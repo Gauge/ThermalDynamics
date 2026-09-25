@@ -204,7 +204,7 @@ namespace Thermodynamics
             var grid = hit.HitEntity as MyCubeGrid;
             var thermal = grid == null || grid.GameLogic == null ? null : grid.GameLogic.GetAs<ThermalGrid>();
             if (thermal == null || thermal.Simulation == null) return sample;
-            var block = thermal.GetAtCell(grid.WorldToGridInteger(hit.Position - hit.Normal * .005f));
+            var block = thermal.GetAtCell(Crosshair.HitCell(grid, hit, ray));
             if (block != null && block.Node != null)
             {
                 float value = block.Node.Temperature;

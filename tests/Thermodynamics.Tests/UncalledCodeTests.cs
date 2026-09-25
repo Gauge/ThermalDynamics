@@ -10,6 +10,34 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The highest-yield defect class here is a thing that exists, is described accurately, and is
+    /// called by nothing** (`D2`), and until now nothing looked for it by machine at all.
+    ///
+    /// <para>
+    /// rules.md said so in as many words: *nothing yet scans the test project for an uncalled
+    /// `internal static` invariant, which is how the four above survived*. The compiler will not do
+    /// it — an unused private method is not a warning, unlike an unused private field — so a lab
+    /// helper written for a measurement that was then taken another way stays in the tree, keeps
+    /// compiling, keeps being maintained, and reads to the next person as something the suite
+    /// relies on. This found `Scenarios.OpenSides` on its first run.
+    /// </para>
+    ///
+    /// <para>
+    /// It covers the shipped code as well, where `D2`'s evidence mostly came from, and finds
+    /// nothing there today — which is a result rather than an omission: it says the mod's own
+    /// private helpers are all reached. The vendored framework is excluded because `R6` forbids
+    /// editing it, and it carries an uncalled `UnpauseClients` that nobody here may delete.
+    /// </para>
+    ///
+    /// <para>
+    /// **Two limits, stated rather than discovered.** A name is counted across every identifier in
+    /// `Data/` and `tests/`, so an *overload* of a name something else calls is invisible here; and
+    /// a helper reached only through a string literal — an xUnit `MemberData("Name")` — would be
+    /// reported. Both are deliberate: the second is a reason to write `nameof`, and the first is the
+    /// same false negative the rules page already names for a misspelled declaration.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class UncalledCodeTests
     {
@@ -20,7 +48,7 @@ namespace Thermodynamics.Tests
             List<string> files = new List<string>();
             string root = ShippedBlocks.RepoRoot();
 
-            foreach (string folder in new[] { "Thermodynamics/Content/Data/", "tests" })
+            foreach (string folder in new[] { "Thermodynamics", "tests" })
             {
                 foreach (string path in Directory.GetFiles(Path.Combine(root, folder), "*.cs",
                     SearchOption.AllDirectories))

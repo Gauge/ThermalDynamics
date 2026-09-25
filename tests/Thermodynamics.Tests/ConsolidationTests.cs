@@ -5,6 +5,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Consolidations decay, and this is the sweep that noticed, promoted to a check.**
+    ///
+    /// <para>
+    /// The cleanup effort's fourth pass found three of its finds were earlier passes' own
+    /// consolidations with a surviving or re-created copy, and its fifth found a tool that had
+    /// been unimportable for six days because a consolidation deleted a name a sibling still
+    /// used. The sweep that finds these was run by hand at the top of each pass; a sweep run by
+    /// hand is a sweep that is eventually not run (`P5`, `D5`). Each case here is one
+    /// consolidated definition's banned form: the pattern must appear in the file that owns the
+    /// definition — a scan that sees nothing is not looking (`E8`) — and nowhere else, with the
+    /// standing exclusions from cleanup-effort.md carried as exemptions, each with its reason.
+    /// </para>
+    ///
+    /// <para>
+    /// The python tools' half of this is `tools/corpus/test_tool_imports.py`; the vendored trees
+    /// are excluded because `R6` forbids editing them.
+    /// </para>
+    /// </summary>
     public class ConsolidationTests
     {
 
@@ -13,7 +32,7 @@ namespace Thermodynamics.Tests
             List<KeyValuePair<string, string>> files = new List<KeyValuePair<string, string>>();
             string root = ShippedBlocks.RepoRoot();
 
-            foreach (string folder in new[] { "Thermodynamics/Content/Data/", "tests" })
+            foreach (string folder in new[] { "Thermodynamics", "tests" })
             {
                 foreach (string path in Directory.GetFiles(Path.Combine(root, folder), "*.cs",
                     SearchOption.AllDirectories))
@@ -44,7 +63,7 @@ namespace Thermodynamics.Tests
             {
 
                 Pattern = "float Clamp01(",
-                Owner = "Data/Scripts/Thermodynamics/Core/Util/ThermalMath.cs",
+                Owner = "Thermodynamics/Core/Util/ThermalMath.cs",
                 Why = "ten private copies were consolidated in iteration 36",
             },
             new Consolidation
@@ -55,7 +74,7 @@ namespace Thermodynamics.Tests
                 {
                     "tests/Thermodynamics.Sim/CorpusFetch.cs",
 
-                    "Data/Scripts/Thermodynamics/Telemetry/TelemetryFormat.cs",
+                    "Thermodynamics/Telemetry/TelemetryFormat.cs",
                 },
                 Why = "six sites stated the CSV escape independently; iteration 48",
             },
@@ -74,19 +93,19 @@ namespace Thermodynamics.Tests
             new Consolidation
             {
                 Pattern = "EntityId < identity",
-                Owner = "Data/Scripts/Thermodynamics/Game/GridGroups.cs",
+                Owner = "Thermodynamics/Game/GridGroups.cs",
                 Why = "the group-claim identity convention; iteration 20",
             },
             new Consolidation
             {
                 Pattern = "WorldToGridInteger(hit.Position",
-                Owner = "Data/Scripts/Thermodynamics/Crosshair.cs",
+                Owner = "Thermodynamics/Crosshair.cs",
                 Why = "the crosshair's nudged-cell resolution; iteration 16",
             },
             new Consolidation
             {
                 Pattern = "(axis + 1) % 3",
-                Owner = "Data/Scripts/Thermodynamics/Core/Util/BoxGeometry.cs",
+                Owner = "Thermodynamics/Core/Util/BoxGeometry.cs",
                 Exempt = new[]
                 {
                     "tests/Thermodynamics.Tests/SurfaceMapPackingTests.cs",

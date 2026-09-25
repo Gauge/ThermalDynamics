@@ -9,6 +9,25 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The claim the degraded-input lab exists to make**, which is that a client's inputs and a
+    /// client's initial state fail in different ways: a wrong state is a perturbation and decays,
+    /// a wrong input is a bias and does not.
+    ///
+    /// <para>
+    /// The whole value of that lab is the standing-error column, and a standing error is only
+    /// meaningful if the rig can produce a zero one. So the two tests that matter here are that an
+    /// undegraded client agrees **exactly** — anything else and every figure the lab prints is
+    /// measuring the harness (`E8`) — and that a perturbation and a bias come out on opposite
+    /// sides of that column.
+    /// </para>
+    ///
+    /// <para>
+    /// The runs are short and small because the claims are about shape. The figures a decision is
+    /// quoted from come from `-- inputs`, at sizes and clocks a suite has no business running.
+    /// See backlog.md `B4`.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class ClientInputTests
     {
@@ -1061,9 +1080,17 @@ namespace Thermodynamics.Tests
             string[] routes = { "BuildLevelRatio", "BuildIntegrity", "CurrentDamage", "MaxIntegrity" };
 
             List<string> offenders = new List<string>();
+            int scanned = 0;
 
             foreach (string file in Directory.GetFiles(scripts, "*.cs", SearchOption.AllDirectories))
             {
+                string relative = file.Substring(scripts.Length).Replace('\\', '/') + "/";
+                if (relative.Contains("/bin/") || relative.Contains("/obj/")) continue;
+                // Thermal vision draws temperatures and never writes to the model, so a block's
+                // condition deciding what it may draw is presentation, not an input.
+                if (relative.Contains("/ThermalVision/")) continue;
+                scanned++;
+
                 string text = File.ReadAllText(file);
                 foreach (string route in routes)
                 {
@@ -1071,6 +1098,7 @@ namespace Thermodynamics.Tests
                 }
             }
 
+            Assert.True(scanned > 100, "scanned only " + scanned + " mod source files, which is not the mod");
             Assert.True(offenders.Count == 0,
                 "block condition now reaches the model by a route the sweep has no knob for: "
                 + string.Join(", ", offenders));

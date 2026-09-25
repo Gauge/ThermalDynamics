@@ -7,6 +7,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The mod's source against the game's script whitelist.
+    ///
+    /// <para>
+    /// **A second opinion on the mod build's.** The mod project compiles the mod's sources against
+    /// the installed game's own assemblies, and MDK2's analyzer checks them against its own copy of
+    /// the whitelist; the game runs its analyzer over its own list, so a type can pass here and be
+    /// refused there. That happened before the analyzer ran in the build: `Units.Watts` took an
+    /// `IFormatProvider`, the build was green, and the mod would not load. This reads the list
+    /// transcribed from the game. See known-issues.md.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class ScriptWhitelistTests
     {
@@ -130,11 +142,22 @@ namespace Thermodynamics.Tests
 
         private static string Short(string path)
         {
-            int index = path.IndexOf("Data" + Path.DirectorySeparatorChar, StringComparison.Ordinal);
-            return index < 0 ? path : path.Substring(index);
+            string root = Harness.ShippedBlocks.RepoRoot();
+            return path.StartsWith(root, StringComparison.Ordinal)
+                ? path.Substring(root.Length).TrimStart('/', '\\')
+                : path;
         }
     }
 
+    /// <summary>
+    /// No mod source carries a preprocessor directive the game's script compiler refuses.
+    ///
+    /// <para>
+    /// `#pragma warning` compiles in the mod project and fails the world load, so a suppression
+    /// that keeps the local build quiet is a mod that does not load (`C2`). Warnings are scoped in
+    /// `.editorconfig` instead.
+    /// </para>
+    /// </summary>
     public class ScriptPreprocessorTests
     {
         [Fact]
@@ -166,8 +189,10 @@ namespace Thermodynamics.Tests
 
         private static string Short(string path)
         {
-            int index = path.IndexOf("Data" + Path.DirectorySeparatorChar, StringComparison.Ordinal);
-            return index < 0 ? path : path.Substring(index);
+            string root = Harness.ShippedBlocks.RepoRoot();
+            return path.StartsWith(root, StringComparison.Ordinal)
+                ? path.Substring(root.Length).TrimStart('/', '\\')
+                : path;
         }
     }
 }
