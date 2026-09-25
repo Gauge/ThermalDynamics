@@ -632,6 +632,30 @@ fast.
 
 S3 and S4 are reported beside these and not counted: both have been seen twice.
 
+### Round 3: fails its own data and its held-out bodies, and the new data says why
+
+| | Registered | Result |
+| --- | --- | --- |
+| T1 calibration within ±12 % | all | **fails** — cylinder `L/d` 2 +15.0 %, cube −13.7 %, cylinder `L/d` 0.5 −12.1 % |
+| T2 ellipsoids within 0.5–1.75× | all five | **fails** — every one 3.6–4.2× White's turbulent value (0.773, 0.718, 0.542, 0.411, 0.332) |
+| T3 long ellipsoids below the sphere | both | holds — 0.411 and 0.332 against 0.718 |
+| S3, S4 (reported) | — | 0.683; 0.978 against 0.978 |
+
+**The forebody law is what is wrong, and the ellipsoids are what showed it.** Every version so far
+made a surface's pressure `C·cosᵐφ` — never negative. A rounded nose is low-drag because of
+**suction on its shoulders**: potential flow puts `Cp = −1.25` on a sphere's equator, and that
+suction on forward-facing surfaces cancels most of the stagnation pressure. A law that cannot go
+negative prices a rounded nose like a blunt one, which is what 0.718 against 0.2 is. The calibration
+cones already said what the law is: White's cone drags run close to linear in `sin²θ` — 1.15 at 90°
+falling by about 0.88·cos²θ — which is a local `Cp = P₀ + P₂·cos²φ` with nothing stopping `P₀` from
+being negative.
+
+**One question is recorded rather than decided, because deciding it now would move a criterion after
+seeing the result** (`E11`). White's *turbulent* ellipsoid values are smooth bodies past the drag crisis.
+Whether a hull built of cells — stepped where it is not built of slope blocks — ever reaches that
+regime, or sits nearer a rough sphere's 0.47 at the same Reynolds number, is a physical question this
+lab cannot answer. It is noted so the next round's choice of comparator can be judged.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -650,6 +674,7 @@ S3 and S4 are reported beside these and not counted: both have been seen twice.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 3 recorded: it misses its own calibration and reads the ellipsoids 3.6–4.2× high.** The cause is the forebody law, which could never go negative and so could not price shoulder suction; the cone data are linear in sin²θ, which is the law the next round needs. Whether a stepped hull reaches the drag crisis White's turbulent values assume is recorded as open, not decided. |
 | 2026-09-25 | **Round 3 registered before it runs**, on data no round has seen: White's turbulent ellipsoids. Base suction becomes a function of the front's bluffness and of reattachment length rather than of fineness alone; calibration is every body the earlier rounds saw, and the fit must meet its own data within ±12 %. |
 | 2026-09-25 | **Round 2 recorded: S3 and S4 pass on the letter, by 0.007 and 0.1 %, and are not counted as evidence.** The fit misses its own calibration cube by 14.8 % and puts no base suction on any body longer than half its width, so a tail cannot matter. The diagnosis is that fineness conflated front-edge separation with attached flow. |
 | 2026-09-25 | **Round 2 of step 1 registered before it runs.** Leeward surfaces count as base only where the flow separates (12° to 22°, sourced), and base suction is calibrated on the square plate and cube with long cylinders for the reattached end. The owner's S1 and S2 become calibration and are recorded as tested once and failed; S3 and S4 stay held out, and a failure ends revisions on this data. |

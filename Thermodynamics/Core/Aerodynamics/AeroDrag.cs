@@ -5,8 +5,8 @@ namespace Thermodynamics.Core
 {
     /// <summary>
     /// The subsonic drag model's coefficients: forebody pressure and its falloff with a surface's
-    /// inclination, and base suction against the hull's fineness. Fitted to White's Table 7.3 cones
-    /// and flat-faced cylinders; see aerodynamics.md, Step 1's criteria.
+    /// inclination, and base suction for flow that stayed attached against flow that left a bluff
+    /// front and has not reattached. Fitted to White's Table 7.3; see aerodynamics.md, Round 3.
     /// </summary>
     public struct AeroCoefficients
     {
@@ -16,14 +16,14 @@ namespace Thermodynamics.Core
         /// <summary>Exponent on the incidence a surface's pressure falls off with.</summary>
         public float Falloff;
 
-        /// <summary>Base suction on a hull with no length behind its front face.</summary>
-        public float BaseNear;
+        /// <summary>Base suction where the flow reaches the base attached, or reattached along the sides.</summary>
+        public float BaseAttached;
 
-        /// <summary>Base suction on a hull long enough for the flow to reattach along its sides.</summary>
-        public float BaseFar;
+        /// <summary>Base suction behind a bluff front whose flow has separated and not reattached.</summary>
+        public float BaseSeparated;
 
-        /// <summary>The fineness over which base suction falls from near to far.</summary>
-        public float BaseLength;
+        /// <summary>The fineness at which flow that left a bluff front has reattached along the sides.</summary>
+        public float ReattachLength;
     }
 
     /// <summary>Drag of an <see cref="AeroView"/>: forebody pressure, base suction and skin friction.</summary>
@@ -44,11 +44,18 @@ namespace Thermodynamics.Core
             return view.Silhouette > 0f ? view.Length / (float)Math.Sqrt(view.Silhouette) : 0f;
         }
 
-        /// <summary>Base suction coefficient at a fineness.</summary>
-        public static float BaseSuction(AeroCoefficients c, float fineness)
+        /// <summary>
+        /// Base suction coefficient for a front of bluffness <paramref name="bluff"/> — one for a flat
+        /// front — at a fineness.
+        /// </summary>
+        public static float BaseSuction(AeroCoefficients c, float bluff, float fineness)
         {
-            float scale = c.BaseLength > 1e-4f ? c.BaseLength : 1e-4f;
-            return c.BaseFar + ((c.BaseNear - c.BaseFar) * (float)Math.Exp(-fineness / scale));
+            float length = c.ReattachLength > 1e-4f ? c.ReattachLength : 1e-4f;
+            float ratio = fineness / length;
+            float r2 = ratio * ratio;
+            float r4 = r2 * r2;
+            float unattached = 1f / (1f + (r4 * r4));
+            return c.BaseAttached + (bluff * (c.BaseSeparated - c.BaseAttached) * unattached);
         }
 
         /// <summary>
@@ -72,17 +79,20 @@ namespace Thermodynamics.Core
 
             float falloff = c.Falloff;
             float total = 0f;
+            float facing = 0f;
             Vector3 moment = Vector3.Zero;
 
             for (int i = 0; i < view.Front.Count; i++)
             {
                 AeroElement e = view.Front[i];
-                float share = c.Forebody * e.Area * Weight(e.Incidence, falloff);
+                float weighted = e.Area * Weight(e.Incidence, falloff);
+                float share = c.Forebody * weighted;
+                facing += weighted;
                 total += share;
                 moment += e.Centre * share;
             }
 
-            float suction = BaseSuction(c, Fineness(view));
+            float suction = BaseSuction(c, facing / view.Silhouette, Fineness(view));
             for (int i = 0; i < view.Base.Count; i++)
             {
                 AeroElement e = view.Base[i];

@@ -9,9 +9,10 @@ namespace Thermodynamics.Harness
 {
     /// <summary>
     /// Fits the subsonic drag model to White's Table 7.3 and predicts the bodies it was not fitted to.
-    /// The bodies are built from cells, flown with the air coming from +Z. Calibration is round 2's:
-    /// the cones from 10° to 75°, the square plate and cube, and the flat-faced cylinders at L/d 2, 4
-    /// and 8; everything else is held out. See aerodynamics.md, Round 2.
+    /// The bodies are built from cells, flown with the air coming from +Z. Calibration is round 3's:
+    /// the cones from 10° to 75°, the flat-faced cylinders, the square plate and the cube. Held out are
+    /// the turbulent ellipsoids, never used by any round; the edge-on cube and the boat-tail pair are
+    /// reported. See aerodynamics.md, Round 3.
     /// </summary>
     public static class AeroCalibrationLab
     {
@@ -43,6 +44,8 @@ namespace Thermodynamics.Harness
         private static readonly float[] ConeDrag = { 0.30f, 0.40f, 0.55f, 0.65f, 0.80f, 1.05f };
         private static readonly float[] CylinderRatios = { 0.5f, 1f, 2f, 4f, 8f };
         private static readonly float[] CylinderDrag = { 1.15f, 0.90f, 0.85f, 0.87f, 0.99f };
+        private static readonly float[] EllipsoidRatios = { 0.75f, 1f, 2f, 4f, 8f };
+        private static readonly float[] EllipsoidDrag = { 0.2f, 0.2f, 0.13f, 0.1f, 0.08f };
 
         /// <summary>Every rig, views built.</summary>
         public static List<Rig> Rigs()
@@ -55,13 +58,18 @@ namespace Thermodynamics.Harness
             }
             for (int i = 0; i < CylinderRatios.Length; i++)
             {
-                bool reattached = CylinderRatios[i] >= 2f;
-                rigs.Add(Make((reattached ? "" : "R1 ") + "cylinder L/d " + CylinderRatios[i].ToString("0.#", CultureInfo.InvariantCulture),
-                    CylinderDrag[i], reattached, Cylinder(CylinderRatios[i]), Upstream));
+                rigs.Add(Make("cylinder L/d " + CylinderRatios[i].ToString("0.#", CultureInfo.InvariantCulture),
+                    CylinderDrag[i], true, Cylinder(CylinderRatios[i]), Upstream));
             }
 
             rigs.Add(Make("cube face-on", 1.07f, true, Box(8, 8, 8), Upstream));
             rigs.Add(Make("square plate", 1.18f, true, Box(8, 8, 1), Upstream));
+            for (int i = 0; i < EllipsoidRatios.Length; i++)
+            {
+                rigs.Add(Make("T2 ellipsoid L/d " + EllipsoidRatios[i].ToString("0.##", CultureInfo.InvariantCulture),
+                    EllipsoidDrag[i], false, Ellipsoid(EllipsoidRatios[i]), Upstream));
+            }
+
             rigs.Add(Make("S3 cube edge-on", 0.81f, false, Box(8, 8, 8), new Vector3(1f, 0f, 1f)));
             rigs.Add(Make("S4 blunt base", 0f, false, Cylinder(2f), Upstream));
             rigs.Add(Make("S4 tapered tail", 0f, false, BoatTailed(2f), Upstream));
@@ -90,7 +98,7 @@ namespace Thermodynamics.Harness
 
             double[] start =
             {
-                Math.Log(0.8), Math.Log(2.0), Math.Log(0.4), Math.Log(0.1), Math.Log(1.0), Math.Log(0.005),
+                Math.Log(0.8), Math.Log(2.0), Math.Log(0.15), Math.Log(0.4), Math.Log(1.1), Math.Log(0.005),
             };
             double residual;
             double[] best = NelderMead.Minimise(objective, start, 0.4, 4000, out residual);
@@ -113,9 +121,9 @@ namespace Thermodynamics.Harness
             {
                 Forebody = (float)Math.Exp(p[0]),
                 Falloff = (float)Math.Exp(p[1]),
-                BaseNear = (float)Math.Exp(p[2]),
-                BaseFar = (float)Math.Exp(p[3]),
-                BaseLength = (float)Math.Exp(p[4]),
+                BaseAttached = (float)Math.Exp(p[2]),
+                BaseSeparated = (float)Math.Exp(p[3]),
+                ReattachLength = (float)Math.Exp(p[4]),
             };
         }
 
@@ -126,8 +134,8 @@ namespace Thermodynamics.Harness
             AeroCoefficients c = result.Coefficients;
             sb.AppendLine("Subsonic drag model fitted to White, Fluid Mechanics, Table 7.3 (Re >= 1e4)");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                "  forebody {0:0.000}  falloff {1:0.000}  base near {2:0.000}  base far {3:0.000}  base length {4:0.000}  lab friction {5:0.00000}  residual {6:0.0000}",
-                c.Forebody, c.Falloff, c.BaseNear, c.BaseFar, c.BaseLength, result.LabFriction, result.Residual));
+                "  forebody {0:0.000}  falloff {1:0.000}  base attached {2:0.000}  base separated {3:0.000}  reattach {4:0.000}  lab friction {5:0.00000}  residual {6:0.0000}",
+                c.Forebody, c.Falloff, c.BaseAttached, c.BaseSeparated, c.ReattachLength, result.LabFriction, result.Residual));
             sb.AppendLine();
             sb.AppendLine(string.Format("  {0,-22} {1,6} {2,8} {3,8} {4,9} {5,9}", "body", "set", "White", "model", "error", "fineness"));
             foreach (Rig rig in result.Rigs)
@@ -214,6 +222,23 @@ namespace Thermodynamics.Harness
                     for (int y = -Radius; y <= Radius; y++)
                         if (InDisk(x, y, r)) Add(grid, x, y, -k);
             }
+            return grid;
+        }
+
+        /// <summary>A prolate ellipsoid, axis along the flow, of length-to-diameter <paramref name="ratio"/>.</summary>
+        public static GridModel Ellipsoid(float ratio)
+        {
+            GridModel grid = Grid();
+            double half = ratio * Radius;
+            int reach = (int)Math.Ceiling(half);
+            for (int z = -reach; z <= reach; z++)
+                for (int x = -Radius; x <= Radius; x++)
+                    for (int y = -Radius; y <= Radius; y++)
+                    {
+                        double q = (((double)x * x) + ((double)y * y)) / ((double)Radius * Radius)
+                            + ((double)z * z) / (half * half);
+                        if (q <= 1d) Add(grid, x, y, z);
+                    }
             return grid;
         }
 
