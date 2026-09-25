@@ -1,9 +1,9 @@
 # Blocks and items
 
-All block definitions live in [Data/CubeBlocks/](../Data/CubeBlocks) with one file per block;
-the extinguisher tool is in [Data/Extinguisher/](../Data/Extinguisher). Display names and
+All block definitions live in [Data/CubeBlocks/](../Thermodynamics/Content/Data/CubeBlocks) with one file per block;
+the extinguisher tool is in [Data/Extinguisher/](../Thermodynamics/Content/Data/Extinguisher). Display names and
 descriptions are localisation keys resolved from
-[Data/Localization/MyTexts.resx](../Data/Localization/MyTexts.resx).
+[Data/Localization/MyTexts.resx](../Thermodynamics/Content/Data/Localization/MyTexts.resx).
 
 Both grid sizes are provided for every functional block, prefixed `Gauge_LG_` (large) and
 `Gauge_SG_` (small).
@@ -43,7 +43,7 @@ them. A pipe with no sinks is plumbing only.
 > being a problem — so *add more sink faces* is not a balance lever, and the pickup is raised or
 > lowered through the coolant's own coefficient instead. See balance.md, *What a jump drive costs in
 > radiator*, where the difference decides whether a 6.4 MW block has an answer at all. Plumbing is declared per subtype in
-[ThermalCoolantShapes.cs](../Data/Scripts/Thermodynamics/Game/ThermalCoolantShapes.cs) as a
+[ThermalCoolantShapes.cs](../Thermodynamics/Game/ThermalCoolantShapes.cs) as a
 `CoolantShape`: two link ports, any number of sink ports, and whether the block is a pump. **A new
 pipe subtype must be added there.** Ports carry the cell they sit on as well as their direction, so
 a block of any size or orientation works without a special case — the small-grid pump is three
@@ -57,12 +57,12 @@ Connection directions (before block orientation is applied):
 | Corner (all variants) | Forward ↔ Left |
 
 The pipes and pump are grouped into the `CoolantGroupLarge` / `CoolantGroupSmall` block variant
-groups ([BlockVarientGroups.sbc](../Data/CubeBlocks/BlockVarientGroups.sbc)) so they cycle on
+groups ([BlockVarientGroups.sbc](../Thermodynamics/Content/Data/CubeBlocks/BlockVarientGroups.sbc)) so they cycle on
 one toolbar slot.
 
 ## Coolant loop rules
 
-[CoolantLoopBuilder](../Data/Scripts/Thermodynamics/Core/Loops/CoolantLoopBuilder.cs) re-finds
+[CoolantLoopBuilder](../Thermodynamics/Core/Loops/CoolantLoopBuilder.cs) re-finds
 every loop on the grid whenever the block layout changes. A ring becomes a loop when **all** of
 these hold:
 
@@ -224,7 +224,7 @@ already cooler than what surrounds it.
 
 The efficiency fraction and the cap are tuned for the whole mod in
 [configuration.md](configuration.md#heat-pumps); the two ratings are per block and live in
-[ThermalHeatPumpShapes](../Data/Scripts/Thermodynamics/Game/ThermalHeatPumpShapes.cs).
+[ThermalHeatPumpShapes](../Thermodynamics/Game/ThermalHeatPumpShapes.cs).
 
 Its waste-energy fractions in `Cubes.xml` are deliberately zero. The simulation already puts every
 watt the block draws into the hot side; a waste fraction on top would charge the same energy twice.
@@ -236,7 +236,7 @@ reason the heat pump is one: it needs a terminal and an on/off switch. It carrie
 
 **A block that radiates like a small sun**, so the point-source path can be seen in a session
 rather than only in the harness. It registers itself through
-[ThermalHeatSources](../Data/Scripts/Thermodynamics/Game/ThermalHeatSources.cs) — the same entry
+[ThermalHeatSources](../Thermodynamics/Game/ThermalHeatSources.cs) — the same entry
 point the mod API's `AddHeatSource` hands out and the same one `/thermal heat` drives — so a
 session that shows this block working has shown that path working for every consumer of it. Its
 output falls off as `P / 4πr²` with a hard cutoff at its range, exactly as a source registered by
@@ -322,23 +322,23 @@ a bottle, because damage tracks the overshoot rather than the heat. See
 
 | Definition | File |
 | --- | --- |
-| `PhysicalGunObject/ExtinguisherGunItem` | [PhysicalItems.sbc](../Data/Extinguisher/PhysicalItems.sbc) |
-| `WeaponDefinition/ExtinguisherGun` | [Weapons.sbc](../Data/Extinguisher/Weapons.sbc) |
-| `AutomaticRifle/ExtinguisherGun` (hand item) | [HandItems.sbc](../Data/Extinguisher/HandItems.sbc) |
-| `AmmoMagazine/BottleMag`, `AmmoDefinition/Bottle` | [AmmoMagazines.sbc](../Data/Extinguisher/AmmoMagazines.sbc), [Ammos.sbc](../Data/Extinguisher/Ammos.sbc) |
-| `AudioDefinition/FireExtinguisher` | [Audio.sbc](../Data/Extinguisher/Audio.sbc) |
-| `CubeBlock/Extinguisher` (decorative wall block) | [Extinguisher.sbc](../Data/Extinguisher/Extinguisher.sbc) |
-| Character animation overrides | [AC_Astronaut.sbc](../Data/Extinguisher/AC_Astronaut.sbc) |
+| `PhysicalGunObject/ExtinguisherGunItem` | [PhysicalItems.sbc](../Thermodynamics/Content/Data/Extinguisher/PhysicalItems.sbc) |
+| `WeaponDefinition/ExtinguisherGun` | [Weapons.sbc](../Thermodynamics/Content/Data/Extinguisher/Weapons.sbc) |
+| `AutomaticRifle/ExtinguisherGun` (hand item) | [HandItems.sbc](../Thermodynamics/Content/Data/Extinguisher/HandItems.sbc) |
+| `AmmoMagazine/BottleMag`, `AmmoDefinition/Bottle` | [AmmoMagazines.sbc](../Thermodynamics/Content/Data/Extinguisher/AmmoMagazines.sbc), [Ammos.sbc](../Thermodynamics/Content/Data/Extinguisher/Ammos.sbc) |
+| `AudioDefinition/FireExtinguisher` | [Audio.sbc](../Thermodynamics/Content/Data/Extinguisher/Audio.sbc) |
+| `CubeBlock/Extinguisher` (decorative wall block) | [Extinguisher.sbc](../Thermodynamics/Content/Data/Extinguisher/Extinguisher.sbc) |
+| Character animation overrides | [AC_Astronaut.sbc](../Thermodynamics/Content/Data/Extinguisher/AC_Astronaut.sbc) |
 
 The `Bottle` ammo does zero damage, has zero trajectory and zero impulse — firing only produces
 the snow particle effect and the extinguisher sound.
 
 The functional part is in `ThermalHud.DrawToolHud`
-([ThermalHud.cs:57](../Data/Scripts/Thermodynamics/ThermalHud.cs#L57)): while the tool is
+([ThermalHud.cs:57](../Thermodynamics/ThermalHud.cs#L57)): while the tool is
 equipped, a 15 m camera raycast finds the block you are looking at, prints its temperature in
 °C at the lower left, and draws heat-coloured billboards over that block and each of its
 thermal neighbours using the `GaugeThermalTexture` transparent material
-([TransparentMaterials.sbc](../Data/TransparentMaterials.sbc)).
+([TransparentMaterials.sbc](../Thermodynamics/Content/Data/TransparentMaterials.sbc)).
 
 ## The performance panel
 
@@ -460,7 +460,7 @@ in that case: the absence is the whole symptom.
 
 It goes there rather than into a terminal control because the terminal's controls are single-line
 fields: a text box handed fifteen lines shows one and a half and clips the rest.
-[ThermalTerminal.cs](../Data/Scripts/Thermodynamics/ThermalTerminal.cs) needs no HUD framework at
+[ThermalTerminal.cs](../Thermodynamics/ThermalTerminal.cs) needs no HUD framework at
 all, so it is the readout that works in any world.
 
 ---

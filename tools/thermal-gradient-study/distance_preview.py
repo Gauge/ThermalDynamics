@@ -11,7 +11,7 @@ from distance_lod import coarse_nodes
 # main operation.
 def main(data,out):
     out.mkdir(parents=True,exist_ok=True);result=[]
-    palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',Path('Data/Scripts/Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text())[:256],float)
+    palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',Path('Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text())[:256],float)
     for file in ('605516903-60.json','1650715158-60.json','2771284480-60.json'):
         s=json.loads((data/file).read_text());nodes=s['nodes'];levels=[]
         span=np.ptp(np.array([n['min'] for n in nodes]+[n['max'] for n in nodes]),axis=0)

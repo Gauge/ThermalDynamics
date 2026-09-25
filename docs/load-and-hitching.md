@@ -956,7 +956,7 @@ the same question is asked of eight thousand ships rather than one save.
 
 A settings file reporting `Version 6` against a branch at 4 looked like a run taken against the
 wrong build. It was not: there are **two settings types with independent version numbers** —
-`Core/Settings/ThermalSettings.cs` is the solver's, and `Data/Scripts/Thermodynamics/Settings.cs` is
+`Core/Settings/ThermalSettings.cs` is the solver's, and `Thermodynamics/Settings.cs` is
 the game-side one the `.cfg` is written from. Every field that looked missing was present. The
 tuning conclusions stood without qualification, and the near-retraction is recorded because the
 reasoning that produced it was sound and the premise was not.

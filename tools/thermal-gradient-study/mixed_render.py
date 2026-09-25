@@ -11,7 +11,7 @@ from corpus_render import raster, font, W, H
 # main operation.
 def main(data, output):
     output.mkdir(parents=True, exist_ok=True)
-    source = Path('Data/Scripts/Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text()
+    source = Path('Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text()
     palette = np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)', source)[:256],float)
     pages = ['<!doctype html><meta charset="utf-8"><title>Mixed thermal detail</title><style>body{background:#111820;color:#dde6ec;font:17px sans-serif;margin:28px}img{width:100%}a{color:#9dd7ef}</style><h1>Mixed thermal detail evaluation</h1><p>Real corpus simulations and the same C# estimator used by the mod. Left: exact block temperatures. Other columns: budgets of 128, 512 and 1400 regions. These are independent per-grid budgets, not one simultaneous fleet or guaranteed distance thresholds.</p><p>Offline block-bound geometry, flat colours, shared exposure. Estimated values are sampled at block centres; native volume intersections, multiple rotated grids, motion and GPU performance still require game validation. Refinement eye is beyond the maximum XYZ corner; all blocks are eligible for detail in this comparison. Dark background has no measurement.</p>']
     metrics=[]

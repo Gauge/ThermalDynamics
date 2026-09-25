@@ -15,7 +15,7 @@ def main(source,out):
     scene=json.loads(source.read_text());nodes=scene['nodes']
     original,_=mesh(nodes,.45);reference=render(original,nodes);mask=np.isfinite(reference)
     lo=min(n['kelvin'] for n in nodes);hi=max(lo+50,max(n['kelvin'] for n in nodes))
-    palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',Path('Data/Scripts/Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text())[:256],float)
+    palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',Path('Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text())[:256],float)
     levels=[]
     for index,tolerance in enumerate((0,2,5,10,20,40,80,160,320)):
         triangles=original if index==0 else optimize(original,tolerance)

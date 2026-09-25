@@ -19,7 +19,7 @@ def blur(values, mask, sigma):
 # main operation.
 def main(data,out):
     out.mkdir(parents=True,exist_ok=True)
-    src=Path('Data/Scripts/Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text()
+    src=Path('Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text()
     palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',src)[:256],float)
     html=['<!doctype html><meta charset="utf-8"><title>Thermal softness target</title><style>body{background:#111820;color:#dde6ec;font:17px sans-serif;margin:28px}img{width:100%}a{color:#9dd7ef}</style><h1>Heat-location-preserving softness: appearance target</h1><p>Offline reference, NOT implemented game rendering. Real corpus temperatures on simplified block-bound surfaces. Temperature is blurred before palette mapping, independently within each ship silhouette. No colours spread into the background. All columns use the same geometry, exposure and display size so softness is easy to compare. Blur widths are illustrative, not distance calibration.</p><p>Near keeps exact visible block readings. Farther views should reduce detail by softening this same spatial pattern. Broad blurred areas can hide small hot or cooled patches; native occlusion boundaries, separate grids and interiors need additional treatment. This image-space reference is not directly available through the Workshop API. The next renderer candidate is temperature-encoded per-vertex UVs sampling a palette ramp, retaining native depth testing.</p>']
     for path in sorted(data.glob('*.json')):

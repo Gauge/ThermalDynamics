@@ -4,8 +4,8 @@ The mod is in two halves, and the line between them is the point of the design.
 
 | Half | Where | Knows about |
 | --- | --- | --- |
-| **The model** | [`Data/Scripts/Thermodynamics/Core/`](../Data/Scripts/Thermodynamics/Core) | Blocks, heat, geometry. One Space Engineers assembly, `VRage.Math`, for vectors. No session, no entity, no `MyAPIGateway`. |
-| **The adapter** | everything else under [`Data/Scripts/Thermodynamics/`](../Data/Scripts/Thermodynamics) | Definitions, entity events, raycasts, damage, storage, HUD, terminal, mod API. |
+| **The model** | [`Thermodynamics/Core/`](../Thermodynamics/Core) | Blocks, heat, geometry. One Space Engineers assembly, `VRage.Math`, for vectors. No session, no entity, no `MyAPIGateway`. |
+| **The adapter** | everything else under [`Thermodynamics/`](../Thermodynamics) | Definitions, entity events, raycasts, damage, storage, HUD, terminal, mod API. |
 
 The model is what [`tests/`](../tests) builds and tests outside the game; the adapter is what the game
 compiles around it. Everything the game supplies crosses one of three boundaries — block layout, an
@@ -82,41 +82,41 @@ temperatures, overheat events and threshold crossings.
 
 | File | Type | Role |
 | --- | --- | --- |
-| [Session.cs](../Data/Scripts/Thermodynamics/Session.cs) | `MySessionComponentBase` | Loads settings, boots the Definition Extensions client, the HUD, the terminal controls and the mod API. Runs the chat commands, cross-grid conduction and the debug overlay. |
-| [PlanetManager.cs](../Data/Scripts/Thermodynamics/PlanetManager.cs) | `MySessionComponentBase` | Which planet is closest to a point. |
-| [Game/ThermalGrid.cs](../Data/Scripts/Thermodynamics/Game/ThermalGrid.cs) | `MyGameLogicComponent` | The per-grid root: mirrors the game grid into a `GridModel`, owns the `ThermalSimulation`, wires block and grid events. `partial`, split across four more files. |
-| [Game/ThermalGridSimulation.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridSimulation.cs) | `partial` | The tick: sample, step, apply damage, raise crossings, refresh readouts. |
-| [Game/ThermalGridEnvironment.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridEnvironment.cs) | `partial` | Builds the `EnvironmentSample`: planet, air, wind, sun, occlusion, registered heat sources. |
-| [Game/ThermalGridStorage.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridStorage.cs) | `partial` | Save and load through the model's codec. |
-| [Game/ThermalBlock.cs](../Data/Scripts/Thermodynamics/Game/ThermalBlock.cs) | class | One placed block bound to one solver node. Pushes power, thrust, door state and mass into the model by event. |
-| [Game/ThermalBlockCatalog.cs](../Data/Scripts/Thermodynamics/Game/ThermalBlockCatalog.cs) | static | Block definition → `BlockModel`, once per definition per session. |
-| [Game/ThermalCoolantShapes.cs](../Data/Scripts/Thermodynamics/Game/ThermalCoolantShapes.cs) | static | Subtype → coolant plumbing. |
-| [Game/ThermalHeatPumpShapes.cs](../Data/Scripts/Thermodynamics/Game/ThermalHeatPumpShapes.cs) | static | Subtype → heat-pump faces and ratings. |
-| [Game/ThermalHeatPumpBlock.cs](../Data/Scripts/Thermodynamics/Game/ThermalHeatPumpBlock.cs) | `MyGameLogicComponent` | The electrical half of a heat pump: the resource sink it draws through, and the switch that runs it. |
-| [Game/ThermalBridges.cs](../Data/Scripts/Thermodynamics/Game/ThermalBridges.cs) | static | Conduction across a rotor or piston, between two grids. |
-| [Game/ThermalHeatSources.cs](../Data/Scripts/Thermodynamics/Game/ThermalHeatSources.cs) | static | Registered point heat sources, and their irradiance at a grid. |
-| [Game/ThermalGridScheduler.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridScheduler.cs) | static | Gives every grid its share of every frame, so a step is spread rather than landed whole. |
-| [Game/ThermalGridRoomDiagnostics.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridRoomDiagnostics.cs) | `partial` | The room and surface dumps, and the comparison against the game's own sealing test. |
-| [Game/ThermalCoolantPumpBlock.cs](../Data/Scripts/Thermodynamics/Game/ThermalCoolantPumpBlock.cs) | `MyGameLogicComponent` | A coolant pump's terminal switch and speed, replicated as a `NetSync<float>`. |
-| [Game/HeatSourceCommand.cs](../Data/Scripts/Thermodynamics/Game/HeatSourceCommand.cs), [Game/HeatSourceMath.cs](../Data/Scripts/Thermodynamics/Game/HeatSourceMath.cs), [Game/ThermalHeatSourceDebug.cs](../Data/Scripts/Thermodynamics/Game/ThermalHeatSourceDebug.cs) | static | Driving and drawing point sources from chat, for exercising the API path in a session. |
-| [Game/PlanetProbes.cs](../Data/Scripts/Thermodynamics/Game/PlanetProbes.cs) | static | The 72-point planet-wide climate and wind sweep. See [environment.md](environment.md#measuring-it). |
-| [ThermalApi.cs](../Data/Scripts/Thermodynamics/ThermalApi.cs) | static | The mod-facing delegate table. See [api.md](api.md). |
-| [ThermalTerminal.cs](../Data/Scripts/Thermodynamics/ThermalTerminal.cs) | static | Thermal readout in every block's terminal. |
-| [ThermalHud.cs](../Data/Scripts/Thermodynamics/ThermalHud.cs) | static | Cockpit summary and extinguisher readout, on Rich HUD, plus the extinguisher billboard. |
-| [ThermalDebugView.cs](../Data/Scripts/Thermodynamics/ThermalDebugView.cs) | static | The x-ray overlay: a coloured box per block, or per room cell, cycled with Ctrl+Shift+=. |
-| [ThermalSettingsMenu.cs](../Data/Scripts/Thermodynamics/ThermalSettingsMenu.cs) | static | What the settings menu holds: pages, controls and write-back, generated from `Settings.Names()`. Opened with Ctrl+Shift+S. Owns the framework registration. |
-| [ThermalSettingsWindow.cs](../Data/Scripts/Thermodynamics/ThermalSettingsWindow.cs) | `WindowBase` | The window the menu is drawn in, built from the framework's HUD elements rather than from terminal pages. See [configuration.md](configuration.md#the-settings-menu). |
-| [ThermalDebugPanel.cs](../Data/Scripts/Thermodynamics/ThermalDebugPanel.cs) | static | The Rich HUD readout beside the overlay: per-view figures for the grid being drawn. |
-| [Debug.cs](../Data/Scripts/Thermodynamics/Debug.cs) | static | The crosshair readout. |
-| [Settings.cs](../Data/Scripts/Thermodynamics/Settings.cs) | class | Config file, defaults, access by name, and the write-through to the model's settings. |
-| [SettingsSync.cs](../Data/Scripts/Thermodynamics/SettingsSync.cs) | static | Replicates the world's settings to every client, over `SENetworkAPI`. |
-| [SettingsRequests.cs](../Data/Scripts/Thermodynamics/SettingsRequests.cs) | static | An administrator changing a setting from a client, over the engine's secure handler. |
-| [Game/ThermalGridSync.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridSync.cs) | static | Replicates block temperatures to clients: the whole hull once, then the near-critical band. Plumbing only — the protocol is `Core/Sync`. |
-| [WindOverlay.cs](../Data/Scripts/Thermodynamics/WindOverlay.cs) | static | The wind map and the crosshair wind needle, cycled with Ctrl+Shift+W. |
-| [OverlayBudget.cs](../Data/Scripts/Thermodynamics/OverlayBudget.cs) | static | Fits the block overlay's draw radius to `DebugOverlayMaxBoxes` each frame. |
-| [Definitions/](../Data/Scripts/Thermodynamics/Definitions) | classes | Typed readers over Definition Extensions. |
-| [Telemetry/](../Data/Scripts/Thermodynamics/Telemetry) | static + records | Data collection. See [telemetry.md](telemetry.md). |
-| [DefinitionExtensionsAPI.cs](../Data/Scripts/Thermodynamics/DefinitionExtensionsAPI.cs), [NetworkAPI/](../Data/Scripts/Thermodynamics/NetworkAPI), [RichHudFramework/](../Data/Scripts/Thermodynamics/RichHudFramework) | vendored | Third-party API clients. Do not edit; replace wholesale when upstream updates. |
+| [Session.cs](../Thermodynamics/Session.cs) | `MySessionComponentBase` | Loads settings, boots the Definition Extensions client, the HUD, the terminal controls and the mod API. Runs the chat commands, cross-grid conduction and the debug overlay. |
+| [PlanetManager.cs](../Thermodynamics/PlanetManager.cs) | `MySessionComponentBase` | Which planet is closest to a point. |
+| [Game/ThermalGrid.cs](../Thermodynamics/Game/ThermalGrid.cs) | `MyGameLogicComponent` | The per-grid root: mirrors the game grid into a `GridModel`, owns the `ThermalSimulation`, wires block and grid events. `partial`, split across four more files. |
+| [Game/ThermalGridSimulation.cs](../Thermodynamics/Game/ThermalGridSimulation.cs) | `partial` | The tick: sample, step, apply damage, raise crossings, refresh readouts. |
+| [Game/ThermalGridEnvironment.cs](../Thermodynamics/Game/ThermalGridEnvironment.cs) | `partial` | Builds the `EnvironmentSample`: planet, air, wind, sun, occlusion, registered heat sources. |
+| [Game/ThermalGridStorage.cs](../Thermodynamics/Game/ThermalGridStorage.cs) | `partial` | Save and load through the model's codec. |
+| [Game/ThermalBlock.cs](../Thermodynamics/Game/ThermalBlock.cs) | class | One placed block bound to one solver node. Pushes power, thrust, door state and mass into the model by event. |
+| [Game/ThermalBlockCatalog.cs](../Thermodynamics/Game/ThermalBlockCatalog.cs) | static | Block definition → `BlockModel`, once per definition per session. |
+| [Game/ThermalCoolantShapes.cs](../Thermodynamics/Game/ThermalCoolantShapes.cs) | static | Subtype → coolant plumbing. |
+| [Game/ThermalHeatPumpShapes.cs](../Thermodynamics/Game/ThermalHeatPumpShapes.cs) | static | Subtype → heat-pump faces and ratings. |
+| [Game/ThermalHeatPumpBlock.cs](../Thermodynamics/Game/ThermalHeatPumpBlock.cs) | `MyGameLogicComponent` | The electrical half of a heat pump: the resource sink it draws through, and the switch that runs it. |
+| [Game/ThermalBridges.cs](../Thermodynamics/Game/ThermalBridges.cs) | static | Conduction across a rotor or piston, between two grids. |
+| [Game/ThermalHeatSources.cs](../Thermodynamics/Game/ThermalHeatSources.cs) | static | Registered point heat sources, and their irradiance at a grid. |
+| [Game/ThermalGridScheduler.cs](../Thermodynamics/Game/ThermalGridScheduler.cs) | static | Gives every grid its share of every frame, so a step is spread rather than landed whole. |
+| [Game/ThermalGridRoomDiagnostics.cs](../Thermodynamics/Game/ThermalGridRoomDiagnostics.cs) | `partial` | The room and surface dumps, and the comparison against the game's own sealing test. |
+| [Game/ThermalCoolantPumpBlock.cs](../Thermodynamics/Game/ThermalCoolantPumpBlock.cs) | `MyGameLogicComponent` | A coolant pump's terminal switch and speed, replicated as a `NetSync<float>`. |
+| [Game/HeatSourceCommand.cs](../Thermodynamics/Game/HeatSourceCommand.cs), [Game/HeatSourceMath.cs](../Thermodynamics/Game/HeatSourceMath.cs), [Game/ThermalHeatSourceDebug.cs](../Thermodynamics/Game/ThermalHeatSourceDebug.cs) | static | Driving and drawing point sources from chat, for exercising the API path in a session. |
+| [Game/PlanetProbes.cs](../Thermodynamics/Game/PlanetProbes.cs) | static | The 72-point planet-wide climate and wind sweep. See [environment.md](environment.md#measuring-it). |
+| [ThermalApi.cs](../Thermodynamics/ThermalApi.cs) | static | The mod-facing delegate table. See [api.md](api.md). |
+| [ThermalTerminal.cs](../Thermodynamics/ThermalTerminal.cs) | static | Thermal readout in every block's terminal. |
+| [ThermalHud.cs](../Thermodynamics/ThermalHud.cs) | static | Cockpit summary and extinguisher readout, on Rich HUD, plus the extinguisher billboard. |
+| [ThermalDebugView.cs](../Thermodynamics/ThermalDebugView.cs) | static | The x-ray overlay: a coloured box per block, or per room cell, cycled with Ctrl+Shift+=. |
+| [ThermalSettingsMenu.cs](../Thermodynamics/ThermalSettingsMenu.cs) | static | What the settings menu holds: pages, controls and write-back, generated from `Settings.Names()`. Opened with Ctrl+Shift+S. Owns the framework registration. |
+| [ThermalSettingsWindow.cs](../Thermodynamics/ThermalSettingsWindow.cs) | `WindowBase` | The window the menu is drawn in, built from the framework's HUD elements rather than from terminal pages. See [configuration.md](configuration.md#the-settings-menu). |
+| [ThermalDebugPanel.cs](../Thermodynamics/ThermalDebugPanel.cs) | static | The Rich HUD readout beside the overlay: per-view figures for the grid being drawn. |
+| [Debug.cs](../Thermodynamics/Debug.cs) | static | The crosshair readout. |
+| [Settings.cs](../Thermodynamics/Settings.cs) | class | Config file, defaults, access by name, and the write-through to the model's settings. |
+| [SettingsSync.cs](../Thermodynamics/SettingsSync.cs) | static | Replicates the world's settings to every client, over `SENetworkAPI`. |
+| [SettingsRequests.cs](../Thermodynamics/SettingsRequests.cs) | static | An administrator changing a setting from a client, over the engine's secure handler. |
+| [Game/ThermalGridSync.cs](../Thermodynamics/Game/ThermalGridSync.cs) | static | Replicates block temperatures to clients: the whole hull once, then the near-critical band. Plumbing only — the protocol is `Core/Sync`. |
+| [WindOverlay.cs](../Thermodynamics/WindOverlay.cs) | static | The wind map and the crosshair wind needle, cycled with Ctrl+Shift+W. |
+| [OverlayBudget.cs](../Thermodynamics/OverlayBudget.cs) | static | Fits the block overlay's draw radius to `DebugOverlayMaxBoxes` each frame. |
+| [Definitions/](../Thermodynamics/Definitions) | classes | Typed readers over Definition Extensions. |
+| [Telemetry/](../Thermodynamics/Telemetry) | static + records | Data collection. See [telemetry.md](telemetry.md). |
+| [DefinitionExtensionsAPI.cs](../Thermodynamics/DefinitionExtensionsAPI.cs), [NetworkAPI/](../Thermodynamics/NetworkAPI), [RichHudFramework/](../Thermodynamics/RichHudFramework) | vendored | Third-party API clients. Do not edit; replace wholesale when upstream updates. |
 
 ## Update order
 
@@ -194,9 +194,9 @@ progress or damage — so it is swept every eight steps, alongside room pressure
 
 ## Persistence
 
-[Game/ThermalGridStorage.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridStorage.cs) writes one
+[Game/ThermalGridStorage.cs](../Thermodynamics/Game/ThermalGridStorage.cs) writes one
 base64 blob into the grid's `MyModStorageComponent`, under the GUID registered in
-[EntityComponents.sbc](../Data/EntityComponents.sbc). `IsSerialized()` triggers the save.
+[EntityComponents.sbc](../Thermodynamics/Content/Data/EntityComponents.sbc). `IsSerialized()` triggers the save.
 
 The codec's v2 format carries block, loop and room air temperatures, keyed by 64-bit position, by
 the loop's own signature rather than by its index, and by the room's anchor cell — so a rebuilt loop
@@ -235,9 +235,9 @@ What *is* replicated travels two ways, and the split is deliberate:
 
 | Channel | Carries | Why this channel |
 | --- | --- | --- |
-| `SENetworkAPI`, `30323` | The world's settings ([SettingsSync.cs](../Data/Scripts/Thermodynamics/SettingsSync.cs)) and the two block throttles — a coolant pump's speed and a heat pump's power limit | Ordinary state, server → client, seeded at construction so a joining client's fetch is answered |
-| The engine's secure handler, `30324` | An administrator's request to change a setting from a client ([SettingsRequests.cs](../Data/Scripts/Thermodynamics/SettingsRequests.cs)) | SENetworkAPI's sender id is a field the sender wrote; a promote-level check cannot be gated on it |
-| The engine's secure handler, `30325` | Block temperatures, server → client, and a client's request for a grid's hull ([Game/ThermalGridSync.cs](../Data/Scripts/Thermodynamics/Game/ThermalGridSync.cs)) | The same reason one channel along: a client must not be able to write temperatures onto another client's simulation, and the from-the-server flag is the only thing that says so. A second id rather than a second handler on `30324`, because one id registered twice delivers every message twice |
+| `SENetworkAPI`, `30323` | The world's settings ([SettingsSync.cs](../Thermodynamics/SettingsSync.cs)) and the two block throttles — a coolant pump's speed and a heat pump's power limit | Ordinary state, server → client, seeded at construction so a joining client's fetch is answered |
+| The engine's secure handler, `30324` | An administrator's request to change a setting from a client ([SettingsRequests.cs](../Thermodynamics/SettingsRequests.cs)) | SENetworkAPI's sender id is a field the sender wrote; a promote-level check cannot be gated on it |
+| The engine's secure handler, `30325` | Block temperatures, server → client, and a client's request for a grid's hull ([Game/ThermalGridSync.cs](../Thermodynamics/Game/ThermalGridSync.cs)) | The same reason one channel along: a client must not be able to write temperatures onto another client's simulation, and the from-the-server flag is the only thing that says so. A second id rather than a second handler on `30324`, because one id registered twice delivers every message twice |
 
 See [configuration.md](configuration.md#changing-settings-from-a-client) for the request path,
 [configuration.md](configuration.md#replicating-temperatures) for the temperature protocol, and
@@ -245,7 +245,7 @@ See [configuration.md](configuration.md#changing-settings-from-a-client) for the
 
 ## Extending it
 
-Other mods bind to the delegate table in [ThermalApi.cs](../Data/Scripts/Thermodynamics/ThermalApi.cs);
+Other mods bind to the delegate table in [ThermalApi.cs](../Thermodynamics/ThermalApi.cs);
 see [api.md](api.md). A host that wants to drive the model directly implements `IBlockAdjacency` and
 pumps `ThermalSimulation` — which is exactly what the test harness does.
 

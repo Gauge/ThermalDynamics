@@ -27,18 +27,18 @@ waste memory.
 
 | Change | Status |
 | --- | --- |
-| Analytic contact area and conduction from block bounds | **done** — [`BoxGeometry`](../Data/Scripts/Thermodynamics/Core/Util/BoxGeometry.cs), [`ConductionBuilder`](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalLink.cs) |
+| Analytic contact area and conduction from block bounds | **done** — [`BoxGeometry`](../Thermodynamics/Core/Util/BoxGeometry.cs), [`ConductionBuilder`](../Thermodynamics/Core/Simulation/ThermalLink.cs) |
 | Conduction path length from real block depth | **done** |
 | Sealing and mounting as a per-face fraction | **done** — `BlockModel.LocalFaceMountFraction`, `BlockInstance.MountFraction` |
-| Adjacency behind a host port | **done** — [`IBlockAdjacency`](../Data/Scripts/Thermodynamics/Core/Model/IBlockAdjacency.cs), `ThermalSolver.Adjacency` |
+| Adjacency behind a host port | **done** — [`IBlockAdjacency`](../Thermodynamics/Core/Model/IBlockAdjacency.cs), `ThermalSolver.Adjacency` |
 | Exposure walks surfaces, not volumes | **done** — `SurfaceMap.GetExposedFaces` |
 | Block *storage* stops enumerating cells | **not done** — `GridModel.blocksByCell`, `SurfaceMap`'s cell table and `BlockInstance.Cells` are still one entry per occupied cell. This is the one thing between the model and an SE2 grid; the maths above is already there. `Se2LatticeTests` marks the line between them. |
 | Room mapping off the block lattice | not done |
 | Struct-of-arrays solver state | **done for the step** — the substep loop reads flat arrays mirrored from the nodes, refreshed only for nodes that changed. The node objects remain the public face. |
 | One grid per thread | **measured and built, shipping off** — `ParallelGrids`; `bench parallel`: 10.17x on a 242-grid fleet at 32 threads, 7.09x at eight, 3.35x on an uneven fleet, hand-off 1.6-6.8 us. See [One grid per thread, measured and built](#one-grid-per-thread-measured-and-built) |
 | Stiffness / multirate | not done — but now **measured**: `LastStepWasClamped` is reported per grid as "steps clamped by substep cap" |
-| Land `Core/` in the live mod | **done** — the adapter is [`Game/`](../Data/Scripts/Thermodynamics/Game); the legacy per-cell path is deleted |
-| Instrument | **done** — [`ISimulationProfiler`](../Data/Scripts/Thermodynamics/Core/Simulation/SimulationProfiler.cs) times topology, room mapping, exposure and solver; see [telemetry.md](telemetry.md) |
+| Land `Core/` in the live mod | **done** — the adapter is [`Game/`](../Thermodynamics/Game); the legacy per-cell path is deleted |
+| Instrument | **done** — [`ISimulationProfiler`](../Thermodynamics/Core/Simulation/SimulationProfiler.cs) times topology, room mapping, exposure and solver; see [telemetry.md](telemetry.md) |
 
 ### Measured effect
 

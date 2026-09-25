@@ -156,7 +156,7 @@ def cull_occluded_triangles(triangles,eye_direction=(1.,.7,1.2)):
 def main(data,out,tolerance=2.,best_order=False,remove_buried=False,occlusion=False):
     out.mkdir(parents=True,exist_ok=True)
     import re
-    palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',Path('Data/Scripts/Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text())[:256],float)
+    palette=np.array(re.findall(r'new Vector3\(([0-9.]+)f, ([0-9.]+)f, ([0-9.]+)f\)',Path('Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs').read_text())[:256],float)
     page=['<meta charset="utf-8"><title>Optimized thermal surfaces</title><style>body{background:#111820;color:white;font:18px sans-serif;margin:28px}img{width:100%}</style><h1>Same gradients, fewer triangles</h1><p>Temperature-interpolated surface mesh. Adjacent flat surfaces merge only when their temperature error stays below TOLERANCE K. Hotspot refinements remain intact.</p><p>Left: accepted version. Middle: optimized. Right: temperature difference (black = identical, white = TOLERANCE K). These are offline comparisons; native rendering cost is not yet measured.</p>'];report=[]
     for s in [fixture(False),fixture(True)]+[json.loads(p.read_text()) for p in sorted(data.glob('*.json'))]:
         for label,sigma in [('near',.45),('far',2.25)]:

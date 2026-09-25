@@ -1545,7 +1545,7 @@ figure this page prices a block on is a steady-state figure, so a recipe can be 
 without moving any of them.
 
 **The nineteenth block is the one nothing checks.** The decorative `Extinguisher` wall block lives in
-[Data/Extinguisher/Extinguisher.sbc](../Data/Extinguisher/Extinguisher.sbc) rather than in
+[Data/Extinguisher/Extinguisher.sbc](../Thermodynamics/Content/Data/Extinguisher/Extinguisher.sbc) rather than in
 `Cubes.xml`, carries ten steel plates, and declares **neither `PCU` nor `BuildTimeSeconds`** — so two
 of the three costs are the engine's defaults rather than anything authored. It is not simulated and
 not priced here; naming it is the whole of what this measurement can say about it.

@@ -80,8 +80,8 @@ changed category**, which is the useful result: the boundary was right and its s
 not. The consequence is still what makes a rule worth writing down — it is the
 [one observation](#the-one-observation) above — it is simply not what separates these two piles.
 
-**A rule is not low value merely because nothing checks it.** Eighteen of the seventy rules
-that are still rules are unchecked and say so, and two more are *reported* rather than checked,
+**A rule is not low value merely because nothing checks it.** Fourteen of the seventy-one rules
+that are still rules are unchecked and say so, and three more are *reported* rather than checked,
 which is weaker and is written as such. Restructuring `Models/` is caught by nothing and costs a
 re-export of every block model; a promote-level check gated on a forgeable field is caught by
 nothing and is a privilege escalation. The category is about what the rule buys, not about who
@@ -117,7 +117,7 @@ reason. See [testing the reduction](#testing-the-reduction).
 | **P8** | **Off means off, and costs nothing.** A mechanism nobody is using must cost nothing, and the way to turn it off must be unambiguous. | `C4` `C7` `C8` `C15` |
 | **P9** | **The core is a library the game happens to call.** That is what makes it testable in seconds, profilable, drivable by other mods and portable to another engine — and a library is also something that must not throw into a caller who never knew it was there. | `C5` `R9` `W4` |
 | **P10** | **The solver's three invariants are the definition of correctness.** Order independence, energy conservation, boundedness — everything else is tuning. | `C6` |
-| **P11** | **The repository is the publish.** Everything committed here reaches the workshop, so what must not ship must not be here. | `R2` `R3` |
+| **P11** | **The mod folder is the publish.** Everything under `Thermodynamics/` that the packer does not ignore reaches the workshop, so what must not ship must not be there. | `R2` `R3` |
 | **P12** | **Do not edit what this repository cannot regenerate.** Model binaries and vendored code have their source of truth outside this tree. | `R4` `R6` |
 | **P13** | **A long run is designed for its own death.** It will be killed — by the OOM killer, a timeout, a mistake or a power cut — so cap it, resume it, and never let a timer guess its duration. | `O1` `O2` `O3` `O5` |
 | **P14** | **Unobservable fidelity is cost.** Take the cheap form where the difference cannot be perceived, say what it gives up, and write the price down. Where it *can* be perceived, the cheap form is a rung on the feature's own ladder rather than the default. | `D6` `M8` `O4` `C15` |
@@ -274,7 +274,7 @@ That asymmetry is not closed and is recorded here rather than left implicit.
 | **D8** | An optimisation is pinned against the code it replaced | absolute | P4 | `SolverAb` and the five bit-identity suites |
 | **D9** | A fault is recorded whether or not collection is running | absolute | P2 | `AnomalyRegistryTests` |
 | **C1** | C# 6 only | absolute | P7 | `LangVersion` on the core project |
-| **C2** | The whitelist covers types the local build accepts | absolute | P7 | — |
+| **C2** | The whitelist covers types the local build accepts | absolute | P7 | the mod build (`MDK01`) |
 | **C3** | Target `net48`, and never reference the native assembly | absolute | P7 | the build |
 | **C11** | Every file the game compiles is compiled by the suite's own build | absolute | P7 | the build |
 | **C4** | Nothing allocates on the stepping path | absolute | P8 | `StageLabTests` |
@@ -282,7 +282,7 @@ That asymmetry is not closed and is recorded here rather than left implicit.
 | **C6** | The solver's three invariants hold | absolute | P10 | `ConductionTests` `StabilityTests` `ConductionClampGateTests` |
 | **C7** | Every mechanism has a switch that removes its own cost | absolute | P8 | `FeatureToggleTests` |
 | **C15** | A feature's configuration runs from `off` to `realistic` | absolute | P8 P14 | `EveryCoreSettingIsReachableFromAWorldsConfiguration` |
-| **C8** | Absent and empty mean the same thing | absolute | P8 | — |
+| **C8** | Absent and empty mean the same thing | absolute | P8 | `CorpusGuardTests` |
 | **C9** | The game's own answer is read, never overridden | absolute | P7 | `RoomPressureTests` |
 | **C10** | The server is authoritative over damage | absolute | P7 | — |
 | **W3** | An authority check reads what the engine supplies, never what the sender wrote | absolute | P7 | — |
@@ -290,7 +290,7 @@ That asymmetry is not closed and is recorded here rather than left implicit.
 | **W1** | A saved world loads on the build that wrote it, and on the ones either side | absolute | P15 | `StorageAndSettingsTests` |
 | **W2** | A name something outside this repository addresses is never repurposed | absolute | P15 | `TheRetiredPropertyNamesAreStillRead` `NoSettingReusesANumberThatWasDeliberatelyRetired` |
 | **R1** | *The repository is the mod folder* | low value | P11 | absorbed into P11 |
-| **R2** | Build output and the corpus live outside it | absolute | P11 | `Directory.Build.props` |
+| **R2** | Build output and the corpus live outside it | absolute | P11 | `mdk.ini` |
 | **R3** | No credential is written into the tree | absolute | P11 | `CredentialScanTests` |
 | **R4** | `Models/` is not restructured | absolute | P12 | `TheModelTreeKeepsItsShape` |
 | **R5** | The workshop identity files are not regenerated | absolute | P15 | `ShippedIdentityTests` |
@@ -317,7 +317,7 @@ That asymmetry is not closed and is recorded here rather than left implicit.
 
 Seventy-four rows: **sixty-four absolute, seven conditional, three low value.** The last three are
 retired as rules and kept only so a citation to them does not dangle, so seventy-one of these are
-rules a change can be measured against. Eighteen of them are unchecked and say so, and three more
+rules a change can be measured against. Fourteen of them are unchecked and say so, and three more
 are *reported* rather than checked, which is weaker and is written as such.
 
 ---
@@ -776,7 +776,7 @@ in one pass: a 297-line lab answering an open balance criterion with no command 
 documented and fully tested block property the in-game parser had no name for, so it worked in
 every test and in no world; six harness commands in no help text; and a Save and a Reset button
 the menu had not had for months. Two more turned up in this one: `BlockThermalProperties.Validate`
-and `ThermalSettings.Validate` produce diagnostics no caller under `Data/Scripts` asks for, and
+and `ThermalSettings.Validate` produce diagnostics no caller in the shipped code asks for, and
 five retired lab invariants sit in the suite with no caller at all. Anything declared once and
 mentioned nowhere else is the place to look, and a name-frequency scan finds them in seconds —
 though it gives a false negative on a misspelled declaration.
@@ -788,7 +788,7 @@ Luminance`, a photopic integration written from first principles and then never 
 `Photopic` with it. The compiler cannot do this: an unused private *field* is a warning and an
 unused private *method* is not, so these compile, get maintained, and read to the next person as
 something the suite relies on. **The shipped code is scanned on the same terms and is clean**, which
-is a result rather than an omission — every private helper under `Data/Scripts` is reached — with
+is a result rather than an omission — every private helper under `Thermodynamics/` is reached — with
 the vendored framework excluded because `R6` forbids editing the one uncalled method in it.
 
 *Applies to:* every pass over the repository.
@@ -998,7 +998,7 @@ asked. Twenty-five failures were in the tree when it was, four of them in the sh
 constant that had been inserted above it, a `<paramref>` on a class. `CS1573` and `CS0419` are
 deliberately not errors: a missing param tag and an ambiguous overload reference are coverage and
 precision, not a name that resolves to nothing. `CS1570` and `CS1572` are errors everywhere except
-[Generic.csproj](../Generic.csproj), which is the only project that compiles the three vendored
+[the mod project](../Thermodynamics/Thermodynamics.csproj), which is the only project that compiles the three vendored
 paths and where `R6` forbids fixing the five they carry; `.editorconfig` cannot narrow it, because
 `WarningsAsErrors` overrides those severities, which was tried and measured.
 
@@ -1122,10 +1122,11 @@ question this mod could answer for itself and should not.
 **No tuples, no `switch` expressions, no `out var`, no string interpolation beyond what C# 6
 supports.**
 
-The game compiles `Data/Scripts/**/*.cs` itself at world load with its own compiler.
+The game compiles the mod's sources itself at world load with its own compiler. They live under
+`Thermodynamics/` here, and the MDK2 packer ships them as `Data/Scripts`.
 
-*Applies to:* everything under `Data/Scripts`. The test projects link the same files, so the
-constraint is theirs too.
+*Applies to:* every `.cs` file under `Thermodynamics/`. The test projects link the same files, so
+the constraint is theirs too.
 *Checked by:* `LangVersion` is pinned to 6 on the core project.
 *From:* [development.md](development.md).
 
@@ -1139,8 +1140,14 @@ compile happily here; `Exception`, `ArgumentException`, `ArgumentNullException`,
 `InvalidOperationException` and `FormatException` are confirmed allowed. Prefer bounds-checking
 to catching a throw. No reflection, no file I/O outside `MyAPIGateway.Utilities`, no threading.
 
+**Since the MDK2 move the mod build runs a whitelist analyzer**, which reports a prohibited type or
+member as `MDK01`, an error; it was proven on 2026-09-24 against `System.IO.File` and
+`IndexOutOfRangeException` before being cited here. It reads MDK2's own snapshot of the whitelist
+rather than the installed game's, so a game update can move ahead of it. The game-whitelist probe in
+`tools/thermal-api-check` asks the installed game directly, for the snippets it holds.
+
 *Applies to:* everything the game compiles.
-*Checked by:* — nothing local can check it.
+*Checked by:* the build — `Thermodynamics/Thermodynamics.csproj`, through MDK2's analyzer.
 *From:* [development.md](development.md), [tests/README.md](../tests/README.md).
 
 #### C3 — Target `net48`, and never reference the native assembly
@@ -1154,22 +1161,23 @@ fail to resolve at 4.7.2. `VRage.Native.dll` is unmanaged and produces `MSB3246`
 
 #### C11 — Every file the game compiles is compiled by the suite's own build
 
-**`Data/Scripts/**/*.cs` is what the game compiles at world load, and the one command the workflow
-already runs — `dotnet build tests/Thermodynamics.slnx` — has to compile all of it.**
+**Every `.cs` file under `Thermodynamics/` is what the game compiles at world load, and the one
+command the workflow already runs — `dotnet build tests/Thermodynamics.slnx` — has to compile all
+of it.**
 
-The test projects link `Core/` in full, four files of `Game/` and six of `Telemetry/`, and nothing
-else. The rest of the adapter is every file that touches the game's own assemblies, and it was
-compiled by `Generic.csproj` alone, which was built by hand. So a rename in `Core` could pass the
+The test projects link `Core/` and `Presentation/` in full and a named handful of `Game/` and
+`Telemetry/` files, and nothing else. The rest of the adapter is every file that touches the game's
+own assemblies, and it was once compiled by a mod project that was built by hand. So a rename in `Core` could pass the
 whole suite and leave the mod unable to load — and did: `C20` renamed `Conductivity` to
 `HeatTransferCoefficient`, left one copy of the old name in `ThermalBlockCatalog`, and the mod did
 not compile for two commits while the whole suite passed.
 
 **It is the rung below `C2`.** There, a green build is not the game's check; here, a green *suite*
-was not even the local build. Nothing about this rule reaches the whitelist, which stays unchecked.
+was not even the local build.
 
-*Applies to:* everything under `Data/Scripts`.
-*Checked by:* the build — `Generic.csproj` is a member of `tests/Thermodynamics.slnx`, so the
-solution build fails on a break the suite cannot see.
+*Applies to:* every `.cs` file under `Thermodynamics/`.
+*Checked by:* the build — `Thermodynamics/Thermodynamics.csproj`, the MDK2 mod project, is a
+member of `tests/Thermodynamics.slnx`, so the solution build fails on a break the suite cannot see.
 *From:* [development.md](development.md#building), and the commit that fixed the break above.
 
 #### C9 — The game's own answer is read, never overridden
@@ -1329,7 +1337,7 @@ surface in it takes or returns a game type.**
 That is what lets the model be built, tested and profiled in seconds instead of by loading a
 world, and it is the boundary an SE2 adapter would bind to.
 
-*Applies to:* `Data/Scripts/Thermodynamics/Core`.
+*Applies to:* `Thermodynamics/Core`.
 *Checked by:* `CoreIsolationTests`.
 *From:* [tests/README.md](../tests/README.md), [architecture.md](architecture.md).
 
@@ -1377,24 +1385,27 @@ the pass could ever be parallelised.
 and not a class — and `ConductionClampGateTests`.
 *From:* [thermal-model.md](thermal-model.md).
 
-### P11 — The repository is the publish
+### P11 — The mod folder is the publish
 
-The game loads this directory directly, which is what makes a change testable without copying,
-and it is also what makes everything sitting here part of what a workshop publish uploads.
+MDK2 packs the mod project's folder, `Thermodynamics/`, into the game's local `Mods/Thermodynamics`
+on every build — the sources as `Data/Scripts`, the content folders beside them — and that folder
+is what a workshop publish uploads. So everything under `Thermodynamics/` that `mdk.ini` does not
+ignore ships, and nothing outside it does.
 
 #### R2 — Build output and the corpus live outside it
 
 **So that publishing needs no cleanup step, because a cleanup step that has to be remembered is
 one that eventually is not.**
 
-Build output goes to a sibling directory; the blueprint corpus lives in the user data directory
-and is overridable by `THERMAL_CORPUS`. They were 394 MB and over a hundred gigabytes
-respectively. A blame hang dump, at 1.9 GB, was one commit from shipping before `TestResults/`
-was ignored.
+The mod project's own `bin/` and `obj/` sit inside `Thermodynamics/` and are left out by
+`mdk.ini`'s `ignores`; every other project builds under `tests/` or `tools/`, outside the packed
+folder. The blueprint corpus lives in the user data directory and is overridable by
+`THERMAL_CORPUS`. They were 394 MB and over a hundred gigabytes respectively. A blame hang dump, at
+1.9 GB, was one commit from shipping before `TestResults/` was ignored.
 
 *Applies to:* anything generated or fetched.
-*Checked by:* `Directory.Build.props` sets the first; `.gitignore` and the corpus path handle the
-second. Neither stops a new generated directory from appearing.
+*Checked by:* `mdk.ini`'s `ignores` for the mod project's output; `.gitignore` and the corpus path
+for the rest. Neither stops a new generated directory from appearing under `Thermodynamics/`.
 *From:* [development.md](development.md).
 
 #### R3 — No credential is written into the tree
@@ -1420,10 +1431,10 @@ things this repository legitimately writes, `--key <key>` among them.
 Moving or renaming a folder under `Models/` silently breaks LOD switching in game, and the only
 fix is re-exporting the models — which needs the source scene, not this repository.
 
-*Applies to:* `Models/` and everything under it.
+*Applies to:* `Thermodynamics/Content/Models/` and everything under it.
 *Checked by:* `ShippedIdentityTests.TheModelTreeKeepsItsShape`, which pins a digest of the sorted
 set of model paths — a **set** rather than a count, because a file added is a normal day and a file
-*moved* is the failure, and only the set tells those apart. Both `note.txt` files say so as well.
+*moved* is the failure, and only the set tells those apart. `Models/note.txt` says so as well.
 *From:* [development.md](development.md).
 
 #### R6 — Vendored code is replaced, never edited
@@ -1766,8 +1777,9 @@ implemented*, and narrowing the implementation to the four tests it was about ma
 
 ### R1 — The repository is the mod folder
 
-**Absorbed into P11.** It states a fact about how the game loads this directory, not something a
-change can violate — and everything that *can* be violated because of it is already written down:
+**Absorbed into P11.** It stated a fact about how the game loaded this directory, not something a
+change can violate — and since the MDK2 move it is not even the fact: the packer's folder is what
+ships, and P11 now says so. Everything that *can* be violated because of it is already written down:
 `R2` keeps generated bulk out, `R3` keeps credentials out, `R5` protects the identity files.
 
 ### J1 — Game mod first
@@ -1802,6 +1814,7 @@ right and this page is stale**; say so and fix it here.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | **The page follows the MDK2 layout, and `C2` has a check.** The mod's sources moved from `Data/Scripts` to `Thermodynamics/`, the mod project from `Generic.csproj` to `Thermodynamics/Thermodynamics.csproj`, and publishing from *this directory is the mod* to *MDK2 packs `Thermodynamics/` into the game's `Mods` folder* — so `P11` is the mod folder rather than the repository, and `R2` is held by `mdk.ini`'s `ignores` rather than by a root `Directory.Build.props` that no longer exists. **`C2` is checked by the mod build**: MDK2's analyzer reports a prohibited member as `MDK01`, an error, proven against `System.IO.File` and `IndexOutOfRangeException` before being cited. **`C8`'s index row said `—` while its body named `CorpusGuardTests.OffMeansOffHoweverItIsSpelled`**, which runs; the index is corrected. **The unchecked count was wrong in two places** — both sentences said eighteen, and the index counted sixteen before today's two — and it is fourteen, counted from the index rather than carried forward (`E5`). `R14`'s compiler check had been lost in the move — the new mod project did not generate documentation, so a dangling `cref` in a file only it compiles was unchecked — and is restored, proven against a dangling `cref` in `Crosshair.cs`. |
 | 2026-08-28 | **`W4` is checked now, and closing it found the defect it was written about.** Its *Checked by* field read "— nothing… that is discipline", and discipline had missed `GetSetting`: `name => Settings.Instance.GetValue(name)`, four lines above a `SetSetting` guarding the same field, so a consumer asking for a setting before this mod loaded its own got a `NullReferenceException` in their session with this mod's name on it. Every table entry goes through `ThermalApi.Guard` now — structure rather than a promise about eighteen bodies — and `GetSetting` reads through `Settings.EnsureLoaded`. |
 | 2026-08-28 | **`M7` gains the half that was luck rather than method: a control the change can reach is not a control.** Pass 9's tenth iteration measured a stage nothing had touched moving 4.5 % between two binaries — and 0.3 % when run on its own. Settling between stages reclaims the garbage and leaves the heap it was allocated into, so a stage carries its predecessors' allocation, and the change under test had cut exactly that. `bench stages --isolate` gives each stage its own process. |
 | 2026-08-27 | **`D2`'s own stated gap is closed: the test tree scans itself.** The entry ended by saying nothing looked for an uncalled `internal static` invariant in the test project, which is how four survived a pass. `UncalledCodeTests` looks now — over the shipped code as well, where it comes back clean — and found two on its first run — a documented six-face count in `Scenarios` and a photopic luminance integration in `IncandescenceTests` that was written from first principles and never called. The compiler cannot find these: an unused private field is a warning and an unused private method is not. |

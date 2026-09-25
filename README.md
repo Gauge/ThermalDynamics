@@ -6,7 +6,7 @@ and a critical temperature. Heat conducts between touching blocks, radiates into
 into atmosphere and into the air of sealed rooms, arrives from the sun, and — if you let it build up
 — destroys your ship.
 
-* **Steam Workshop ID:** `2985582372` (see [modinfo.sbmi](modinfo.sbmi))
+* **Steam Workshop ID:** `2985582372` (see [modinfo.sbmi](Workshop/modinfo.sbmi))
 * **Namespace:** `Thermodynamics`
 * **Target:** Space Engineers 1 (`net48`, C# 6)
 

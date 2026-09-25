@@ -1010,7 +1010,7 @@ block arrives at ambient, and creative changes when that happens rather than wha
 fourth, god mode, has no thermal meaning: a player who cannot be hurt is not a heat sink.
 
 `SuspendedRulesTests` pins it, because a claim about what code does *not* do rots the moment
-somebody adds the line: nothing in `Data/Scripts` reads the game mode, the creative flags or the
+somebody adds the line: nothing in the mod's sources reads the game mode, the creative flags or the
 creative tools.
 
 ---
@@ -1023,7 +1023,7 @@ commitment this page already made: the readouts are drawn through Rich HUD *so t
 temperature the way they read a power figure, with nothing mod-shaped announcing itself*. The game's
 own HUD is localised. A readout that is not is mod-shaped by definition.
 
-Counted over `Data/Scripts`, the distinct strings the mod puts in front of a person are:
+Counted over the mod's sources, the distinct strings the mod puts in front of a person are:
 
 | Surface | Distinct strings | Language |
 | --- | ---: | --- |
@@ -1036,7 +1036,7 @@ Counted over `Data/Scripts`, the distinct strings the mod puts in front of a per
 
 **So the surface that has to be translatable is forty-seven strings**, **4.3 %** of what the mod
 writes, and the mechanism is already proven by the thirty block names in
-[MyTexts.resx](../Data/Localization/MyTexts.resx). `LocalisationSurfaceTests` counts the table above
+[MyTexts.resx](../Thermodynamics/Content/Data/Localization/MyTexts.resx). `LocalisationSurfaceTests` counts the table above
 and holds the claim as a band, because telling a sentence from an identifier without a compiler is
 approximate and pinning the exact count would pin the heuristic rather than the finding.
 

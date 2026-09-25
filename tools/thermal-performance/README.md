@@ -2,7 +2,7 @@
 
 Run the command in [the optimization audit](../../docs/thermal-vision-optimization-audit.md).
 The executable validates output before reporting timings. `BaselineBlockField.cs`
-is a frozen offline reference, not code shipped under `Data/Scripts`. Do not update
+is a frozen offline reference, not code the mod ships. Do not update
 it to mirror optimizations: that would invalidate the comparison. `results.json`
 records one local run; reruns will vary with hardware and host load.
 
@@ -58,6 +58,18 @@ against the frozen reference. It measures query CPU cost, not frame time.
 The executable references `Thermodynamics.Presentation` and `VRage.Math` only.
 It does not link the physical simulation model or the SE1 drawing adapter.
 
+## Files
+
+`Program.cs` is the executable. With no flag it runs the general fixtures and prints their
+results as JSON, which is where `results.json` came from; `--occlusion`, `--nearest` and `--caps`
+each run and print one fixture instead. The `Baseline*.cs` files are the
+frozen references each fixture compares against — `BaselineCapSampling.cs` is the near-camera
+sampling one — and are not to be updated. `results-memory.json` holds the memory follow-up,
+`results-diagonal-patches.json` the alternate-diagonal run and `diagonal-study/` its geometry, and
+`quad-opportunity.json` the uniform-quad opportunity counts, which leave native rendering
+unchanged; all three are read in
+[the optimization audit](../../docs/thermal-vision-optimization-audit.md).
+
 ## Region occlusion
 
 Use the command above with `--occlusion` to compare hierarchical rejection with
@@ -72,4 +84,5 @@ not the previous renderer without occlusion, and excludes native submission.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | Named every file in the folder, which `EveryToolIsNamedByItsReadme` asks for. |
 | 2026-09-19 | Added reproducible synthetic thermal CPU and allocation benchmarks, reference-output checks and optimization tradeoffs. |

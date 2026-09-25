@@ -24,8 +24,8 @@ Surveyed in `~/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64`.
 
 ## Build corrections
 
-The mod now compiles against the real assemblies with **zero warnings**. Two things were wrong in
-`Generic.csproj`:
+The mod compiles against the real assemblies with **zero warnings**. Two things were wrong in the
+mod project as it first stood:
 
 | Problem | Fix |
 | --- | --- |
@@ -43,7 +43,7 @@ Reference points:
   Build against `Bin64`.
 * Mod scripts are compiled by `VRage.Scripting.MyScriptCompiler` against a whitelist with three
   targets (`MyWhitelistTarget.Ingame`, `.ModApi`, `.Both`). Everything below is `ModApi`
-  surface — it is reachable from `Data/Scripts`, unlike the in-game programmable block sandbox.
+  surface — it is reachable from a mod's scripts, unlike the in-game programmable block sandbox.
 
 ---
 
@@ -124,7 +124,7 @@ The 0.128 ms figure is real and is still three hundred times a hand-off. See
 
 ## Planets already describe their own climate
 
-[Data/Planets.xml](../Data/Planets.xml) defines only the `DefaultThermodynamics` fallback, so
+[Data/Planets.xml](../Thermodynamics/Content/Data/Planets.xml) defines only the `DefaultThermodynamics` fallback, so
 **every planet in the game is treated as Earthlike** — 283–294 K, `SolarDecay` 0.5. The vanilla
 planet definitions already say otherwise:
 
@@ -288,7 +288,7 @@ dependency currently means a missing Definition Extensions install throws inside
 **Partly taken up.** The mod now uses `MyVisualScriptLogicProvider.GetWeather(position)`, which
 returns the effect's subtype name and is on the same whitelisted class as the intensity call it
 already used. That is enough to distinguish a dust storm from rain, and
-[WeatherResponse](../Data/Scripts/Thermodynamics/Core/Definitions/WeatherResponse.cs) turns the name
+[WeatherResponse](../Thermodynamics/Core/Definitions/WeatherResponse.cs) turns the name
 into a temperature offset, a solar multiplier, a wind multiplier and a convective multiplier.
 
 The response table's figures are **transcribed** from Keen's `WeatherEffects.sbc`, not read from it.

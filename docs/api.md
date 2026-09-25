@@ -169,7 +169,7 @@ unless an administrator saves them with `/thermal save`. The names are listed in
 
 A mod that wants more than the message API can go further, at the cost of coupling to this one's
 source. The simulation core in
-[Data/Scripts/Thermodynamics/Core](../Data/Scripts/Thermodynamics/Core) has no dependency on the
+[Thermodynamics/Core](../Thermodynamics/Core) has no dependency on the
 game session, and its two seams are meant to be used:
 
 * **`IBlockAdjacency`** — supply "which blocks touch this one" from a better index than a cell map.

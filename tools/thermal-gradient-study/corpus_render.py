@@ -128,6 +128,6 @@ def main(data,out,palette_source,flat=False):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('data',type=Path);p.add_argument('output',type=Path)
-    p.add_argument('--palette',type=Path,default=Path('Data/Scripts/Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs'))
+    p.add_argument('--palette',type=Path,default=Path('Thermodynamics/Presentation/ThermalVision/ThermalVisionPalette.cs'))
     p.add_argument('--flat',action='store_true')
     a=p.parse_args();main(a.data,a.output,a.palette,a.flat)

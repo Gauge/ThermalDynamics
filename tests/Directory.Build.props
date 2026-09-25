@@ -58,8 +58,8 @@
       CS1573 and CS0419 are deliberately not here: a missing param tag and an ambiguous overload
       reference are coverage and precision, not a name that resolves to nothing.
       No vendored file is compiled by any project under tests/, so all nine can be errors here.
-      Generic.csproj, which compiles all three vendored paths, keeps CS1570 and CS1572 as warnings
-      for the five that Draygo's client carries and R6 forbids fixing; its own note says so.
+      The mod project, which compiles all three vendored paths, keeps CS1570 and CS1572 as warnings
+      for the ones the vendored files carry and R6 forbids fixing; its own note says so.
     -->
     <NoWarn>$(NoWarn);CS1573;CS0419</NoWarn>
     <WarningsAsErrors>$(WarningsAsErrors);CS1570;CS1572;CS1574;CS1580;CS1581;CS1584;CS1587;CS1710;CS1734</WarningsAsErrors>

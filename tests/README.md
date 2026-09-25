@@ -17,9 +17,9 @@ debugged in seconds instead of by loading a world.
 
 `Thermodynamics.Core` builds only the simulation model. Thermal-vision algorithms
 compile separately in `Thermodynamics.Presentation`, linking
-`Data/Scripts/Thermodynamics/Presentation/**/*.cs`. The harness, visual benchmarks
+`Thermodynamics/Presentation/**/*.cs`. The harness, visual benchmarks
 and tests reference presentation explicitly; the model does not. The SE1 renderer
-is still compile-checked by `Generic.csproj`, not linked into either library.
+is compile-checked by the mod project, not linked into either library.
 `CoreIsolationTests` prevents presentation types from returning to the simulation
 assembly and checks both libraries' permitted assembly dependencies.
 
@@ -44,11 +44,12 @@ assembly and checks both libraries' permitted assembly dependencies.
 
 | Project | What it is |
 | --- | --- |
-| `Thermodynamics.Core` | The simulation itself. Sources live in [`../Data/Scripts/Thermodynamics/Core`](../Data/Scripts/Thermodynamics/Core) so the game compiles them as part of the mod; this project links the same files. |
+| `Thermodynamics.Core` | The simulation itself. Sources live in [`../Thermodynamics/Core`](../Thermodynamics/Core) so the game compiles them as part of the mod; this project links the same files. |
 | `Thermodynamics.Harness` | Synthetic block catalogue, grid builder, canned environments, scenario library. |
 | `Thermodynamics.Sim` | Command line front end for the scenarios. |
 | `Thermodynamics.Tests` | xUnit suite. |
-| `../Generic.csproj` | The mod's own compile check, and **not** part of the isolated environment. It is in the solution so that building the solution compiles every file the game compiles; see [rules.md](../docs/rules.md) `C11`. It runs nothing and `dotnet test` skips it. |
+| `../Thermodynamics/Thermodynamics.csproj` | The mod project (MDK2): the mod's own compile check and whitelist check, and **not** part of the isolated environment. It is in the solution so that building the solution compiles every file the game compiles; see [rules.md](../docs/rules.md) `C11`. Building it also deploys the mod to the game's local `Mods` folder; see [development.md](../docs/development.md#deploying-to-the-game). It runs nothing and `dotnet test` skips it. |
+| `../tools/modkit/Modkit.csproj` | Compiles the drop-in API client as a consumer mod would, as C# 6 through the whitelist; see [tools/modkit/README.md](../tools/modkit/README.md). |
 
 ## What makes it isolated
 
@@ -230,15 +231,9 @@ dotnet run --project Thermodynamics.Sim -- run reactor
 dotnet run --project Thermodynamics.Sim -- run all --csv out/
 ```
 
-If the game's assemblies are not found, point at your install:
-
-```bash
-SE_BIN=/path/to/SpaceEngineers/Bin64 dotnet test
-```
-
-The probe order is `$SE_BIN`, the default Steam path on Linux, then the one on Windows, and it is
-in the repository's root [Directory.Build.props](../Directory.Build.props) because the mod project
-needs it too. If none of them resolves, the build says so by name.
+The game's assemblies are found by MDK2's `Mal.Mdk2.References`, for the test projects and the mod
+project alike; the build prints `Loading Space Engineers assemblies from …` with the path it chose.
+See [development.md](../docs/development.md#building).
 
 ### The two lanes, and the rule that sorts them
 
@@ -691,7 +686,7 @@ hold — `A13` was a change to how *vanilla* blocks are read, and it moved the p
 | **End to end, and the host boundary** | `SimulationIntegrationTests` `ScenarioTests` `ScenarioClaimTests` `HostAdapterTests` `CoreIsolationTests` `FleetParallelTests` `ParallelTickTests` |
 | **Balance, and the ships it is decided on** | `BalanceTests` `CoolingLadderTests` `RetrofitTests` `BlockHeatIndexTests` `HandCoolingTests` `BuildCostTests` `GlowChannelTests` `SuspendedRulesTests` `KnobBaselineTests` `LocalisationSurfaceTests` `CorpusProvenanceTests` `TimeToLossTests` `CatalogDriftTests` `ModHardwareRetestTests` `RetestSetTests` `SettleReadingTests` `SettleExtrapolationTests` `DecorativeStiffnessTests` `ElementCostFitTests` `ScreeningTests` `BlueprintTests` `SubgridBridgeTests` `PrefabWalk` `CorpusCapWalk` `CorpusGuardTests` `CorpusArchiveTests` `CorpusRecordTests` `ClientDriftTests` `ClientInputTests` `HotTailTests` `HotTailSyncTests` `AirCostTests` `ConductionPaceTests` `LoadDialTests` `WorstCaseTests` `LabRunTests` `LabInvariantTests` |
 | **Corpus walks** (opt-in, `THERMAL_CORPUS_TESTS`) | `CorpusSurvey` `CorpusAirWalk` `CorpusFloorWalk` `CorpusCensus` `KnobSweep` `ConductanceRetestWalk` `PairSweep` `SunlightPanelWalk` `BlockAccountingWalk` `DeterminismWalk` |
-| **The documentation itself** | `DocumentationTests` `ModApiShapeTests` `ThermodynamicsClientTests` `ConfigurationDocTests` `SimCommandTests` `CredentialScanTests` `ScriptWhitelistTests` `UncalledCodeTests` `FidelityEndTests` `CorpusConstantTests` `ConsolidationTests` |
+| **The documentation itself** | `DocumentationTests` `ModApiShapeTests` `ThermodynamicsClientTests` `ConfigurationDocTests` `SimCommandTests` `CredentialScanTests` `ScriptWhitelistTests` `ScriptPreprocessorTests` `UncalledCodeTests` `FidelityEndTests` `CorpusConstantTests` `ConsolidationTests` |
 
 > **The bit-identity suites share one fixture.** Five of them pin an optimisation against the
 > thing it replaced — the precomputed environment rows, the fixed source row, the gated
