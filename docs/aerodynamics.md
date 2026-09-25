@@ -605,6 +605,33 @@ wake at any length; on a flat-fronted body it separates at the front rim and rea
 it has reattached along the sides first. The slender cones pulled suction down with length to be slow,
 and that starved the cube. Round 3 separates the two, and tests on data neither round has seen.
 
+### Round 3, registered before it is run
+
+**One structural change: base suction depends on where the flow left the body.**
+`C_base = C_att + b·(C_sep − C_att)·R(λ)`, where `b` is how bluff the front is — the forebody's own
+pressure-weighted share of the silhouette, `Σ a·cosᵐφ / A`, one for a flat front and small for a
+slender cone — and `R(λ) = 1 / (1 + (λ/λ_r)⁸)` is whether the body is too short for flow that left a
+front rim to reattach along its sides. A flat-fronted body shorter than `λ_r` keeps the full separated
+suction; a longer one, or one whose front never shed its flow, sees the attached value. Leeward surfaces
+count as base only where separated (round 2's 12° to 22°). Six coefficients again: `C_front`, `m`,
+`C_att`, `C_sep`, `λ_r`, the lab's skin friction.
+
+**Calibration is every body the earlier rounds used**, since all of them have now been seen: the cones
+from 10° to 75°, all five flat-faced cylinders, the square plate and the cube.
+
+**Held out, and never used by any round: White's turbulent ellipsoids** — `L/d` 0.75, 1, 2, 4, 8 at
+**0.2, 0.2, 0.13, 0.1, 0.08**, flown along the axis. They are the attached-flow, gradually-closing body
+S4 is about, and a hull with a rounded nose and a tapered tail is exactly what a player builds to go
+fast.
+
+| # | Prediction | Falsified by |
+| --- | --- | --- |
+| T1 | every calibration body within ±12 % of White — a fit that misses its own data is not a model | any outside |
+| T2 | each ellipsoid within 0.5× to 1.75× of White's turbulent value | any outside |
+| T3 | the ellipsoids at `L/d` 4 and 8 read below the one at `L/d` 1 | either not below |
+
+S3 and S4 are reported beside these and not counted: both have been seen twice.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -623,6 +650,7 @@ and that starved the cube. Round 3 separates the two, and tests on data neither 
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 3 registered before it runs**, on data no round has seen: White's turbulent ellipsoids. Base suction becomes a function of the front's bluffness and of reattachment length rather than of fineness alone; calibration is every body the earlier rounds saw, and the fit must meet its own data within ±12 %. |
 | 2026-09-25 | **Round 2 recorded: S3 and S4 pass on the letter, by 0.007 and 0.1 %, and are not counted as evidence.** The fit misses its own calibration cube by 14.8 % and puts no base suction on any body longer than half its width, so a tail cannot matter. The diagnosis is that fineness conflated front-edge separation with attached flow. |
 | 2026-09-25 | **Round 2 of step 1 registered before it runs.** Leeward surfaces count as base only where the flow separates (12° to 22°, sourced), and base suction is calibrated on the square plate and cube with long cylinders for the reattached end. The owner's S1 and S2 become calibration and are recorded as tested once and failed; S3 and S4 stay held out, and a failure ends revisions on this data. |
 | 2026-09-25 | **Round 1 of step 1 fails, recorded as run.** The profile's geometry is built and checked against hand geometry (`AeroGeometryTests`); the drag model fitted to White's round bodies predicts all four held-out bodies outside their bands. The diagnosis is written beside the numbers: a round section reattaches sooner than a square one, and the model counted a boat-tail's attached surfaces as base. |
