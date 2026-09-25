@@ -1181,6 +1181,11 @@ Together they are what makes the table safe to publish at all — the *why* unde
 
 ### To another mod that also slows a ship down: the same answer, and it is stronger here
 
+> **Superseded 2026-09-24 by decision** ([aerodynamics.md](aerodynamics.md) `AR15`): this mod's embedded
+> RelativeTopSpeed port is removed, and the original mod owns top speed. This mod reads RTS's read-only API to
+> explain which limit binds, and both forces act (cruise curve, then drag). The section below is kept as the
+> record of the earlier position.
+
 **`EnableDrag` ships off, so adding this mod to a world running
 [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed) changes no force at all.** That is the
 whole of the collision handled, and it is handled by the same switch the section below argues for
@@ -1335,7 +1340,14 @@ frame buffer. That is a statement about difficulty, not about intent — it is w
   blocks facing each other across a gap do not see each other, and no view factors exist. A surface
   *can* now be shiny to the sun and black to space — `SolarAbsorptivity` is separate from
   `Emissivity` — but each is one constant rather than a curve against wavelength.
-* **Not a flight model — reversed 2026-08-31, by decision.** This bullet refused lift for ten
+* ~~**Not a flight model.**~~ **It is one, as of 2026-09-24, by decision: aerodynamics as realistic
+  as the game allows, learning from SEDrag where it is right** — the requirements are
+  [aerodynamics.md](aerodynamics.md) `AR1`–`AR22`, built as [backlog.md](backlog.md) `K25`. The
+  reasoning below argued against a flight model on the grounds that the solver's Newtonian sum is
+  wrong in the regime ships fly in. That is still true, and it is now the reason to replace the sum
+  with a subsonic force channel rather than the reason to stay out of handling. What follows is kept
+  as the record, superseded.
+  **Reversed for lift 2026-08-31, by decision.** This bullet refused lift for ten
   months of change log and one day of calendar, and the refusal is lifted because the owner asked
   for aerodynamic lift implemented and configurable ([backlog.md](backlog.md) `K23`). **That is a
   choice about what the mod is for, not a measurement that overturned one**, and it is recorded that
