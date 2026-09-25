@@ -5,6 +5,11 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A door seals differently in each of its two states, and not by the same rule on every
+    /// face. The sides it is bolted in by hold whatever it is doing; only the way through opens.
+    /// One flag cannot express that, which is what these pin down.
+    /// </summary>
     public class DoorSealingTests
     {
 

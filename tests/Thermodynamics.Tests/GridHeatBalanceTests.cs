@@ -6,6 +6,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A grid's heat balance as two figures: what it is making and what it is shedding.
+    ///
+    /// Per-block temperatures cannot answer "is this ship able to cool itself at all", which is
+    /// the first question a player asks when a ship overheats. These are accumulated on the hot
+    /// path rather than behind the diagnostics switch, so they are available on a working ship
+    /// rather than only on an instrumented one — which means the accounting has to be right in
+    /// every path through the environment pass, including the ones that skip it.
+    /// </summary>
     public class GridHeatBalanceTests
     {
 

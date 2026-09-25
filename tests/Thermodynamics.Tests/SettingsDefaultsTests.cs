@@ -4,6 +4,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The model's own settings type, whose defaults have to survive being loaded from a file
+    /// written before a setting existed.
+    ///
+    /// The game-side config class cannot be reached from here — it needs the game's assemblies —
+    /// but it has the same shape and the same trap, and the trap is worth stating once: a config
+    /// file has no element for a setting added after it was written, the XML reader leaves the
+    /// field at whatever the type starts as, and a world silently runs with every new feature off.
+    /// Defaults belong on the fields, where a reader that finds nothing leaves them alone.
+    /// </summary>
     public class SettingsDefaultsTests
     {
         [Fact]

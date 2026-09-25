@@ -3,6 +3,27 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What bolting a cooling block to a reactor actually buys, pinned so the answer cannot
+    /// quietly invert.
+    ///
+    /// <para>
+    /// `blocks.md` says the radiator is a block you **plumb**, not one you bolt, and `balance.md`
+    /// prices a coolant sink face at six times a bolt joint. Both were argued from conductances.
+    /// The ladder measures the end result instead — the largest reactor the game ships, at its
+    /// plate rating, in shadow, with every block that has a plausible claim to being the best
+    /// cooling in the game stacked against it — and the end result is starker than the argument:
+    /// the mod's own radiator takes **two kelvin off eight hundred and ninety**, and a stack of
+    /// thirty-two takes no more off than a stack of eight.
+    /// </para>
+    ///
+    /// <para>
+    /// These assertions are on directions and orders of magnitude rather than on figures, because
+    /// the figures move with any definition change and the conclusions are what a reader is
+    /// entitled to rely on. The lab prints the figures; this says they still mean what the pages
+    /// claim they mean.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class CoolingLadderTests
     {

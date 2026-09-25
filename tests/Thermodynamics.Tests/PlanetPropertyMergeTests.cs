@@ -3,6 +3,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a planet definition that says less than everything does to the climate.
+    ///
+    /// A field dump taken on an earthlike world read 2.7 K of ambient at 0.93 air density, no
+    /// convection at all, and no solar decay — the vacuum figures, in breathable air — with 232,000
+    /// points of heat damage behind them. The planet's thermal group had not reached the mod, and
+    /// every value it did not supply arrived as zero and was written over the model's own default.
+    /// A definition now overrides only what it carried.
+    /// </summary>
     public class PlanetPropertyMergeTests
     {
 

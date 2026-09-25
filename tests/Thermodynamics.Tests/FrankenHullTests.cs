@@ -7,6 +7,17 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The million-block grid welded out of real ships (`G5`), held to the things that make it a
+    /// grid rather than a pile.
+    ///
+    /// <para>
+    /// **Built from hulls this file makes, not from the corpus.** The tiling is the part that can
+    /// be wrong — two ships in the same cells, a lattice that is a line, a target overshot by a
+    /// whole ship — and none of that needs a blueprint to check. What needs the corpus is the
+    /// *mixture*, and that is what `bench franken` measures rather than what a test asserts.
+    /// </para>
+    /// </summary>
     public class FrankenHullTests
     {
         private readonly ITestOutputHelper output;

@@ -8,6 +8,29 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every waste fraction `Cubes.xml` authors says where it came from, and the ones that claim a
+    /// real conversion or the game's own field are held to it.
+    ///
+    /// <para>
+    /// **This is <see cref="AuthoredMaterialTests"/>'s rule applied to the half of a definition
+    /// that had no rule at all.** A `Conductivity` claiming aluminium has been checked since `C2`;
+    /// a `ConsumerWasteEnergy` claimed nothing, which is how the jump drive came to sit at `0.15`
+    /// under the note *"storage is efficient; the dump is not"* while its own definition stated
+    /// `PowerEfficiency 0.8` — on the block carrying most of the corpus's full-load waste heat. See
+    /// definitions.md, *Every waste fraction says where it came from*, which owns the counts.
+    /// </para>
+    ///
+    /// <para>
+    /// Four kinds of provenance, and a fraction must claim exactly one. `waste:` names a conversion
+    /// in <see cref="ReferenceEfficiencies"/> and is held to its band. `derived:` names a field the
+    /// game's own definitions state and is recomputed from them. `no producer:` says the fraction
+    /// is never read, and is checked against every definition of that type declaring no power
+    /// output. `invented:` is an admitted opinion and is nobody's business but the author's — but it
+    /// has to be said, so that a value cannot arrive with no provenance and read as though it had
+    /// one. See definitions.md, Where a block's properties come from.
+    /// </para>
+    /// </summary>
     public class AuthoredWasteTests
     {
         private static readonly string[] Waste = { "ProducerWasteEnergy", "ConsumerWasteEnergy" };

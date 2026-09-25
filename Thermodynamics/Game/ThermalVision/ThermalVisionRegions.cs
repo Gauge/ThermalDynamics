@@ -230,11 +230,9 @@ namespace Thermodynamics
             if (Vector3D.Dot(n, eye - a) < 0) { Vector3D swap = b; b = c; c = swap; n = -n; }
             n.Normalize();
             Vector3D offset = bias ? MyAPIGateway.Session.Camera.WorldMatrix.Backward * .001 : Vector3D.Zero;
-#pragma warning disable CS0618
             MyTransparentGeometry.AddTriangleBillboard(a + offset, b + offset, c + offset,
                 (Vector3)n, (Vector3)n, (Vector3)n, Vector2.Zero, Vector2.UnitX, Vector2.UnitY,
                 CompositeSurfaceMaterial, 0, (a + b + c) / 3, colour, MyBillboard.BlendTypeEnum.PostPP);
-#pragma warning restore CS0618
             regionBillboards++; drawn++; examined++;
         }
 

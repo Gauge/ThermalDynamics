@@ -7,6 +7,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Temperature thresholds another mod can register, and the edge semantics they promise.
+    ///
+    /// <para>
+    /// The whole difficulty is not reporting twice. A block sitting exactly on a threshold, a block
+    /// crossing it inside a multi-step update, and a block crossing the wrong way each have a case
+    /// here, because a threshold that fires repeatedly is worse than one that never fires: the caller
+    /// acts on it.
+    /// </para>
+    /// </summary>
     public class ThresholdTests
     {
 

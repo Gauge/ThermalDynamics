@@ -1980,7 +1980,7 @@ namespace Thermodynamics.Sim
 
         private static void PrintUsage()
         {
-            Console.WriteLine("Thermal Dynamics simulation harness");
+            Console.WriteLine("Thermodynamics simulation harness");
             Console.WriteLine();
             Console.WriteLine("  list                    show available scenarios");
             Console.WriteLine("  run <name|all>          run a scenario");
@@ -2022,6 +2022,7 @@ namespace Thermodynamics.Sim
             Console.WriteLine("    --load                    full load instead of idle: the control, not G7");
             Console.WriteLine("  drift                   how long a client that joined stale stays wrong");
             Console.WriteLine("  inputs                  each input a client drives its sim from, degraded");
+            Console.WriteLine("  thermal-corpus-export <out>  temperature fields of three corpus ships, for the thermal-vision studies");
             Console.WriteLine("  thermal-vision <out> [--require-complete]  shared rendering core, synthetic depth and readiness report");
             Console.WriteLine("  thermal-vision-rays <out>  synthetic sensor resolution and query-workload study (not game rendering)");
             Console.WriteLine("  thermal-vision-reuse <out>  bounded sample reuse, camera motion and new occluder counterexamples");

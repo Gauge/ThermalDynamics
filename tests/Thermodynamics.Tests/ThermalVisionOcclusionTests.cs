@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Whole-grid solid-box occlusion preserves openings, partial views and moving targets.</summary>
     public class ThermalVisionOcclusionTests
     {
 

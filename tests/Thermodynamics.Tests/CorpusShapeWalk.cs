@@ -6,6 +6,37 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every ship in the corpus in air **twice**: with the hull shape term off as it ships, and with
+    /// `EnableShapeDrag` on.
+    ///
+    /// <para>
+    /// **Why it exists.** backlog.md `K22` built the shape term and measured what it is worth on two
+    /// toy hulls — a settled four-cell brick runs 9.96 K cooler at reentry air and a stair-stepped
+    /// wedge 11.36 K. Both are larger than the 7.4 K windward shielding is worth, which is already
+    /// enough to keep *that* switch off, so the term cannot become a default on a hull's evidence.
+    /// This is the population.
+    /// </para>
+    ///
+    /// <para>
+    /// **Both arms run to the same simulated clock**, for the reason the cap walk states: a run
+    /// stops when the hottest block settles, so two configurations of one ship stop at different
+    /// instants and a comparison of two settle-stopped runs measures the stopping rule (`M1`,
+    /// `P6`). The unshaped arm runs first and hands its elapsed clock to the shaped one.
+    /// </para>
+    ///
+    /// <para>
+    /// **The arm is carried in the scenario name rather than in a new column**, because the outcome
+    /// schema is read by every corpus tool and a walk that only this one reads should not widen it.
+    /// A shaped row is `reentry-shaped`; its control is `reentry` in the same file for the same ship.
+    /// </para>
+    ///
+    /// <para>
+    /// **`vacuum-shadow` is the control the change cannot reach.** There is no air in it, so the
+    /// friction term is dead and the shape factor multiplies nothing; if it moves, the term is
+    /// reaching something it has no business touching and the reentry delta is not what it says.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusShapeWalk
     {

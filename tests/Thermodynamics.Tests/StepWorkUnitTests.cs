@@ -5,6 +5,34 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The corpus scores a step's cost in the unit the allowance is spent in, and the link half
+    /// of that unit was missing.**
+    ///
+    /// <para>
+    /// `G6`'s cost half compares a step's element visits against `MaxElementVisitsPerStep`. The
+    /// mod's own statement of that cost is <see cref="ThermalSimulation.SubstepCost"/>, which is
+    /// `links + 4 x nodes`: a substep runs a conduction pass that is per *link* and an environment
+    /// pass that is per *node*, and benchmarks.md measured the weight
+    /// between them rather than assuming it.
+    /// </para>
+    ///
+    /// <para>
+    /// **The corpus had no link column, and `verdict.py` was handed `joints` in its place.** A
+    /// joint is a rotor or a piston *between two grids* and there are none on most blueprints; a
+    /// link is a face two blocks share and there are one to three per block. So every step-work
+    /// figure this repository has published is the node half alone, and the true cost is larger by
+    /// whatever the hull's link-to-node ratio is. These tests pin all three claims — that the two
+    /// counts are different, that the recorded cost is the mod's own arithmetic rather than a copy
+    /// of it, and that the per-grid reading is per grid — because the defect is silent in exactly
+    /// the way `P5` describes: two definitions of *links*, and the wrong one is a valid number.
+    /// </para>
+    ///
+    /// <para>
+    /// This is the same class of error as the 2.125-against-4 correction of 2026-08-24, one level
+    /// down: that one had the right count in the wrong currency, this one has the wrong count.
+    /// </para>
+    /// </summary>
     public class StepWorkUnitTests
     {
         private const int Blocks = 2000;

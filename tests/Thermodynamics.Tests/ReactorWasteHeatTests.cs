@@ -6,6 +6,20 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// That reactors heat at all, and that the fraction chosen for them still means what it was
+    /// chosen to mean.
+    ///
+    /// The defect these were written against: the <c>Reactor</c> entry in Cubes.xml carried
+    /// <c>ProducerWasteEnergy</c> 0 and <c>ConsumerWasteEnergy</c> 0.25. A reactor delivers power
+    /// through the source component, so only the producer fraction can ever apply to it, and every
+    /// reactor in the game made exactly no heat — the largest heat source a ship has, inert, while
+    /// a suite of 1,179 tests stayed green. Nothing in the solver was wrong; the number it was
+    /// handed was.
+    ///
+    /// Figures come from <see cref="ReactorLab"/>, which reads the shipped XML at run time, so a
+    /// tuning change moves these tests rather than sliding past them.
+    /// </summary>
     [Trait("speed", "slow")]
     public class ReactorWasteHeatTests
     {

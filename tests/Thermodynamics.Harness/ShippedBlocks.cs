@@ -90,7 +90,7 @@ namespace Thermodynamics.Harness
             DirectoryInfo directory = new DirectoryInfo(start);
             while (directory != null)
             {
-                if (File.Exists(Path.Combine(directory.FullName, "ThermalDynamics.sln")))
+                if (File.Exists(Path.Combine(directory.FullName, "Thermodynamics.sln")))
                 {
                     return directory.FullName;
                 }

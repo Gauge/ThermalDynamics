@@ -8,6 +8,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A block that is hot because of **what it is**, not because of the power crossing it.
+    ///
+    /// <para>
+    /// Every other heat term in this model is a fraction of watts passing through a block:
+    /// produced, consumed, or spent on thrust. That describes a reactor and a thruster and nothing
+    /// else. Decay heat in spent fuel, a forge, a campfire, a wreck still burning — none of them
+    /// draw power, and a mod author's only recourse was to invent a power draw the block does not
+    /// have and accept whatever consumer fraction rode along with it.
+    /// </para>
+    ///
+    /// <para>
+    /// <c>HeatSourceWatts</c> is that term. These tests pin the four things it has to be: watts
+    /// that arrive, watts that are *conserved*, watts independent of power, and watts that are
+    /// zero unless asked for — the last mattering because the property is deliberately absent from
+    /// the Cubes.xml required list, so every block in the game inherits it as an omission.
+    /// </para>
+    /// </summary>
     public class CustomHeatSourceTests
     {
 

@@ -6,6 +6,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The plumbing every setting has to pass through, checked as text.
+    ///
+    /// <para><c>Settings.cs</c> reads <c>Sandbox.*</c> and cannot be linked into this project, so
+    /// none of this can be done by calling it. That is fine: every fault this guards against is
+    /// visible in the source, and each of them is silent at runtime.</para>
+    ///
+    /// <para><b>Why these exist.</b> A setting is wired by hand in five places — a field with a
+    /// <c>ProtoMember</c> number, an entry in <c>Names()</c>, a case in <c>GetValue</c>, a case in
+    /// <c>SetValue</c>, and a row in the reference documentation. Miss one and nothing fails; the
+    /// setting simply does not work, or works in one direction, or quietly overwrites another
+    /// setting on the wire. All four of those have happened in this codebase.</para>
+    /// </summary>
     public class SettingsWiringTests
     {
 

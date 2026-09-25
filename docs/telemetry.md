@@ -570,7 +570,7 @@ does not — and how many of those have a vent reporting pressurised.
 
 Every cell the room map calls external is offered to `IsRoomAtPositionAirtight`, and the ones the
 game calls airtight are grouped into connected regions
-([UnmappedRooms](../Data/Scripts/Thermodynamics/Core/Surfaces/UnmappedRooms.cs)). Each region is a
+([UnmappedRooms](../Thermodynamics/Core/Surfaces/UnmappedRooms.cs)). Each region is a
 compartment this model lost: the flood fill walked in from outside, no room was created, and
 because pressurisation is only ever asked about rooms the map already found, nothing ever compared
 the two.
@@ -821,7 +821,7 @@ boundary** — `GridTelemetry` and `TelemetryReport` both read `Sandbox.*`, so t
 is compile-checked and not test-covered. What it reads is covered: `CoolantLoopTests` pins the loop
 watt figures and `HeatPumpTests` pins each of the three idle states the section classifies.
 
-`dotnet build Generic.csproj --no-incremental` is the only check that compiles this module at all —
+`dotnet build Thermodynamics/Thermodynamics.csproj --no-incremental` is the only check that compiles this module at all —
 a green `tests/` test run says nothing about it, because `tests/` links four of its files and skips the
 rest.
 

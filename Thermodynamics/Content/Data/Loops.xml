@@ -9,18 +9,87 @@
 			</Id>
 			<ModExtensions>
 				<Group Name="ThermalLoopProperties">
-					<!--kg of coolant per cubic metre of the cell a pipe occupies, so a ring's charge scales with its length AND with the grid it is built on.-->
+					<!--
+						kg of coolant per cubic metre of the cell a pipe occupies, so a ring's charge
+						scales with its length AND with the grid it is built on. Per pipe rather than
+						per loop: a fixed charge per loop divided the same fluid into smaller parcels
+						as a ring grew, which made every parcel stiffer to integrate and made a longer
+						ring couple harder to the grid while holding no more coolant.
+
+						A density rather than a flat mass, because a flat mass has no grid size in it.
+						This was 50 kg a pipe until C43: 3.2 kg/m3 in a 2.5 m cube, which is a gas,
+						against 400 kg/m3 in a 0.5 m one, which is a liquid and outweighs the 32 kg
+						pipe block carrying it. 33 kg/m3 is a bore a fifth of the cell across filled
+						with water-glycol - 515.6 kg a pipe on a large grid, 4.1 kg on a small one.
+
+						CoolantMassPerPipe is still read and still means kilograms in a pipe. State it
+						instead of this to pin a flat charge; state neither and this default applies.
+					-->
 					<Decimal Name="CoolantKilogramsPerCubicMetre" Value ="33" />
-					<!--W/(m2 K): how well heat crosses between the fluid and the wall it touches, WHILE THE RING IS CIRCULATING.-->
+					<!--
+						W/(m2 K): how well heat crosses between the fluid and the wall it touches,
+						WHILE THE RING IS CIRCULATING. Convective, so there is no thickness in it -
+						the resistance is the boundary layer against the wall. It was a 0..1 quality
+						against a reference conductivity divided by half a cell, which gave the game
+						a second conduction pace and made the coefficient it implied five times
+						larger on a small grid than on a large one, for the same fluid against the
+						same wall. See backlog.md, C20.
+
+						1000 because a pumped ring is forced convection. 160 was what the loop
+						already ran at before it was restated as a coefficient, and it is the
+						stagnant end of the range - a water-glycol mix moved by a pump is a few
+						hundred to a few thousand in any handbook. It is now the value a STOPPED
+						ring runs at, through StagnantTransferFraction below, so nothing behaves
+						worse than it did and what changed is that running the pump buys something.
+
+						This is the only dial on the pickup, because the sink face count is fixed by
+						design (blocks.md), and the pickup decides whether a block has an answer at
+						all: watts over it is the gradient a buried source is forced to sit at
+						however much radiator is hung off the far end. At 160 a 6.4 MW jump drive
+						forced 6,400 K against a 689 K rating on one sink face and 1,600 K on four,
+						so no realistic plumbing could cool it and the mod's own design thesis could
+						not be built. See balance.md, What a jump drive costs in radiator, and
+						backlog.md C42.
+					-->
 					<Decimal Name="HeatTransferCoefficient" Value="1000" />
-					<!--J/(kg K),water-glycol coolant.-->
+					<!--J/(kg K), real units: water-glycol coolant-->
 					<Decimal Name="SpecificHeat" Value="3400" />
 					<Decimal Name="PipeContactMultiplier" Value ="1" />
 					<Decimal Name="SinkContactMultiplier" Value ="1" />
-					<!--How fast the coolant moves with one pump at full power, metres per second — the same unit the terminal reports.-->
+					<!--
+						How fast the coolant moves with one pump at full power, metres per second —
+						the same unit the terminal reports. This is how fast heat travels round the
+						ring, and with it how long a radiator takes to hear about a reactor.
+
+						Flow rises with the square root of combined pumping, so four pumps carry
+						twice this, not four times.
+
+						Split by grid size because it is a balance dial, not a physical constant: a
+						small-grid pump is a much smaller machine driving a much shorter ring, and
+						whether it should move its coolant as fast as a capital ship's is a
+						judgement. Shipped equal, so the two grids behave alike until someone
+						decides they should not.
+
+						A small-grid pipe is a fifth as long, so the same speed is five times the
+						parcel rate: the ring laps far more often and levels out sooner.
+					-->
 					<Decimal Name="LargeGridFlowRate" Value ="10" />
 					<Decimal Name="SmallGridFlowRate" Value ="10" />
-					<!--What survives with nothing circulating, as a share of the coefficient above.-->
+					<!--
+						What survives with nothing circulating, as a share of the coefficient above.
+						Fluid-to-wall transfer is convective, so it depends on the flow: a pumped
+						ring is forced convection and a stopped one is natural convection against
+						the same wall, the best part of an order of magnitude apart.
+
+						0.16 because 1000 x 0.16 is 160, which is exactly what every ring in this mod
+						ran at before C42 - so a stopped ring is unchanged and no situation anywhere
+						is worse than it was. What the pair buys is that running the pump now makes
+						the ring CONDUCT rather than only mixing it, which is a reason to switch a
+						pump on and to pay for the power it draws.
+
+						Until C37 this field multiplied nothing at all: it described the transport
+						between parcels, which Advect already stops dead on zero flow.
+					-->
 					<Decimal Name="StagnantTransferFraction" Value ="0.16" />
 				</Group>
 			</ModExtensions>

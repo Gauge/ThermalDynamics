@@ -6,6 +6,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// No credential is written into the tree.
+    ///
+    /// <para>
+    /// The rule is `R3`, it was absolute from the day the corpus fetcher was written, and until now
+    /// nothing enforced it — the *Checked by* field said "nothing scans the tree". This is the
+    /// scan. It is worth having because the failure is silent and permanent: a key committed once
+    /// is in the history whether or not the next commit removes it, and **this repository is the
+    /// published mod folder**, so anything in it ships.
+    /// </para>
+    ///
+    /// <para>
+    /// Shaped patterns rather than entropy. A Steam Web API key is thirty-two hex characters, which
+    /// is a shape a file can hold innocently — an MD5, a GUID with its dashes taken out — so the
+    /// test looks for a key *beside a word that says it is one*, and separately for the shapes that
+    /// cannot be anything else: a private key header, a provider-prefixed token, an assigned
+    /// password.
+    /// </para>
+    /// </summary>
     public class CredentialScanTests
     {
 

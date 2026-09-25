@@ -7,6 +7,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The mod API's delegate table has the shape the API page says it has.
+    ///
+    /// <para>
+    /// A consumer reaches this mod by casting: `api["GetBlockTemperature"] as
+    /// Func&lt;IMySlimBlock, float&gt;`. A cast that does not match returns **null**, not an error —
+    /// so a signature that changes on one side and not the other produces a second mod whose
+    /// feature silently does nothing, in a session, with no message anywhere. `R9` calls the API
+    /// page part of the contract, and until now the only thing checked was that every entry is
+    /// *named* there.
+    /// </para>
+    ///
+    /// <para>
+    /// Textual, because the shape is text on both sides and neither can be reached without a
+    /// session. It cannot check that a signature is a good one; it checks that there is one answer
+    /// rather than two (`D3`).
+    /// </para>
+    /// </summary>
     public class ModApiShapeTests
     {
 

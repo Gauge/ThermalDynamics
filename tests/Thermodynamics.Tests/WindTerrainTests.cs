@@ -5,6 +5,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What the ground does to the wind over it: speeds it up over a rise, shelters behind a ridge,
+    /// and steers it along a valley.
+    ///
+    /// Every case here is a piece of terrain built by hand as a ring of relative heights — a cone, a
+    /// wall, a trench, an even slope — so the shapes are unambiguous and the expected answer is the
+    /// one anybody who has stood on that shape would give.
+    /// </summary>
     public class WindTerrainTests
     {
 

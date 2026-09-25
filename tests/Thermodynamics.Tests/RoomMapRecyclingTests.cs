@@ -6,6 +6,22 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A room pass writes into a recycled map instead of buying a new one (`D20`): the mapper
+    /// rotates three slots, because a published map may be read until the publish after next —
+    /// the solver holds one across a budgeted exposure refresh — so the map free to be written
+    /// is the one two publishes old.
+    ///
+    /// <para>
+    /// Four claims, each the failure the design has to survive: the rotation really is three
+    /// maps and no fourth (a fourth is `D20`'s leak back); a map two publishes old still answers,
+    /// even while the pass recycling its successor is in flight (two slots instead of three would
+    /// republish or reset a map somebody holds); a recycled map is cell-for-cell identical to a
+    /// fresh one (`D8` — the fresh path is the code the recycled path replaced); and a warm pass
+    /// allocates an order less than a cold one, which is the saving itself, asserted rather than
+    /// read off a benchmark nobody re-runs (`E5`).
+    /// </para>
+    /// </summary>
     public class RoomMapRecyclingTests
     {
 

@@ -8,6 +8,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Whether one grid per thread is safe today**, which is the half of
+    /// backlog.md `D19` a test can settle without a session.
+    ///
+    /// <para>
+    /// The mod is not threaded and the intent is that it should be. Two things have to be true
+    /// before that is a change rather than a gamble: a fleet stepped one grid per thread has to
+    /// produce exactly what the same fleet stepped in order produces, and it has to keep producing
+    /// it — which means nothing in the core may hold mutable state that two grids could share.
+    /// Both are asserted here, and the second is the one that would rot silently: a static field
+    /// added for a cache is invisible until two threads meet in it.
+    /// </para>
+    ///
+    /// <para>
+    /// **Bit-identical, not close.** This is `D8`'s shape applied to a change that has not been
+    /// made yet: the sequential run is the oracle, and a parallel run that merely agrees to a
+    /// tolerance is a run with a race in it that happened not to lose this time.
+    /// </para>
+    /// </summary>
     public class FleetParallelTests
     {
         private const int Grids = 6;

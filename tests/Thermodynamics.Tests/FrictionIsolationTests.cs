@@ -5,6 +5,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Wind and grid velocity, separately and together, against the friction system.
+    ///
+    /// The hull feels one thing: the relative wind, composed as ambient wind minus grid velocity.
+    /// Friction and forced convection both read that one scalar, which makes the composed cases
+    /// impossible to attribute in play — a session with a storm and a moving ship shows a heat
+    /// that could belong to either. These tests hold each contributor still while the other
+    /// moves, and then pin the compositions where the sum surprises: a headwind that doubles the
+    /// airflow neither part supplies alone, and a downwind run that heats at walking-pace airflow
+    /// at full throttle. Since 2026-09-02 friction is live at every speed — the old 50 m/s
+    /// threshold ships at 0 — so the compositions move watts smoothly rather than tripping a gate.
+    /// </summary>
     public class FrictionIsolationTests
     {
         private const float ThickAir = 1f;

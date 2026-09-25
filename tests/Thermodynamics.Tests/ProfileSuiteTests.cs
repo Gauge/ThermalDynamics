@@ -7,6 +7,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The profile machinery itself, and the findings it produced.
+    ///
+    /// Two kinds of test here and they are worth telling apart. The first few check that the sweep
+    /// measures what it claims to — a hook that silently stopped applying would turn every profile
+    /// into the shipped one and the whole comparison would agree beautifully and mean nothing. The
+    /// last few pin defects that are currently *present*, so that fixing one shows up as a test
+    /// that has to change rather than as a number nobody was watching.
+    /// </summary>
     [Trait("speed", "slow")]
     public class ProfileSuiteTests
     {

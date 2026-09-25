@@ -5,6 +5,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Waste heat, solar gain and friction are all fixed for the length of a step — none of them
+    /// depends on a node's temperature — so the environment pass carries their sum as one row and
+    /// reads that instead of three arrays per node per substep. The pass is bound by how many node
+    /// arrays it streams, and the three separate rows survive only for the diagnostics substep.
+    ///
+    /// <para>
+    /// The risk that buys is a row that disagrees with its parts: the reported heat gain would
+    /// then be a different number from the four figures a player sees beside it, and nothing else
+    /// in the model would notice. These pin the two together, on a hull where all three terms are
+    /// live and on one where only waste heat is.
+    /// </para>
+    /// </summary>
     public class FixedSourceRowTests
     {
 

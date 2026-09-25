@@ -5,6 +5,26 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The committed baseline is the tree a change is measured against, and it rots without
+    /// announcing that it has.
+    ///
+    /// <para>
+    /// A comparison joins on <c>section / case / metric</c>. Rename a profile, add a section, or
+    /// change what a metric means, and the join stops matching: the affected rows leave the
+    /// regression list and appear under "new" and "gone", where they read as bookkeeping rather
+    /// than as a baseline that can no longer answer the question. The baseline in this repository
+    /// had drifted exactly that far — two profiles renamed and every substep figure rescaled by an
+    /// earlier units change — and produced seventy false moves against an unmodified tree.
+    /// </para>
+    ///
+    /// <para>
+    /// This does not check the figures. Timings belong to the machine that took them and comparing
+    /// them across machines is what the calibration row is for. It checks the <em>keys</em>, which
+    /// belong to the code, so a change that makes the baseline unusable fails here instead of six
+    /// weeks later in the middle of a measurement.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class BenchmarkBaselineTests
     {

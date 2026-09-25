@@ -5,6 +5,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A step's fixed cost — the passes over every node that run once per step rather than once
+    /// per substep.
+    ///
+    /// There are two of them: mirroring the node objects into the flat rows, and the stability
+    /// estimate that decides how many substeps the step gets. Both are O(nodes) and neither does
+    /// any physics, so a step that runs either twice pays a full node walk for an answer it
+    /// already holds. On a grid taking three substeps — the field average — the fixed part is
+    /// roughly half the step, which is what makes the count worth pinning.
+    /// </summary>
     public class StepFixedCostTests
     {
 

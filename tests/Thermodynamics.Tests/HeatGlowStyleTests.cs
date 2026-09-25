@@ -5,6 +5,10 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Natural heat cue visibility: fixed endpoint and midpoint oracles, full distance/angle sweeps,
+    /// grid-scale offsets and warmed allocation accounting. This does not exercise the SE1 renderer.
+    /// </summary>
     public class HeatGlowStyleTests
     {
         [Theory]

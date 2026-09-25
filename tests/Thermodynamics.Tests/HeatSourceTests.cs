@@ -6,6 +6,11 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Point heat sources: the sun's maths applied to something a mod owns. What a source is
+    /// bound to, where it is and whether anything is in the way are all the host's business; by
+    /// the time the simulation sees one it is a direction and an irradiance.
+    /// </summary>
     public class HeatSourceTests
     {
 

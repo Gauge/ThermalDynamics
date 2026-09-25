@@ -6,7 +6,28 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
-    public class ThermalDynamicsClientTests
+    /// <summary>
+    /// The drop-in client (`tools/modkit/ThermodynamicsApi.cs`) binds exactly the delegate table
+    /// `ThermalApi.cs` publishes — every key, with the same signature, in both directions.
+    ///
+    /// <para>
+    /// The client is a *copy* of the API's shape, held in another file so a consumer can drop it
+    /// into their mod without referencing this one's assembly. A copy drifts (`D3`): add a key to
+    /// the API and the client silently cannot reach it; change a signature on one side and the
+    /// client's cast returns null in a consumer's session with no message anywhere. This is the
+    /// test that keeps the two identical, the same way `ModApiShapeTests` keeps api.md identical to
+    /// the table.
+    /// </para>
+    ///
+    /// <para>
+    /// Textual on both sides, because the client binds game types this project does not reference
+    /// and the table cannot be built without a session — so neither can be reached except as source.
+    /// The client itself is compiled against the game by `tools/modkit/Modkit.csproj`, a member of
+    /// the test solution, which is what proves it is valid C# 6; this test proves it is the *right*
+    /// C# 6.
+    /// </para>
+    /// </summary>
+    public class ThermodynamicsClientTests
     {
 
         private static string RepoRoot()
@@ -63,7 +84,7 @@ namespace Thermodynamics.Tests
         private static Dictionary<string, string> ClientBindings()
         {
             string source = File.ReadAllText(Path.Combine(RepoRoot(),
-                "tools", "modkit", "ThermalDynamicsApi.cs"));
+                "tools", "modkit", "ThermodynamicsApi.cs"));
 
             Dictionary<string, string> shapes = new Dictionary<string, string>(StringComparer.Ordinal);
 
@@ -134,7 +155,7 @@ namespace Thermodynamics.Tests
             string apiSource = File.ReadAllText(Path.Combine(RepoRoot(),
                 "Thermodynamics", "ThermalApi.cs"));
             string clientSource = File.ReadAllText(Path.Combine(RepoRoot(),
-                "tools", "modkit", "ThermalDynamicsApi.cs"));
+                "tools", "modkit", "ThermodynamicsApi.cs"));
 
             string apiChannel = Regex.Match(apiSource, @"ChannelId\s*=\s*(\d+)").Groups[1].Value;
             string clientChannel = Regex.Match(clientSource, @"Channel\s*=\s*(\d+)").Groups[1].Value;

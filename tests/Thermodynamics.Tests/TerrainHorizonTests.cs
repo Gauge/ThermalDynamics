@@ -5,6 +5,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Shadow cast by the ground itself.
+    ///
+    /// The planet test treats a world as a smooth ball, which is right for night and for orbit and
+    /// blind to the mountain next door. These build terrain out of arithmetic — a plain, a ridge, a
+    /// canyon — and check the walk against ground that was never rendered.
+    /// </summary>
     public class TerrainHorizonTests
     {
         private const double Radius = 60000d;

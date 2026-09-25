@@ -6,6 +6,25 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What a hand tool would have to be worth**, which is the number
+    /// document-of-intent.md needed before it could say whether acting on
+    /// heat by hand is in scope.
+    ///
+    /// <para>
+    /// backlog.md `B32` was a void rather than a defect: the mod ships an
+    /// extinguisher that scans and does not extinguish, and nothing said whether that was the
+    /// design. A position taken without this measurement would be indistinguishable from never
+    /// having asked, which is why these run before that sentence was written (`E1`).
+    /// </para>
+    ///
+    /// <para>
+    /// **The comparison is physical and the clock cannot move it.** `HeatTimeScale` divides every
+    /// heat capacity, which makes a kelvin cheaper for a block's waste heat and for a tool's
+    /// cooling by exactly the same factor. So every figure here is in watts and joules, and the
+    /// answer holds at any value of the dial.
+    /// </para>
+    /// </summary>
     public class HandCoolingTests
     {
         private readonly ITestOutputHelper output;

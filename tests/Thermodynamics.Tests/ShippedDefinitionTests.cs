@@ -9,6 +9,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Cross-checks the shipped XML against itself, and against the code that binds to it. These
+    /// are the failures a green solver suite cannot see: the simulation is correct, and the numbers
+    /// it is handed are not the ones the definitions author — or the block the definitions author
+    /// has no logic attached to it at all.
+    ///
+    /// The defect that prompted this: every one of the mod's own blocks declared its thermal
+    /// properties under <c>&lt;TypeId&gt;CubeBlocks&lt;/TypeId&gt;</c>, which is not an object
+    /// builder type. Definition Extensions therefore matched none of them, every block fell
+    /// through to <c>DefaultThermodynamics</c>, and a live dump showed the radiator running at
+    /// emissivity 0.125 with no area bonus instead of the authored 0.35 and 1.25 — the two
+    /// properties the block exists for.
+    /// </summary>
     public class ShippedDefinitionTests
     {
         const string CUBES_DEFINITION_PATH = "Cubes.xml";

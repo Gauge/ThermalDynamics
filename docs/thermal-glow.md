@@ -25,8 +25,8 @@ preview can certify game bloom, whitelist acceptance or the appearance of transp
 
 ## Rendering contract
 
-[HeatGlowStyle.cs](../Data/Scripts/Thermodynamics/Presentation/HeatGlowStyle.cs) holds view shaping
-in the presentation library. [ThermalGlow.cs](../Data/Scripts/Thermodynamics/ThermalGlow.cs) consumes
+[HeatGlowStyle.cs](../Thermodynamics/Presentation/HeatGlowStyle.cs) holds view shaping
+in the presentation library. [ThermalGlow.cs](../Thermodynamics/ThermalGlow.cs) consumes
 it from the existing session Draw hook; the existing grid cue pass supplies temperatures and
 exposed faces, and the existing unload hook clears lights. There is no new solver pass, network
 packet, setting, particle emitter or model edit.

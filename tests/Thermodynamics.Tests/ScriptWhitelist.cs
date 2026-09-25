@@ -11,6 +11,48 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The game's script whitelist, and the mod's source read against it.
+    ///
+    /// <para>
+    /// **Compiling is not this check.** The mod project compiles the mod's sources against the
+    /// installed game's own assemblies, which catches a member that does not exist and cannot catch
+    /// a member the game *refuses*: Space Engineers compiles a mod through a Roslyn analyzer over a
+    /// positive whitelist, so a type can resolve on this machine and be prohibited in a session. It
+    /// cost one — `Units.Watts` took an `IFormatProvider`, and the only feedback was a red wall of
+    /// text on the loading screen. MDK2's analyzer now runs in the mod build as well, from its own
+    /// copy of the list; this one is transcribed from the game, so the two can disagree (`P4`).
+    /// </para>
+    ///
+    /// <para>
+    /// **The list below is transcribed from the game rather than guessed at**, from
+    /// `SpaceEngineers.Game.MySpaceGameDefaultIlChecker`, which builds it in three methods of
+    /// `AllowNamespaceOfTypes` / `AllowTypes` / `AllowMembers` calls, and
+    /// `VRage.Scripting.MyScriptWhitelist`, which matches against it. The shape that catches people
+    /// out is that **`System` is not an allowed namespace** — only the types named one by one are.
+    /// Read it again with `ilspycmd -t SpaceEngineers.Game.MySpaceGameDefaultIlChecker` when the
+    /// game updates; the transcription date is below.
+    /// </para>
+    ///
+    /// <para>
+    /// **This is narrower than the game's rule, deliberately, in the direction that cannot cry
+    /// wolf.** It judges the framework surface only — the types a mod reaches through `netstandard`
+    /// — because that is where the whitelist is a list of individual types and where a mod author
+    /// has no way of knowing. The game half is allowed by whole namespaces, is already exercised by
+    /// every session the mod has ever loaded in, and would need the game's own resolution to judge.
+    /// What is left is exactly the class of mistake that produced this file.
+    /// </para>
+    ///
+    /// <para>
+    /// **Two more names are dropped for the same reason, and both cost sensitivity.** A name the
+    /// game also declares — `Color` is `VRageMath.Color` far more often than `System.Drawing.Color`
+    /// — and a name the mod declares itself. Without resolving the way a compiler does there is no
+    /// telling which was meant, and a check that reported three hundred `Color`s would be switched
+    /// off within a week. The cost is that a genuinely prohibited framework type whose simple name
+    /// collides with a game type is invisible here; the benefit is that everything this reports is
+    /// real.
+    /// </para>
+    /// </summary>
     public static class ScriptWhitelist
     {
         public const string TranscribedFrom = "Space Engineers, Bin64 of 2026-08-14, read 2026-08-23";
@@ -280,8 +322,16 @@ namespace Thermodynamics.Tests
             if (root == null) return new List<string>();
 
             return Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories)
+                .Where(x => !IsBuildOutput(x.Substring(root.Length)))
                 .OrderBy(x => x, StringComparer.Ordinal)
                 .ToList();
+        }
+
+
+        private static bool IsBuildOutput(string relative)
+        {
+            string path = relative.Replace('\\', '/') + "/";
+            return path.Contains("/bin/") || path.Contains("/obj/");
         }
 
 

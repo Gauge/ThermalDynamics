@@ -26,9 +26,9 @@ Three kinds of thermal mass exist. They integrate identically; only their capaci
 
 | Node | Capacity, J/K | Built by |
 | --- | --- | --- |
-| Block | `SpecificHeat × Mass / HeatTimeScale` | [ThermalNode.cs](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalNode.cs) |
-| Coolant loop | `SpecificHeat × Mass / HeatTimeScale` | [CoolantLoop.cs](../Data/Scripts/Thermodynamics/Core/Loops/CoolantLoop.cs) |
-| Room air | `Volume × RoomAirDensity × Pressure × 1005 / HeatTimeScale` | [RoomAir.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/RoomAir.cs) |
+| Block | `SpecificHeat × Mass / HeatTimeScale` | [ThermalNode.cs](../Thermodynamics/Core/Simulation/ThermalNode.cs) |
+| Coolant loop | `SpecificHeat × Mass / HeatTimeScale` | [CoolantLoop.cs](../Thermodynamics/Core/Loops/CoolantLoop.cs) |
+| Room air | `Volume × RoomAirDensity × Pressure × 1005 / HeatTimeScale` | [RoomAir.cs](../Thermodynamics/Core/Surfaces/RoomAir.cs) |
 
 Capacity is floored at `ThermalConstants.MinimumThermalMass` so a zero-mass block cannot divide by
 zero. `SpecificHeat` is in real J/(kg·K); `HeatTimeScale` is the single global divisor that turns
@@ -37,7 +37,7 @@ real thermal time into playable thermal time — see
 
 ### Integration
 
-[ThermalSolver.Step](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalSolver.cs) advances
+[ThermalSolver.Step](../Thermodynamics/Core/Simulation/ThermalSolver.cs) advances
 `deltaSeconds` of simulated time:
 
 ```
@@ -83,7 +83,7 @@ telemetry.
 ### Conduction
 
 Between two touching blocks, over the area where both carry a mount surface
-([ThermalLink.cs](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalLink.cs)):
+([ThermalLink.cs](../Thermodynamics/Core/Simulation/ThermalLink.cs)):
 
 ```
 A_contact = cells_shared × coverage_a × coverage_b × gridSize²
@@ -120,7 +120,7 @@ better index.
 
 **Across a mechanical joint.** Two blocks either side of a rotor or piston belong to different grids
 and therefore different solvers, so their link lives outside both, in
-[ThermalBridges.cs](../Data/Scripts/Thermodynamics/Game/ThermalBridges.cs). Bridges exchange once
+[ThermalBridges.cs](../Thermodynamics/Game/ThermalBridges.cs). Bridges exchange once
 per ten-frame tick, under the same clamped, energy-conserving rule.
 
 ### Radiation
@@ -175,7 +175,7 @@ quickly: at a quarter density the air already behaves 68% like sea level.
 ### Room air
 
 A sealed room holds one well-mixed air mass that exchanges with every surface bounding it
-([ThermalSolver.AccumulateRoomAir](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalSolver.cs)):
+([ThermalSolver.AccumulateRoomAir](../Thermodynamics/Core/Simulation/ThermalSolver.cs)):
 
 ```
 G     = RoomConvectionCoefficient × faces × gridSize² × ExposedSurfaceMultiplier
@@ -199,7 +199,7 @@ solarEnergy = SolarEnergy × (1 − occludedShare) × (1 − SolarDecay × atmos
 
 Occlusion against the rest of the world is resolved **per grid**, every `SolarOcclusionInterval`
 steps. Planets are tested analytically by angular size; terrain by walking ground heights along the
-sun ray ([TerrainHorizon.cs](../Data/Scripts/Thermodynamics/Core/Simulation/TerrainHorizon.cs)), for
+sun ray ([TerrainHorizon.cs](../Thermodynamics/Core/Simulation/TerrainHorizon.cs)), for
 grids near a surface and only once the planet's own horizon test says the sun is up; voxels by a
 physics raycast; other grids by a ray against their blocks. Each of the three is a separate switch,
 because each costs a different amount. Being underground forces full occlusion.
@@ -209,7 +209,7 @@ tested, and `solarEnergy` is scaled by the share that reached the sun. One sampl
 a single ray from the grid's centre and gives 0 or 1.
 
 `litFraction` is **the grid's shadow on itself**, and is 1 for every block when `SolarSelfShadowing`
-is off. When it is on, [SunShadowMap.cs](../Data/Scripts/Thermodynamics/Core/Simulation/SunShadowMap.cs)
+is off. When it is on, [SunShadowMap.cs](../Thermodynamics/Core/Simulation/SunShadowMap.cs)
 walks toward the sun from the air just outside each block face, one cell at a time, until the ray
 leaves the grid's bounding box: cross anything solid and that face is shadowed. It is a standard
 voxel traversal, so the ray visits every cell it passes through and cannot slip diagonally between
@@ -246,7 +246,7 @@ watts = irradiance × ε × faceWeight(source) × A_exposed
 
 The host reduces a source to a direction and an irradiance before the solver sees it. For a source
 of `P` watts at distance `r`,
-[ThermalHeatSources.cs](../Data/Scripts/Thermodynamics/Game/ThermalHeatSources.cs) uses
+[ThermalHeatSources.cs](../Thermodynamics/Game/ThermalHeatSources.cs) uses
 `irradiance = P / (4π r²)`, with `r` floored at 1 m. See [api.md](api.md#heat-sources).
 
 ### Aerodynamic friction
@@ -532,7 +532,7 @@ choice again rather than a constraint. See [backlog.md](backlog.md) `K22`.
 ### Waste heat
 
 Recomputed only when the game reports a change, never per step
-([ThermalNode.RefreshHeatGeneration](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalNode.cs)):
+([ThermalNode.RefreshHeatGeneration](../Thermodynamics/Core/Simulation/ThermalNode.cs)):
 
 ```
 watts = produced × ProducerWasteEnergy + (consumed + thrust) × ConsumerWasteEnergy
@@ -557,7 +557,7 @@ destroy every large reactor in the game in a build no player could improve. See
 ### Coolant loops
 
 A closed ring of pipe blocks carries one parcel of coolant per pipe
-([CoolantLoopBuilder.cs](../Data/Scripts/Thermodynamics/Core/Loops/CoolantLoopBuilder.cs)). It links
+([CoolantLoopBuilder.cs](../Thermodynamics/Core/Loops/CoolantLoopBuilder.cs)). It links
 to the pipe blocks it runs through, and to whatever block sits behind each pipe's sink faces:
 
 ```
@@ -852,7 +852,7 @@ timer. It is the only part of this with no derivation under it, so it is a setti
 ### Heat pumps
 
 Every other mechanism here moves heat down a gradient. A heat pump moves it up one, and pays an
-energy price to do so ([HeatPump.cs](../Data/Scripts/Thermodynamics/Core/Devices/HeatPump.cs)).
+energy price to do so ([HeatPump.cs](../Thermodynamics/Core/Devices/HeatPump.cs)).
 
 ```
 COP   = min(MaxCoefficient, CarnotFraction × T_cold / (T_hot − T_cold))
@@ -889,7 +889,7 @@ Damage is applied by the server only and is not replicated: every machine derive
 simulation.
 
 Any other temperature can be watched through
-[ThermalThresholds.cs](../Data/Scripts/Thermodynamics/Core/Simulation/ThermalThresholds.cs). A
+[ThermalThresholds.cs](../Thermodynamics/Core/Simulation/ThermalThresholds.cs). A
 crossing is measured against the temperature at the top of the step, so a block that crosses and
 recrosses within one step reports once, in the direction it ended up going. Thresholds are half open
 — a block resting exactly on one cannot report twice. With none registered, the check is a single
@@ -905,7 +905,7 @@ What counts as an exposed surface decides what radiates, what convects and what 
 ### Surface bits
 
 One integer per grid cell, four face-indexed groups of six
-([CellSurface.cs](../Data/Scripts/Thermodynamics/Core/Model/CellSurface.cs)):
+([CellSurface.cs](../Thermodynamics/Core/Model/CellSurface.cs)):
 
 ```
 bits  0-5   self airtight       this cell's face seals
@@ -918,7 +918,7 @@ Faces are indexed in one canonical order — Forward, Left, Up, Down, Right, Bac
 `face + opposite == 5`.
 
 The self half comes from the block. The neighbour half is **always derived** by
-[SurfaceMap.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/SurfaceMap.cs) from the adjacent cell's
+[SurfaceMap.cs](../Thermodynamics/Core/Surfaces/SurfaceMap.cs) from the adjacent cell's
 self bits, never authored, so the two halves cannot drift apart.
 
 A block type's bits are built once per definition by `BlockSurfaceBuilder` from two things every
@@ -966,7 +966,7 @@ not its volume.
 
 ### The room map
 
-[RoomMapper.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/RoomMapper.cs) classifies every cell in
+[RoomMapper.cs](../Thermodynamics/Core/Surfaces/RoomMapper.cs) classifies every cell in
 the grid's padded bounding box as external space, solid structure, or part of an enclosed room, in
 two phases:
 
@@ -991,7 +991,7 @@ door is a volume that can open, and a portal needs a region on the door's own si
 ### Portals and venting
 
 Every face of every door that opens is recorded once, at map time, as a
-[RoomPortal.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/RoomPortal.cs): the door, the face, and
+[RoomPortal.cs](../Thermodynamics/Core/Surfaces/RoomPortal.cs): the door, the face, and
 the region either side of it. Whether it is currently open is read live from the door.
 
 `RoomMap.RefreshVenting` resolves the portals into which rooms currently reach open air: union-find
@@ -1011,7 +1011,7 @@ remap is requested instead.
 ### Room air
 
 Each sealed, unvented room can hold an air mass
-([RoomAir.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/RoomAir.cs)):
+([RoomAir.cs](../Thermodynamics/Core/Surfaces/RoomAir.cs)):
 
 ```
 Volume   = cells × gridSize³
@@ -1029,7 +1029,7 @@ way to know whether a compartment is pressurised, and a room at zero pressure ha
 and no cost.
 
 **Pressure is the game's answer, not this model's**, and
-[RoomPressure.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/RoomPressure.cs) is the rule for
+[RoomPressure.cs](../Thermodynamics/Core/Surfaces/RoomPressure.cs) is the rule for
 reading it. Three things can empty a room and each can veto air on its own:
 
 | Source | Question | Answer when it says no |
@@ -1122,7 +1122,7 @@ cell. When the two disagree the fill walks in from outside and a whole compartme
 no room, no air, nothing drawn in the room overlay, and no complaint anywhere, because
 **pressurisation is only ever asked about rooms this model already found**.
 
-[UnmappedRooms.cs](../Data/Scripts/Thermodynamics/Core/Surfaces/UnmappedRooms.cs) closes it by
+[UnmappedRooms.cs](../Thermodynamics/Core/Surfaces/UnmappedRooms.cs) closes it by
 asking the other model. Every cell the map calls external is offered to
 `MyCubeGrid.IsRoomAtPositionAirtight`, and the cells it calls airtight are grouped into connected
 regions — each one a compartment this model lost. Per region it reports the air vents standing in it

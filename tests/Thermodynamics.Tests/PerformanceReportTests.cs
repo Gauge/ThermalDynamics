@@ -10,6 +10,17 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The performance report exists to be compared against itself across changes, so the thing
+    /// that must not rot is its <em>shape</em>: the sections it produces, the keys it produces
+    /// them under, and its ability to read back what it wrote.
+    ///
+    /// A benchmark suite fails quietly. If a case is renamed, a diff against last month's
+    /// baseline silently drops that row and reports no regression; if the CSV round-trip breaks,
+    /// every comparison reads as "everything is new". Neither shows up as a failure anywhere
+    /// else, which is why these are ordinary tests rather than something a person remembers to
+    /// check.
+    /// </summary>
     [Trait("speed", "slow")]
     [Collection("alone")]
     public class PerformanceReportTests

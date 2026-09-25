@@ -7,6 +7,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The per-cell surface word: which faces seal, which carry a mount, and which of those belong to the neighbour.
+    ///
+    /// <para>
+    /// The neighbour half is derived and must always mirror the other cell's self half, in both
+    /// directions, after an edit as well as after a rebuild. Everything the model calls exposed falls
+    /// out of these bits, so a stale one is a block radiating through a wall.
+    /// </para>
+    /// </summary>
     public class SurfaceMapTests
     {
 
@@ -209,6 +218,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The flood fill that decides which cells are inside a ship.
+    ///
+    /// <para>
+    /// Two properties beyond the classification itself, and both exist because the fill is budgeted
+    /// across frames: a pass stepped in small budgets gives the same answer as one run to completion,
+    /// and the previous map stays readable while a new pass runs. The last case closes the loop to the
+    /// physics — a sealed interior stops radiating.
+    /// </para>
+    /// </summary>
     public class RoomMapperTests
     {
 

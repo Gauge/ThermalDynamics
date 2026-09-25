@@ -6,7 +6,7 @@ using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
 
-namespace ThermalDynamics.Client
+namespace Thermodynamics.Client
 {
 
     public enum ThresholdDirection
@@ -70,7 +70,7 @@ namespace ThermalDynamics.Client
         public bool Rising;
     }
 
-    public class ThermalDynamicsApi
+    public class ThermodynamicsApi
     {
         public const long Channel = 2985582372L;
 

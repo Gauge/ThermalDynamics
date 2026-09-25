@@ -9,6 +9,33 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Every setting the solver carries reaches the solver.**
+    ///
+    /// <para>
+    /// <see cref="DialReachTests"/> makes this check for the eighteen dials `KnobLab` sweeps, and
+    /// thirteen of those are *material* dials rather than world settings — so of the settings a
+    /// player can move, five had a reach check and the rest had none. `C33` counts the measurement
+    /// gap and this closes the silent half of it: a curve that comes back flat reads as *this dial
+    /// does not matter* and is indistinguishable from *this dial is not wired to anything*, and
+    /// this repository has been caught by that shape four times.
+    /// </para>
+    ///
+    /// <para>
+    /// **Enumerated rather than listed**, exactly as <see cref="LoopDialReachTests"/> is, because a
+    /// list is what fails: a field added to <see cref="ThermalSettings"/> tomorrow is checked
+    /// tomorrow without anyone remembering this file exists. <see cref="SettingsWiringTests"/>
+    /// covers the plumbing either side of it — a proto number, a name, a getter, a setter, a clamp,
+    /// a documentation row — and every one of those can be right while the value reaches nothing.
+    /// </para>
+    ///
+    /// <para>
+    /// **It is a reach test.** It asserts a setting changes an outcome and says nothing about the
+    /// direction or the size, which is what lets it survive a retune untouched. What it cannot do
+    /// is speak for a setting whose whole effect is outside the core — a debug overlay, the HUD, the
+    /// telemetry stride — and those are not on <see cref="ThermalSettings"/> to begin with.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class SettingsDialReachTests
     {

@@ -5,6 +5,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The published map's solid set is a bitset over the search box, and it is checked against
+    /// something that is not the map (`E7`): a cell is solid exactly when the surface map says it
+    /// seals structurally on all six faces and it belongs to no door — which is the mapper's own
+    /// definition, applied here cell by cell over the whole box rather than trusted through the map.
+    ///
+    /// <para>
+    /// Every cell of the box is asked, inside and out, so a bit stored at the wrong index, a box
+    /// sized a cell short, or a set that was never reset between passes would each show up as a
+    /// cell answering differently from its definition. Each fixture asserts it found structure,
+    /// since an empty set agrees with anything (`E8`).
+    /// </para>
+    /// </summary>
     public class RoomMapSolidTests
     {
 

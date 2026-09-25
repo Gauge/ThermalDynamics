@@ -12,7 +12,7 @@ rather than of the ship in it — the ship's response to it is in
 | How a grid *responds* to these figures — radiation, convection, friction | [thermal-model.md](thermal-model.md#the-mechanisms) |
 | The settings that scale every term | [configuration.md](configuration.md#environment) |
 | The dumps that measure it | [telemetry.md](telemetry.md#climate-dump) |
-| The per-planet figures themselves | [Planets.xml](../Data/Planets.xml), derived in [Planet properties](#planet-properties) |
+| The per-planet figures themselves | [Planets.xml](../Thermodynamics/Content/Data/Planets.xml), derived in [Planet properties](#planet-properties) |
 
 ---
 
@@ -56,7 +56,7 @@ flying into a 40 m/s wind at 40 m/s trips the 50 m/s friction threshold that nei
 `ClimateModel.Target` gives a place the temperature it is heading toward; `ClimateModel.Follow`
 chases it.
 
-[EnvironmentSolver](../Data/Scripts/Thermodynamics/Core/Simulation/EnvironmentSolver.cs) is a pure
+[EnvironmentSolver](../Thermodynamics/Core/Simulation/EnvironmentSolver.cs) is a pure
 function from a host sample to the state a step consumes:
 
 ```
@@ -92,7 +92,7 @@ hours after noon out of twenty-four, which is where `AmbientLagShareOfDay` = 0.0
 answer directly, but whether the script whitelist admits it cannot be established outside a session
 and a type the in-game compiler rejects takes the mod down at world load. The sun's direction is
 already sampled once a frame for the solar term, and the angle it sweeps between two samples is the
-same fact — so [DayLength](../Data/Scripts/Thermodynamics/Core/Simulation/DayLength.cs) needs no new
+same fact — so [DayLength](../Thermodynamics/Core/Simulation/DayLength.cs) needs no new
 type, survives a server changing the interval mid-session, and works on a world whose rotation
 nothing publishes. It offers nothing until the sun has swept a tenth of a turn, and until then the
 authored `AmbientLagSeconds` runs, which is also what a world with a static sun gets.
@@ -124,7 +124,7 @@ there is no convection.
 | Term | What it does | Setting |
 | --- | --- | --- |
 | **Latitude** | A planet's `DayTemperature` and `NightTemperature` are its *equatorial* figures. `PoleTemperatureDrop` is the span to its poles, interpolated on cos(latitude) because that is how squarely the sun strikes a band. Zero gives one climate for a whole world. | `PlanetPoleTemperatureDrop` |
-| **Ground** | The voxel material under the grid shifts the air and widens or narrows its day ([GroundTemperature.cs](../Data/Scripts/Thermodynamics/Core/Definitions/GroundTemperature.cs)). Snow −14 K at 0.7× swing; sand +8 K at 1.7×, because dry ground holds nothing overnight. Matched on the *word* in the material name rather than the exact subtype, so other worlds' spellings land; anything unrecognised leaves the planet untouched. | `ClimateGroundInfluence` |
+| **Ground** | The voxel material under the grid shifts the air and widens or narrows its day ([GroundTemperature.cs](../Thermodynamics/Core/Definitions/GroundTemperature.cs)). Snow −14 K at 0.7× swing; sand +8 K at 1.7×, because dry ground holds nothing overnight. Matched on the *word* in the material name rather than the exact subtype, so other worlds' spellings land; anything unrecognised leaves the planet untouched. | `ClimateGroundInfluence` |
 | **Lag** | First-order, applied once to a finished target. The day's peak then lands after noon and the low before dawn without either being written down. **A share of the day rather than a count of seconds** — see [The lag is a share of the day](#the-lag-is-a-share-of-the-day). | `PlanetAmbientLagSeconds` |
 | **Altitude** | A lapse rate cools the air as it rises, which is what makes a mountain colder than its valley. | `PlanetAmbientLapseRate` |
 | **Thin air** | Ambient fades toward vacuum on `1 − (1 − d)⁸`, blunter than the `1 − (1 − d)⁴` curve convection and solar decay run on: density decides when there stops being air to have a temperature at all, and that happens at the edge of space rather than gradually all the way up. | — |
@@ -173,7 +173,7 @@ game's `WeatherEffects.sbc` carries three authored modifiers:
 | `FogHeavy` | 0.3 | 0.15 | 0.10 |
 | `ExtremeHeat` | 2 | 1.75 | 0.10 |
 
-[WeatherResponse.cs](../Data/Scripts/Thermodynamics/Core/Definitions/WeatherResponse.cs) is that
+[WeatherResponse.cs](../Thermodynamics/Core/Definitions/WeatherResponse.cs) is that
 table, converted. The two multipliers pass straight through — one onto solar irradiance, one onto
 the wind the field produces. `TemperatureModifier` is a factor on the game's 0..1 comfort figure
 rather than a temperature, so it becomes kelvin as `clamp(m − 1, −3, 3) × 6 K`: heavy snow lands at
@@ -283,7 +283,7 @@ multiplies the rock end: there is no wind under fifty metres of stone.
 
 The engine supplies a scalar rating and no direction (see
 [What the engine supplies](#what-the-engine-supplies)), so the wind is modelled outright.
-[WindSolver.cs](../Data/Scripts/Thermodynamics/Core/Simulation/WindSolver.cs) composes six factors
+[WindSolver.cs](../Thermodynamics/Core/Simulation/WindSolver.cs) composes six factors
 and one added velocity over the engine's rating.
 
 **It is a map, not a simulation.** The properties worth keeping are that it is steady, cheap,
@@ -291,7 +291,7 @@ different in different places, and recognisable from a cockpit.
 
 ### Circulation
 
-[WindField.cs](../Data/Scripts/Thermodynamics/Core/Simulation/WindField.cs) lays Earth's bands over
+[WindField.cs](../Thermodynamics/Core/Simulation/WindField.cs) lays Earth's bands over
 the planet — trades blowing west to 30°, westerlies to 60°, polar easterlies beyond. Speed is a
 fraction of the ceiling: about an eighth in fair weather, half in the worst weather the game
 reports, times a steady per-place variation so one valley is windier than the next.
@@ -381,7 +381,7 @@ the warmest part by construction — no clock, sun-rotation interval or day-leng
 Every other terrain effect is **mechanical** — what terrain does to a wind that was already blowing.
 Slope winds are **thermal**: the ground creates them out of sunlight and gravity, and they blow on a
 day when nothing else does.
-[WindSlope.cs](../Data/Scripts/Thermodynamics/Core/Simulation/WindSlope.cs) adds them as a velocity
+[WindSlope.cs](../Thermodynamics/Core/Simulation/WindSlope.cs) adds them as a velocity
 rather than a factor, from the terrain ring's first harmonic.
 
 * **Anabatic, by day.** Sunlight heats a slope; the air against it warms, becomes buoyant, and rises
@@ -400,7 +400,7 @@ they cost **+46 ns a sample** because the terrain they need is already read.
 
 Three mechanical effects, all from one ring of **eight compass bearings at two radii — sixteen
 height lookups** — each giving the ground's height relative to the site's own
-([WindTerrain.cs](../Data/Scripts/Thermodynamics/Core/Simulation/WindTerrain.cs)):
+([WindTerrain.cs](../Thermodynamics/Core/Simulation/WindTerrain.cs)):
 
 | Effect | Read from the ring as | Physical basis |
 | --- | --- | --- |
@@ -460,9 +460,9 @@ cheap.
 
 ## Planet properties
 
-Every figure in [Planets.xml](../Data/Planets.xml) is derived from the world's own generator
+Every figure in [Planets.xml](../Thermodynamics/Content/Data/Planets.xml) is derived from the world's own generator
 definition by
-[PlanetThermalDerivation.cs](../Data/Scripts/Thermodynamics/Core/Definitions/PlanetThermalDerivation.cs),
+[PlanetThermalDerivation.cs](../Thermodynamics/Core/Definitions/PlanetThermalDerivation.cs),
 which is pure and tested and serves twice: it generates the shipped entries offline, and it is the
 fallback for a **modded** planet nobody has authored an entry for. The property names and defaults
 are in [definitions.md](definitions.md#group-thermalplanetproperties).
@@ -539,7 +539,7 @@ Each departure is written into the generated file beside the entry it affects, u
 
 ```bash
 dotnet run --project tests/Thermodynamics.Sim -- planets                        # the table
-dotnet run --project tests/Thermodynamics.Sim -- planets --write Data/Planets.xml
+dotnet run --project tests/Thermodynamics.Sim -- planets --write Thermodynamics/Content/Data/Planets.xml
 ```
 
 `TheShippedPlanetsFileIsWhatThisCodeGenerates` fails if the file on disk drifts from what the code

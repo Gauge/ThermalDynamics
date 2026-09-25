@@ -286,12 +286,17 @@ ordinary through-wall patches, while shadowless heat lights can leak through wal
 and 32-light limits can omit effects in overloaded scenes. No live game visual acceptance is
 claimed for this replacement; see [thermal-glow.md](thermal-glow.md) for its verification scope.
 
-### The whitelist is not the assemblies, and building the mod project does not check it
+### The whitelist is not the assemblies, and the build checks a copy of it
 
-`Generic.csproj` builds `Data/Scripts` against the installed game's own assemblies, which is what
-makes it a real compile rather than a guess — and it is **not** the check the game applies. Space
-Engineers compiles a mod with a Roslyn analyzer over a positive whitelist, so a type can exist in
-`Bin64`, resolve, build clean here, and be refused in a session.
+The mod project builds the mod's sources against the installed game's own assemblies, which is
+what makes it a real compile rather than a guess — and compiling is **not** the check the game
+applies. Space Engineers compiles a mod with a Roslyn analyzer over a positive whitelist, so a type
+can exist in `Bin64`, resolve, compile clean, and be refused in a session.
+
+**Since the MDK2 move the build runs a whitelist analyzer too**: `Mal.Mdk2.ModAnalyzers` reports a
+prohibited type or member as `MDK01`, an error (`rules.md` `C2`). It reads MDK2's own snapshot of the
+whitelist rather than the installed game's, so a game update can move ahead of it;
+[tools/thermal-api-check](../tools/thermal-api-check/README.md) asks the installed game directly.
 
 **Measured, from the game's own registration.** `SpaceEngineers.Game.MySpaceGameDefaultIlChecker`
 is where the whitelist is built, and the shape of it is what matters:
@@ -619,7 +624,7 @@ rota running on *both* machines rather than from something the client alone gets
 
 **Mass is the only channel block condition has into the model, and whether anything comes down it
 is unsettled.** No path in the mod reads a build ratio or an integrity figure — `ClientInputTests`
-pins that by scanning `Data/Scripts`, because a claim about what code does *not* do rots the moment
+pins that by scanning the mod's sources, because a claim about what code does *not* do rots the moment
 somebody adds the line — so the sweep has a mass knob rather than a separate damage one. What that
 leaves open is the engine end: `SweepMass` polls `IMySlimBlock.Mass`, and whether the game moves it
 with build progress or with damage decides whether block condition is an input at all. **The
@@ -859,7 +864,7 @@ nothing in game. The room dump now reports a `links` column, so air with mass an
 so.
 
 **Every block this mod ships ran on the default thermal properties, in game only.** All eighteen of
-the mod's own entries in [Cubes.xml](../Data/Cubes.xml) declared themselves under
+the mod's own entries in [Cubes.xml](../Thermodynamics/Content/Data/Cubes.xml) declared themselves under
 `<TypeId>CubeBlocks</TypeId>`. There is no such object builder type — the blocks are `CubeBlock`
 (pipes, radiators) and `UpgradeModule` (pumps, heat pumps) — so Definition Extensions matched none of
 them and every one took the fallback path to `DefaultThermodynamics`:

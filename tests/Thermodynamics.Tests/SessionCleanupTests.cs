@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Pins the failed-unload incident: injected faults must not skip later cleanup or disappear from reports.</summary>
     public class SessionCleanupTests
     {
         [Fact]

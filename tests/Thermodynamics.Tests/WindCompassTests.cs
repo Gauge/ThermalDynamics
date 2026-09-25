@@ -5,6 +5,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The wind turned into the viewer's frame, which is the only form of it a player can act on.
+    ///
+    /// The field itself is pinned by <see cref="WindFieldTests"/>. What these hold is the handedness
+    /// — that "to the right" on screen is the same side as the viewer's right hand — and the cases
+    /// where there is no answer to give, since a needle that swings wildly when the player looks at
+    /// the sky is worse than one that stops.
+    /// </summary>
     public class WindCompassTests
     {
 

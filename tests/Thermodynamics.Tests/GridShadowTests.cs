@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// One grid's shadow falling on another's faces.
+    ///
+    /// The interesting part is not that a shadow exists — the whole-grid occlusion ray already knew
+    /// that — but where it lands. A station overhead should darken the hull under it and nothing
+    /// else, and that means reasoning about two cell lattices that share no axes, no origin and no
+    /// scale. The ray is carried into the occluder's frame and walked there, so these check the
+    /// transform as much as the walk: offset, rotation, and the shadow moving when the occluder
+    /// does.
+    /// </summary>
     public class GridShadowTests
     {
 

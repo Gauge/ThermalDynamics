@@ -95,8 +95,8 @@ under the row it sits in, created and drawn inside Rich HUD Master, whose client
 restyle or escape, and a section longer than three controls drew over itself. The framework's HUD
 element library is a different matter — it compiles into this mod and draws from here, which is
 what the cockpit readouts and the debug panel are already made of — so
-[`ThermalSettingsWindow.cs`](../Data/Scripts/Thermodynamics/ThermalSettingsWindow.cs) builds the
-window and [`ThermalSettingsMenu.cs`](../Data/Scripts/Thermodynamics/ThermalSettingsMenu.cs) keeps
+[`ThermalSettingsWindow.cs`](../Thermodynamics/ThermalSettingsWindow.cs) builds the
+window and [`ThermalSettingsMenu.cs`](../Thermodynamics/ThermalSettingsMenu.cs) keeps
 what it says.
 
 A setting therefore sits on the page itself rather than inside a panel: its name down the left, its
@@ -844,7 +844,7 @@ will not move it much.
 
 ## Coolant loops
 
-These ship in [`Loops.xml`](../Data/Loops.xml), which the settings menu never showed — so "how fast
+These ship in [`Loops.xml`](../Thermodynamics/Content/Data/Loops.xml), which the settings menu never showed — so "how fast
 does coolant move" was a settings question whose answer lived in a file nobody could reach from the
 game. They are world settings: saved, replicated and editable like any other.
 
@@ -865,7 +865,7 @@ Move one and it wins from then on, across every loop definition in the world.
 
 ## Planet climate
 
-These ship in [`Planets.xml`](../Data/Planets.xml) and follow the same rule: one entry ships, so
+These ship in [`Planets.xml`](../Thermodynamics/Content/Data/Planets.xml) and follow the same rule: one entry ships, so
 these address it, and a world with several authored planet types still reads them from the file
 until a value is moved off its shipped figure. See [environment.md](environment.md) for the
 model they parameterise.
@@ -889,7 +889,7 @@ model they parameterise.
 
 The two ratings a heat pump has — how much heat it can move and how much electricity it can draw —
 belong to the block and live in
-[ThermalHeatPumpShapes](../Data/Scripts/Thermodynamics/Game/ThermalHeatPumpShapes.cs). What is
+[ThermalHeatPumpShapes](../Thermodynamics/Game/ThermalHeatPumpShapes.cs). What is
 tunable here is the physics between them, which is the same for every pump in the world.
 
 | Setting | Default | Effect |

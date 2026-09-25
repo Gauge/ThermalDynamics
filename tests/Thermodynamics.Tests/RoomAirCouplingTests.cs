@@ -6,6 +6,20 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The properties the game's own pressurisation path relied on and did not have.
+    ///
+    /// Room air was sound everywhere it was tested and dead everywhere it ran. Every test and the
+    /// mod API set pressure through <see cref="ThermalSimulation.SetRoomPressure"/>, which rebuilds
+    /// the room's links and seeds new air from the walls holding it. The game's own sweep assigned
+    /// the field directly and refreshed the mass by hand, so in a live world a pressurised room got
+    /// its air mass, no links at all, and whatever temperature the last rebuild left behind — 2.7 K
+    /// for a ship in vacuum. Measured: a 30-cell cabin with two vents on it, the game reporting it
+    /// sealed and 99% full, running at zero pressure.
+    ///
+    /// These pin the two properties that made the difference, so a caller that bypasses the solver
+    /// again fails here rather than in somebody's world.
+    /// </summary>
     public class RoomAirCouplingTests
     {
         private static readonly Vector3I Interior = Vector3I.Zero;

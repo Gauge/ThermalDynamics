@@ -6,6 +6,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The position key and the box arithmetic every index in the model is built on.
+    ///
+    /// <para>
+    /// Two keys exist: the wide one in use, and the legacy 32-bit one saved worlds are written with.
+    /// The legacy key aliases outside a bounded range, and that is pinned as a fact rather than fixed,
+    /// because a save written with it has to keep decoding the way it was encoded.
+    /// </para>
+    /// </summary>
     public class GridMathTests
     {
         [Fact]

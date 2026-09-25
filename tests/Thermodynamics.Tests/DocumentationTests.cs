@@ -1,12 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The documentation is checked the way the code is: every cross-reference between the pages is a
+    /// claim that a file, a heading, a rule or a test exists, and **a dead link is worse than a missing
+    /// one, because it reads as though somebody checked**. Textual and cheap.
+    /// Holds `R7`, `R10`, `R12`, `R13` and half of `E5`.
+    /// </summary>
     [Trait("speed", "slow")]
     public class DocumentationTests
     {
@@ -32,6 +39,15 @@ namespace Thermodynamics.Tests
 
             files.Sort(StringComparer.Ordinal);
             return files;
+        }
+
+
+        // A directory with no file in it is a leftover of a move rather than a target, and git does
+        // not carry one, so a link resolving to it resolves on this machine and nowhere else.
+        private static bool HoldsAFile(string directory)
+        {
+            return Directory.Exists(directory)
+                && Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Any();
         }
 
 
@@ -122,7 +138,7 @@ namespace Thermodynamics.Tests
 
                     checked_++;
                     string full = Path.GetFullPath(Path.Combine(folder, path));
-                    if (!File.Exists(full) && !Directory.Exists(full))
+                    if (!File.Exists(full) && !HoldsAFile(full))
                     {
                         broken.Add(Relative(file) + " -> " + target);
                     }
@@ -928,11 +944,15 @@ namespace Thermodynamics.Tests
 
             List<string> dangling = new List<string>();
             int cited = 0;
+            int modFiles = 0;
+            int testFiles = 0;
 
             foreach (string file in SourceFiles())
             {
 
                 string relative = Relative(file);
+                if (relative.StartsWith("Thermodynamics/", StringComparison.Ordinal)) modFiles++;
+                if (relative.StartsWith("tests/", StringComparison.Ordinal)) testFiles++;
 
                 if (relative.Contains("RichHudFramework")) continue;
                 if (relative.Contains("NetworkAPI")) continue;
@@ -947,9 +967,10 @@ namespace Thermodynamics.Tests
                 }
             }
 
-            Assert.True(cited > 200,
-                "only " + cited + " identifiers were found cited in source, so this test is looking"
-                + " in the wrong place and would pass whatever a comment said");
+            Assert.True(modFiles > 100 && testFiles > 100 && cited > 0,
+                "read " + modFiles + " mod files, " + testFiles + " test files and " + cited
+                + " citations, so this test is looking in the wrong place and would pass whatever a"
+                + " comment said");
 
             dangling.Sort(StringComparer.Ordinal);
             Assert.True(dangling.Count == 0,

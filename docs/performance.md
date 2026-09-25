@@ -113,7 +113,7 @@ Pinned by `OptimisedBuildTests`, which reads `DebuggableAttribute` off the built
 test assemblies and fails if any of them says the optimiser is off — a line dropped from a props
 file fails nothing else.
 
-**What it is not.** It is not the game. The game compiles `Data/Scripts` with its own compiler and
+**What it is not.** It is not the game. The game compiles the mod's sources with its own compiler and
 runs it on .NET Framework 4.8; the harness is .NET 9. The 6–8× gap between a field dump and the
 harness recorded on [load-and-hitching.md](load-and-hitching.md) was measured against the
 unoptimised harness and is now larger, not smaller — the harness got faster and the game did not.
@@ -2477,7 +2477,7 @@ nine that matter.
 **The vendored exemption, and why it is a project rather than a path.** `.editorconfig` cannot
 narrow this: its severities are overridden by `WarningsAsErrors`, which was tried and measured to
 change nothing at all. So `CS1570` and `CS1572` are warnings in
-[Generic.csproj](../Generic.csproj) — the only project that compiles the three vendored paths, and
+[the mod project](../Thermodynamics/Thermodynamics.csproj) — the only project that compiles the three vendored paths, and
 the only place `R6` forbids the fix — and errors everywhere else, which is every project under
 `tests/` and so every file in `Core`, `Game` and `Telemetry`. The seven no vendored file trips are
 errors in both.

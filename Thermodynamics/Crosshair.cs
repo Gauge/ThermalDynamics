@@ -45,7 +45,7 @@ namespace Thermodynamics
             ThermalGrid thermals = grid.GameLogic.GetAs<ThermalGrid>();
             if (thermals == null || thermals.Simulation == null) { reason = "grid-not-simulated"; return false; }
 
-            Vector3I cell = grid.WorldToGridInteger(hit.Position + (target.Camera.Forward * IntoFaceMetres));
+            Vector3I cell = HitCell(grid, hit, target.Camera.Forward);
             ThermalBlock bound = thermals.GetAtCell(cell);
             if (bound == null || bound.Node == null) { reason = "hit-cell-no-temperature"; return false; }
 
@@ -54,6 +54,12 @@ namespace Thermodynamics
             target.Cell = cell;
             reason = "target-found";
             return true;
+        }
+
+        /// <summary>The cell a ray hit, nudged along the ray so a hit on a face lands in the block behind it.</summary>
+        public static Vector3I HitCell(MyCubeGrid grid, IHitInfo hit, Vector3D rayDirection)
+        {
+            return grid.WorldToGridInteger(hit.Position + (rayDirection * IntoFaceMetres));
         }
     }
 }

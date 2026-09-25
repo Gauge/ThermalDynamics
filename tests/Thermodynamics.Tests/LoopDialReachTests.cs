@@ -9,6 +9,32 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Every number describing the coolant reaches the coolant.**
+    ///
+    /// <para>
+    /// <see cref="DialReachTests"/> makes this check for the eighteen dials `KnobLab` sweeps, and
+    /// the loop's own definition is not among them: <see cref="LoopThermalProperties"/> is parsed
+    /// from `ThermalLoopProperties`, carried through <c>Settings</c>, listed in the in-game menu and
+    /// clamped, and until this class was written nothing asked whether the solver ever read it.
+    /// One field did not. `StagnantTransferFraction` was authored, documented, exposed to players on
+    /// a slider and copied into the running properties, and no line of the simulation multiplied
+    /// anything by it — a dial that looked like a decision and was a no-op.
+    /// </para>
+    ///
+    /// <para>
+    /// **So the check is by reflection rather than by list**, because a list is what failed. A field
+    /// added to <see cref="LoopThermalProperties"/> tomorrow is checked tomorrow, without anyone
+    /// remembering to add it here. That is the whole point: this repository's recurring defect is
+    /// something built, documented and reached by nothing, and the only checks that catch it are the
+    /// ones that enumerate rather than recite.
+    /// </para>
+    ///
+    /// <para>
+    /// **It is a reach test.** It asserts a field changes an outcome and says nothing about the
+    /// direction or the size of the change, which is what lets it survive every retune untouched.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class LoopDialReachTests
     {

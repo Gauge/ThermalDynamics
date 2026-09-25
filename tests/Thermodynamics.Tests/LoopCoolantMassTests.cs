@@ -7,6 +7,40 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What correcting the coolant's grid-size defect does, measured on a rig that has somewhere
+    /// to put the heat.**
+    ///
+    /// <para>
+    /// `CoolantMassPerPipe` is a flat 50 kg with no grid size in it: **3.2 kg/m³ in a 2.5 m cube,
+    /// which is a gas, against 400 kg/m³ in a 0.5 m one, which is a liquid** — and on a small grid
+    /// it is more fluid than the 32 kg pipe block carrying it weighs. That is the same defect
+    /// <see cref="LoopThermalProperties.HeatTransferCoefficient"/> was corrected for when it stopped
+    /// being a conductivity divided by half a cell, and correcting it the same way — a fixed
+    /// density, the mass following the cell — is what ships since `C43`.
+    /// <see cref="LoopBefore"/> holds the flat charge it replaced.
+    /// </para>
+    ///
+    /// <para>
+    /// **The first version of this class ran the rig with the environment disabled**, so the ring
+    /// had a 125 kW source and no sink of any kind. Nothing settled: every arm climbed linearly and
+    /// forever, and the four figures it published — 715.5 K and 387.0 K on a large grid, 661.5 K and
+    /// 912.1 K on a small one — were that ramp read at step 400. At step 25,600 the same arms read
+    /// 26,836 K and 5,908 K. **What it measured was the ratio of two heat capacities**, which is
+    /// exactly what coolant mass is, so the answer looked like physics and was a stopwatch reading
+    /// (`P2`: what the instrument could not see is part of the result — here it could not see an
+    /// equilibrium, because there was none).
+    /// </para>
+    ///
+    /// <para>
+    /// With the environment on, the ring radiates and every arm settles by about step 1,600. The
+    /// correction is then **worth 7 K to a large grid's mean and 1 K to a small one's**, costs no
+    /// substeps either way, and what it actually moves is the ring's temperature *swing*: 100 K
+    /// becomes 10 K on a large grid and 8 K becomes 95 K on a small one. Coolant mass buffers a
+    /// ring; it does not decide where the ring runs. See balance.md, *The coolant mass is doing an
+    /// undeclared job*.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class LoopCoolantMassTests
     {

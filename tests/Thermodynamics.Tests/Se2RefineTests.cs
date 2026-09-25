@@ -5,6 +5,12 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Refining the lattice moves no block and changes no topology: the same nodes, the same
+    /// links, the same rooms — only the cells under them multiply. These are the invariants that
+    /// make `bench se2tax` a measurement of the lattice rather than of an accidentally different
+    /// ship.
+    /// </summary>
     public class Se2RefineTests
     {
 

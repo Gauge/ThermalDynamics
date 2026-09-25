@@ -7,6 +7,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The harness itself, because a ring built wrong is a scenario that tests nothing and says it
+    /// passed. `PipeFitter` exists to stop that happening by hand, and it had the failure it was
+    /// written to prevent: a pump carries no sink ports, every rectangle's first straight run is
+    /// index 1, `BuildRing` put the pump there by default, and a sink requested on index 1 was
+    /// dropped without a word. Every scenario and test in the repository asked for exactly that.
+    /// </summary>
     public class PipeFitterTests
     {
 

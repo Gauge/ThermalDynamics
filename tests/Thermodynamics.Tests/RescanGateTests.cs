@@ -3,6 +3,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The gate on a periodic diagnostic scan.
+    ///
+    /// It exists because the lost-room scan re-derived the same answer for every grid in a fleet
+    /// every thirty seconds — a game call per external cell, on 292 grids, all inside one frame's
+    /// after-step. Two properties matter and they pull against each other: a scan must never be
+    /// skipped when its subject has moved, and must never repeat when it has not.
+    /// </summary>
     public class RescanGateTests
     {
         private const int Interval = 240;

@@ -8,6 +8,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every setting a world can carry is documented, and every documented setting exists.
+    ///
+    /// <para>
+    /// `configuration.md` is the reference an administrator reads before changing anything, and it
+    /// drifts in one direction: settings get added to `Settings.cs` and the menu, and the reference
+    /// is written later or not at all. Twenty-one had accumulated that way — the whole `Loop*` and
+    /// `Planet*` families, added when the loop and planet definitions became world settings, plus
+    /// `MaxSubsteps` and `ClampEnvironmentOvershoot`, which the prose discussed at length and the
+    /// tables never listed.
+    /// </para>
+    ///
+    /// <para>
+    /// The check is textual because `Settings.cs` reads `Sandbox.*` and cannot be linked into this
+    /// project. That is enough: a setting is declared on one line with a `ProtoMember` attribute,
+    /// and documented as the first cell of a table row. Both forms are stable, and the failure this
+    /// guards against is a setting that appears in one and not the other.
+    /// </para>
+    /// </summary>
     public class ConfigurationDocTests
     {
         [Fact]

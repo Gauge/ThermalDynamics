@@ -5,6 +5,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A client that joined with the wrong temperatures converges on the server's, and this is what
+    /// keeps the figures that decision rests on from moving quietly.
+    ///
+    /// <para>
+    /// Block temperatures are not replicated: a client re-simulates from the same inputs, and a
+    /// client joining mid-session starts from whatever the world was last saved at. The open
+    /// question was how far it may drift before it has to be corrected (backlog.md
+    /// `B4`), and the answer is that the model is dissipative — the disagreement decays on its own,
+    /// so what matters is how fast, and what the readout says while it lasts.
+    /// </para>
+    ///
+    /// <para>
+    /// The runs here are small and short because the *claims* are about shape rather than about a
+    /// particular hull: convergence happens, air is faster than vacuum, and a run against itself
+    /// agrees exactly. The figures a decision is quoted from come from `-- drift`, at sizes a test
+    /// suite has no business running.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class ClientDriftTests
     {

@@ -4,6 +4,12 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A dataset records the build it was collected on**, because the alternative was found out
+    /// the expensive way: the 2026-08-24 air walk finished one minute after a commit that moved
+    /// twenty-seven waste fractions, and establishing that took comparing its rows against a later
+    /// walk and then reading the git log for the window between them.
+    /// </summary>
     public class CorpusProvenanceTests
     {
         [Fact]

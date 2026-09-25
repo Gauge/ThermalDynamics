@@ -5,6 +5,27 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What decided the last of the three unsourced fractions with a real figure beside them,
+    /// pinned so it cannot invert quietly.
+    ///
+    /// <para>
+    /// The oxygen generator wasted **0.6** of what it draws under a comment admitting the figure
+    /// was invented, against water electrolysis sourcing 0.20–0.40. The rule for moving it was
+    /// registered in balance.md, *Oxygen generator waste heat*, before
+    /// <see cref="OxygenGeneratorLab"/> produced a number; the rule's first clause fired, and it
+    /// fired on a finding nobody had gone looking for. **At 0.6, two of the six vanilla generators
+    /// are past their own critical temperature alone in open space at their own rated draw** — a
+    /// state no build can improve on, because there is nothing cooler than every face on a 2.7 K
+    /// sky. 0.40 is the top of the sourced band and the highest value where all six survive both
+    /// rigs.
+    /// </para>
+    ///
+    /// <para>
+    /// Figures come from <see cref="OxygenGeneratorLab"/>, which reads the shipped XML at run time,
+    /// so a tuning change moves these tests rather than sliding past them.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class OxygenGeneratorWasteHeatTests
     {

@@ -5,6 +5,10 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The audit is the diagnostic that answers "the room mapper says zero rooms, why". It has to
+    /// be right about a healthy grid before it can be trusted about a broken one.
+    /// </summary>
     public class RoomAuditTests
     {
 

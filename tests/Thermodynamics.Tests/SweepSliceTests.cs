@@ -2,6 +2,15 @@ using Thermodynamics.Core;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The rolling sweep's slice arithmetic.
+    ///
+    /// A rota is where a mod looks for changes the game raises no event for — block mass here —
+    /// and its failure mode is quiet. A slice that rounds to zero stops the sweep entirely and
+    /// nothing reports it: masses simply stop being noticed, blocks keep the thermal inertia they
+    /// were built with, and the only symptom is temperatures that are subtly wrong on exactly the
+    /// largest grids. That is worth arithmetic tests of its own.
+    /// </summary>
     public class SweepSliceTests
     {
         private const int Interval = 8;

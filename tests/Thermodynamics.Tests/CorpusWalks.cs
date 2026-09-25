@@ -5,6 +5,9 @@ using Xunit;
 namespace Thermodynamics.Tests
 {
 
+    /// <summary>Every block in every blueprint is placed or counted as unknown.</summary>
+
+    /// <summary>Every block in every blueprint is placed or counted as unknown.</summary>
     public class BlockAccountingWalk
     {
         [Fact]
@@ -15,6 +18,9 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>The same ship in the same state twice gives the same answer.</summary>
+
+    /// <summary>The same ship in the same state twice gives the same answer.</summary>
     public class DeterminismWalk
     {
         private const int Sample = 200;

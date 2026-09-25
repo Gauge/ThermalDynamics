@@ -5,6 +5,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The six-face index every other structure in the model is laid out against.
+    ///
+    /// <para>
+    /// Offsets, normals, opposites and axes have to agree with each other exactly, because a surface
+    /// word, a node's exposure array and a solar weight are all six-element arrays keyed on this one
+    /// numbering. A disagreement here would read as a physics fault everywhere else.
+    /// </para>
+    /// </summary>
     public class FaceTests
     {
         [Fact]
@@ -59,6 +68,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The temperature-to-colour ramp shared by the HUD, the terminal and every overlay, and the unit conversions beside it.
+    ///
+    /// <para>
+    /// A ramp is presentation and cannot make a ship wrong, which is why it went untested for so long
+    /// in the copy that had the callers. What it can do is produce a colour that is not a colour: the
+    /// last two cases here are the degenerate anchors an overlay actually asks for.
+    /// </para>
+    /// </summary>
     public class TemperatureScaleTests
     {
         [Fact]
@@ -163,6 +181,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// Whether a planet stands between a grid and the sun, worked out analytically rather than by casting a ray across millions of metres.
+    ///
+    /// <para>
+    /// Three regimes, because the fitted horizon curve behaves differently in each: just above the
+    /// surface, where most of the sky is below ground; far away, where the terminator is sharp; and
+    /// the plain case of the sun behind the body.
+    /// </para>
+    /// </summary>
     public class OcclusionMathTests
     {
         [Fact]

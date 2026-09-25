@@ -6,6 +6,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The bit in front of the probe says exactly what the probe would have said.**
+    ///
+    /// <para>
+    /// The air rebuild and the room-side exposure refresh walk the six faces of every cell of every
+    /// room and ask the grid what stands across each. Nine faces in ten hold nothing, so a bitset
+    /// over the padded bounding box answers first and the dictionary is asked only where the bit is
+    /// set (performance.md, Pass 4, Iteration 6). That is a fast path in front of a lookup, which is
+    /// the shape that goes wrong quietly: a bit clear where a block stands is a wall that stops
+    /// bounding a room, and nothing else in the model would report it.
+    /// </para>
+    ///
+    /// <para>
+    /// So these check the bit against the dictionary — two structures written by different code —
+    /// over every cell of a real hull, and check that the set is not allowed to go stale.
+    /// </para>
+    /// </summary>
     public class GridOccupancyTests
     {
         [Fact]

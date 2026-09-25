@@ -22,6 +22,7 @@ in the prose. The conventions are in
 | Document | Contents |
 | --- | --- |
 | [thermal-model.md](thermal-model.md) | Every equation the simulation evaluates, and the surface geometry every area term reads. |
+| [aerodynamics.md](aerodynamics.md) | The aerodynamics requirements `AR1`–`AR22`: the subsonic regime, SEDrag taken apart part by part, and the strip-and-rebuild plan the `K25` milestone follows. |
 | [environment.md](environment.md) | The air, ground, sun and wind outside a grid: how each is computed and what evidence stands behind it. |
 | [scale-design.md](scale-design.md) | Where the model is going: variable block sizes, and grids to a million blocks. |
 | [se2-labs.md](se2-labs.md) | What Space Engineers 2's architecture costs each structure of the model, measured: the lattice tax, the room map at supercell stride, and the conduction kernel in job shapes. |
@@ -70,6 +71,7 @@ in the prose. The conventions are in
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | Indexed the aerodynamics requirements page. |
 | 2026-09-20 | Index the natural overheating glow design and validation record. |
 | 2026-09-18 | Indexed the thermal vision design and feasibility assessment. |
 | 2026-08-22 | Opened, taking the documentation index off the [README](../README.md). The README is written to be pasted into the workshop and read by a player, and an index of twenty-one developer pages is not something that audience needs ([backlog.md](backlog.md) `H5`). |

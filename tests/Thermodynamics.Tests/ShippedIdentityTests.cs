@@ -10,6 +10,25 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The two things in this repository that cannot be undone by editing them back.**
+    ///
+    /// <para>
+    /// `R5` and `R4` are both *judgement* on the rules page: nothing checked either, and both are
+    /// irreversible in a way a compiler cannot see. Regenerating `modinfo.sbmi` publishes the mod as
+    /// a **new workshop item** and every subscriber stays on the old one — the repository would look
+    /// correct, the build would be green, and the players would be gone. Restructuring `Models/`
+    /// costs a re-export of every block model, because a `.mwm` path is written into the `.sbc` that
+    /// names it and neither this repository nor the game can regenerate the other side.
+    /// </para>
+    ///
+    /// <para>
+    /// **A pin, not a prohibition.** Both are things that may one day be done deliberately; what
+    /// they must not be is done *incidentally*, by a tool that rewrites a file or a tidy-up that
+    /// moves a folder. Changing the constants below is the deliberate act, and it is one line in a
+    /// diff that a reviewer sees.
+    /// </para>
+    /// </summary>
     public class ShippedIdentityTests
     {
         private readonly ITestOutputHelper output;

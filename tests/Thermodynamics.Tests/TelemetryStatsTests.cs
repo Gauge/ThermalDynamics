@@ -5,6 +5,12 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The accumulators behind every number in the telemetry report.
+    ///
+    /// They matter more than their size suggests: a session runs for hours and nothing is kept
+    /// but these running totals, so an error here is not recoverable after the fact.
+    /// </summary>
     public class RunningStatTests
     {
         [Fact]
@@ -167,6 +173,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The bucketing behind every distribution in the telemetry report.
+    ///
+    /// <para>
+    /// A histogram is read as evidence, so what it does with the values that are not ordinary matters
+    /// more than what it does with the ones that are: NaN is dropped rather than bucketed, infinity
+    /// goes to the overflow bucket, and merging refuses two histograms whose edges differ rather than
+    /// silently adding unlike things.
+    /// </para>
+    /// </summary>
     public class HistogramTests
     {
 
@@ -380,6 +396,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The accumulator every stage timing in the report is built from.
+    ///
+    /// <para>
+    /// EachIntervalIsMeasuredFromScratchRatherThanAccumulatingTheStopwatch is the case with a fault
+    /// behind it: a stopwatch restarted rather than reset reports every interval as the time since the
+    /// session began.
+    /// </para>
+    /// </summary>
     public class TimingStatTests
     {
         [Fact]

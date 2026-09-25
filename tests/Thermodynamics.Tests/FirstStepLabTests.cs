@@ -2,6 +2,14 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The first-step lab's fault counter reads <c>/proc/self/stat</c>, whose second field — the
+    /// command name — may itself hold spaces and parentheses, so the parse counts from the last
+    /// ')'. A parse that counted from the front would shift every field on such a name and read a
+    /// wrong column that still looks like a plausible fault count, which is why the parser is a
+    /// pure function with the hostile name on its fixture. A line it cannot read is −1, never 0:
+    /// zero means "no faults happened" and is a measurement (`P2`).
+    /// </summary>
     public class FirstStepLabTests
     {
         [Fact]

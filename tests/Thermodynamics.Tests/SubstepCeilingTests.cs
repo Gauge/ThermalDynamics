@@ -4,6 +4,26 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What it costs when `MaxSubsteps` refuses the demand**, which is the question
+    /// backlog.md `C19` answered by assertion.
+    ///
+    /// <para>
+    /// The shipped configuration's p99 substep demand in thick air at 200 m/s is 73.4 against the
+    /// 64 the ceiling grants, and that was read as *those hulls are simulated wrong rather than
+    /// slowly*. Nothing had measured it. The mechanism named in support of it — the solver flooring
+    /// a block's heat capacity — belongs to `MaxSubstepsPerBlock`, which ships at zero and does not
+    /// run; what actually happens is that the step is integrated at the ceiling and the two
+    /// overshoot clamps bound every exchange it makes.
+    /// </para>
+    ///
+    /// <para>
+    /// **The quantity is the over-subscription, not the substep count**, and that is what makes a
+    /// rig able to answer for a population it is not a member of: 72 demanded of 62 and 36 demanded
+    /// of 31 are the same approximation, and these tests assert they cost the same. The ladder and
+    /// the figures are in stiffness.md.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class SubstepCeilingTests
     {

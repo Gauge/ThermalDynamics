@@ -7,6 +7,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A grid standing in its own light.
+    ///
+    /// The cheap solar model lights any face pointing at the sun, whatever is built in front of
+    /// it. These pin the alternative: the shadow map's own behaviour first, then the thing that
+    /// actually matters, which is that a block behind another block stops being heated.
+    /// </summary>
     public class SunShadowMapTests
     {
 
@@ -483,6 +490,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// A grid standing in its own light, at the level of what it does to a temperature.
+    ///
+    /// <para>
+    /// SunShadowMapTests checks the map's geometry; this checks that the map reaches the solver. A
+    /// block behind another stops being heated, a lone block is unaffected, the shadow follows a
+    /// moving sun, and a block built into an existing shadow is picked up without the sun having to
+    /// move.
+    /// </para>
+    /// </summary>
     public class SolarSelfShadowingTests
     {
 

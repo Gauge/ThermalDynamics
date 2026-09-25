@@ -8,6 +8,30 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Every dial moves something.**
+    ///
+    /// <para>
+    /// A balance pass turns dials and reads what happened. The failure that wastes a pass is a dial
+    /// that reaches nothing: the curve comes back flat, which reads as *this dial does not matter*
+    /// and is indistinguishable from *this dial is not wired to anything*. This repository has been
+    /// caught by that shape repeatedly — a coolant sink face no test ever exercised, a reactor
+    /// making no heat while 1,179 tests stayed green, a panel rule that selected no reactors.
+    /// </para>
+    ///
+    /// <para>
+    /// <see cref="KnobBaselineTests"/> is the other half and does not overlap: it checks each
+    /// dial's *shipped* value is the one that actually ships, so a curve is read from where the mod
+    /// sits. This checks the dial is connected to the simulation at all.
+    /// </para>
+    ///
+    /// <para>
+    /// **It is a reach test, not a balance test.** It asserts a dial changes an outcome and says
+    /// nothing about whether the change is the right size or the right direction — a direction is a
+    /// claim about the model and belongs with the model. Keeping it to reach is what makes it
+    /// survive every retune without being touched.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class DialReachTests
     {

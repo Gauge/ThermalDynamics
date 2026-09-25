@@ -6,6 +6,15 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Specific heat is stated in real J/(kg K), and the game's pace comes from one global
+    /// factor that divides every heat capacity.
+    ///
+    /// The claim that makes that honest is that dividing capacity is <em>exactly</em> running
+    /// thermal time faster: nothing about the physics changes, only the clock. These tests hold
+    /// that claim to account, because if it is wrong the setting is not a time scale, it is a
+    /// silent rebalance.
+    /// </summary>
     public class HeatTimeScaleTests
     {
 

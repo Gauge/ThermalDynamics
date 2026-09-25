@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Palette ordering and viewpoint-loss behavior; these do not validate engine rendering.</summary>
     public class ThermalVisionTests
     {
         [Fact]

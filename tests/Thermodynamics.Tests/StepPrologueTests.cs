@@ -5,6 +5,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The step prologue runs on the tick that rebuilds the topology, not on the first step after
+    /// it (`D4`): a rebuilt grid's first step must find the node mirror current, the link mass
+    /// factors filled and every buffer sized, so it pays a step's cost rather than the rebuild's.
+    ///
+    /// <para>
+    /// Three claims: a step after a rebuild performs no full resync (the mirror was taken at
+    /// rebuild time); the first step allocates like a later one (the link-mass array used to be
+    /// bought and doubled inside it); and preparing early changes no temperature anywhere — the
+    /// prologue is the same code the step would run, so stepping a prepared grid and an
+    /// unprepared one must agree to the last bit (`D8`).
+    /// </para>
+    /// </summary>
     public class StepPrologueTests
     {
 

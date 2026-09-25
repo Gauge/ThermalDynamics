@@ -6,6 +6,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// One pass over every ship in the corpus: built once, run through each distinct scenario once,
+    /// with every invariant evaluated against the shared outcomes and every violation reported by
+    /// name (`M8`). Five stepped runs a ship where separate walks cost twelve, most of the difference
+    /// being scenarios that are the same simulation under two names.
+    ///
+    /// <para>
+    /// **<c>all-peak</c> is deliberately absent**: it puts 96 % of ships over critical, and a melting
+    /// grid never settles, so it starves the balance invariant it would be run for. Every invariant
+    /// here asserts a non-zero judged count (`E8`).
+    /// See balance-lab.md, and balance.md, The population.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusSurvey
     {

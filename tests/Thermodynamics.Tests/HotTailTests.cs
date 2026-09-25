@@ -7,6 +7,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The packet a server sends a client about the blocks that are about to fail**: what goes in
+    /// it, what it weighs, and what a reader does with one it cannot trust.
+    ///
+    /// <para>
+    /// These temperatures are written straight onto a running simulation on the other machine, so
+    /// the failure mode is not a dropped update — it is a hull whose blocks were moved to values
+    /// nobody sent. That is why a short or unrecognised packet decodes nothing rather than what it
+    /// can, and why every one of those paths has a test here.
+    /// </para>
+    ///
+    /// <para>
+    /// The selection rule and its budget are checked against a real hull rather than against a
+    /// hand-made list, because the claim that matters — the budget keeps the blocks nearest failing
+    /// — is about an ordering over blocks with different critical temperatures, and a rig where
+    /// every block fails at the same temperature cannot tell that ordering from ordering by kelvin
+    /// (`E7`). See backlog.md `B4`.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class HotTailTests
     {

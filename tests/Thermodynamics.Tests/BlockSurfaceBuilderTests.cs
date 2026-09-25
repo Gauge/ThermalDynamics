@@ -4,6 +4,11 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The bridge a host crosses to describe a block type: airtightness and mount rectangles in,
+    /// surface bits out. Everything the game adapter reads from a block definition ends up here,
+    /// so these are the tests that pin down what the adapter is allowed to produce.
+    /// </summary>
     public class BlockSurfaceBuilderTests
     {
 

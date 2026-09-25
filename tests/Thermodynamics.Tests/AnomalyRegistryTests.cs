@@ -3,6 +3,21 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The rule that decides whether a problem is recorded at all.
+    ///
+    /// The defect these were written against: <c>Telemetry.Exception</c> filed through the same
+    /// gate as every measurement hook, and telemetry is off by default. Every <c>catch</c> in the
+    /// simulation adapter — twenty-two of them, including the guard around <c>ThermalGrid.Tick</c>
+    /// whose own comment says an exception named there is worth more than a crash dump — therefore
+    /// discarded its exception in an ordinary world, wrote nothing to any file, and left the grid
+    /// running in whatever state the throw abandoned it in. A player's crash was unrecoverable
+    /// after the fact by construction.
+    ///
+    /// The distinction the registry holds is between an *observation*, which costs something on
+    /// every healthy frame and is rightly opt-in, and a *fault*, which costs nothing until the mod
+    /// has already failed.
+    /// </summary>
     public class AnomalyRegistryTests
     {
         private const bool Collecting = true;

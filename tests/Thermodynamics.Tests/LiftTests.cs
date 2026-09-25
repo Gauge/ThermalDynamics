@@ -6,6 +6,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Lift: the transverse half of the pressure sum, and the two halves of `K23`'s criterion a
+    /// rig can answer.**
+    ///
+    /// <para>
+    /// Registered before any of this was measured: a hull symmetric about the flow must make *no*
+    /// lift, or the sum is reading an artefact rather than a shape; and lift on a ramp must point
+    /// **away from the sloped face**, or the sign is wrong and every ship flies into the ground.
+    /// The other two halves are population figures and belong to the corpus.
+    /// </para>
+    /// </summary>
     public class LiftTests
     {
         private const float ThickAir = 1f;

@@ -4,6 +4,19 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The comparison every A/B suite in this project makes: run the same grid two ways and
+    /// require the results to agree <b>bit for bit</b>, not to be close.
+    ///
+    /// <para>
+    /// The reason it is here rather than copied into each suite is the guard below. Two grids of
+    /// zeros agree perfectly and prove nothing, and so do two grids that never left their starting
+    /// temperature. Three of the five suites that made this comparison had no such check, so a
+    /// fixture that quietly stopped seeding or stopped driving its producers would have turned
+    /// them green rather than red. The assertion now refuses to pass on a state where nothing
+    /// varies.
+    /// </para>
+    /// </summary>
     public static class SolverAb
     {
 

@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The wind map that stands in for the one the game does not have.
+    ///
+    /// What the game gives is a planet-wide ceiling — its definition's maximum wind scaled by air
+    /// density — which on an earthlike world reads 80 m/s at sea level everywhere. Treated as a
+    /// wind it puts every parked ship in a permanent hurricane, over the friction threshold and at
+    /// double the still-air convection. These pin the field that replaces it: bands like Earth's,
+    /// a speed that is a fraction of the ceiling, and nothing that varies from one moment to the
+    /// next.
+    /// </summary>
     public class WindFieldTests
     {
 

@@ -6,6 +6,14 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a step reports about itself, as opposed to what it computes.
+    ///
+    /// Nothing in the simulation reads these figures, which is exactly why they can drift: they
+    /// only ever surface in the cockpit readout, the debug overlay and the telemetry report, and
+    /// all three of those are believed. A rate of change that is quietly a sixth of the truth is
+    /// worse than none, because it reads like a measurement.
+    /// </summary>
     public class SolverReportingTests
     {
 

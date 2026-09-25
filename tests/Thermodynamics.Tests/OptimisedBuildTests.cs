@@ -6,6 +6,18 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The harness measures optimised code, in every configuration.
+    ///
+    /// <para>
+    /// `dotnet run` and `dotnet test` build Debug, and a Debug assembly carries
+    /// `DebuggableAttribute(DisableOptimizations)`, which the JIT honours — so until 2026-08-26 every
+    /// timing this harness produced was of code the game never runs, at 3.4× a step and up to 7.7×
+    /// on the diagnostics surcharge. `tests/Directory.Build.props` sets `Optimize` for every project
+    /// now, and this is what says it still does: a line dropped from a props file fails nothing else.
+    /// See performance.md, Iteration 1.
+    /// </para>
+    /// </summary>
     public class OptimisedBuildTests
     {
 

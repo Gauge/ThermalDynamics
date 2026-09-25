@@ -8,6 +8,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Reading a real ship out of a blueprint file.
+    ///
+    /// This is the foundation of the balance lab, and the thing most able to be quietly wrong. A
+    /// blueprint that half-parses does not throw: it yields a ship with some of its blocks, which
+    /// simulates perfectly well and answers a different question from the one being asked. Every
+    /// test here is about the *yield* rather than about the physics.
+    ///
+    /// Every test here is synthetic, and deliberately: the end of the chain — a real subscribed
+    /// blueprint building a simulation that steps — is `CorpusSurvey`, which builds every ship in
+    /// the corpus, probes that it steps and counts joints, rooms and small grids in one pass.
+    /// </summary>
     public class BlueprintTests
     {
 

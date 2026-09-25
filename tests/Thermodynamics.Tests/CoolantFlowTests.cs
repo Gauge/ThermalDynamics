@@ -7,6 +7,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// How the coolant is carried round the ring.
+    ///
+    /// The fluid does not move: the ring's origin does. Parcels sit in a fixed array and each pipe
+    /// reads the parcel currently passing through it. Because a pipe's index is a whole number, the
+    /// rounded offset collapses to one integer shift shared by every pipe — which is what makes it a
+    /// bijection at any speed, exact, and free of the stability limit a blended scheme has.
+    /// </summary>
     public class CoolantFlowTests
     {
 

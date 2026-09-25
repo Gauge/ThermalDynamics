@@ -6,6 +6,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The air a grid sits in: where on the planet, what the ground is, and how long the air takes
+    /// to answer the sun.
+    ///
+    /// Measured against a test world, the model these replace gave a desert a 9 K day-night swing,
+    /// left a snowfield at +4 to +14 C, and produced the same climate at 7 degrees of latitude as
+    /// at 41 — every difference between those sites came from air density, which is a fact about
+    /// altitude and not about climate.
+    /// </summary>
     public class ClimateModelTests
     {
 

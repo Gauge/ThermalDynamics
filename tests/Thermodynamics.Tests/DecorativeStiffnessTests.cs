@@ -5,6 +5,27 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Why a light fitting still sets a warship's substep count after being given a light
+    /// fitting's material properties.
+    ///
+    /// <para>
+    /// A block's stability demand is its conductance over its heat capacity, and the conductance
+    /// has two halves. Conduction is what the block is made of and what it is bolted to; the
+    /// environment is radiation and convection over the block's exposed area. The `Cubes.xml`
+    /// entries for lights, neon and cameras addressed the first half. The second is untouched by
+    /// them: exposed area comes from the cell a block occupies, so a 16 kg fitting radiates and
+    /// convects as though it were a 2.5 m cube.
+    /// </para>
+    ///
+    /// <para>
+    /// That is why the predicted saving arrived in vacuum and very nearly did not in air. In the
+    /// 2026-08-20 fleet dump — flown in an atmosphere averaging 0.73 air density — `SmallLight`
+    /// demands 22.7 substeps at its worst with 3 % of that demand coming from conduction, and
+    /// 12,764 of 123,784 blocks are stiff mostly through radiation and convection. See
+    /// stiffness.md.
+    /// </para>
+    /// </summary>
     public class DecorativeStiffnessTests
     {
 

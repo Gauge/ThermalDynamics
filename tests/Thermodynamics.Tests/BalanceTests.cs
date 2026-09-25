@@ -11,6 +11,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The conclusions the balance pass reached, pinned so they cannot quietly invert.
+    ///
+    /// These are not assertions about the solver — the physics suite covers that. They are
+    /// assertions about the *definitions*: that the radiator still beats the armour it displaces,
+    /// that the coolant loop is still the stiffest way to feed a panel, that a block's mass is
+    /// still the sum of its components. Every one of them is a statement a design decision was
+    /// made on, and every one of them would otherwise be re-derived from memory a year from now.
+    ///
+    /// Figures come from <see cref="BalanceLab"/>, which reads the shipped XML at run time, so
+    /// editing a definition moves these tests. That is the point: a tuning change that inverts a
+    /// conclusion should have to say so out loud.
+    /// </summary>
     [Trait("speed", "slow")]
     public class BalanceTests
     {

@@ -5,6 +5,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The room mapper reads a per-pass snapshot of the structural sealing instead of the surface
+    /// map's dictionaries, and the map it publishes is held identical to the one the dictionaries
+    /// produce — cell for cell, room for room, portal for portal (`D8`).
+    ///
+    /// <para>
+    /// A map is not a temperature, so "close" has no meaning: one cell classified differently is a
+    /// different room, a different exposure, a different ship. The comparison runs on a census
+    /// hull with compartments, on a shell with a door in it — the case with a portal — and on the
+    /// air the pressurised hull then holds, stepped both ways to the same temperatures. Every
+    /// fixture asserts it found rooms, because two empty maps agree about nothing (`E8`).
+    /// </para>
+    /// </summary>
     public class RoomMapSnapshotTests
     {
 

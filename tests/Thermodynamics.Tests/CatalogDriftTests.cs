@@ -7,6 +7,25 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// That the scenario catalogue *is* the blocks it stands in for, and stays that way.
+    ///
+    /// <para>
+    /// `Catalog` used to open by saying its masses were approximations and its thermal properties
+    /// "mirror Data/Cubes.xml". Nothing had compared them: four of the six stand-ins were out by
+    /// more than five per cent, the large thruster by **4.32x**, the battery by 3.70x because it
+    /// carried the *small-grid* battery's mass under a large-grid name, and `ReactorThermal` said a
+    /// quarter of a reactor's output becomes heat where the shipped definition says a hundredth.
+    /// Every scenario in this repository is built out of these, so every scenario temperature was
+    /// quoted off them. backlog.md `C4`.
+    /// </para>
+    ///
+    /// <para>
+    /// **The stand-ins are now derived from `Vanilla` and the shipped derivation rather than typed**,
+    /// so the disagreement is structurally gone rather than corrected once. These hold it that way:
+    /// a hand-typed mass reappearing is what this fails on.
+    /// </para>
+    /// </summary>
     public class CatalogDriftTests
     {
         private readonly ITestOutputHelper output;

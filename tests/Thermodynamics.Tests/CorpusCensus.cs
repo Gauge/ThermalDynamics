@@ -9,6 +9,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What every ship in the corpus *is*, before anything is stepped — the terms G4 needs and the
+    /// survey's outcome rows do not carry. **This costs a build, not a simulation**, so the full
+    /// corpus is minutes rather than the survey's eight hours and can be re-run whenever a definition
+    /// moves.
+    ///
+    /// <para>
+    /// <c>census.csv</c> is one row per ship, <c>composition.csv</c> one per ship and heat-making block
+    /// type. See balance.md, The datasets.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusCensus
     {

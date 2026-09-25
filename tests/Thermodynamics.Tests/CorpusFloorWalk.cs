@@ -6,6 +6,31 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every corpus ship the element-visit allowance actually binds on, in air, **twice**: with
+    /// `FloorBlocksWhenOverBudget` off as it ships, and on.
+    ///
+    /// <para>
+    /// **Why it walks 294 ships and not 8,144.** The mechanism engages only where a grid cannot
+    /// afford the substeps its demand asks for, so the other 7,850 published hulls never reach the
+    /// branch and walking them would measure nothing at eight times the cost. The 294 are every
+    /// ship whose step work exceeds the allowance in at least one air scenario, read out of
+    /// `out/cap-2026-08-25`, and the rule is written into the selection file beside the dataset
+    /// rather than left in a commit message (`M10`).
+    /// </para>
+    ///
+    /// <para>
+    /// **The design is `CorpusCapWalk`'s and deliberately so.** Both arms run to the same simulated
+    /// clock, the unfloored arm first, because the difference being measured is smaller than the
+    /// settle tolerance and two settle-stopped runs would compare the stopping rule (`M1`, `P6`).
+    /// What differs is the arm: a *world* cap of 6 there, the *grid's own* budget here.
+    /// </para>
+    ///
+    /// <para>
+    /// What it is expected to say is written into balance-lab.md with its
+    /// falsifiers before this ran (`E1`, `E11`).
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusFloorWalk
     {

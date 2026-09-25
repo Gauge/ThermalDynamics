@@ -1010,7 +1010,7 @@ block arrives at ambient, and creative changes when that happens rather than wha
 fourth, god mode, has no thermal meaning: a player who cannot be hurt is not a heat sink.
 
 `SuspendedRulesTests` pins it, because a claim about what code does *not* do rots the moment
-somebody adds the line: nothing in `Data/Scripts` reads the game mode, the creative flags or the
+somebody adds the line: nothing in the mod's sources reads the game mode, the creative flags or the
 creative tools.
 
 ---
@@ -1023,7 +1023,7 @@ commitment this page already made: the readouts are drawn through Rich HUD *so t
 temperature the way they read a power figure, with nothing mod-shaped announcing itself*. The game's
 own HUD is localised. A readout that is not is mod-shaped by definition.
 
-Counted over `Data/Scripts`, the distinct strings the mod puts in front of a person are:
+Counted over the mod's sources, the distinct strings the mod puts in front of a person are:
 
 | Surface | Distinct strings | Language |
 | --- | ---: | --- |
@@ -1036,7 +1036,7 @@ Counted over `Data/Scripts`, the distinct strings the mod puts in front of a per
 
 **So the surface that has to be translatable is forty-seven strings**, **4.3 %** of what the mod
 writes, and the mechanism is already proven by the thirty block names in
-[MyTexts.resx](../Data/Localization/MyTexts.resx). `LocalisationSurfaceTests` counts the table above
+[MyTexts.resx](../Thermodynamics/Content/Data/Localization/MyTexts.resx). `LocalisationSurfaceTests` counts the table above
 and holds the claim as a band, because telling a sentence from an identifier without a compiler is
 approximate and pinning the exact count would pin the heuristic rather than the finding.
 
@@ -1180,6 +1180,11 @@ Together they are what makes the table safe to publish at all — the *why* unde
 [Open](#open--the-api-is-part-of-the-contract), which states the goal and the check.
 
 ### To another mod that also slows a ship down: the same answer, and it is stronger here
+
+> **Superseded 2026-09-24 by decision** ([aerodynamics.md](aerodynamics.md) `AR15`): this mod's embedded
+> RelativeTopSpeed port is removed, and the original mod owns top speed. This mod reads RTS's read-only API to
+> explain which limit binds, and both forces act (cruise curve, then drag). The section below is kept as the
+> record of the earlier position.
 
 **`EnableDrag` ships off, so adding this mod to a world running
 [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed) changes no force at all.** That is the
@@ -1335,7 +1340,14 @@ frame buffer. That is a statement about difficulty, not about intent — it is w
   blocks facing each other across a gap do not see each other, and no view factors exist. A surface
   *can* now be shiny to the sun and black to space — `SolarAbsorptivity` is separate from
   `Emissivity` — but each is one constant rather than a curve against wavelength.
-* **Not a flight model — reversed 2026-08-31, by decision.** This bullet refused lift for ten
+* ~~**Not a flight model.**~~ **It is one, as of 2026-09-24, by decision: aerodynamics as realistic
+  as the game allows, learning from SEDrag where it is right** — the requirements are
+  [aerodynamics.md](aerodynamics.md) `AR1`–`AR22`, built as [backlog.md](backlog.md) `K25`. The
+  reasoning below argued against a flight model on the grounds that the solver's Newtonian sum is
+  wrong in the regime ships fly in. That is still true, and it is now the reason to replace the sum
+  with a subsonic force channel rather than the reason to stay out of handling. What follows is kept
+  as the record, superseded.
+  **Reversed for lift 2026-08-31, by decision.** This bullet refused lift for ten
   months of change log and one day of calendar, and the refusal is lifted because the owner asked
   for aerodynamic lift implemented and configurable ([backlog.md](backlog.md) `K23`). **That is a
   choice about what the mod is for, not a measurement that overturned one**, and it is recorded that

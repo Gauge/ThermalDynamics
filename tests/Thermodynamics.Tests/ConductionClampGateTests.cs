@@ -4,6 +4,17 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The conduction pass skips the overshoot clamp on any step where it cannot bind, and the only
+    /// thing that makes that safe is that running it would have produced **the same bits** (`D8`) — a
+    /// gate that is nearly right drops clamping on a grid that needed it and diverges silently.
+    ///
+    /// <para>
+    /// The last two tests are what keep the rest honest: without them a gate that never engaged, or
+    /// one that always did, would pass every equivalence assertion above (`E8`).
+    /// See benchmarks.md, The overshoot clamp A/B.
+    /// </para>
+    /// </summary>
     public class ConductionClampGateTests
     {
 

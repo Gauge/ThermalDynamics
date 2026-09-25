@@ -6,6 +6,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A block behind another is sheltered from the wind, for heat and for drag.**
+    ///
+    /// <para>
+    /// The same self-shadowing pass the sun uses, aimed at the relative wind — `SunShadowMap` takes
+    /// its direction as an argument, so it was always a direction pass. What differs is the
+    /// cadence, and that is measured rather than inherited: see `WindShieldingCostTests` for why the
+    /// threshold is 20° rather than the sun's 2°, and why a running pass is never restarted.
+    /// </para>
+    ///
+    /// <para>
+    /// **Off by default, and the default is the conservative answer.** Unshielded, every face is
+    /// treated as being in the open, so a hull is heated and dragged at least as much as it should
+    /// be and never less. A world that switches this on is asking for the more forgiving model, not
+    /// the harsher one.
+    /// </para>
+    /// </summary>
     public class WindShieldingTests
     {
         private const float ThickAir = 1f;

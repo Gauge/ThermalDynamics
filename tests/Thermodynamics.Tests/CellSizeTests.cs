@@ -6,6 +6,39 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Which cell size is actually the harder one to cool, and the answer is not the one this
+    /// repository had written down.**
+    ///
+    /// <para>
+    /// balance.md argued from the arithmetic of a cell face that "the
+    /// arithmetic that decides everything else on this page is against small grids by about 2.5×",
+    /// and used that to block `C43`'s density correction: half of it is a regression, and it lands
+    /// on the size that is already behind. **The first half of that sentence is exact and the
+    /// second was never measured.** A small cell face is 0.25 m² against 2.5 m², so the loop pickup
+    /// really is a twenty-fifth — but radiation, conduction and the ship's own skin scale by three
+    /// different powers of the cell edge, and the game's waste figures scale by none of them.
+    /// </para>
+    ///
+    /// <para>
+    /// Measured here, per block, from the definitions alone: **a small grid is 2.1× behind on a
+    /// block's own skin, 2.3× behind on the loop pickup, and 2.5× *ahead* on conduction into the
+    /// hull.** `tools/corpus/cellsize.py` is the other half, over 8,137 corpus ships, and it says
+    /// the same thing louder — a small-grid ship carries 2.47× the exposed skin per kilowatt, buries
+    /// a fifth as much of it, and gives its hottest block **19.75×** the path into the hull per watt
+    /// that a large-grid ship does.
+    /// </para>
+    ///
+    /// <para>
+    /// **So the handicap belongs to the pickup alone, and it does not need a dial.** At the face
+    /// count `C42` already measured — three, which is what a routed rectangle gives past a one-cell
+    /// source — 79 of the 80 paired blocks have a cooling answer on a small grid exactly where they
+    /// have one on a large grid. The exception is the small prototech jump drive, and buying it
+    /// costs a **×5.63** small-grid coefficient that would make every other small-grid block
+    /// strictly easier to cool than its large counterpart. See balance.md, *What a small cell is
+    /// behind on, and what it is not*, and backlog.md `C43`.
+    /// </para>
+    /// </summary>
     public class CellSizeTests
     {
         private readonly ITestOutputHelper output;

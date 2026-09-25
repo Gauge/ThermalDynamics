@@ -6,6 +6,27 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The conduction loop gathers two temperatures and scatters two watts per link, and what
+    /// that costs depends entirely on how far apart the two nodes are numbered.**
+    ///
+    /// <para>
+    /// It is the loop a step spends the most time in, so "renumber the nodes into a spatially
+    /// coherent order" is the obvious next idea — and it is the wrong one here, because the
+    /// numbering already is coherent. Measured on the census hull at 126,731 blocks: the mean
+    /// index span of a link is **244**, two thirds of links span fewer than 64 nodes and
+    /// **97.8 %** span fewer than 1,024 — which is four kilobytes of a float row, so the gather
+    /// lands in L1 nearly every time. Reordering would buy the last two per cent of a loop that is
+    /// already at 1.8 ns a link. See performance.md, Pass 5, Iteration 2.
+    /// </para>
+    ///
+    /// <para>
+    /// This is kept as a check rather than a note because the property is not guaranteed by
+    /// anything: nodes are numbered in the order blocks are added, and a change to how a grid is
+    /// built or loaded could scatter them. If that happens, conduction gets slower for a reason no
+    /// timing would explain, and this says so first.
+    /// </para>
+    /// </summary>
     public class LinkSpanProbe
     {
         private readonly ITestOutputHelper output;

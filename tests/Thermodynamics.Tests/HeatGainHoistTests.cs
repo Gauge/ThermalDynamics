@@ -6,6 +6,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The heat a grid puts into itself cannot change between the substeps of one step**, so it
+    /// is summed once and read twenty-three times rather than summed twenty-four.
+    ///
+    /// <para>
+    /// Waste heat, solar gain and aerodynamic friction are read out of `nodeSourceRow`, which is
+    /// filled on a step's first substep and read by the rest. Summing it every substep computed the
+    /// same float over and over — and not for free: a running float sum is a dependency the loop
+    /// carries from one node to the next, and the two accumulators in that loop measured **35 %**
+    /// of the environment stage between them (performance.md, Pass 5, Iteration 3).
+    /// </para>
+    ///
+    /// <para>
+    /// The sum is over the same values in the same order, so the published figure is unchanged **to
+    /// the bit** — which is what these check, by running the same grid both ways (`D3`, `D8`).
+    /// </para>
+    /// </summary>
     public class HeatGainHoistTests
     {
 

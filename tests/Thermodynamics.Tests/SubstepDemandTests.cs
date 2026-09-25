@@ -5,6 +5,21 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a block demands of a step, asked of a grid that has not stepped and of a world the grid
+    /// is not in.
+    ///
+    /// <para><c>NodeSubstepDemand</c> is the only figure the ship screening reads about stiffness,
+    /// and the screening deliberately steps nothing — that is what makes it affordable over a
+    /// corpus of thousands. It read the mirrored rows the step path fills, which on a grid that has
+    /// never stepped are empty, so it reported conduction alone whatever world it was asked about:
+    /// 0.075 against the 0.47 the same fitting demands in air, and identical figures for a vacuum
+    /// and a sea-level atmosphere.</para>
+    ///
+    /// <para>That is not a small error in a small number. A fleet's cost is set by its stiffest
+    /// block, half of that block's stiffness is what it exchanges with the world over its exposed
+    /// area, and the corpus is stratified on the result.</para>
+    /// </summary>
     public class SubstepDemandTests
     {
 

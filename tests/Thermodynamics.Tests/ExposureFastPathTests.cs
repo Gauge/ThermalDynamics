@@ -4,6 +4,13 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// `SurfaceMap.GetExposedFaces` answers a one-cell block from one cell state and six face
+    /// tests, and is held to the boundary-walking count it short-cuts, face for face, over every
+    /// block of a census hull with its rooms mapped and of a grid mixing unit blocks with bars and a
+    /// cube (`D8`). Exposure is what every radiating and convecting term multiplies by, so a face
+    /// counted differently is a different temperature on every step after.
+    /// </summary>
     public class ExposureFastPathTests
     {
 

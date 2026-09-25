@@ -6,6 +6,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The room mapper is well covered for grids built in one shot through
+    /// <see cref="ThermalSimulation.RebuildAll"/>. A player welding a room is a different path
+    /// entirely: one <see cref="ThermalSimulation.AddBlock"/> per block, with
+    /// <see cref="ThermalSimulation.Update"/> pumping the budgeted mapper in between. These
+    /// tests walk that path.
+    /// </summary>
     public class IncrementalRoomTests
     {
 

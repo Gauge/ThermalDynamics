@@ -7,6 +7,26 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The room map answers the same questions once it stops holding a dictionary to answer
+    /// them with.**
+    ///
+    /// <para>
+    /// Room cells were held twice: once per room, and once in a `Dictionary&lt;Vector3I, int&gt;`
+    /// costing about 31 bytes a cell — the one memory row that still climbed with grid size
+    /// (backlog.md `E3`). A map is written once and read for the life of the grid, so when a pass
+    /// completes it publishes instead: today, one room index per room cell, found through the rank
+    /// of that cell in the membership set the pass already filled. Four bytes a cell, no cell keys
+    /// held at all, and a query that is two loads and a popcount.
+    /// </para>
+    ///
+    /// <para>
+    /// **The other copy is the oracle.** The rooms still hold their own cells, so the published
+    /// lookup can be checked against the thing it was derived from, cell by cell (`D8`) — and the
+    /// checks below are unchanged across all three forms it has taken, which is the point of
+    /// writing them against the answer rather than against the structure.
+    /// </para>
+    /// </summary>
     public class RoomMapFreezeTests
     {
         private readonly ITestOutputHelper output;

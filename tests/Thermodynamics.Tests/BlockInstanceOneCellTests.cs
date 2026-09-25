@@ -11,6 +11,13 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A one-cell `BlockInstance` is built without walking its cells, and is held to the walk over
+    /// every one of the twenty-four orientations, for a solid block, a partly mounted one, a door
+    /// shut and a door open — the same cell, the same live bits, the same structural bits (`D8`).
+    /// The uniform-bits short cut in the surface rotation is covered by the same comparison, since
+    /// the solid block takes it and the partly mounted one cannot.
+    /// </summary>
     public class BlockInstanceOneCellTests
     {
 
@@ -80,7 +87,7 @@ namespace Thermodynamics.Tests
 
             List<string> writes = new List<string>();
 
-            foreach (string folder in new[] { "Thermodynamics/Content/Data/", "tests" })
+            foreach (string folder in new[] { "Thermodynamics", "tests" })
             {
                 foreach (string path in Directory.GetFiles(Path.Combine(root, folder), "*.cs",
                     SearchOption.AllDirectories))

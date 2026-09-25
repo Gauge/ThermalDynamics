@@ -3,6 +3,11 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The mass-to-cruise-speed curve absorbed from RelativeTopSpeed (`K10`), pinned at the points
+    /// the original's own configuration authors — so a world moving from that mod to this one flies
+    /// the same, and so the reversed-looking clamp inside it cannot be "tidied" without failing.
+    /// </summary>
     public class CruiseCurveTests
     {
         private const float MinMass = 200000f, MidMass = 5000000f, MaxMass = 8000000f;

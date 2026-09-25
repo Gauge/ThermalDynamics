@@ -7,8 +7,25 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Reads `Data/Cubes.xml` as *values with their provenance comments*, which is what the
+    /// authored-figure checks judge.
+    ///
+    /// <para>
+    /// **The comment is data here rather than prose.** A figure's source is written immediately
+    /// above it, so the reader has to keep the two together; a comment separated from its value by
+    /// anything but whitespace belongs to something else and is not returned.
+    /// </para>
+    ///
+    /// <para>
+    /// One reader, because <see cref="AuthoredMaterialTests"/> and <see cref="AuthoredWasteTests"/>
+    /// ask the same question of the same file and two parsers of one format drift silently in both
+    /// directions (`D3`).
+    /// </para>
+    /// </summary>
     public static class AuthoredValues
     {
+        /// <summary>One authored number, with the comment that says where it came from.</summary>
         public class Entry
         {
             public string TypeId;

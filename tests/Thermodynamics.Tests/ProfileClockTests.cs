@@ -5,6 +5,24 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Whether the realism sweep's one unexplained divergence is a divergence at all**, which is
+    /// what backlog.md `C8` leaves open.
+    ///
+    /// <para>
+    /// Scenario run lengths are cut for the shipped world and thermal time runs at `HeatTimeScale`,
+    /// so the `physical` column — at a clock 225× slower — is a column of runs stopped while they
+    /// were still climbing. `physical / x-overloaded` reaches 11,662 K with every substep granted,
+    /// and the sweep cannot tell that from a run that ended too early: it is `M1` in practice, two
+    /// runs stopped on different physical states.
+    /// </para>
+    ///
+    /// <para>
+    /// **Scaling the whole sweep costs the same 225×, so this asks the question of one cell.**
+    /// `ScenarioRunner.DurationScale` is the mechanism and `ProfileSweep.MeasureAtItsOwnClock` sets
+    /// it from the profile's own clock, which is what makes the comparison one of equals.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     [Collection("alone")]
     public class ProfileClockTests

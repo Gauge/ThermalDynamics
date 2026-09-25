@@ -6,6 +6,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The self-shadow scenario, checked against geometry worked out independently of the model.
+    ///
+    /// The scenario exists to answer "which faces of a solid hull are lit"; a test that asked the
+    /// model the same question twice would agree with whatever the model happened to do. So the
+    /// expected shares are computed here by ray-versus-cube against the same geometry, and the
+    /// scenario's own figures have to match them.
+    /// </summary>
     [Collection("alone")]
     public class SelfShadowScenarioTests
     {

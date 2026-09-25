@@ -7,6 +7,10 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The scan that turns a grid's temperatures into cues, and the two things it must not do:
+    /// cost anything on a cold hull, and repeat itself on a hot one.
+    /// </summary>
     public class HeatCueScanTests
     {
         [Fact]

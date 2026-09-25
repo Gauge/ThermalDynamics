@@ -4,6 +4,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Where a dataset goes and what it says about itself — the two things a corpus walk gets
+    /// wrong without anyone finding out.
+    ///
+    /// <para>
+    /// **Both cases here are failures that happened**, on 2026-08-25, on the same run. The `A13`
+    /// census was asked for in one directory and written to another, and it recorded nothing about
+    /// the build it was taken on. Neither showed up as a failure: the walk passed, and the
+    /// question it answers — *which waste fractions was this measured at* — had to go back to the
+    /// git log, which is precisely what `CorpusRecord.Provenance` exists to replace.
+    /// </para>
+    ///
+    /// <para>
+    /// These run without the corpus, because neither is about the corpus. They set the environment
+    /// variable, and restore it, so an opted-in run is not disturbed.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusRecordTests : IDisposable
     {

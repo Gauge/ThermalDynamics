@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The arithmetic behind a drawn glow: the quad that covers one face of a block, and the single
+    /// light a grid's glowing blocks reduce to.
+    ///
+    /// <para>
+    /// Both live in <c>Core</c> rather than beside the draw call precisely so they can be checked
+    /// here. What cannot be checked offline is whether the renderer draws what it is handed, which
+    /// is a session's job — see known-issues.md, testing gaps.
+    /// </para>
+    /// </summary>
     public class GlowGeometryTests
     {
         [Fact]

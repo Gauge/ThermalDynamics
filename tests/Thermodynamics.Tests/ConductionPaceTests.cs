@@ -7,6 +7,36 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The game had two conduction paces, and the second one is gone.**
+    ///
+    /// <para>
+    /// <see cref="ThermalConstants.ConductionScale"/> sets the pace for solid conduction — block to
+    /// block, and block to a bolted panel. The coolant loop's fluid coupling used to have its own,
+    /// a 0…1 quality against a reference conductivity of 200 W/(m·K), and nothing in the code made
+    /// the two agree: the ratio between them is what decides whether plumbing beats bolting
+    /// It is a heat transfer coefficient in W/(m²·K)
+    /// now — what the transfer physically is — so there is one pace and one dial rather than two
+    /// that had to be moved together.
+    /// </para>
+    ///
+    /// <para>
+    /// **Measured, on the retune `C12` asks for.** Raising the solid pace ×4 and leaving the loop's
+    /// alone took a coolant sink from buying **195.3 K** against the best surface dial's 41.5 K to
+    /// buying **73.3 K** against 135.3 K — the mod's own headline finding, *the radiator is a block
+    /// you plumb*, inverted, and nothing said so except four balance tests failing for what read
+    /// like unrelated reasons. Moving the loop's pace with it recovered 73.3 K to 108.2 K and did
+    /// not restore the ordering, which is a separate finding and is
+    /// balance.md's.
+    /// </para>
+    ///
+    /// <para>
+    /// So what is left to hold is the solid pace itself and the coefficient the loop shipped at,
+    /// both of which every cooling figure in balance.md was measured
+    /// against. The failure they prevent is the same one: a balance change nobody chose, in a
+    /// mechanism nobody was editing.
+    /// </para>
+    /// </summary>
     public class ConductionPaceTests
     {
         private readonly ITestOutputHelper output;

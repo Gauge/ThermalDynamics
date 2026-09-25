@@ -9,6 +9,26 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Every number describing a block reaches the solver**, which completes the set: the
+    /// coolant's are <see cref="LoopDialReachTests"/>, the world's are
+    /// <see cref="SettingsDialReachTests"/>, the planet's are <see cref="PlanetDialReachTests"/>,
+    /// and a block's are here.
+    ///
+    /// <para>
+    /// <see cref="DialReachTests"/> already covers seven of these, because they are seven of the
+    /// eighteen dials `KnobLab` sweeps. The four it does not — a surface's absorptivity, a block's
+    /// own heat source, the damage rate and the exclusion switch — each have a dedicated test class
+    /// somewhere, which is not the same thing: **the point of enumerating is the field written
+    /// tomorrow**, and this repository's recurring defect is something built, documented and
+    /// reached by nothing.
+    /// </para>
+    ///
+    /// <para>
+    /// **It is a reach test**, and says nothing about the direction or the size of what a field
+    /// changes.
+    /// </para>
+    /// </summary>
     public class BlockDialReachTests
     {
         private readonly ITestOutputHelper output;

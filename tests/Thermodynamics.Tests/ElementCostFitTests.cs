@@ -4,6 +4,12 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The element cost lab's conclusions are a least-squares fit, and a fit that is wrong is
+    /// wrong quietly — it returns numbers either way. These recover known coefficients from
+    /// synthetic rows, so the arithmetic behind a budget recommendation is not itself the thing
+    /// being trusted on sight.
+    /// </summary>
     public class ElementCostFitTests
     {
 

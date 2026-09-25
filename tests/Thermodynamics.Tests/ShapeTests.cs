@@ -7,6 +7,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Invariants that must hold whatever shape a grid takes.
+    ///
+    /// Every other test in this suite builds a solid or hollow box, because those are easy to
+    /// reason about. Real grids are ships: irregular, mostly skin, with thin joints between
+    /// heavy masses and conduction paths hundreds of blocks long. A solid cube is the best case
+    /// for exposure, for bounding-volume density and for conduction distance all at once, so a
+    /// bug that only appears on an awkward shape has nowhere to show up.
+    ///
+    /// These tests run the same assertions across <see cref="GridShapes.Catalogue"/>.
+    /// </summary>
     [Trait("speed", "slow")]
     public class ShapeTests
     {

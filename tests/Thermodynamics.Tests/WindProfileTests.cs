@@ -3,6 +3,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The wind's vertical structure and its daily cycle.
+    ///
+    /// The game supplies neither: <c>MyPlanet.GetWindSpeed</c> is the planet's maximum scaled
+    /// linearly by air density, so it falls monotonically from the ground to the edge of the
+    /// atmosphere and is the same at midnight as at noon. These pin the two curves that replace it —
+    /// a logarithmic rise to a plateau, and a daily swing that reverses with height.
+    /// </summary>
     public class WindProfileTests
     {
         private const float Roughness = 0.03f;

@@ -3,6 +3,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The force that holds a ship under its cruise speed, and the switch that decides how far past
+    /// it a ship may be pushed.
+    ///
+    /// <para>
+    /// **This suite exists because `EnableSpeedBoost` shipped dead.** `ThermalGridTopSpeed` returned
+    /// at <c>speed &lt;= cruise</c> and then asked, on the next line, whether boosting was off *and*
+    /// the speed was at or below cruise — a condition that could never be true. The switch appeared
+    /// in the settings file, in the settings menu and in a documented ladder of three rungs, and
+    /// changed nothing in any world. Nothing caught it: the file needs a session, a physics
+    /// component and a grid group, so every decision it made was made where no check could look.
+    /// </para>
+    ///
+    /// <para>
+    /// So the tests that matter here are the ones that ask **what the switch changes**, not whether
+    /// the arithmetic is pretty. A dead switch passes any test that only exercises one side of it.
+    /// </para>
+    /// </summary>
     public class TopSpeedForceTests
     {
         private const float Resistance = 1.5f;

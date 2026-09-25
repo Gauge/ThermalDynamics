@@ -3,6 +3,14 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// One bit per cell of a box, standing in for a hash set of cells.
+    ///
+    /// It replaces the room mapper's visited set, which by the end of a pass holds every cell of
+    /// the bounding box — so its failure modes are quiet ones. A cell wrongly reported as visited
+    /// stops a flood fill early and a compartment silently stops existing; a cell wrongly reported
+    /// as unvisited makes the fill revisit it forever. Neither throws.
+    /// </summary>
     public class CellBitsetTests
     {
 

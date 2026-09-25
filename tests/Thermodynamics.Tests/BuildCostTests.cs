@@ -6,6 +6,10 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What the mod's blocks cost to build, placed inside the distribution the game itself
+    /// prices** — backlog.md `B33`.
+    /// </summary>
     public class BuildCostTests
     {
         private readonly ITestOutputHelper output;

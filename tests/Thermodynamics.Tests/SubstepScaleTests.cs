@@ -3,6 +3,30 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A substep count is a number about a step, and quoting one without the step it belongs to is
+    /// the mistake this suite exists to make expensive.
+    ///
+    /// <para>
+    /// A step of <c>dt</c> simulated seconds needs <c>dt · r_max / safety</c> substeps, so demand
+    /// is <b>proportional to the step length</b>. Halve the step and every figure halves with it:
+    /// what the grid asks for, which blocks a given cap reaches, and what that cap is worth.
+    /// </para>
+    ///
+    /// <para>
+    /// The cap tables in stiffness.md were taken at <c>Frequency 4</c>
+    /// and read for a year as if they described the shipped default, which had moved to
+    /// <c>Frequency 8</c>. Every speed-up on the page was therefore about twice what a default
+    /// world would see, and the backlog item arguing for a shipped cap was reasoned from it. The
+    /// tables were not wrong; they were unlabelled, which turned out to be the same thing.
+    /// </para>
+    ///
+    /// <para>
+    /// Nothing caught it because nothing asserted the relationship. These tests do, and they are
+    /// cheap — no stepping, only the estimate — so the invariant that makes a table readable is
+    /// checked on every run.
+    /// </para>
+    /// </summary>
     public class SubstepScaleTests
     {
 

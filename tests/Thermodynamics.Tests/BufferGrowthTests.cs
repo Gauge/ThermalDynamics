@@ -5,6 +5,22 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What happens when a grid outgrows its buffers with a step part way through.
+    ///
+    /// <para>
+    /// A step is spread over the frames of its window, and the node arrays it integrates over are
+    /// grown when the node count passes their capacity. Growing reallocates them — every one, the
+    /// temperatures and the mirrored heat capacities included — and refills them at the next
+    /// <c>SyncNodeState</c>, which does not run until the next step begins. A step in flight then
+    /// carries on over zeroed rows and divides watts by a heat capacity of zero.
+    /// </para>
+    ///
+    /// <para>
+    /// It takes a block placed on a frame the step is not finished with, on a grid whose buffers
+    /// have no headroom left — welding onto a ship, in other words.
+    /// </para>
+    /// </summary>
     public class BufferGrowthTests
     {
 

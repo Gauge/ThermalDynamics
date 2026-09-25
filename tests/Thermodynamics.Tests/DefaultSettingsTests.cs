@@ -7,6 +7,23 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The shipped settings are the most faithful configuration the model has, and they stay in the
+    /// world when run.
+    ///
+    /// <para>
+    /// There is one configuration now, so there is no ladder to check and nothing to compare it
+    /// against: what is left is whether it is still the honest one — every mechanism on, no
+    /// approximation switched on for anybody — and whether a hull run on it stays inside the
+    /// temperatures physics allows. See configuration.md.
+    /// </para>
+    ///
+    /// <para>
+    /// The six-neighbour test below is here because it is the defect that made the question worth
+    /// asking, and it is not about the defaults at all: it builds its own deliberately refused
+    /// settings.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class DefaultSettingsTests
     {

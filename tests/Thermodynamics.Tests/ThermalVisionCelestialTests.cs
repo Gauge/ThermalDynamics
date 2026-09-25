@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Apparent planetary size, tangent geometry and sky projection without voxel meshes.</summary>
     public class ThermalVisionCelestialTests
     {
         [Fact]

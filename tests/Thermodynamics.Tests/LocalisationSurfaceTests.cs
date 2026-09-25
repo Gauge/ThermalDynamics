@@ -8,6 +8,28 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **How much of what the mod writes sits inside the game's own HUD**, which is the boundary
+    /// document-of-intent.md draws between what is localised and what is
+    /// English.
+    ///
+    /// <para>
+    /// backlog.md `B35` decided that boundary from a commitment already made
+    /// — the readouts are drawn through Rich HUD so nothing mod-shaped announces itself, and the
+    /// game's own HUD is localised — and the figure that made it a small decision rather than a
+    /// large one is that the surface is **about four per cent** of what the mod writes. A figure a
+    /// page quotes needs a source (`E5`), and this is it.
+    /// </para>
+    ///
+    /// <para>
+    /// **It counts with a heuristic and is asserted as a band, not a number.** Telling a sentence
+    /// from an identifier without a compiler is approximate: format specifiers, subtype ids and
+    /// member names all look like strings. So the test prints what it found and holds only the
+    /// claim the decision rests on — that the localisable surface is a small fraction of the whole
+    /// and that the settings menu, the telemetry files and the debug overlays are the bulk of it.
+    /// Asserting the exact count would be pinning the heuristic rather than the finding.
+    /// </para>
+    /// </summary>
     public class LocalisationSurfaceTests
     {
         private readonly ITestOutputHelper output;

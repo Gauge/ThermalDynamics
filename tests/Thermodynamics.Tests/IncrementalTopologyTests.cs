@@ -6,6 +6,20 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Placing a block links the block, not the grid — and the graph that comes out has to be
+    /// the same graph a full rebuild would have produced.
+    ///
+    /// That equivalence is the whole safety argument for the incremental path, and it is not
+    /// obvious: two blocks placed against each other each see the other as a neighbour, so the
+    /// pair can be added twice and the joint conduct at double rate; a block placed against an
+    /// existing one must not disturb links that already exist; and the conductance totals the
+    /// substep estimate divides by are accumulated rather than recomputed, so an error in them
+    /// shows up as a stability change rather than as a wrong temperature.
+    ///
+    /// Every test here therefore compares against the global builder rather than against a
+    /// number written down by hand.
+    /// </summary>
     public class IncrementalTopologyTests
     {
 

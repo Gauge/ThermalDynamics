@@ -6,6 +6,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The protocol around the packet**: which grid a message is about, when a server sends one,
+    /// when a client asks for one, and what is dropped when nobody is there any more.
+    ///
+    /// <para>
+    /// `HotTailTests` covers the packet itself. This covers everything the transport decides —
+    /// and it is here rather than in a session because a session is the one place none of it can
+    /// be checked. Registration and addressing are host code; the policy is not, so the policy
+    /// lives in `Core` where it can be run (`C5`).
+    /// </para>
+    ///
+    /// <para>
+    /// Two of these are about failures that are silent by construction. A message with no grid on
+    /// it would be applied to whichever hull received it, because block positions are only an
+    /// identity inside a grid. And a ledger that is never pruned costs one entry per grid that has
+    /// ever existed per player who has ever joined — invisible in a session with one player, and a
+    /// leak on the servers this mod is for. See backlog.md `B30`.
+    /// </para>
+    /// </summary>
     public class HotTailSyncTests
     {
 

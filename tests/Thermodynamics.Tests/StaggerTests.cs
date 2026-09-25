@@ -5,6 +5,18 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What spreading a step across frames costs, and what staggering whole steps would cost
+    /// instead** — the trade backlog.md `D14` asks to re-decide.
+    ///
+    /// <para>
+    /// Both schedules do identical arithmetic over the same nodes in the same order; only the
+    /// interleaving differs, so what separates them is locality. These hold the two halves of the
+    /// answer: that the penalty is set by how many grids are competing for cache rather than by how
+    /// big any of them is, and that a whole grid's step — the lump staggering would put on one
+    /// frame — is small enough to say where the schedule could change.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     [Collection("alone")]
     public class StaggerTests

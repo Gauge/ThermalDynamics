@@ -6,6 +6,26 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What the real-unit conversion bought the mod's own cooling hardware**, pinned so it cannot
+    /// invert quietly.
+    ///
+    /// <para>
+    /// The retest set of workshop hulls (<c>ConductanceRetestWalk</c>) cannot answer this: the
+    /// corpus filters admit vanilla ships, so not one of the forty carries a coolant pipe or a
+    /// radiator, and the walk's own reach column reports that arm as reaching zero blocks. The two
+    /// largest single moves the conversion made — pipes 200 → 960 W/(m·K) and radiators 200 → 568.8
+    /// — are therefore measured on a rig instead, one family at a time.
+    /// </para>
+    ///
+    /// <para>
+    /// **The stand-in is held against the shipped block first.** These rigs are built from
+    /// <see cref="Catalog"/>, which is known to drift from the shipped definitions (backlog `C4`),
+    /// and a comparison of two worlds built from the same stand-in cancels that drift everywhere
+    /// except in the one figure under test. So the conductance under test is checked against
+    /// <c>Cubes.xml</c> before anything is run.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class ModHardwareRetestTests
     {

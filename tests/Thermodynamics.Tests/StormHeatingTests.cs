@@ -6,6 +6,28 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a storm does to a ship that is standing still.
+    ///
+    /// <para>
+    /// The defect the wind field was written to prevent: the engine's raw figure put every parked
+    /// ship in a permanent 80 m/s wind, over the friction threshold and at double the still-air
+    /// convection. The composed model reopened it — a storm reached 187 m/s, 143 of that within a
+    /// hundred metres of the ground — for two reasons that were faults rather than balance, and one
+    /// that is not. backlog.md `B17`, `B18`.
+    /// </para>
+    ///
+    /// <para>
+    /// The faults are fixed: the weather's own wind modifier moved the intensity instead of
+    /// multiplying the share, so the same storm is no longer counted twice, and the composed speed
+    /// is bounded by the planet's own figure again. What is left is that a storm's wind heats a
+    /// parked hull by friction, and **that is the model working rather than failing** — `v_rel`
+    /// is relative wind by design, so a ship parked in a hurricane heats like a ship flying at
+    /// hurricane speed, and since 2026-09-02 the term is live at every speed rather than gated at
+    /// a floor (the v³ law is the guard now). This measures how much, because "acceptable" is an
+    /// assertion until it is a number.
+    /// </para>
+    /// </summary>
     public class StormHeatingTests
     {
 

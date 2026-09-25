@@ -5,6 +5,14 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The supercell flood finds the shipped mapper's partition exactly — external count, room
+    /// count, and every room's cell set under a bijection of ids — on the grids whose shapes
+    /// exercise its seams: rooms smaller than a supercell, rooms spanning many, structure on a
+    /// supercell boundary, a closed door's roomable cell, a partially sealed cell's pocket, and a
+    /// dealt hull. A speedup measured on any other partition would be a speedup at finding the
+    /// wrong rooms, so this suite is what lets `bench coarserooms` report milliseconds at all.
+    /// </summary>
     public class CoarseRoomFloodTests
     {
 

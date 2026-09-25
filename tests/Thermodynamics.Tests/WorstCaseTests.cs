@@ -6,6 +6,22 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Whether the expensive scenarios are actually expensive.
+    ///
+    /// <para>
+    /// The performance report spent its whole existence stating that convection cost nothing. It
+    /// was not wrong about what it measured: every benchmark ran in vacuum, where
+    /// <c>AtmosphereFactor</c> is zero and the convection branch never executes. A confident zero
+    /// from a case that never ran is worse than a wrong number, because a wrong number invites
+    /// scrutiny and a zero closes the question.
+    /// </para>
+    ///
+    /// <para>
+    /// So every worst case has a test here saying it built the thing it is named after. These are
+    /// not tests of the simulation — they are tests that the measurements have a subject.
+    /// </para>
+    /// </summary>
     public class WorstCaseTests
     {
         private const int Size = 2000;

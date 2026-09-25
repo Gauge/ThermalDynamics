@@ -6,6 +6,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The claims the cooling scenarios make in their summary lines, so a headline conclusion cannot
+    /// quietly invert. Same discipline as <see cref="ScenarioClaimTests"/>, kept separate because
+    /// these seven were written together against one field telemetry dump.
+    ///
+    /// Every one of them exists because the dump could not answer the question: it showed a ship
+    /// carrying 288 pipe blocks, four pumps, eight radiators and four heat pumps, and could not say
+    /// whether any of it moved a watt.
+    /// </summary>
     [Trait("speed", "slow")]
     public class CoolingScenarioClaimTests
     {

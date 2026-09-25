@@ -6,6 +6,26 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Overheat damage: the one output of this simulation that destroys a player's ship, and the
+    /// one that two field sessions failed to exercise at all.
+    ///
+    /// <para>
+    /// Both dumps reported <c>critical damage events 0</c> and <c>total heat damage 0.0</c>. Not
+    /// because nothing got hot — a thruster reached 939 K — but because the equilibrium it
+    /// reached sat under its 1,050 K rating. So the whole damage path shipped untested against
+    /// anything but unit tests on a single block, and the balance question ("what should a block
+    /// survive") and the correctness question ("does the threshold fire when it should") were
+    /// indistinguishable from outside.
+    /// </para>
+    ///
+    /// <para>
+    /// These separate them. Every test here drives a hull to a temperature the block census says
+    /// is fatal, and asserts what the simulation does about it. What temperature a real ship
+    /// reaches is a balance question and belongs in a dump; whether the model acts on it when it
+    /// does is a correctness question and belongs here.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class CriticalTemperatureTests
     {

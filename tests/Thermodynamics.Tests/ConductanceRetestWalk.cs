@@ -9,6 +9,38 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The retest set, run in the world before real conductances and in the world after it**, so
+    /// backlog `C2` is answered with a measurement rather than an argument.
+    ///
+    /// <para>
+    /// The standing panel is the wrong instrument for this question. It picks extremes because a
+    /// dial sweep needs the largest lever it can find; a regression asks whether a change broke the
+    /// ships people fly, which is what <c>tools/corpus/typical.csv</c> is for — forty hulls carrying
+    /// thrust, power, an airtight room and 100 kW of load, nearest the population median on the four
+    /// quantities the census found decide an outcome.
+    /// </para>
+    ///
+    /// <code>
+    ///     THERMAL_CORPUS_TESTS=1 THERMAL_CORPUS_DATA=out/retest \
+    ///         dotnet test --filter ConductanceRetestWalk
+    /// </code>
+    ///
+    /// <para>
+    /// **The worlds run in sequence, and that is not a tuning choice.** A material override is a
+    /// process-wide static that empties the shared model cache, so two worlds in flight at once
+    /// would build ships out of each other's materials. The parallelism is inside a world, across
+    /// the set, which is where it was anyway.
+    /// </para>
+    ///
+    /// <para>
+    /// **Reach is measured before anything is run and written to its own file.** An arm that reaches
+    /// no block on this set reports "no change" in exactly the shape of an arm that reached every
+    /// block and changed nothing, and the corpus filters admit vanilla hulls only — so the arm for
+    /// the mod's own blocks is expected to reach zero here, and has to say so rather than read as a
+    /// finding (`E8`).
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class ConductanceRetestWalk
     {

@@ -6,6 +6,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The census hull's bolt search — which way each partial-mount block turns — is held against
+    /// the search it replaced, orientation for orientation (`D8`).
+    ///
+    /// <para>
+    /// The replacement resolves the 24 orientations' rotated faces once and probes each block's six
+    /// neighbours once, where the original built a matrix and probed a dictionary for every face of
+    /// every candidate of every block. Same candidates in the same order, same tie-break, same
+    /// count — so the two must agree exactly, and a hull where they do not is a different ship
+    /// from the one every benchmark describes. The reference below is the original, kept verbatim,
+    /// because the old code is the only oracle that answers *did this change anything* (`P4`).
+    /// </para>
+    /// </summary>
     public class CensusBoltTests
     {
         private static class Reference

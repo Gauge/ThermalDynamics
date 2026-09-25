@@ -5,6 +5,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The one-cell fast path against the walk it replaces, bit for bit.**
+    ///
+    /// <para>
+    /// A one-cell block's neighbourhood is the same 26 offsets wherever it sits — its centre is its
+    /// own cell — so their unit vectors are constants that the general walk arrives at by 26 square
+    /// roots and 26 divisions per block. The fast path reads them from a table instead. A census
+    /// hull is mostly one-cell blocks, so this is most of the pass.
+    /// </para>
+    ///
+    /// <para>
+    /// **Equal is asserted exactly rather than to a tolerance**, because the claim is that the two
+    /// do the same arithmetic in the same order and not that they agree closely. Float addition is
+    /// not associative, so a table walked in a different order from the loop would be a different
+    /// answer — and one close enough to pass a tolerance is exactly the failure that would survive
+    /// into the corpus figures.
+    /// </para>
+    /// </summary>
     public class ShapeNormalOneCellTests
     {
 

@@ -7,6 +7,24 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Coolant is a consumable, and a ring that is part full costs the integrator nothing extra.**
+    ///
+    /// <para>
+    /// backlog.md `B43` decided that refilling a loop costs energy and time, and `B44` named the
+    /// trap in getting there: a loop's substep demand is `SegmentConductance / SegmentThermalMass`,
+    /// so scaling the fluid's *capacity* with the fill and leaving its *coupling* alone makes a
+    /// 5 %-full ring twenty times stiffer than a full one — on an element that already competes to
+    /// be a grid's worst, against a cap of 64.
+    /// </para>
+    ///
+    /// <para>
+    /// The design scales both, which makes the ratio invariant and is also the physical answer:
+    /// half the fluid touching a wall carries half the heat through it. **That invariance is what
+    /// this file exists to hold**, because a consumer of a link's conductance that forgets to scale
+    /// it is not a compile error — it is a ring that is quietly stiffer than it should be.
+    /// </para>
+    /// </summary>
     public class CoolantFillTests
     {
         private readonly ITestOutputHelper output;

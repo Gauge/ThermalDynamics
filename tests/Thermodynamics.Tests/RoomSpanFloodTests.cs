@@ -6,6 +6,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Walking the external air a run at a time classifies the same cells as walking it a cell at
+    /// a time.**
+    ///
+    /// <para>
+    /// Most of a room-mapping pass is the open space around the hull: 5.1 million of the 7.2 million
+    /// cells visited on a 505,566-block hull, in runs averaging 84 cells. The run walk takes a whole
+    /// run of them per dequeue (performance.md, Pass 4, Iteration 7). It is a different algorithm,
+    /// not a tuning of the old one — a scanline fill against a breadth-first one — so what says it
+    /// is right is that it produces the same map, on hulls with real compartments, doors and hollows.
+    /// </para>
+    ///
+    /// <para>
+    /// The cell walk stays as `SpanFlood = false` for exactly this reason: it is the simpler
+    /// statement of what a flood is, and it is the oracle here (`E7`, `D3`).
+    /// </para>
+    /// </summary>
     public class RoomSpanFloodTests
     {
 

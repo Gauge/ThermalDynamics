@@ -7,6 +7,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A room's air is a function of the room, not of the path the flood took through it.**
+    ///
+    /// <para>
+    /// `BuildRoomLinks` walks a room's cells and counts the faces each bounding block presents to
+    /// it in a `Dictionary&lt;int, int&gt;`, which enumerates by insertion — so the links came out in
+    /// the order the flood happened to reach the cells, and the mean wall temperature a new room's
+    /// air starts at was a sum of floats in that same order. Two floods that agree exactly about
+    /// which cells are in a room would then disagree in the last bits about how warm its air is.
+    /// </para>
+    ///
+    /// <para>
+    /// **This is the property a faster flood needs.** A flood that enqueued runs of cells rather
+    /// than single cells reaches a room's cells in a different order, and is worth having
+    /// (performance.md, *what is designed and not built*). It cannot be written while the answer
+    /// depends on that order. Sorting the contacts by node index makes both the links and the sum a
+    /// function of the room's contents; these tests are what says so.
+    /// </para>
+    /// </summary>
     public class RoomAirCanonicalTests
     {
 

@@ -5,6 +5,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The climate's lag is a share of the day, and the day is measured from the sun.
+    ///
+    /// <para>
+    /// `AmbientLagSeconds` was 45 absolute seconds against a rotation a server sets to anything: it
+    /// attenuates a four-minute day to less than half and does nothing at all to a two-hour one, so
+    /// one authored figure meant a different climate on every world it was applied to.
+    /// backlog.md `C6`.
+    /// </para>
+    ///
+    /// <para>
+    /// **Measured rather than read.** `MySectorWeatherComponent.RotationInterval` exists and would
+    /// answer directly, but whether the script whitelist admits it cannot be established outside a
+    /// session and a rejected type takes the mod down at world load. The sun's direction is already
+    /// sampled every frame, and the angle it sweeps is the same fact.
+    /// </para>
+    /// </summary>
     public class DayLengthTests
     {
 

@@ -6,6 +6,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Slope winds: air running up a mountain by day and draining back down it at night.
+    ///
+    /// <para>Anabatic and katabatic flow, and they are a <b>different mechanism</b> from everything
+    /// else terrain does in this model. Speed-up, sheltering and channelling are mechanical — what
+    /// the ground does to a wind that was already blowing. This one the ground <i>makes</i>, out of
+    /// sunlight and gravity, and it blows on a day when nothing else does.</para>
+    ///
+    /// <para>The figures come from the meteorological literature: anabatic 3–5 m/s and hundreds of
+    /// metres deep; katabatic 3–8 m/s and only 10–100 m deep; both forming under calm, clear
+    /// conditions and both overrun by a real synoptic wind.</para>
+    /// </summary>
     [Collection("alone")]
     public class WindSlopeTests
     {

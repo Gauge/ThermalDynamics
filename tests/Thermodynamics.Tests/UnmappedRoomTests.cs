@@ -7,6 +7,20 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Finding the compartments the game seals and this model does not.
+    ///
+    /// This exists because of a field report the mod could not answer. A player stood in a room
+    /// with an air vent reading full, and the mod's room overlay drew nothing — no room, no air,
+    /// no fault. The map had 12 rooms totalling 61 cells on a 1,293 block ship, with only 24 of
+    /// 8,702 block faces bounding a room at all, and 1,298 block cells classified as outdoors.
+    /// Every one of those numbers was in the report and none of them said the thing that mattered,
+    /// which is that the game had rooms there and this model did not.
+    ///
+    /// The failure is silent by construction: pressurisation is only ever asked about rooms the
+    /// map already found, so a compartment the fill walks into from outside is never compared
+    /// against anything.
+    /// </summary>
     public class UnmappedRoomTests
     {
 

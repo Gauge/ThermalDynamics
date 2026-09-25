@@ -7,6 +7,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The simulation driven the way a host drives it: build, edit, step, save, load.
+    ///
+    /// <para>
+    /// Everything else in this project tests one mechanism against a fixture built for it. This tests
+    /// that the mechanisms compose — that a block added at runtime joins the graph, that removing one
+    /// opens its neighbours to space, and that a save round-trips every temperature and is taken
+    /// without disturbing the run it was taken from.
+    /// </para>
+    /// </summary>
     public class SimulationIntegrationTests
     {
         [Fact]
@@ -254,6 +264,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// Every scenario runs, finishes and produces finite numbers.
+    ///
+    /// <para>
+    /// The scenarios are this repository's worked examples and its documentation quotes their figures,
+    /// so a scenario that silently stopped exercising what it names would take a page of prose down
+    /// with it. ScenarioClaimTests checks the conclusions; this checks they were reached at all.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class ScenarioTests
     {

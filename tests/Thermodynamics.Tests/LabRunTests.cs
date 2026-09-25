@@ -5,6 +5,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The two ways the lab spreads its work, and the invariant that makes one of them usable.
+    ///
+    /// Running the battery concurrently is only sound if it produces the same matrix. That is not
+    /// obvious: every simulation built from one ship shares that ship's <c>BlockInstance</c>
+    /// objects, and the load is written onto them, so a naive fan-out silently has two scenarios
+    /// overwriting each other's watts — which does not throw, and does not look wrong in a report.
+    /// It just answers a different question.
+    /// </summary>
     [Collection("alone")]
     public class LabRunTests
     {

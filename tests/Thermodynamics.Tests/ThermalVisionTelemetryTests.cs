@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Probe report aggregation, bounded retention, missing samples and repeatable snapshots.</summary>
     public class ThermalVisionTelemetryTests
     {
         [Fact]

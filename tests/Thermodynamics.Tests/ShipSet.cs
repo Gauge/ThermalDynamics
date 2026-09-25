@@ -7,8 +7,29 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A committed list of corpus ships, read and resolved to blueprints — and the resume record a
+    /// sweep over one keeps.
+    ///
+    /// <para>
+    /// **There are two such lists and they answer different questions**: `panel.csv` is cut for
+    /// spread because a dial sweep needs the largest lever it can find, and `typical.csv` is cut for
+    /// the middle because a regression asks whether a change broke the ships people fly. What they
+    /// share is everything mechanical — the same header shape, the same quoting, the same need to
+    /// resolve a name and a workshop id to one blueprint — and that plumbing existed three times
+    /// before this class, once per walk, which is the drift `D3` exists to prevent.
+    /// </para>
+    ///
+    /// <para>
+    /// **The paths matter more than they look.** Each list carries the blueprint each ship was
+    /// measured from. Matching on name and id by walking the corpus instead means fully parsing all
+    /// 9,981 blueprints — every worker free to open a quarter-gigabyte file at once — to find forty
+    /// ships, which is exactly how earlier runs died.
+    /// </para>
+    /// </summary>
     internal static class ShipSet
     {
+        /// <summary>One row of a committed set: the three columns every one of them starts with.</summary>
         public class Entry
         {
             public string Name;
@@ -129,6 +150,17 @@ namespace Thermodynamics.Tests
             }
         }
 
+        /// <summary>
+        /// What a sweep has already finished, kept beside its data.
+        ///
+        /// <para>
+        /// A sweep is hours long and dies for reasons that have nothing to do with it (`O3`), so
+        /// resuming is not a convenience. The record is exact because a mark is written *after* the
+        /// rows it stands for — a mark that landed first would lose them. One file per sweep: two
+        /// sweeps share a corpus and not a state, and one that inherited another's record would skip
+        /// everything and report success.
+        /// </para>
+        /// </summary>
         public class Resume
         {
             private readonly string label;

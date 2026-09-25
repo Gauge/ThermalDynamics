@@ -5,6 +5,11 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Sun visibility worked out the slow, obvious way: intersect the ray with every cell's cube.
+    /// Analytic rather than sampled, because a sampled walk rounds at cell boundaries and cannot
+    /// tell a ray passing through a cube from one grazing its corner.
+    /// </summary>
     public static class Reference
     {
 

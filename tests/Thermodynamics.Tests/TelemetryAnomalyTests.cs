@@ -3,6 +3,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The telemetry module's judgement about what counts as a problem worth reporting.
+    ///
+    /// Both directions matter. A missed anomaly loses the only evidence of a solver fault that
+    /// a player's session will ever produce; a false one buries the real findings under noise
+    /// from ordinary gameplay.
+    /// </summary>
     public class TelemetryAnomalyTests
     {
         private const float Implausible = 20000f;
@@ -110,6 +117,9 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The stride that keeps the wide per-block-type statistics off the hot path.
+    /// </summary>
     public class SampleGateTests
     {
 
@@ -207,6 +217,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The always-on health check: whether a whole grid has gone numerically bad, decided from
+    /// three figures the solver already publishes rather than by walking it.
+    ///
+    /// This exists because per-node classification runs only on the sampling walk, and the walk
+    /// runs only while collection is on — which is never, by default. The one class of bug worst
+    /// worth catching, a grid that goes NaN or runs away, was the one nothing in an ordinary
+    /// world was looking for. A grid welded past its buffer capacity did exactly that, whole.
+    /// </summary>
     public class GridHealthTests
     {
         private const float Implausible = 20000f;

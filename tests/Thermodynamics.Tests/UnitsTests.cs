@@ -3,6 +3,23 @@ using Thermodynamics.Core;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The one watt formatter, which used to be four.
+    ///
+    /// <para>
+    /// The cockpit panel, the settings menu, the debug panel and the chat command each carried
+    /// their own, and they had drifted into three conventions: one decimal place or two, a
+    /// gigawatt tier or none, the current culture or the invariant one. A ship's heat balance was
+    /// quoted at a different precision depending on which readout a player opened.
+    /// </para>
+    ///
+    /// <para>
+    /// The cases that matter are the boundaries and the sign. A figure one watt under a tier and
+    /// one watt over it must not disagree about which tier it is in, and a negative figure — a
+    /// grid shedding more than it makes, which is what the cockpit panel shows when cooling is
+    /// working — must pick its tier by magnitude rather than falling through to raw watts.
+    /// </para>
+    /// </summary>
     public class UnitsTests
     {
         [Theory]

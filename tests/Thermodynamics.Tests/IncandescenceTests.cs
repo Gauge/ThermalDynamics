@@ -7,6 +7,20 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The glow: the brightness band, and the colour checked against Planck's law rather than
+    /// against itself.
+    ///
+    /// <para>
+    /// The two halves are tested differently because they are different claims. **Brightness is a
+    /// design decision** — the last hundred kelvin before a block fails — so what can be checked is
+    /// that it does what it says at both ends, in between, and on a hull that is merely warm.
+    /// **Colour is a measurement**, and <see cref="Incandescence"/>'s twelve-entry table came out
+    /// of an integration that is not in the mod. This file carries that integration — Planck's law
+    /// against the CIE observer, in SI units, from first principles — and re-runs it, so nothing
+    /// about the colour compares the shipped code to a number the shipped code produced (`E7`).
+    /// </para>
+    /// </summary>
     public class IncandescenceTests
     {
         private const double Planck = 6.62607015e-34;

@@ -1,12 +1,12 @@
 # Definition reference
 
-Thermal Dynamics reads none of its tuning values from its own C# constants. Everything lives in
+Thermodynamics reads none of its tuning values from its own C# constants. Everything lives in
 `<ModExtensions>` groups attached to game definitions, read at runtime through Draygo's
 **Definition Extensions** mod. That means any mod — including one that does not depend on this
 one — can declare thermal properties for its own blocks, and this mod will pick them up.
 
 The three files that ship with the mod are listed in
-[Data/definitionextensions.txt](../Data/definitionextensions.txt), which is how Definition
+[Data/definitionextensions.txt](../Thermodynamics/Content/Data/definitionextensions.txt), which is how Definition
 Extensions discovers them:
 
 ```
@@ -27,7 +27,7 @@ Loops.xml
 ## Group: `ThermalBlockProperties`
 
 Read by `ThermalCellDefinition.GetDefinition`
-([Definitions/ThermalCellDefinition.cs](../Data/Scripts/Thermodynamics/Definitions/ThermalCellDefinition.cs)).
+([Definitions/ThermalCellDefinition.cs](../Thermodynamics/Definitions/ThermalCellDefinition.cs)).
 
 | Property | Type | Clamp | Meaning |
 | --- | --- | --- | --- |
@@ -159,7 +159,7 @@ full-load waste. What both did to a real ship is measured in
 [balance.md](balance.md#what-the-real-unit-conversion-moved).
 
 **Every authored figure now says where it came from**, and `AuthoredMaterialTests` holds it to that:
-either it names a material [`ReferenceMaterials`](../Data/Scripts/Thermodynamics/Core/Definitions/ReferenceMaterials.cs)
+either it names a material [`ReferenceMaterials`](../Thermodynamics/Core/Definitions/ReferenceMaterials.cs)
 prices and matches it within five per cent — the rounding the environment default's 450 against mild
 steel's 466 needs — or it says `invented`, which four figures do: the two lamps and the camera, none
 of which is one substance. A figure with no provenance at all fails, which is what stops the check
@@ -370,7 +370,7 @@ Two rules matter more than the order:
   it does not override a derivation that actually describes the block. It applies to a block with no
   priced components at all.
 
-### Shipped values ([Data/Cubes.xml](../Data/Cubes.xml))
+### Shipped values ([Data/Cubes.xml](../Thermodynamics/Content/Data/Cubes.xml))
 
 `Cubes.xml` no longer carries an entry per block type. It holds only deliberate deviations from the
 derivation:
@@ -404,7 +404,7 @@ consequences rather than choices:
 ## Group: `ThermalPlanetProperties`
 
 Read by `PlanetDefinition.GetDefinition`
-([Definitions/PlanetDefinition.cs](../Data/Scripts/Thermodynamics/Definitions/PlanetDefinition.cs)),
+([Definitions/PlanetDefinition.cs](../Thermodynamics/Definitions/PlanetDefinition.cs)),
 keyed on a `PlanetGeneratorDefinition` id, falling back to
 `PlanetGeneratorDefinition/DefaultThermodynamics`.
 
@@ -430,13 +430,13 @@ real setting for every one of them — no latitude, no lag, no lapse, no damping
 planet file predating them would otherwise silently ask for all five to be switched off.
 
 Weather is **not** in this group. The mod reads the weather's name from the game and looks it up in
-[WeatherResponse](../Data/Scripts/Thermodynamics/Core/Definitions/WeatherResponse.cs), whose figures
+[WeatherResponse](../Thermodynamics/Core/Definitions/WeatherResponse.cs), whose figures
 are derived from Keen's own `WeatherEffects.sbc`, so a mod adding a weather called `RainHeavier`
 gets rain behaviour without annotating anything. See
 [environment.md](environment.md#weather).
 
 Per-planet values are set by adding a definition with that planet's `SubtypeId`. The shipped
-[Data/Planets.xml](../Data/Planets.xml) carries **nine entries** — the `DefaultThermodynamics`
+[Data/Planets.xml](../Thermodynamics/Content/Data/Planets.xml) carries **nine entries** — the `DefaultThermodynamics`
 fallback plus one for each of Alien, EarthLike, Europa, Mars, Moon, Pertam, Titan and Triton — each
 derived from that world's own generator definition rather than typed. **The file is generated**;
 see [environment.md](environment.md#planet-properties) for the derivation, the three worlds whose
@@ -445,9 +445,9 @@ shipped entries depart from it, and how to regenerate it.
 ## Group: `ThermalLoopProperties`
 
 Read by `ThermalLoopDefintion.GetDefinition`
-([Definitions/ThermalLoopDefinition.cs](../Data/Scripts/Thermodynamics/Definitions/ThermalLoopDefinition.cs)).
+([Definitions/ThermalLoopDefinition.cs](../Thermodynamics/Definitions/ThermalLoopDefinition.cs)).
 There is currently one loop definition and every loop uses it:
-`EnvironmentDefinition/DefaultThermodynamicsLoop` in [Data/Loops.xml](../Data/Loops.xml).
+`EnvironmentDefinition/DefaultThermodynamicsLoop` in [Data/Loops.xml](../Thermodynamics/Content/Data/Loops.xml).
 
 | Property | Default | Clamp | Meaning |
 | --- | --- | --- | --- |

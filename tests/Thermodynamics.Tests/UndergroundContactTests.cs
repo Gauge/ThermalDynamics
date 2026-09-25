@@ -5,6 +5,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a buried grid is actually against.
+    ///
+    /// <para>
+    /// It used to be air. A grid under the surface took the planet's ambient from the rock — which
+    /// is right — and exchanged with it at the planet's *convection* coefficient, which is the
+    /// figure for moving air. Rock contact was not modelled, so 50 W/(m² K) was the nearest
+    /// available answer. backlog.md `A16`.
+    /// </para>
+    ///
+    /// <para>
+    /// **It was wrong by a factor of twenty-five and in the flattering direction**: digging in was
+    /// the best cooling in the game. For a body of size D buried far from a surface the conduction
+    /// shape factor gives `h = 2k/D`, and rock at 2.5 W/(m K) over a 2.5 m block is 2 W/(m² K), not
+    /// 50.
+    /// </para>
+    /// </summary>
     public class UndergroundContactTests
     {
 

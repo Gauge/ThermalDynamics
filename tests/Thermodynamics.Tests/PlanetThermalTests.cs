@@ -9,6 +9,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Thermal properties derived from a planet's own generator definition, and the shipped file
+    /// they generate.
+    ///
+    /// <para>Every world in this mod used to run one entry — an earthlike climate — so the Moon,
+    /// Titan and Pertam were all 294 K by day. These hold the derivation that replaced it, the
+    /// judgement calls layered on top of it, and the fact that <c>Data/Planets.xml</c> is what this
+    /// code produces rather than something that has drifted away from it.</para>
+    /// </summary>
     public class PlanetThermalTests
     {
 
@@ -264,14 +273,14 @@ namespace Thermodynamics.Tests
             {
                 if (a[i] == b[i]) continue;
 
-                Assert.Fail("Data/Planets.xml has drifted from PlanetLab.Xml() at line " + (i + 1)
+                Assert.Fail("Thermodynamics/Content/Data/Planets.xml has drifted from PlanetLab.Xml() at line " + (i + 1)
                     + ".\n  on disk:    " + a[i]
                     + "\n  generated:  " + b[i]
                     + "\nRegenerate with: dotnet run --project Thermodynamics.Sim -- planets"
-                    + " --write ../Data/Planets.xml");
+                    + " --write ../Thermodynamics/Content/Data/Planets.xml");
             }
 
-            Assert.Fail("Data/Planets.xml has " + a.Length + " lines against the generator's "
+            Assert.Fail("Thermodynamics/Content/Data/Planets.xml has " + a.Length + " lines against the generator's "
                 + b.Length + "; regenerate it.");
         }
 

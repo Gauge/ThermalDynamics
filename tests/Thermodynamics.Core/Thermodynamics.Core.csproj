@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    The simulation core. Every source file lives under Data/Scripts/Thermodynamics/Core so that
-    Space Engineers compiles it as part of the mod; this project links the same files so they can
-    be built and tested outside the game.
+    The simulation core. Every source file lives under Thermodynamics/Core so that Space Engineers
+    compiles it as part of the mod; this project links the same files so they can be built and
+    tested outside the game.
 
     LangVersion 6 is deliberate: it is what the in-game script compiler accepts, so anything that
     builds here will build in game.
@@ -28,7 +28,7 @@
   <ItemGroup>
     <Compile Include="$(CoreSourceRoot)**/*.cs" LinkBase="Core" />
 
-    <!-- Outside Data/Scripts on purpose; see the file's own note. -->
+    <!-- Outside the mod's sources on purpose; see the file's own note. -->
     <Compile Include="TestVisibility.cs" />
   </ItemGroup>
 

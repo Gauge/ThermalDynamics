@@ -5,6 +5,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The transport package shipped, and these are what says so.**
+    ///
+    /// <para>
+    /// <see cref="LoopBefore"/> was `LoopCandidate`, a proposal: forced convection while the ring is
+    /// pumped, the old coefficient while it is stopped, and coolant sized from the cell instead of a
+    /// flat 50 kg. All three are now the mod's own defaults — the first two at `C42`, the coolant's
+    /// density at `C43` — so the class holds the **before** and these tests are the mirror image of
+    /// the ones that used to say *none of it ships*.
+    /// </para>
+    ///
+    /// <para>
+    /// **The inversion is the point.** A candidate that quietly became the default would leave every
+    /// lab with two identical arms, reporting *the package is worth nothing* in exactly the voice it
+    /// would use if the package were worth nothing. That is this repository's recurring defect and it
+    /// has already cost two findings, so the first test here pins that the two arms still differ.
+    /// </para>
+    /// </summary>
     public class LoopBeforeTests
     {
 

@@ -5,6 +5,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Resolves a walk's scenario names against the battery, failing loudly on a name the
+    /// battery does not carry.
+    ///
+    /// A runner that skips an unknown name silently is how a misspelled scenario thins a
+    /// dataset without an error (`E8`), so the resolution asserts rather than filters. Three
+    /// corpus walks carried this as near-copies differing only in the walk's own name, which is
+    /// now the argument.
+    /// </summary>
     internal static class ScenarioIndex
     {
 

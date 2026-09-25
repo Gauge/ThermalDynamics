@@ -5,6 +5,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// How a step is spread across the frames of its window.
+    ///
+    /// <para>
+    /// Pacing exists so one grid's step does not arrive as a lump. It has a floor because
+    /// re-entering the resumable stage machine costs the same whatever it carries, and a grid
+    /// small enough that its whole step is a dozen element visits was paying that entry on every
+    /// frame of its window. The floor must remove the entries without moving the rate: a grid that
+    /// completes four steps a second before must complete four after.
+    /// </para>
+    /// </summary>
     public class StepPacingTests
     {
         private const float Frame = 1f / 60f;
