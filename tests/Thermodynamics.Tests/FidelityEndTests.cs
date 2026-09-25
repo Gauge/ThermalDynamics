@@ -8,6 +8,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Which way each integration dial points is stated in the code, and the page cannot drift
+    /// from it.**
+    ///
+    /// <para>
+    /// `C15` wants a mechanism configured from `off` to `realistic`. The four integration dials are
+    /// the exception, and configuration.md said so and then said *nothing tells a reader which way
+    /// each points but this page* — which is the sentence this file exists to make false. They run
+    /// in three directions: two are faithful at zero, two at their ceiling, and a player in the
+    /// menu had four differently worded tips and no rule (`B31`).
+    /// </para>
+    /// </summary>
     public class FidelityEndTests
     {
 

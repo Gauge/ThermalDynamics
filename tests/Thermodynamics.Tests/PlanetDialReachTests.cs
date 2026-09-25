@@ -9,6 +9,34 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Every number describing a planet reaches the environment the solver is handed.**
+    ///
+    /// <para>
+    /// <see cref="LoopDialReachTests"/> makes this check for the coolant and found a dial that was
+    /// authored, documented, exposed on a slider and multiplied by nothing.
+    /// <see cref="SettingsDialReachTests"/> makes it for the world settings. The planet's fourteen
+    /// are the third group and had neither: they are parsed from `ThermalPlanetProperties`, carried
+    /// through <c>Settings</c>, listed in the in-game menu and clamped, and nothing asked whether
+    /// the model ever read them. `C33` counts them as the largest unswept subsystem.
+    /// </para>
+    ///
+    /// <para>
+    /// **The reading is the environment rather than a temperature.**
+    /// <see cref="EnvironmentSolver.Solve"/> is where every one of these lands — it takes the planet
+    /// and a sample and produces the state a step integrates against — so a fingerprint of that
+    /// state over a spread of places is both the cheapest instrument and the complete one. A dial
+    /// that moved a temperature without moving the state would be a dial reaching the solver by
+    /// some path other than the one it is documented to take.
+    /// </para>
+    ///
+    /// <para>
+    /// **It is a reach test.** It asserts a field changes what the environment solve produces and
+    /// says nothing about the direction or the size, which is what lets it survive a retune
+    /// untouched. `C7` is where the planet numbers are argued, and it says they are opinions rather
+    /// than fits; this says only that the opinions are connected.
+    /// </para>
+    /// </summary>
     public class PlanetDialReachTests
     {
         private readonly ITestOutputHelper output;

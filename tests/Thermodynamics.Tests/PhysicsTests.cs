@@ -7,6 +7,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Shared setup for solver tests.</summary>
     public static class Fixture
     {
 
@@ -43,6 +44,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// Heat between two touching blocks: the conductance, and the four properties of the flow it produces.
+    ///
+    /// <para>
+    /// Symmetry, conservation and order independence are asserted rather than assumed, because the
+    /// original model had none of the three and every one of its failures looked like a plausible
+    /// temperature. The last two cases run the original formulas from LegacyFormulas to show exactly
+    /// what changed.
+    /// </para>
+    /// </summary>
     public class ConductionTests
     {
         [Fact]
@@ -320,6 +331,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The integrator under step sizes it was never meant to see.
+    ///
+    /// <para>
+    /// An explicit scheme on a stiff grid diverges rather than degrading, so the substep estimate and
+    /// the overshoot clamp are the two things standing between a slow server and a ship at 10^30 K.
+    /// WithoutTheClampAnAbsurdStepBlowsUp exists so the clamp cannot be removed as an optimisation
+    /// without something saying what it was for.
+    /// </para>
+    /// </summary>
     public class StabilityTests
     {
         [Fact]

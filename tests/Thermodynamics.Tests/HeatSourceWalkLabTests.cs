@@ -4,6 +4,14 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The heat-source-walk lab prices a registered source per step on redesign.md's fourth
+    /// sweep. What is pinned is that the fixture actually exercises the path — the sources reach
+    /// the solver and cost something, monotonically in their count — and that the source
+    /// contribution is real heat, not a no-op the timing would measure as free (`E8`). The
+    /// injection helper itself is pinned too: a source registered on the sample must raise a
+    /// node's watts, or the lab is timing a mechanism that never ran.
+    /// </summary>
     public class HeatSourceWalkLabTests
     {
         [Fact]

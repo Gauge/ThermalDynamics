@@ -7,6 +7,34 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What a player can make heat do by changing the block population**, which is the exploit
+    /// surface of `F26`'s deliberate limit.
+    ///
+    /// <para>
+    /// Heat leaves the world with a block that leaves it and a welded block arrives at ambient.
+    /// That was recorded as a limit on the grounds that conserving it would mean a grinder that
+    /// heats the ship around it. What the limit did not cost out is that a player can *drive* it:
+    /// grind and reweld on a timer and the ship has a heat sink made of one block.
+    /// </para>
+    ///
+    /// <para>
+    /// **The coolant loop is the sharp case and it is measured here.** A loop's coolant carries far
+    /// more heat than the pipe it sits in, and breaking the ring dissolves the loop. The solver
+    /// spills a dying loop into its pipes rather than deleting it — that fix went in after a 190 MJ
+    /// case where grinding a pump dumped a ship's heat on demand — and these measure how much of it
+    /// actually survives.
+    /// </para>
+    ///
+    /// <para>
+    /// **A third of it used to.** The spill mixed each parcel into its pipe at
+    /// `(T_n·M_n + T_s·M_s) / (M_n + M_s)` and then left the node at `M_n`, so the energy landing
+    /// was `mixed × M_n` where `T_n·M_n + T_s·M_s` went in and `M_s / (M_n + M_s)` of the ring's
+    /// heat — 67.9 % on a large grid — was destroyed by two capacities nobody chose. The pipe now
+    /// takes the parcel's heat capacity along with its temperature, so the only heat a broken ring
+    /// loses is what was inside the block that left.
+    /// </para>
+    /// </summary>
     public class HeatLaunderingTests
     {
         private readonly ITestOutputHelper output;

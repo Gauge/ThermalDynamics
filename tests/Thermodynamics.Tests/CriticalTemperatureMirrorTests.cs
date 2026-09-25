@@ -6,6 +6,27 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Each node's critical temperature is mirrored into a flat array beside its mass and
+    /// emissivity, so the apply pass can decide whether a block is burning without reaching
+    /// through the node object to its block and its model.
+    ///
+    /// <para>
+    /// That test runs once per node per substep and fires almost never — two field sessions
+    /// recorded zero critical events between them — and reaching it cost three dependent loads
+    /// into memory scattered across the heap. Removing them took the marginal cost of
+    /// <c>EnableDamage</c> from 0.85 ms to 0.19 ms of a step, and the 125,000-block rung of the
+    /// ladder from 30.8 ms to 17.1 ms.
+    /// </para>
+    ///
+    /// <para>
+    /// A mirrored row is only correct while something refreshes it, and the failure it invites is
+    /// specific: a row that belongs to the block that used to hold that index. A block destroyed
+    /// beside a reactor would then be judged against the reactor's 1,200 K rating, or the reactor
+    /// against its 900 K one — silently, and only on grids that have lost a block. The tests below
+    /// drive exactly that.
+    /// </para>
+    /// </summary>
     public class CriticalTemperatureMirrorTests
     {
 

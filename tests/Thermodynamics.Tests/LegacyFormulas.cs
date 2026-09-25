@@ -3,6 +3,10 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The original mod's formulas, reproduced verbatim so tests can demonstrate exactly how the
+    /// rewritten model differs. Nothing in the shipping code calls any of this.
+    /// </summary>
     public static class LegacyFormulas
     {
 
@@ -48,6 +52,9 @@ namespace Thermodynamics.Tests
             return new Vector3(h, s, v);
         }
 
+        /// <summary>A cell's per-neighbour conduction coefficient, as the original computed it.</summary>
+
+        /// <summary>A cell's per-neighbour conduction coefficient, as the original computed it.</summary>
         public sealed class Cell
         {
             public float Conductivity;

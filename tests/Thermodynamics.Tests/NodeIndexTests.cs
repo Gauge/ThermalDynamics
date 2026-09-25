@@ -7,6 +7,25 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The block carries its node's index, and the dictionary that used to is the oracle.**
+    ///
+    /// <para>
+    /// The solver kept a `Dictionary&lt;long, ThermalNode&gt;` from block key to node — about 49
+    /// bytes a block, measured, for an answer the block can hold in four
+    /// (backlog.md `E1`). A change whose whole purpose is cost has to be
+    /// pinned against the code it replaced (`D8`), and here that code is reconstructible: the
+    /// dictionary is exactly `node.Block.Key → node` over the live node list, so these build it and
+    /// require the index to agree with it.
+    /// </para>
+    ///
+    /// <para>
+    /// **The agreement has to survive index motion**, which is where a hand-maintained index fails:
+    /// a removal moves the last node into the hole through one of two paths, and both are exercised
+    /// here. The fixture asserts its own preconditions for the reason `D8` gives — two lookups over
+    /// a grid that built nothing agree perfectly.
+    /// </para>
+    /// </summary>
     public class NodeIndexTests
     {
         private readonly ITestOutputHelper output;

@@ -6,6 +6,38 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// One pass over every ship in the corpus in **air**, which is the environment both halves of
+    /// `G6` are decided in and the only one the survey has never run.
+    ///
+    /// <para>
+    /// **Why it exists.** `CorpusSurvey`'s five scenarios are all vacuum. `G6`'s *demand* half read
+    /// as passing for months on that dataset — corpus p99 6.02 against 64 granted — and failed the
+    /// moment air was measured on 49 hulls, which is what `C19` and then `C24` came out of. Its
+    /// *cost* half is in exactly the same position now: scored at p99 883,675 element visits in
+    /// vacuum, and projected through the panel's own air-to-vacuum ratio it lands near four million
+    /// against the four million the allowance grants (`C27`). A projection of a projection is
+    /// standing where a measurement belongs, and this is the measurement.
+    /// backlog.md `F11`.
+    /// </para>
+    ///
+    /// <para>
+    /// **Why a separate walk rather than three more scenarios on the survey.** Every figure quoted
+    /// from the survey was taken on a run of five scenarios; adding to it makes each of those rows
+    /// a different run and nothing quoted from the old one is comparable with the new (`M1`, `P6`).
+    /// A walk of its own has its own resume record and its own data directory, is read by the same
+    /// `verdict.py`, and can be run and re-run without touching what the survey means.
+    /// </para>
+    ///
+    /// <para>
+    /// **What it judges, and what it only records.** The population criteria are scored downstream
+    /// by `verdict.py` against the markers written in balance-lab.md,
+    /// which is where they belong and where they were written before any of this data existed
+    /// (`E1`, `E11`). What this walk asserts is the two things only a run in air can check — that
+    /// the convection path actually carried watts, and that no ship is *cheaper* in air than in
+    /// vacuum — plus the accounting every walk owes its own dataset.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusAirWalk
     {

@@ -6,6 +6,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A blueprint's subgrids are one machine, and heat crosses between them.
+    ///
+    /// <para>
+    /// backlog.md `F12` said the opposite — that "subgrids are read as
+    /// separate ships" and "the lab does not reassemble them", so every corpus figure was taken on
+    /// a hull the game would not have simulated that way. It is not true, and had not been for as
+    /// long as `ShipAssembly` existed: 747 of the first 1,002 ships of the 2026-08-22 sweep hold
+    /// more than one grid, 695 of them resolved mechanical joints, and 29,604 joints were built
+    /// across them.
+    /// </para>
+    ///
+    /// <para>
+    /// What was missing is this: `CorpusSurvey` *counts* bridges and asserts the population resolves
+    /// them, and nothing anywhere checked that a bridge actually **moves heat**. A count is not a
+    /// mechanism, and a claim about the lab reassembling ships should not rest on one.
+    /// </para>
+    /// </summary>
     public class SubgridBridgeTests
     {
 

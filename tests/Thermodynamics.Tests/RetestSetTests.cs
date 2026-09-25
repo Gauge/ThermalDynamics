@@ -7,6 +7,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// That the committed retest set is a set something can actually run.
+    ///
+    /// <para>
+    /// <c>tools/corpus/typical.csv</c> was written by <c>typical.py</c> and then read by nothing for
+    /// a while, which is the defect class this repository keeps finding: built, documented, and
+    /// reached by nothing (`D2`). These checks are the cheap half of wiring it — they need neither
+    /// the corpus opt-in nor a game install, so a set that has gone stale fails in the ordinary
+    /// suite rather than eight hours into a walk.
+    /// </para>
+    /// </summary>
     public class RetestSetTests
     {
         [Fact]

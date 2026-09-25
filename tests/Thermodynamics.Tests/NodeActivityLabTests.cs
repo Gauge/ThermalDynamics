@@ -3,6 +3,14 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The activity lab is the instrument that decides the sleep-threshold candidate on
+    /// redesign.md, so what is pinned is that it can tell quiet from
+    /// busy at all: thresholds are monotone (a looser threshold never reports fewer quiet nodes),
+    /// the driven hull is busier than the parked one at the same mark, the disturbance makes the
+    /// background it lands on measurably busier, and every judged population is the whole grid —
+    /// a lab that judged three nodes would agree with anything (`E8`).
+    /// </summary>
     public class NodeActivityLabTests
     {
         private static NodeActivityLab.Result result;

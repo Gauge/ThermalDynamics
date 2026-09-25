@@ -6,6 +6,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The load axis of the pair grid reaches the blocks, and reaches nothing else.**
+    ///
+    /// <para>
+    /// `C12`'s search moved conduction and the clock, which are both transport, and reaching the
+    /// significance window that way costs three of the mod's levers. The load is the dial that is
+    /// not transport: it changes how much heat a ship makes without changing how the heat moves,
+    /// and measured over the retest set it reaches the same window at conductivity ×1. See
+    /// balance.md.
+    /// </para>
+    ///
+    /// <para>
+    /// **A sweep dial that reaches nothing reports *no change* in exactly the shape of a dial that
+    /// reached everything and changed nothing**, which is the failure this repository keeps
+    /// finding — the retest set's own `reach.csv` exists for it. So the override is checked here
+    /// rather than trusted: both waste fractions move, and nothing else does.
+    /// </para>
+    /// </summary>
     public class LoadDialTests
     {
 

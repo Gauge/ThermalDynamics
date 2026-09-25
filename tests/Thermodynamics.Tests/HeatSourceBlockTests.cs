@@ -3,6 +3,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The debug heat source block's dial, which is the half of that block a session cannot check.
+    ///
+    /// <para>
+    /// The block itself is two sliders and a call into <c>ThermalHeatSources</c>, and whether it
+    /// radiates is answered by looking at it. What cannot be answered by looking is whether the
+    /// number under the slider is the number the player set: a <b>clamp</b> that saturates without
+    /// saying so and a <b>codec</b> that reloads a world at a different output both look exactly
+    /// like a correct block, because the readout echoes whatever the dial ended up holding.
+    /// </para>
+    ///
+    /// <para>
+    /// The third thing pinned here is that the block and <c>/thermal heat</c> agree about what a
+    /// heat source is. They are two ways of driving one registry and each has its own defaults; a
+    /// pair like that is the drift <c>wired-to-nothing</c> keeps finding, so the agreement is
+    /// asserted rather than assumed.
+    /// </para>
+    /// </summary>
     public class HeatSourceBlockTests
     {
         [Fact]

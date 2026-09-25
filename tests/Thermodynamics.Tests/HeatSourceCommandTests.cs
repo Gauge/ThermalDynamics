@@ -3,6 +3,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Reading the <c>/thermal heat</c> command.
+    ///
+    /// <para>
+    /// This is the half of the debug tool that can be quietly wrong. Registering a source is one
+    /// call into a registry with its own tests; deciding that <c>5M</c> means five megawatts and
+    /// <c>5</c> means five watts, that <c>pulse 5M 30</c> is watts-then-seconds and not the other
+    /// way round, and that a malformed command is a usage message rather than a zero-watt source
+    /// nobody can see — that is where a slip becomes a modder wondering why their bonfire does
+    /// nothing.
+    /// </para>
+    /// </summary>
     public class HeatSourceCommandTests
     {
 

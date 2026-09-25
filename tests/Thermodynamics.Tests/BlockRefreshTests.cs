@@ -6,6 +6,20 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// <see cref="ThermalSimulation.RefreshBlock"/> is the path for a block whose geometry or
+    /// mounting changed under an existing node — the block is not placed and not removed, so
+    /// neither of the two incremental paths applies to it.
+    ///
+    /// It used to do neither: it refreshed the surface bits, dirtied the topology and left every
+    /// conduction link touching the block carrying a conductance derived from mounting the block
+    /// no longer had. Contact area is the product of both ends' mount fractions, so those links
+    /// were wrong rather than merely stale, and nothing recomputed them. Meanwhile it charged a
+    /// full room remap for the privilege.
+    ///
+    /// These pin both halves: the graph it leaves behind is the graph a full rebuild would build,
+    /// and the flood fill runs again only when what the block seals actually changed.
+    /// </summary>
     public class BlockRefreshTests
     {
 

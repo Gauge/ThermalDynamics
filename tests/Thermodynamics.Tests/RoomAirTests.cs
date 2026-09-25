@@ -6,6 +6,10 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Room air. A sealed room holds a mass of air that every surface bounding it exchanges with,
+    /// which is the only path heat has between two walls that do not touch.
+    /// </summary>
     public class RoomAirTests
     {
 

@@ -5,6 +5,23 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The mod's design thesis, which had never been measured.**
+    ///
+    /// <para>
+    /// `C40` bounded every path that moves heat *inside* a grid at about 9 % of the peak, and closed
+    /// the transport line for retrofits with it. What it could not settle is the claim
+    /// document-of-intent.md actually makes — *cooling designed
+    /// in* — because every rig this repository owned had an **exposed** source. A panel bolted to an
+    /// exposed source radiates wherever it is put, so no rig could see the difference between
+    /// reaching the sky and not reaching it.
+    /// </para>
+    ///
+    /// <para>
+    /// <see cref="DesignedHullLab"/> buries the source in solid armour, which is how one is
+    /// installed, and the difference appears: a bolted panel is buried too.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class DesignedHullTests
     {

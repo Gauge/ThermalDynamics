@@ -3,6 +3,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// `BlockOrientation` rotates through a table built once from its own matrix, and the table is
+    /// held against that matrix exhaustively (`D8`): every one of the thirty-six forward/up pairs —
+    /// the twenty-four orientations and the twelve degenerate pairs that keep the matrix path —
+    /// over every integer vector in a 7×7×7 cube, forward, back, and per face.
+    ///
+    /// <para>
+    /// The matrix is a signed permutation, so both forms are exact on integers and *identical* is
+    /// the right word rather than *close*. What this pins is not the arithmetic but the wiring: a
+    /// slot computed wrongly, an axis stored in the wrong order, or a transpose that is not the
+    /// inverse would each agree on the identity and disagree somewhere in the cube.
+    /// </para>
+    /// </summary>
     public class BlockOrientationCacheTests
     {
         private const int Reach = 3;

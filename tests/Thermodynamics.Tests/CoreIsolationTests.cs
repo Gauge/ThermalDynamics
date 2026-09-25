@@ -8,6 +8,23 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The simulation must not know the game exists.
+    ///
+    /// That isolation is the reason this suite can run at all, and it is also what makes a second
+    /// host possible: Space Engineers 2 keeps blocks in a different shape — integer AABBs on a
+    /// 0.25 m lattice, cells grouped as boxes rather than listed — and an adapter can only be
+    /// written against a core that takes block layout, an environment sample and a frame length,
+    /// and hands back temperatures. Every game type that leaks into the core is a line that
+    /// adapter would have to fake.
+    ///
+    /// It has always been asserted in prose — <c>tests/README.md</c> says the core references one
+    /// assembly and names it — and never by anything that fails. A stray <c>using Sandbox.Game</c>
+    /// would be caught by the build here, because the reference is not present to satisfy it; a
+    /// type that arrives indirectly, through a shared struct or an interface parameter, would not
+    /// be. These tests read the built assembly rather than the source, so they see what actually
+    /// got compiled.
+    /// </summary>
     public class CoreIsolationTests
     {
 

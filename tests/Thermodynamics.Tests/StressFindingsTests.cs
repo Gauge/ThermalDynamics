@@ -7,6 +7,13 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Regressions written from an in-game block-count stress test: twenty 44,632 cell capital
+    /// ships plus sixty projections, run to a world close.
+    ///
+    /// Each test here pins one thing that report got wrong or nearly got wrong. The report itself
+    /// is the specification — where a number is quoted in a comment, it came out of that run.
+    /// </summary>
     [Trait("speed", "slow")]
     public class StressFindingsTests
     {

@@ -5,11 +5,32 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The two classes that turn the stage lab's dials down run one at a time.** `StageLab.Repeats`
+    /// and its convergence settings are static, and a suite that runs eight ways in parallel had two
+    /// classes assigning them at once — which showed up the moment a second dial was added, as a
+    /// stage that stopped before its best was confirmed. Serialised rather than made instance state,
+    /// because a lab that a caller configures is what every other bench command here expects.
+    /// </summary>
     [CollectionDefinition("the stage lab's dials", DisableParallelization = true)]
     public class StageLabDials
     {
     }
 
+    /// <summary>
+    /// `bench stages` is the instrument a performance pass judges a stage on, so this holds the
+    /// two properties that make its reading a reading: every stage it names produces a figure on a
+    /// hull that exercised it, and a stage's work counter is identical across repeats — which the
+    /// lab enforces by refusing, and this checks by asking twice.
+    ///
+    /// <para>
+    /// And a third, since pass 8: **a stage does not stop until its fastest reading has been
+    /// reproduced.** Best-of-fifteen was not converged — three runs of the same binary read the
+    /// surface rebuild at 7.4, 9.6 and 6.5 ms — so a stage now repeats until five readings land
+    /// within two per cent of its best. `EveryStageConfirmsItsBest` is what says that happened
+    /// rather than that the cap was reached.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     [Collection("the stage lab's dials")]
     public class StageLabTests

@@ -5,6 +5,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The wind model on every world the game ships, at every size, in every corner.
+    ///
+    /// <para><b>Space Engineers planets are not small Earths, they are a different kind of object.</b>
+    /// An earthlike world is 120 km across against Earth's 12,742, and its hills reach 12% of its own
+    /// radius against Earth's 0.14%. Terrain is therefore about eighty times steeper relative to the
+    /// world it sits on, a circulation band is 31 km wide rather than 3,300, and the horizon from
+    /// head height is 490 m rather than five kilometres. Every constant in this model came from
+    /// terrestrial meteorology and every one of them lands somewhere unexpected here.</para>
+    ///
+    /// <para>These run the whole matrix at a coarse day so the suite stays quick; the full-resolution
+    /// version is <c>dotnet run --project tests/Thermodynamics.Sim -- wind scenarios</c>.</para>
+    /// </summary>
     public class WindScenarioTests
     {
 

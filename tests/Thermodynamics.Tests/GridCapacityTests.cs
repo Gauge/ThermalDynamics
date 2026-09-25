@@ -6,6 +6,21 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Sizing the cell table before a hull is built, and that it changes nothing but the garbage.**
+    ///
+    /// <para>
+    /// The table doubles as it fills and every doubling copies every entry it already holds, so on a
+    /// 125,000-block hull placing blocks allocated **10.5 MB** of nothing but old tables — 84 bytes a
+    /// block, and most of what the `place` stage allocates. `ThermalGrid` knows the block count
+    /// before it registers the first one, so it says so.
+    /// </para>
+    ///
+    /// <para>
+    /// **A hint, not a bound**: the table is keyed per cell and the count is a block count, so a
+    /// hull of multi-cell blocks still grows once. Nothing is refused for exceeding it.
+    /// </para>
+    /// </summary>
     public class GridCapacityTests
     {
 

@@ -6,6 +6,31 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Whether the synthetic ship still resembles the real one — **tests of the measuring instrument
+    /// rather than of the simulation**. They hold <see cref="Census"/> against the field observations
+    /// recorded beside it and fail when the two drift apart; refresh both together when a dump arrives
+    /// (`M11`). See stiffness.md, How close the synthetic tests are to a real ship.
+    ///
+    /// <para>
+    /// **Two of the three references here were taken at a pace that no longer ships, and only one
+    /// of them can be re-measured.** `C24` moved `ConductionScale` and `HeatTimeScale` together,
+    /// and a substep demand is a conductance over a capacity, so every stiffness figure in this
+    /// class moved with them and none by the same factor. The corpus walk was re-run — 8,105
+    /// blueprints, 190 s — and <see cref="Census.Corpus"/> carries the new figures with the old
+    /// ones beside them. <see cref="Census.Field"/> cannot be: it is two ships from two vanished
+    /// sessions, and re-taking it needs a live session on the new pair. So the corpus is the
+    /// reference where there is a choice, and where a test still reads the dump it says which pace
+    /// each side was taken at (`P6`).
+    /// </para>
+    ///
+    /// <para>
+    /// **And the hull has left the population at the one cap that ships.** At a per-block cap of 8
+    /// it floors 6.91 % of its own blocks against a real population's 0.92 % — seven times as many
+    /// — while at caps of 4, 2 and 1 it is inside the population as it always was. That is
+    /// backlog.md `C26`, pinned below rather than asserted around.
+    /// </para>
+    /// </summary>
     public class CensusFidelityTests
     {
 

@@ -8,6 +8,11 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Each scenario states a conclusion in its summary line. These check the conclusions rather
+    /// than the numbers: a scenario whose headline claim can quietly invert is worse than no
+    /// scenario, because it reads like evidence.
+    /// </summary>
     [Trait("speed", "slow")]
     public class ScenarioClaimTests
     {

@@ -3,6 +3,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Whether a room holds air, decided from the game's answers rather than this model's.
+    ///
+    /// Every one of those answers can veto air and none can insist on it — not because the two
+    /// mistakes are different sizes, which was the reason written down here and is measured false,
+    /// but because the game owns pressurisation and this model has no standing to overrule it.
+    /// **Silence is not one of those answers**, and treating it as one is what `C22` corrected.
+    /// </summary>
     public class RoomPressureTests
     {
         [Fact]
@@ -59,6 +67,9 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// What pressure does to the air itself, once decided.
+    /// </summary>
     public class RoomAirPressureTests
     {
 

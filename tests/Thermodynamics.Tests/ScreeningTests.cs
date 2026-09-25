@@ -4,6 +4,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The cheap pass of the balance lab: what a ship is, before anything is stepped.
+    ///
+    /// Every figure here becomes a row in the matrix the balance criteria are decided from, so an
+    /// error in one of them is an error in a default. The load model is the part most able to be
+    /// wrong while looking right, and the tests are weighted accordingly.
+    /// </summary>
     public class ScreeningTests
     {
         [Fact]

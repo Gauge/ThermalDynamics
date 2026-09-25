@@ -4,6 +4,19 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The watts row is written by the environment pass rather than zeroed first, and the only thing
+    /// that makes that safe is an ordering claim in three parts: the pass runs first, reaches
+    /// **every** node including buried ones and a switched-off environment, and still does so when
+    /// sliced across frames.
+    ///
+    /// <para>
+    /// The assertion is **bit-identical** rather than close enough (`D8`), because a node whose watts
+    /// were not reset integrates a doubled source term — a slow drift found in a save months later.
+    /// A memset that is *nearly* redundant is a correctness defect at any price, whatever it saves.
+    /// See benchmarks.md, The watts row is written.
+    /// </para>
+    /// </summary>
     public class WattsClearFusionTests
     {
 

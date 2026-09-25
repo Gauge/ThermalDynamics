@@ -7,6 +7,17 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The one constraint SE2's lattice imposes: **nothing whose cost matters may be proportional to a
+    /// block's volume**, since a 5 m block spans 8,000 cells there against one here. Contact area,
+    /// face area, surface area and conduction depth all fall out of two integer AABBs, and these pin
+    /// that end to end on mixed-size grids.
+    ///
+    /// <para>
+    /// **They do not claim SE2 is supported.** Block *storage* is still per cell, which is the open
+    /// item — see engine-notes.md and scale-design.md, Implementation status.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class Se2LatticeTests
     {

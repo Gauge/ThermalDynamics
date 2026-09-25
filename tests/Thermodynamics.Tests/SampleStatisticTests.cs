@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The lab that asks which summary of a stage's repeats is reproducible.**
+    ///
+    /// <para>
+    /// `SampleStatisticLab` decides a rule the whole performance page rests on, so its arithmetic is
+    /// checked against hand-computed answers rather than against itself (`E7`), and the two ways it
+    /// can quietly compare the wrong thing — a stage present in some runs and not others, a run file
+    /// that parsed to nothing — are checked to be loud (`P2`).
+    /// </para>
+    /// </summary>
     public class SampleStatisticTests
     {
         [Fact]

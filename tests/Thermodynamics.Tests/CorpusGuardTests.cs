@@ -3,6 +3,30 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The two guards on the corpus walks, both of which used to say the opposite of what they
+    /// meant.
+    ///
+    /// <para>
+    /// **The opt-in gate read an empty value as opted in.** It tested `THERMAL_CORPUS_TESTS`
+    /// against null, and on Linux `THERMAL_CORPUS_TESTS=` is a variable that exists and holds
+    /// nothing — so the obvious way to write "off" turned every corpus walk on. That is `C8` and
+    /// backlog.md `H3`.
+    /// </para>
+    ///
+    /// <para>
+    /// **The resume counted files while the writing was per ship.** A skip supplied by hand off a
+    /// progress line both re-emitted the ships of the interrupted batch and lost the ones it had
+    /// not reached; the shipped 2026-08-21 dataset carries fifty duplicate rows from exactly that.
+    /// It is now a record of finished blueprints rather than a count, which is `H2`.
+    /// </para>
+    ///
+    /// <para>
+    /// Neither can be tested through the walks themselves — they read a corpus that is gigabytes
+    /// and lives outside the repository — so both are tested as what they are: two decisions taken
+    /// on values.
+    /// </para>
+    /// </summary>
     public class CorpusGuardTests
     {
         [Theory]

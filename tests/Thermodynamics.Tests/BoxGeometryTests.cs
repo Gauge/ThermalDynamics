@@ -7,6 +7,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The analytic block geometry that replaced per-cell enumeration.
+    ///
+    /// The cases that matter most are the ones with <em>unequal</em> block sizes. Space Engineers
+    /// 1 has two block sizes and never mixes them on one grid, so every joint is between equals
+    /// and a great many wrong formulas give the right answer. Space Engineers 2 ships eight block
+    /// sizes on a shared lattice, so a joint between a small block and one twenty times its
+    /// width is ordinary. These tests pin the behaviour for that case now, while it is still
+    /// cheap to get right.
+    /// </summary>
     public class BoxGeometryTests
     {
 

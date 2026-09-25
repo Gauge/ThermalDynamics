@@ -3,6 +3,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The line the mod puts on screen as a matter of course**, and the one thing about it that
+    /// can be checked outside a session: what it says.
+    ///
+    /// <para>
+    /// The intent page decides that basic environmental information should be on screen without
+    /// waiting for a failure, and sets the bar at *clear* rather than *present* — somebody who has
+    /// never read this repository should be able to look at the screen and tell their ship is
+    /// getting hotter. What that means in code is a decision about wording and thresholds, and a
+    /// decision is a thing to pin; the drawing is a shell over it that only a session can judge
+    /// (`B41`).
+    /// </para>
+    /// </summary>
     public class EnvironmentReadoutTests
     {
         private const float Critical = 1000f;

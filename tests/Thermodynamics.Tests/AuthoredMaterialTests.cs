@@ -7,6 +7,26 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every material figure `Cubes.xml` authors says where it came from, and the ones that claim a
+    /// real material are held to it.
+    ///
+    /// <para>
+    /// **A comment reading `real units: aluminium` beside a `237` is a claim, and nothing checked
+    /// it.** That is the shape of backlog.md `C2` — the authored values
+    /// predate three changes to the model that reads them, and no reader could tell which numbers
+    /// still meant what they said. These checks do not decide whether a value is *balanced*; they
+    /// decide whether it is what it claims to be, which is the part a test can settle and the part
+    /// that was silently rotting.
+    /// </para>
+    ///
+    /// <para>
+    /// Two rules, and the second is what makes the first durable: a figure may name a material in
+    /// <see cref="ReferenceMaterials"/> and must then match it, or it may say `invented` and is then
+    /// nobody's business but the author's — and it must do one of the two, so a value cannot be
+    /// added with no provenance at all. See definitions.md, Conductivity is in real W/(m·K).
+    /// </para>
+    /// </summary>
     public class AuthoredMaterialTests
     {
         private const float Tolerance = 0.05f;

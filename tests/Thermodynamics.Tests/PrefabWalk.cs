@@ -5,6 +5,29 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// `G7`, the compatibility floor: a ship the game spawns survives arriving.
+    ///
+    /// <para>
+    /// Every other criterion is measured on ships players chose to upload. These are the 705 the
+    /// game puts in front of a player whether they want them or not — cargo ships, drones,
+    /// encounters, unknown signals, respawn pods — and a mod that destroys them as they arrive is
+    /// broken however good its physics is. The criterion is stated in
+    /// balance-lab.md and was written before any of this ran (`E11`).
+    /// </para>
+    ///
+    /// <para>
+    /// **The second case is what makes the first mean anything.** A floor that can only ever pass
+    /// has not been tested, so the same prefabs are run again under full load, where they are
+    /// expected to fail — 616 of 705 do. Without it, `G7 HOLDS` would be indistinguishable from a
+    /// walk that measured nothing (`E8`).
+    /// </para>
+    ///
+    /// <para>
+    /// Needs the game installed, and stands down without it like everything else that reads the
+    /// install.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class PrefabWalk
     {

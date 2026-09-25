@@ -7,6 +7,32 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The invariants that make the lab's output trustworthy without anyone reading it.
+    ///
+    /// <para>
+    /// Three faults have been found in this harness so far — a gyro's torque read as thrust, a
+    /// block with no declared mount points built with no mounts at all, and a battery counted as
+    /// charging and discharging at once. Every one of them was a *definition read wrongly*, every
+    /// one produced a plausible-looking report, and **not one was caught by a test**. They were
+    /// caught by looking at a number and disbelieving it.
+    /// </para>
+    ///
+    /// <para>
+    /// That is not a method that scales to ten thousand ships. These are the standing versions of
+    /// the disbelief: physical statements that must hold whatever the ship, so a harness that
+    /// starts lying fails here rather than in a report someone has to read carefully.
+    /// </para>
+    ///
+    /// <para>
+    /// **What is left here is what nothing else does.** `CorpusSurvey` absorbed the walks that used
+    /// to stand alone — sealed blocks are rare, a settled grid sheds what it makes, more load is
+    /// never cooler — and `SunlightPanelWalk` took the sunlight claim, because all four want the
+    /// same build of the same ship and doing them in one pass costs one pass. The bodies stayed
+    /// behind as uncalled helpers for a while, which is the worst of both: a claim that reads as
+    /// checked and runs nowhere. They are gone; the claims are in the two classes named above.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class LabInvariantTests
     {

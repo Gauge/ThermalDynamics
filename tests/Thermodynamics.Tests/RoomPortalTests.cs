@@ -6,6 +6,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Rooms are built from structure, and doors are portals through it. A door cycling changes
+    /// which rooms reach open air; it does not change where the rooms are.
+    ///
+    /// The property that has to hold above all others is that the consumer cannot tell the
+    /// difference: <see cref="SurfaceMap.GetExposedFaces"/> asks one question per face — is the
+    /// cell beyond it outdoors — and it must get the same answer it would from a map rebuilt
+    /// from scratch with the doors in their current state.
+    /// </summary>
     public class RoomPortalTests
     {
 

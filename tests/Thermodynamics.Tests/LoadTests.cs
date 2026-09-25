@@ -8,9 +8,20 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Keeps the timed tests off the same cores as the rest of the suite. A stopwatch reading taken
+    /// while thirty other tests saturate the machine measures the machine: the first run of these
+    /// reported 1.7x and then 3.2x from the same binary, all of it scheduling.
+    /// </summary>
     [CollectionDefinition("load", DisableParallelization = true)]
     public class LoadCollection { }
 
+    /// <summary>
+    /// What an update costs, asserted on work counters rather than on a stopwatch — a millisecond
+    /// threshold is a claim about the machine, and "placing one block must not visit every node" is a
+    /// claim about the algorithm. Every test writes its figures to the test output, so a suite run is
+    /// also a performance report. See load-and-hitching.md, Catching it again.
+    /// </summary>
     [Collection("load")]
     [Trait("speed", "slow")]
     public class LoadTests

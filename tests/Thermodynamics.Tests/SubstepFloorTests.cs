@@ -7,6 +7,26 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A step is divided into as many substeps as the stiffest node on the grid needs, and every
+    /// other node pays for them. On a real capital ship that stiffest node is a light fitting:
+    /// measured on a 42,051-block hull, forty-three 16 kg lights asked for twenty-eight substeps
+    /// while the five hundred kilogram armour around them asked for one, and the ship ran at a
+    /// third of real time to pay for it.
+    ///
+    /// <c>MaxSubstepsPerBlock</c> is the answer, and it is an approximation, so what it does and
+    /// does not disturb has to be pinned rather than asserted in prose:
+    ///
+    /// <list type="bullet">
+    /// <item>it bounds what conduction can ask for;</item>
+    /// <item>it moves no node that was already above the floor;</item>
+    /// <item>it does not move the temperature anything settles at, because a steady state is
+    /// where the watts cancel and has nothing to do with heat capacity;</item>
+    /// <item>it leaves the block's real capacity on the node, so every readout still describes
+    /// the block rather than the approximation used to integrate it;</item>
+    /// <item>and it is inert when off.</item>
+    /// </list>
+    /// </summary>
     public class SubstepFloorTests
     {
         private readonly ITestOutputHelper output;

@@ -8,6 +8,47 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Conduction and the clock, moved together**, which is the one thing every sweep so far has
+    /// not done and the whole of `G8`'s open question.
+    ///
+    /// <para>
+    /// The projected route to the significance window — conductivity ×4 with `HeatTimeScale` ≈ 15,
+    /// for a ~200 s crossing at ~0.7 substeps — was arrived at by multiplying two single-dial
+    /// curves together. Substep demand goes as conductivity × clock, so the projection is at least
+    /// dimensionally sound; whether a *crossing time* composes the same way is an extrapolation
+    /// across an interaction nothing has run. This runs the grid.
+    /// </para>
+    ///
+    /// <code>
+    ///     THERMAL_CORPUS_TESTS=1 THERMAL_CORPUS_DATA=out/pairs \
+    ///         dotnet test --filter "FullyQualifiedName~PairSweep"
+    /// </code>
+    ///
+    /// <para>
+    /// **On the retest set, not the standing panel, and that is a choice with a cost.** `G8` is a
+    /// criterion about the event *a player meets*, and the retest set is the forty hulls chosen to
+    /// be the ones people fly; the panel is chosen for spread, so its median is the median of a
+    /// deliberately extreme sample. The cost is comparability: every published knob curve was taken
+    /// on the panel, so **the edges of this grid are the same dials on a different population and
+    /// are not the published rows re-derived**. What is compared here is the interior against the
+    /// edges *within this dataset*, which is what the interaction question needs and which is
+    /// `M1`-clean because every cell shares a population, a clock rule and a stop criterion.
+    /// </para>
+    ///
+    /// <para>
+    /// The panel would have been the other choice and was priced: 656,516 blocks against the retest
+    /// set's 177,822, which is eleven hours against three for the same sixteen cells. Point
+    /// <c>THERMAL_PANEL</c> at <c>tools/corpus/panel.csv</c> to run it there instead — the walk
+    /// reads whatever file it is given and names the count it resolved.
+    /// </para>
+    ///
+    /// <para>
+    /// **The cells run in sequence**: a material override is a process-wide static that empties the
+    /// shared model cache, so two cells in flight would build ships out of each other's world. The
+    /// parallelism is inside a cell, across the panel.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class PairSweep
     {

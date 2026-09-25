@@ -4,6 +4,26 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The exposure refresh writes only the nodes whose faces moved, and what makes that safe is
+    /// that writing all of them would have produced **the same bits** (`D8`).
+    ///
+    /// <para>
+    /// The refresh runs over every node whenever the room map republishes. On a hull nobody is
+    /// building, every one of those nodes gets the answer it already had — and before Pass 9's
+    /// seventh iteration each was written anyway and marked `StateDirty`, so the next
+    /// `SyncNodeState` re-mirrored the whole grid and, on a server, resent it. Skipping is only
+    /// correct if a node that was skipped was genuinely identical, and the failure it would cause is
+    /// silent: a stale radiating area looks like physics.
+    /// </para>
+    ///
+    /// <para>
+    /// The reference here is the code the skip replaced, not the skip's own intent — six per-face
+    /// writes and a `RefreshExposure`, which is unconditional and therefore cannot skip anything.
+    /// The last two tests are what keep the rest honest: without them a skip that never engaged, or
+    /// one that swallowed a real change, would pass every equivalence assertion above (`E8`).
+    /// </para>
+    /// </summary>
     public class ExposureSkipTests
     {
 

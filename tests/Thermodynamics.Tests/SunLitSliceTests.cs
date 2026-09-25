@@ -5,6 +5,27 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The lit-fraction sweep is sliced across frames, and a sliced pass has to land on the same
+    /// answer the whole pass would have.
+    ///
+    /// <para>
+    /// Two budgeted walks run behind the sun: the shadow map's, which decides which cell faces the
+    /// sun reaches, and the solver's own, which turns that map into a lit fraction per node face.
+    /// The suite pinned incremental-versus-one-shot equivalence for the conduction graph and for
+    /// the room flood fill, and never for this one — it checked only that the *cached environment
+    /// rows* were invalidated when the sweep published, which is a different claim: it says a stale
+    /// row is not read, not that the row that replaces it is right.
+    /// </para>
+    ///
+    /// <para>
+    /// The gap mattered because the sweep writes into a shared array in place. A cursor that
+    /// overran, a restart that reset the fill value but not the cursor, or a budget boundary that
+    /// skipped a node would leave some faces carrying the previous pass's fraction, and every
+    /// symptom of that is a solar figure slightly wrong on a large grid — which nothing else here
+    /// would catch.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class SunLitSliceTests
     {

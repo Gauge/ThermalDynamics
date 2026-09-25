@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The extension files the mod ships, read the way Definition Extensions reads them.
+    ///
+    /// The game's own loaders are lenient; Draygo's importer deserialises with the strict .NET
+    /// serialiser, and a file it rejects is rejected silently in ordinary play — one log line in a
+    /// file nobody reads, and every entry in the file quietly absent. The shipped Planets.xml
+    /// carried a "--" inside its header comment, which is illegal XML, so no world that ever
+    /// loaded the mod received a single per-planet climate. The report's
+    /// <c>[from definition: None]</c> line is what finally said so.
+    /// </summary>
     public class DefinitionFileTests
     {
 

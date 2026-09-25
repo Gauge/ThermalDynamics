@@ -7,6 +7,11 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **How much of the glow's colour channel a player can actually see**, which is what
+    /// backlog.md `B34` needed before the intent page could say who the
+    /// two-channel design is for.
+    /// </summary>
     public class GlowChannelTests
     {
         private readonly ITestOutputHelper output;

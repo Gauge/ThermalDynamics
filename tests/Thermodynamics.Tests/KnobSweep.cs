@@ -9,6 +9,31 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every balance dial, swept over the standing panel, so each one gets a measured response
+    /// curve rather than an argument.
+    ///
+    /// <para>
+    /// Opt-in on the same terms as the rest of the corpus work, and additionally on a panel file:
+    /// <c>tools/corpus/panel.csv</c>, built by <c>tools/corpus/panel.py</c> from a census and a
+    /// survey. The panel is chosen for spread — both grid sizes, both failure modes, the hulls that
+    /// are critical in exactly one scenario, and controls that must stay safe — and it is small
+    /// enough that the whole grid of configurations is hours rather than weeks. **Its size is not
+    /// quoted here**: it was 36 for as long as this comment said so and the file had 50 (`E5`), and
+    /// `panel.csv` is the only place that answers it.
+    /// </para>
+    ///
+    /// <code>
+    ///     THERMAL_CORPUS_TESTS=1 THERMAL_CORPUS_DATA=out/knobs dotnet test --filter KnobSweep
+    /// </code>
+    ///
+    /// <para>
+    /// **The configurations run in sequence, and that is deliberate.** A material override is a
+    /// process-wide static that empties the shared model cache, so two configurations in flight at
+    /// once would build ships out of each other's world. The parallelism is inside a configuration,
+    /// across the panel, which is where it was anyway.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class KnobSweep
     {

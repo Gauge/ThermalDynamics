@@ -6,6 +6,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The world a grid sits in, resolved from one sample into the terms a step consumes.
+    ///
+    /// <para>
+    /// Everything here is a function of where the grid is and what time it is, and none of it depends
+    /// on a temperature. These are the boundary conditions; the suites below them are what the model
+    /// does with those conditions.
+    /// </para>
+    /// </summary>
     public class EnvironmentSolverTests
     {
         [Fact]
@@ -159,6 +168,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// Stefan-Boltzmann, against a figure computed by hand rather than by the model.
+    ///
+    /// <para>
+    /// Four properties follow from the equation and each has a case: radiation is toward ambient
+    /// rather than away, it needs an exposed face, emissivity is the rate dial, and a block colder
+    /// than ambient warms by the same equation that cools a hot one.
+    /// </para>
+    /// </summary>
     public class RadiationTests
     {
 
@@ -266,6 +284,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The three environment mechanisms that are not radiation, each checked for what makes it distinct.
+    ///
+    /// <para>
+    /// Convection carries the air blend and falls with density; solar follows the projected area of a
+    /// face and disappears under occlusion; friction has a speed threshold and cubes above it. The one
+    /// non-obvious result is that a settled temperature is not monotonic in air density — thinner air
+    /// convects less, and also blocks less sun.
+    /// </para>
+    /// </summary>
     public class ConvectionSolarFrictionTests
     {
         [Fact]

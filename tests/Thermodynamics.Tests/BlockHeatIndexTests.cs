@@ -9,6 +9,23 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The one number that says whether a block can survive itself, and the gate on it.
+    ///
+    /// <para>
+    /// The corpus found that every ship carrying a jump drive loses a block, whatever else is true
+    /// of it, and the reason turned out not to need a corpus at all: a `LargeJumpDrive` makes
+    /// 4.8 MW into 262 m² of its own surface and carries a critical temperature of 689 K, so it
+    /// passes its own limit before any question of hull, mounting or cooling arises. That is
+    /// checkable from the definition, in milliseconds, and this is the check.
+    /// </para>
+    ///
+    /// <para>
+    /// **The known-impossible list is the point of the test.** It is not there to excuse the blocks
+    /// on it; it is there so that the day one of them is fixed, or a new block joins them, the suite
+    /// says so. Removing an entry should be the last step of fixing a block.
+    /// </para>
+    /// </summary>
     public class BlockHeatIndexTests
     {
         private readonly ITestOutputHelper output;

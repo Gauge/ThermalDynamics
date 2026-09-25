@@ -6,6 +6,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Emissivity and solar absorptivity are two numbers.
+    ///
+    /// <para>
+    /// One number used to do both jobs: `ThermalNode.RadiationCoefficient` is
+    /// `Emissivity x sigma x area` for the heat a block gives up, and the same emissivity scaled
+    /// the sun and every point source coming in. A good radiator was therefore forced to be a good
+    /// absorber, which is the one combination real spacecraft radiators exist to avoid — a
+    /// selective surface is high in the thermal infrared and low in the visible. Backlog `B27`.
+    /// </para>
+    ///
+    /// <para>
+    /// The compatibility constraint is the point of most of this class: **an authored file that
+    /// says nothing about absorptivity must behave exactly as it did**, and 674 authored values plus
+    /// every third-party definition say nothing about it.
+    /// </para>
+    /// </summary>
     public class SolarAbsorptivityTests
     {
         [Fact]

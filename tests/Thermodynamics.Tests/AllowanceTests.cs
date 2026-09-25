@@ -7,6 +7,18 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Holds <see cref="AllowanceLab"/> to the two claims a decision about
+    /// <c>MaxElementVisitsPerStep</c> rests on: that the setting is a per-frame budget, and that
+    /// the rate it trades away has a price nobody may read off a straight line.
+    ///
+    /// <para>
+    /// The timed columns are not asserted here — a millisecond is a claim about the machine
+    /// (`M4`), and the rows that carry one are the lab's report rather than its contract. What is
+    /// asserted is the arithmetic, the ordering between worlds, and the interpolation, all of
+    /// which are properties of the code.
+    /// </para>
+    /// </summary>
     [Collection("load")]
     [Trait("speed", "slow")]
     public class AllowanceTests

@@ -3,6 +3,14 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The remap-locality lab is the instrument that decides the change-local remap candidate on
+    /// redesign.md, so what is pinned is the instrument's honesty: the
+    /// diff sees change where a mutation made one, sees a *lot* of change where a mutation opened
+    /// a room — the case where a big answer is the right answer — and a full pass's visited count
+    /// dwarfs the changed count for a skin change, which is the asymmetry the whole evaluation
+    /// rests on. Every claim is on a hull the lab proves has compartments first (`E8`).
+    /// </summary>
     public class RemapLocalityLabTests
     {
         private static List<RemapLocalityLab.Row> rows;

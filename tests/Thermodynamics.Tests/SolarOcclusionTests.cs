@@ -6,6 +6,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Occlusion by everything that is not the grid itself: a planet's night side, an asteroid, a
+    /// station overhead.
+    ///
+    /// The raycasts belong to the game and cannot run here. What can, and what these cover, is the
+    /// part that decides what the raycasts mean: the share of a ship that ends up in shadow, and
+    /// where the rays are cast from.
+    /// </summary>
     public class SolarOcclusionTests
     {
 
@@ -119,6 +127,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// Where to cast from when asking whether the sun reaches a grid.
+    ///
+    /// <para>
+    /// One ray from the centre makes a large ship flip from fully lit to fully dark the instant its
+    /// centre crosses a terminator. These pin the properties that turn that step into a ramp: the
+    /// centre comes first so one sample behaves as it always did, opposite corners are paired so any
+    /// even count straddles the hull, and every point is inside the hull rather than beside it.
+    /// </para>
+    /// </summary>
     public class SolarOcclusionSamplerTests
     {
         private static readonly BoundingBoxD Ship =

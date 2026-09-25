@@ -9,6 +9,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The eight worlds `PlanetLab` transcribes still say what the installed game says.
+    ///
+    /// <para>
+    /// `PlanetLab` generates the shipped `Planets.xml` and opens by claiming that every input comes
+    /// from `PlanetGeneratorDefinitions.sbc` and that "nothing here is remembered or estimated" —
+    /// but the inputs are typed into a table by hand, and until now nothing compared the two. It is
+    /// the same gap `TheVanillaReferenceStillMatchesTheInstalledGame` closed for blocks, on a table
+    /// that decides the climate of every world in the game (`E7`).
+    /// </para>
+    ///
+    /// <para>
+    /// **Reading the file is itself a trap worth recording.** Six of the eight worlds are written as
+    /// `&lt;Definition&gt;` and two — Triton and Pertam — as `&lt;PlanetGeneratorDefinition&gt;`, so
+    /// a reader that keys on the first name silently sees six worlds and reports success. This test
+    /// asserts it found all eight for that reason.
+    /// </para>
+    /// </summary>
     public class PlanetReferenceTests
     {
         private class Definition

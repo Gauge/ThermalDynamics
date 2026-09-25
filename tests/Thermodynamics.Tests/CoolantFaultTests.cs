@@ -6,6 +6,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// "I built a ring and nothing happened" is the commonest way a coolant loop fails, and the loop
+    /// list cannot answer it: the whole symptom is that the loop is absent. These pin the reason
+    /// given for each way a run can fail to close.
+    ///
+    /// The case that prompted it: a field dump held six copies of one ship, four with a working loop
+    /// and two without, and nothing in the report could say what differed between them.
+    /// </summary>
     public class CoolantFaultTests
     {
 

@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The offline planet, and the three questions a field dump could not answer.
+    ///
+    /// The first run of wind telemetry from a real world produced 2.9 minutes of samples, at
+    /// latitudes 5° to 30°, on ground so gentle that sheltering never took more than 7% and
+    /// channelling never turned the wind more than a degree for 57% of samples. None of the model's
+    /// interesting behaviour was exercised. These hold the simulator to exercising all of it, so
+    /// that a change to the model is answerable at a desk and only the *world* has to be checked in
+    /// game.
+    /// </summary>
     public class WindLabTests
     {
 

@@ -7,6 +7,10 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The heat pump. It is the only thing in the model that moves heat the wrong way up a
+    /// gradient, and the only one that spends energy from outside the grid to do it.
+    /// </summary>
     public class HeatPumpTests
     {
 

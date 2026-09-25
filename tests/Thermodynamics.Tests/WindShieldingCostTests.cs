@@ -7,6 +7,31 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What windward shielding would cost, measured before it is built — because the one thing
+    /// the drag milestone says has no measurement behind it is the thing that decides whether it can work at all.**
+    ///
+    /// <para>
+    /// The machinery exists. `SunShadowMap` is not a sun pass, it is a **direction** pass:
+    /// `Restart(grid, direction, occluders)` takes the direction as an argument, walks the grid
+    /// against it and produces a per-face lit fraction. Aimed at the relative wind it would give
+    /// per-face windward exposure, so a block behind another stops being heated and dragged as
+    /// though it were in the open.
+    /// </para>
+    ///
+    /// <para>
+    /// **The unmeasured part is the cadence, and the cadence is not about the weather.** The pass
+    /// restarts when its direction moves more than `SunRebuildCosine`, which is cos(2°), and the
+    /// direction it tracks is in **grid-local** space. The sun crosses two degrees in tens of
+    /// seconds. The relative wind crosses two degrees whenever the *ship turns two degrees* — so
+    /// the rate is set by the pilot, not the sky.
+    /// </para>
+    ///
+    /// <para>
+    /// This measures how long a pass takes on a real hull and states the turn rate at which it can
+    /// never finish. It is the number the drag milestone has to be designed against.
+    /// </para>
+    /// </summary>
     public class WindShieldingCostTests
     {
         private readonly ITestOutputHelper output;

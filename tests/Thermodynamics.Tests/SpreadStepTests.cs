@@ -6,6 +6,23 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A step spread across many frames must produce exactly the same answer as the same step run
+    /// in one go.
+    ///
+    /// This is the whole safety argument for spreading, and it is not a small claim. The original
+    /// mod also spread its work across frames and that was a defect: it advanced <em>different
+    /// blocks on different frames</em>, so a block's neighbours could be a frame ahead of or
+    /// behind it, the result depended on iteration order, and it had to alternate sweep direction
+    /// every pass to keep the bias fair.
+    ///
+    /// What is spread here is the arithmetic of a single substep, never the simulation. Every
+    /// exchange is computed from the temperatures at the start of the substep and summed into a
+    /// watts buffer that is applied to every node together at the end — and a sum has the same
+    /// value however many pieces it is computed in. So the assertion is not "close enough", it is
+    /// <b>bit-identical</b>, and anything less means a slice is reading state another slice has
+    /// already moved.
+    /// </summary>
     [Trait("speed", "slow")]
     public class SpreadStepTests
     {

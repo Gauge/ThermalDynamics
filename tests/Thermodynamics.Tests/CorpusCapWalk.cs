@@ -6,6 +6,42 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every ship in the corpus, in air, **twice**: with the per-block substep cap off as it ships,
+    /// and with `MaxSubstepsPerBlock 6`.
+    ///
+    /// <para>
+    /// **Why it exists.** backlog.md `C3` asks whether that cap should be
+    /// a default and is undecided only because what it costs has been measured on *one hull* —
+    /// 0.028 K on the worst-placed block of a driven census hull. `G6`'s cost half fails in air
+    /// (`F11`), and the cap is the one lever that lowers a step's work rather than moving it into
+    /// the frame. They are the same question, and this is the measurement. What the walk is
+    /// expected to say was written into
+    /// balance-lab.md
+    /// with its falsifiers before any of this ran (`E1`, `E11`).
+    /// </para>
+    ///
+    /// <para>
+    /// **The one thing the design has to get right: both arms run to the same simulated clock.**
+    /// `Battery.Run` stops when the hottest block moves less than 0.25 K in a sixty-second chunk,
+    /// so two configurations of one ship stop at different instants — and the difference this walk
+    /// is measuring is expected to be a hundredth of a kelvin, two orders of magnitude under that
+    /// tolerance. Comparing two settle-stopped runs would have measured the stopping rule (`M1`,
+    /// `P6`). So the uncapped arm runs first, and its elapsed clock is handed to the capped one
+    /// through <see cref="Battery.RunForSeconds"/>.
+    /// </para>
+    ///
+    /// <para>
+    /// **What it judges, and what it only records.** The population figures are scored downstream
+    /// by `verdict.py` and `cap.py` against markers already written down; what this walk asserts is
+    /// the four things only the run itself can check — that the air scenarios carried convection,
+    /// that the cap held something back, that a capped run is never *stiffer* than its own control,
+    /// and that the two arms really did run the same clock. The identity the projection rested on —
+    /// capped demand being `min(uncapped demand, cap)` — is asserted here too, because it is the
+    /// assumption under the predicted benefit and a walk that does not test its own premise has
+    /// tested nothing (`P4`).
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class CorpusCapWalk
     {

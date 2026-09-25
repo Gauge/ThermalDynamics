@@ -4,6 +4,17 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// One overheating block produces <b>one</b> overheat event a step, not one per substep — because
+    /// three consumers read the list's length as a count of blocks rather than summing it, and the
+    /// harness's batched path keeps every step's events for a whole run.
+    ///
+    /// <para>
+    /// The first test here is the one that matters: **total damage over a run must not change**, since
+    /// that is what the accumulation could have broken (`D8`).
+    /// See benchmarks.md, One overheat event per block per step.
+    /// </para>
+    /// </summary>
     public class OverheatEventTests
     {
 

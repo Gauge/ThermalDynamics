@@ -5,6 +5,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Which block faces the model believes are open to the sky, and why.
+    ///
+    /// Exposure decides radiation, convection and solar gain, so a face wrongly called buried is a
+    /// block that never sheds or takes heat — and from the outside every rejection looks the same.
+    /// These pin all three rejection rules separately, on the cases that actually occur: a face
+    /// partly covered by a smaller block, a face against a block that is not airtight, a face onto
+    /// a room that is sealed and the same face once it is vented, and the interior faces of a
+    /// multi-cell block.
+    ///
+    /// The audit is checked against <see cref="SurfaceMap.GetExposedFaces"/> everywhere, because
+    /// its whole value is being trusted when the two could disagree.
+    /// </summary>
     public class ExposureAuditTests
     {
 

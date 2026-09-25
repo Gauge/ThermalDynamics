@@ -6,6 +6,28 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every room's cells live in one array, and the things that makes safe.
+    ///
+    /// <para>
+    /// The map used to hold each room as a `HashSet&lt;Vector3I&gt;` and pay about seventeen bytes
+    /// a cell over a list for it. Nothing searched a room — the map answers "which room is this
+    /// cell in" from a sorted index that answers for every room at once — so the set was buying
+    /// deduplication and a lookup, and neither was wanted. On a 500,000-block hull that was 39 MB.
+    /// Then the per-room lists became ranges into one store, so a rebuild sized from the pass
+    /// before it copies nothing (performance.md, Pass 4, Iteration 2).
+    /// </para>
+    ///
+    /// <para>
+    /// Neither a list nor an array carries a duplicate check, so the property the set was silently
+    /// providing has to be asserted instead: the flood offers each cell exactly once, because every
+    /// `AddToRoom` is behind a visited bitset that is tested and set in the same breath. These pin
+    /// that, the agreement between a room's own cells and the index that finds them, and the two
+    /// properties one store depends on — that a room's range is contiguous and that a completed
+    /// pass carries no slack — on hulls with real compartments rather than on a shape built to
+    /// have one.
+    /// </para>
+    /// </summary>
     public class RoomCellStorageTests
     {
 

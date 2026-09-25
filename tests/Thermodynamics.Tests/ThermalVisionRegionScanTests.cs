@@ -8,6 +8,7 @@ using Region = Thermodynamics.Presentation.ThermalVisionRegionPartition.Region;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Fair scan work, conservative group heat, atomic publication and failure cleanup.</summary>
     public class ThermalVisionRegionScanTests
     {
         [Fact]

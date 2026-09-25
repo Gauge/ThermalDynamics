@@ -5,6 +5,29 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Why the same retune costs more in vacuum and less in air**, which is the arithmetic under
+    /// the finding that decided `C12`.
+    ///
+    /// <para>
+    /// Substep demand is a conductance over a heat capacity. `HeatTimeScale` divides every
+    /// capacity and touches nothing else, so lowering it divides *every* stiffness term at once;
+    /// multiplying a block's conductivity restores the conduction term and only that one. A block
+    /// whose stiffness comes from its neighbours therefore gets dearer by
+    /// <c>conductivity × clock / 225</c>, and a block whose stiffness comes from the air around it
+    /// gets cheaper by <c>clock / 225</c>. Two rigs, one of each, are what these tests are.
+    /// </para>
+    ///
+    /// <para>
+    /// **The population figures are not pinned here and cannot be.** That air is where the budget
+    /// goes — p99 73.4 substeps at 200 m/s against the 64 the caps grant, against 7.8 in vacuum —
+    /// is a measurement over 49 workshop hulls that live outside the repository, and it is scored
+    /// by `tools/corpus/air.py`. What is checkable without them is the mechanism that produces it,
+    /// and a rig that isolates one term is a better test of that than a hull where the two are
+    /// mixed in proportions nobody chose (`E7`). See
+    /// balance.md.
+    /// </para>
+    /// </summary>
     public class AirCostTests
     {
         private const float CandidateClock = 100f;

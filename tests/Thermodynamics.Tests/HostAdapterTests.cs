@@ -5,6 +5,10 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The parts of the game adapter that can be checked without the game: the gate that decides
+    /// whether a tick is worth sampling the world for, and the coolant plumbing table.
+    /// </summary>
     public class HostAdapterTests
     {
 

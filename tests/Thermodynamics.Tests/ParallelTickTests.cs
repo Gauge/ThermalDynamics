@@ -5,6 +5,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The boundary a fleet is solved in parallel across, checked as text.**
+    ///
+    /// <para>
+    /// `D19`'s shape is *solve in parallel, apply on the game thread*, and what makes it safe is not
+    /// the threading but the boundary: `ThermalGrid.SolveTick` touches nothing outside its own grid,
+    /// and everything that reads or writes the game happens in `PrepareTick` or `PublishTick`. That
+    /// is a property of the source rather than of a run — the harness cannot construct a game
+    /// component at all, and a session is the only place a violation would show, as a crash on a
+    /// worker thread that nobody can reproduce.
+    /// </para>
+    ///
+    /// <para>
+    /// So it is asserted the way this repository asserts the settings plumbing: by reading the file.
+    /// A test that runs the parallel path is not possible here; a test that says *this method does
+    /// not name the game* is, and it is the check that would have caught the mistake.
+    /// </para>
+    /// </summary>
     public class ParallelTickTests
     {
 

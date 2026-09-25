@@ -5,6 +5,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A block telling the drag model it is a different shape than its faces suggest.**
+    ///
+    /// <para>
+    /// The model's only shape term is a projected area — six exposed-face fractions weighted by
+    /// their incidence — so it cannot tell a jet engine from a box of the same size. the drag milestone is the
+    /// interface for a mod that knows its own block's shape to say so, and the mechanism is a
+    /// multiplier on the exposure the solver already computes rather than a parallel model.
+    /// </para>
+    ///
+    /// <para>
+    /// **The risk here is larger than the heat API's and these tests are mostly about the bound.** A
+    /// registered heat source changes a temperature; a registered profile changes how a ship flies,
+    /// so a bad registration is a handling bug in somebody else's mod that looks like one in this
+    /// one. A profile may only *reduce*, anything unusable reads as no change, and it must not
+    /// reach the sun.
+    /// </para>
+    /// </summary>
     public class DragProfileTests
     {
         private const float ThickAir = 1f;

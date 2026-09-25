@@ -6,6 +6,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The three things the climate learned to react to after a test world with a four minute day
+    /// was measured: the weather standing over a grid, how far above sea level it is, and how far
+    /// under the ground.
+    ///
+    /// The run that produced these is worth stating, because one of the tests below exists only
+    /// because of it. Three grids on an earthlike, telemetry on, 851 seconds. The snowfield sat at
+    /// 5.6 km with an air density of 0.61 and reported an ambient of <b>36 K</b> for the whole run
+    /// — 220 K below what the model was asked for — and every block on it froze to match. Nothing
+    /// in the climate was wrong. The scale for thin air was being applied to the running ambient
+    /// instead of to the target the ambient was chasing, so it compounded against the lag on every
+    /// step and settled at a seventh of the intended figure.
+    /// </summary>
     public class WeatherAndDepthTests
     {
 

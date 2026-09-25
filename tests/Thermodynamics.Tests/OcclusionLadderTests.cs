@@ -7,6 +7,23 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What `SolarOcclusionSamples` buys, and what it does not.
+    ///
+    /// <para>
+    /// backlog.md `A9` ranks the shipped occlusion default second of
+    /// everything open, on the ground that one ray from the grid's centre makes a ship flip between
+    /// fully lit and fully dark and that *fidelity is the default* forbids shipping the cheap form of
+    /// a difference a player can see. **The premise is right and the dial is the wrong one**, which
+    /// is what these hold: more samples change the sunlight a hull absorbs over a terminator crossing
+    /// by almost nothing, because a single centre ray is unbiased — it reports light after the
+    /// leading end is dark and dark before the trailing end is, and the two cancel.
+    /// </para>
+    ///
+    /// <para>
+    /// See balance.md and configuration.md, External shadow.
+    /// </para>
+    /// </summary>
     public class OcclusionLadderTests
     {
         private readonly ITestOutputHelper output;

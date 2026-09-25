@@ -3,6 +3,32 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Stopping a run when it has nowhere left to go, rather than when it last moved slowly.**
+    ///
+    /// <para>
+    /// The settle rule asks how far the hottest block moved over the last sixty seconds and stops
+    /// when that is under 0.25 K. On three of the air walk's four scenarios a hull meets that in
+    /// two minutes. On `vacuum-shadow` it never does: a hull radiating into the dark decays towards
+    /// its floor, so its per-chunk movement shrinks geometrically and creeps under a fixed
+    /// threshold only after most of an hour. Measured on the 2026-08-28 air walk, **every ship**
+    /// runs its full 1,800 s there and the scenario is **33.7 %** of the walk's cost.
+    /// </para>
+    ///
+    /// <para>
+    /// <see cref="Battery.Converged"/> asks the other question. If a chunk moved the hull `d` and
+    /// the one before moved it `p`, then `r = d / p` is the decay per chunk and what is left is the
+    /// rest of that geometric series, `d * r / (1 - r)`. Inside the same tolerance, the run is
+    /// already where it is going. **This is a cheaper route to the same reading, not a looser
+    /// reading**, which is why every test here is about the bound rather than about the saving.
+    /// </para>
+    ///
+    /// <para>
+    /// Every case below that returns false is a refusal to extrapolate something that is not
+    /// decaying, because an extrapolation off a curve that is not a decay is a guess with a
+    /// number attached (`E8`).
+    /// </para>
+    /// </summary>
     public class SettleExtrapolationTests
     {
         [Fact]

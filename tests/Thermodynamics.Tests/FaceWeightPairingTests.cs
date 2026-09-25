@@ -5,6 +5,18 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A node's exposure on face <i>f</i> is weighted against the sun's and the wind's incidence on
+    /// **that same face**. A sum pairing face 2's exposure with face 3's incidence compiles, stays
+    /// symmetric, conserves energy and reads plausibly on every hull, and a cube — which is what
+    /// <see cref="SolarSymmetryTests"/> uses — cannot see a permutation at all.
+    ///
+    /// <para>
+    /// The fixture is a block buried on five sides. The assertion is the weaker and more useful one:
+    /// that one direction lights each node, and that it is the same function of the open face for all
+    /// six — which a permutation breaks and a handedness convention does not.
+    /// </para>
+    /// </summary>
     public class FaceWeightPairingTests
     {
 

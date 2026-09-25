@@ -5,6 +5,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The falloff a placed heat source lives or dies by.
+    ///
+    /// <para>
+    /// A bonfire, a thermal missile, a burning wreck — every use the mechanism has is judged by
+    /// whether the heat weakens correctly with distance. That arithmetic sat inside the registry's
+    /// sampling loop, in a file the test project cannot compile, so the registry was covered and
+    /// the physics was not: a source that delivered full output at any range, or nothing past a
+    /// metre, would have passed every test that existed.
+    /// </para>
+    /// </summary>
     public class HeatSourceMathTests
     {
 

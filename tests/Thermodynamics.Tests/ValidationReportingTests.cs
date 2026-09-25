@@ -4,6 +4,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// That a validator's finding reaches somebody.
+    ///
+    /// <para>
+    /// `BlockThermalProperties.Validate` and `ThermalSettings.Validate` were correct and tested for
+    /// as long as they existed, and were called from nowhere the game runs — the whole of
+    /// backlog.md `A19`, and the defect class `D2` exists to catch: built,
+    /// documented, reached by nothing. Tests that call a validator directly cannot see that, which
+    /// is why these test the collector instead: what it says, how often it says it, and that a
+    /// finding survives having nowhere to write it.
+    /// </para>
+    ///
+    /// <para>
+    /// The game side of the wiring — the two call sites and the log — is a game type and cannot run
+    /// here; `NoDocCommentDescribesSomethingThatIsNotThere` and the build are what hold it.
+    /// </para>
+    /// </summary>
     [Collection("ThermalValidation")]
     public class ValidationReportingTests
     {

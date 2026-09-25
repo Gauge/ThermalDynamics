@@ -5,6 +5,27 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A load-time room mapping pass finishes, and says so when it does not.
+    ///
+    /// <para>
+    /// `RunToCompletion` carried a flat safety limit of twenty million cell visits. The flood walks
+    /// the grid's bounding volume, which passes twenty million at about seven hundred thousand
+    /// blocks — and passing it returned quietly, having published nothing, leaving
+    /// `RoomMap.AllExternal` in place. A hull that size finished its load with no rooms at all and
+    /// every interior block classified as facing open space: 95 % of blocks exposed against 34 % on
+    /// the same shape one rung smaller, all of them radiating and convecting to the sky, and no
+    /// compartment holding air.
+    /// </para>
+    ///
+    /// <para>
+    /// The limit is now derived from the volume it is about to walk, which cannot bind on a pass
+    /// that is going to finish, and the call reports whether it completed. These tests pin both,
+    /// and they reach the failure through a bounding volume rather than through a block count —
+    /// the volume is what the limit counts, and a grid of eight blocks can have as much of it as a
+    /// grid of eight hundred thousand.
+    /// </para>
+    /// </summary>
     public class RoomMapCompletionTests
     {
 

@@ -2,6 +2,15 @@ using Thermodynamics;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The per-frame cost tracker, which is what a report says when someone asks why the game
+    /// stutters.
+    ///
+    /// Worth testing on its own because everything it does is bookkeeping that only shows up
+    /// after a session — a frame closed at the wrong moment, a worst-frame list that keeps the
+    /// most recent rather than the worst, or a hitch threshold that lets the list fill with
+    /// ordinary frames all produce a report that looks plausible and says nothing.
+    /// </summary>
     public class FrameCostTests
     {
         [Fact]

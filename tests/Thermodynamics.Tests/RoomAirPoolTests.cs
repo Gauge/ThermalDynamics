@@ -7,6 +7,24 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Room air nodes are pooled across rebuilds, and a rebuild is the same rebuild for it.**
+    ///
+    /// <para>
+    /// A rebuild allocated a node and a link list per room every time — 2,573 KB on a
+    /// 126,731-block hull, mostly the links — and it runs on every completed room pass. Reusing the
+    /// node keeps the list's capacity, which is where the bytes were.
+    /// </para>
+    ///
+    /// <para>
+    /// **The bug this could cause is silent and physical, not a crash**, which is why the tests are
+    /// paired rather than a smoke check. The carry-over map used to hold the *nodes* a rebuild was
+    /// about to reuse, so a room could have read a temperature belonging to whichever room reused
+    /// its node first; it holds copies now. And `Initialised` was the one field written on only one
+    /// of the two branches, so a pooled node would have arrived at a fresh room already claiming to
+    /// hold a meaningful temperature.
+    /// </para>
+    /// </summary>
     public class RoomAirPoolTests
     {
 

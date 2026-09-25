@@ -6,6 +6,23 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A coolant loop costs power to run, and it is very much cheaper than a heat pump.
+    ///
+    /// <para>
+    /// `CoolantPump.MaxPowerWatts` was declared and assigned nowhere, so a loop was free once built
+    /// while a heat pump paid for every watt it lifted. The asymmetry is right — a circulator is
+    /// not a refrigerator — but nothing had ever said so, and the mod's own intent is that *a
+    /// cooling system costs power and makes heat doing it*.
+    /// </para>
+    ///
+    /// <para>
+    /// The rating is derived rather than chosen: a large-grid ring moves 200 kg/s of coolant, and
+    /// pushing that against two bar of head at seventy per cent efficiency is `ṁ ΔP / (ρ η)` =
+    /// 57 kW. What these check is the *shape* — that it is charged at all, linear in speed, off
+    /// when the block is, and small against what the ring carries.
+    /// </para>
+    /// </summary>
     public class PumpPowerTests
     {
         [Fact]

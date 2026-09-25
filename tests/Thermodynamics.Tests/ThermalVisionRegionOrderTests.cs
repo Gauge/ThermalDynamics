@@ -8,6 +8,7 @@ using Region = Thermodynamics.Presentation.ThermalVisionRegionPartition.Region;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Spatial ordering against independent ray intervals, field preservation and fragmentation bounds.</summary>
     public class ThermalVisionRegionOrderTests
     {
         [Fact]

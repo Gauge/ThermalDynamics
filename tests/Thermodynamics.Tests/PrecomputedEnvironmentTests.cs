@@ -5,6 +5,26 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The environment pass reuses per-node terms across the substeps of a step instead of
+    /// recomputing them, and the only thing that makes that safe is that recomputing them would
+    /// have produced the same bits.
+    ///
+    /// <para>
+    /// Solar gain, friction and the convection coefficient are functions of exposure, area,
+    /// emissivity and the sun and wind directions — none of which a substep changes, because a
+    /// substep changes temperature and nothing else. The relaxation factor is
+    /// <c>mass / (h * conductance)</c>, whose three inputs are fixed for the length of a step.
+    /// So sixteen substeps were doing the same arithmetic sixteen times, including a float divide
+    /// per node per substep.
+    /// </para>
+    ///
+    /// <para>
+    /// The assertion is therefore <b>bit-identical</b>, not "close enough". Anything less means
+    /// something in that list does move between substeps, and a cache that is nearly right is
+    /// worse than none: it would drift silently, on exactly the grids nobody benchmarks.
+    /// </para>
+    /// </summary>
     public class PrecomputedEnvironmentTests
     {
 

@@ -4,6 +4,25 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The per-mechanism watt figures are written on the last substep of a step and on no other.
+    ///
+    /// <para>
+    /// Each substep overwrites what the one before it wrote, and every consumer — the telemetry
+    /// report, the crosshair readout, the debug overlay, the mod API — reads between steps. So
+    /// only the last substep's writes were ever observed, and the earlier ones were five stores
+    /// into a node object per node and two into another per link, discarded by the next substep.
+    /// A step at nineteen substeps did that eighteen times for nothing, and switching diagnostics
+    /// on nearly doubled the step: 3.93 ms to 7.51 ms on a 32,800-block hull.
+    /// </para>
+    ///
+    /// <para>
+    /// The assertion is bit-identical against writing on every substep, because "the last substep's
+    /// figures" has to mean exactly that. Anything less means the batching changed which substep is
+    /// being reported, which would make every watt figure in a telemetry dump describe a different
+    /// moment than the one it claims.
+    /// </para>
+    /// </summary>
     public class DiagnosticBatchingTests
     {
 

@@ -5,6 +5,26 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **What a per-grid drag sum costs, measured — because the drag milestone binds the drag milestone and says it is small.**
+    ///
+    /// <para>
+    /// A ship with a rotor turret is several grids to the engine, each with its own `Physics`.
+    /// the drag milestone argues that a *mass*-derived force splits badly, and that drag fails differently and
+    /// less badly, "because area is additive, so a per-grid sum is about right in magnitude". That
+    /// is true of real frontal area and this asks whether it is true of **this model's** area,
+    /// which is a different question: the solver's drag is proportional to *exposed* windward
+    /// faces, and the faces where two grids touch are exposed to the model however welded together
+    /// they look.
+    /// </para>
+    ///
+    /// <para>
+    /// So splitting one hull into two grids does not merely redistribute the drag, it **adds** some:
+    /// the interface that was interior becomes two lee-and-windward faces. This is the size of that
+    /// error, so the drag milestone can apply a force knowing what it is wrong by rather than assuming it is
+    /// nothing.
+    /// </para>
+    /// </summary>
     public class DragGroupingTests
     {
         private const float ThickAir = 1f;

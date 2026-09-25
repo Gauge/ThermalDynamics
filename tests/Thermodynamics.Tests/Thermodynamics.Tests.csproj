@@ -19,7 +19,7 @@
     <PackageReference Include="xunit" Version="2.9.3" />
 
     <!--
-      Roslyn, for the script-whitelist check only: it parses Data/Scripts to find the names the mod
+      Roslyn, for the source scans: it parses the mod's sources to find the names the mod
       writes in a type position, which is the one way to tell a type from a field called Size.
       Syntax only - no compilation, no references, no semantic model.
     -->

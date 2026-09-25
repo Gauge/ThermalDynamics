@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Checks HUD pixel anchoring under camera motion, lens shifts, FOV and DPI changes.</summary>
     public class ThermalVisionHudProjectionTests
     {
         [Theory]

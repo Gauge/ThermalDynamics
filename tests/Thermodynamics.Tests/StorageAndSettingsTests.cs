@@ -7,6 +7,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The save format, which is the one thing here a player cannot recover from.
+    ///
+    /// <para>
+    /// Both directions of both versions: that the current format round-trips temperatures, loops and
+    /// room air; that legacy payloads still load and still lose the fraction they always lost; and
+    /// that a corrupt or truncated payload is rejected rather than throwing, since the in-game
+    /// compiler forbids catching the exception a naive reader would raise.
+    /// </para>
+    /// </summary>
     public class StorageCodecTests
     {
         [Fact]
@@ -374,6 +384,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The settings object: what is derived from what, what is clamped, and what is merely reported.
+    ///
+    /// <para>
+    /// Clamping and validation are deliberately different. A value outside its range is corrected; a
+    /// value inside its range but physically odd is flagged and left alone, because an administrator
+    /// is allowed to mean it.
+    /// </para>
+    /// </summary>
     public class SettingsTests
     {
         [Fact]
@@ -430,6 +449,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The numbers a definition file is allowed to state.
+    ///
+    /// <para>
+    /// A definition is authored by hand, often by another mod's author, so every property is clamped
+    /// where it is read. ZeroSpecificHeatCannotProduceAnInfiniteTemperature is the case that matters:
+    /// one omitted attribute would otherwise divide by zero on every step of every block of that type.
+    /// </para>
+    /// </summary>
     public class DefinitionTests
     {
         [Fact]
@@ -515,6 +543,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The budgets a resumable pass gets, sized against a grid.
+    ///
+    /// <para>
+    /// How real frames become simulated time is tested in `HostAdapterTests`, against
+    /// `ThermalSimulation.Update`. It used to be tested here against a second step-credit
+    /// accumulator on `SimulationScheduler` that no shipped code called, and which has been removed
+    /// (backlog.md `F23`).
+    /// </para>
+    /// </summary>
     public class SchedulerTests
     {
 

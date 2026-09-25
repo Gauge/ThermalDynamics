@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>Shared extraction and projection against independent source-index and software-depth oracles.</summary>
     public class ThermalVisionLabTests
     {
         [Fact]

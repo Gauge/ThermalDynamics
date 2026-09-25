@@ -7,6 +7,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The population constants the harness reasons from have a dataset behind them, and it is
+    /// checked.**
+    ///
+    /// <para>
+    /// `Census.Corpus` states what the corpus does — substep demand in vacuum and in air, waste per
+    /// block, ship count — and every one of those figures was transcribed by hand out of a walk's
+    /// output. `E5` says a figure comes from the dataset it is about, and `F14` records what
+    /// happens otherwise: a page said *twenty-four sealed blocks* where the dataset said **1,184
+    /// across 331 ships**, a sample figure standing as a population figure with only its share
+    /// right. Nothing was checking these.
+    /// </para>
+    ///
+    /// <para>
+    /// The committed summary is the source. It is kilobytes and versioned, so a constant and the
+    /// walk behind it can be compared without the gigabytes the walk produced — which is the whole
+    /// reason `verdict.py --csv` exists.
+    /// </para>
+    /// </summary>
     public class CorpusConstantTests
     {
         private const string Summary = "summary-survey-2026-08-28.csv";

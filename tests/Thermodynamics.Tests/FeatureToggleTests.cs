@@ -7,6 +7,28 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every mechanism is meant to be independently switchable, and switching one off is meant to
+    /// remove exactly its own contribution and nothing else. These pin that down one mechanism at
+    /// a time: build the same grid twice, change one switch, and check that the difference is the
+    /// one mechanism.
+    ///
+    /// <para>
+    /// **One test per switch, and the switch is the subject.** Most of these mechanisms are tested
+    /// hard somewhere else — friction against the cube of airspeed, self-shadowing against a block
+    /// standing behind another, coolant against the energy it carries — but those rigs reach the
+    /// mechanism through its physics rather than through its switch, and several of them turn other
+    /// switches off only to keep the fixture quiet. A mechanism that ignores its own setting passes
+    /// every one of them. What is checked here is narrower and duller: the setting is honoured, and
+    /// what disappears when it is off is that mechanism's contribution and not a neighbour's.
+    /// </para>
+    ///
+    /// <para>
+    /// Where a mechanism reports watts, the assertion is on the watts rather than on a temperature
+    /// that moved, because a temperature only says something happened. Diagnostics are opt-in, so
+    /// those rigs set <c>CollectDiagnostics</c>.
+    /// </para>
+    /// </summary>
     public class FeatureToggleTests
     {
 

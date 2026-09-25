@@ -5,6 +5,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The block overlay's two cost bounds: dropping what the camera cannot see, and fitting a
+    /// radius to a box budget.
+    ///
+    /// The cull must never drop a box that is on screen — an overlay that hides part of a hull is
+    /// worse than a slow one, because it reads as a hull that is not there. The fit must settle
+    /// rather than oscillate, since a radius that pulses is a picture that flickers.
+    /// </summary>
     public class OverlayBudgetTests
     {
 

@@ -7,6 +7,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A ring of pipe becoming a loop, and the loop moving heat.
+    ///
+    /// <para>
+    /// Two halves, and the first decides whether the second means anything: topology — what counts as
+    /// a closed ring, that a ring is found once wherever the search starts, and that the loop's
+    /// identity survives a rebuild so a saved temperature comes back to the right fluid — and
+    /// transport, where the assertions are on energy rather than on temperature, because a loop that
+    /// leaks energy still produces plausible-looking numbers.
+    /// </para>
+    /// </summary>
     public class CoolantLoopTests
     {
 

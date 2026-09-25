@@ -5,6 +5,13 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The instrumentation hook the telemetry module hangs its stage timings on.
+    ///
+    /// What matters is that every stage is bracketed correctly and that a simulation with no
+    /// profiler attached behaves exactly as it did before the hook existed — that is the whole
+    /// basis of "comprehensive when testing, free in production".
+    /// </summary>
     public class ProfilerTests
     {
         private class RecordingProfiler : ISimulationProfiler

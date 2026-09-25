@@ -6,6 +6,25 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Trading simulation speed against heat transfer, and what it actually buys.
+    ///
+    /// <para>
+    /// The tempting tuning is to halve <c>SimulationSpeed</c> and double <c>HeatTimeScale</c>: half
+    /// as many steps a second, heat moving twice as fast in each, so the ship still cools at the
+    /// same rate against a wall clock for half the cost. The first half of that is true and worth
+    /// pinning — it is what makes the knob usable at all.
+    /// </para>
+    ///
+    /// <para>
+    /// The second half mostly is not, and the tests below say so rather than leaving it to be
+    /// discovered. A step's cost is its substep count, and the substep count a grid needs is
+    /// proportional to the step length times the stiffness — which is what <c>HeatTimeScale</c>
+    /// is. Halving the steps and doubling the stiffness leaves the substeps where they were. What
+    /// saving there is comes from somewhere else entirely: fewer, longer steps amortise the passes
+    /// that run once per step whatever its length.
+    /// </para>
+    /// </summary>
     public class PaceEquivalenceTests
     {
         private readonly ITestOutputHelper output;

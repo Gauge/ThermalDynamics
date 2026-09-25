@@ -5,6 +5,14 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// `GridModel.GetNeighbours` answers a one-cell block with six probes and no deduplication, and
+    /// is held to the boundary-walking query it short-cuts — the same neighbours in the same order,
+    /// for every block of a census hull and of a grid that mixes one-cell blocks with bars and cubes
+    /// (`D8`). Order matters here beyond correctness: the link list is built in this order, and the
+    /// conduction sum accumulates in link order, so a permutation would move the last bit of a
+    /// temperature.
+    /// </summary>
     public class GridModelAdjacencyTests
     {
 

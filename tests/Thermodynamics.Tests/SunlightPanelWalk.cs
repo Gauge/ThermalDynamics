@@ -6,6 +6,26 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Sunlight never cools a real hull, proven the transient-proof way: **cold start, equal
+    /// clocks, all six directions.**
+    ///
+    /// <para>
+    /// The survey's version of this claim compares two adaptively-stopped runs that begin at
+    /// 293 K — above both equilibria — so both hulls are cooling and the comparison depends on
+    /// when each run happened to stop. Twenty per cent of real ships "violated" it that way, every
+    /// one an artifact of unequal stop times. Started at the vacuum floor instead, both runs warm:
+    /// the shadowed hull from its own waste heat, the sunlit one from waste heat plus the sun, so
+    /// the sunlit hull is at least as warm at *every* instant — provided the clocks are equal,
+    /// which is why this runs a fixed duration with no early exit.
+    /// </para>
+    ///
+    /// <para>
+    /// Six directions rather than the survey's one, because a panel of two hundred ships can
+    /// afford what ten thousand cannot, and the spread across directions is itself balance data:
+    /// how much a real hull's heat budget depends on which way it faces the sun.
+    /// </para>
+    /// </summary>
     public class SunlightPanelWalk
     {
         private const int Panel = 200;

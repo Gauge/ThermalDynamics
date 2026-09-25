@@ -6,6 +6,22 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The rebuild's scratch buffers are kept, and a rebuild is the same rebuild for it.**
+    ///
+    /// <para>
+    /// `SurfaceMap.Rebuild` snapshots the table into two `long[cells]` so the derived neighbour half
+    /// can be written back without enumerating a dictionary it is mutating. It allocated both every
+    /// time — **2 MB on a 126,731-block hull, the whole of what the `surfaces` stage allocated** —
+    /// and a rebuild runs on every structural change. They are scratch, so they are kept.
+    /// </para>
+    ///
+    /// <para>
+    /// **The buffers outlive the hull that sized them**, which is the one thing that could go wrong:
+    /// both loops are bounded by the table's count rather than by the array's length, so a smaller
+    /// grid rebuilt into buffers a larger one sized must not read the larger one's leftovers.
+    /// </para>
+    /// </summary>
     public class SurfaceRebuildScratchTests
     {
 

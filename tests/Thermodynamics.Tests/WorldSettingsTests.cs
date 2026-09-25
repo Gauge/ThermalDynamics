@@ -3,6 +3,13 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Reading the world's own settings out of the serialised session settings.
+    ///
+    /// The parser is deliberately not a hand-written field list, so what is tested is that it
+    /// survives the shapes the game's serialiser actually emits: flat values, empty elements,
+    /// nested blocks, attributes on the root, and entities in a value.
+    /// </summary>
     public class WorldSettingsTests
     {
         private const string Sample =

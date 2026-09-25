@@ -5,6 +5,18 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The shape term, and whether it separates the pair a projected area cannot.**
+    ///
+    /// <para>
+    /// `DragShapeTests` is the counter-example this exists to answer: a brick and a stair-stepped
+    /// wedge sharing a frontal cross-section compute identical drag, because the sum is over six
+    /// axis normals and the steps project onto the square the brick presents. `ShapeNormal` gives
+    /// each node an effective normal read from the cells around it, and the Newtonian `sin²θ` that
+    /// the projected area is missing. These are the readings that say whether it worked.
+    /// See thermal-model.md, The shape term, and backlog.md `K22`.
+    /// </para>
+    /// </summary>
     public class ShapeDragTests
     {
         private const float ThickAir = 1f;

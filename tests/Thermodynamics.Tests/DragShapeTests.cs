@@ -5,6 +5,33 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **Whether a drag coefficient can be derived from what this model computes. It cannot, and
+    /// this is the pair of hulls that shows why.**
+    ///
+    /// <para>
+    /// The friction term is `FrictionScale x rho x v_rel^3 x area x windward exposure`, and real
+    /// drag power is `1/2 C_d rho A v^3` — the same expression, so matching them makes
+    /// `FrictionScale` exactly `1/2 C_d` times the fraction of the work that lands in the surface.
+    /// That invites an obvious question: if the model already computes a windward area, can it
+    /// compute the coefficient too, and spare an authored number (`P7`)?
+    /// </para>
+    ///
+    /// <para>
+    /// **The windward exposure is a projected area, and a projected area is not a shape.** What the
+    /// solver sums is, per node, the exposed cell faces weighted by `max(0, dot(faceNormal,
+    /// windDirection))` over the six axis-aligned faces. A stair-stepped wedge presents exactly the
+    /// same count of wind-facing cell faces as the brick that shares its frontal cross-section —
+    /// the steps project onto the same square — so the two read *identically*, while their real
+    /// drag coefficients differ by an order of magnitude.
+    /// </para>
+    ///
+    /// <para>
+    /// So the drag milestone's coefficient has to be authored until there is a shape term to derive it from,
+    /// which is `K6` and the drag milestone's subject. This test is here so that when somebody proposes deriving
+    /// it, the counter-example is a test rather than an argument.
+    /// </para>
+    /// </summary>
     public class DragShapeTests
     {
         private const float ThickAir = 1f;

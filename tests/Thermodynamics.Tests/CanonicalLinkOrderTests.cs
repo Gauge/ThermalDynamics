@@ -6,6 +6,24 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The link list's order is a function of the graph, not of the walk that found it.**
+    ///
+    /// <para>
+    /// The conduction pass accumulates watts by running down the link streams in order, and a sum
+    /// of floats depends on its order — so until this was sorted, the sequence a rebuild emitted
+    /// links in was part of the answer. Any change to how neighbours are found moved the last bit
+    /// of every temperature on every grid, which is why the previous pass had to hold five
+    /// optimisations to the exact emission order, and why the one change that would actually make
+    /// the stage faster was refused (backlog.md `D3b`).
+    /// </para>
+    ///
+    /// <para>
+    /// **A canonicalisation that reorders nothing buys nothing**, so the second check here is the
+    /// one that matters: the walk's own order is *not* already sorted on a real hull. Without that,
+    /// the freedom this iteration claims to buy would be imaginary.
+    /// </para>
+    /// </summary>
     public class CanonicalLinkOrderTests
     {
         private readonly ITestOutputHelper output;

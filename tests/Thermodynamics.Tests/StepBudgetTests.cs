@@ -5,6 +5,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The step budget bounds what one solver step may cost. It used to count link visits alone,
+    /// which could not see the environment pass a substep runs once per node — so two grids with
+    /// the same links and different node counts were granted the same allowance for different
+    /// work, and a sparsely linked grid was under-charged worst of all.
+    ///
+    /// It now counts element visits: links, plus nodes weighted by
+    /// <see cref="ThermalSettings.NodeCostInLinks"/>, measured in
+    /// benchmarks.md.
+    /// </summary>
     public class StepBudgetTests
     {
 

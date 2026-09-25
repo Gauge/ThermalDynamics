@@ -5,6 +5,22 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The force the mod has been computing and throwing away.**
+    ///
+    /// <para>
+    /// The friction term is drag power under another name, so the force is one division: power is
+    /// force times speed. Deriving it from the watts rather than recomputing it from the geometry
+    /// is what keeps the two consistent — a second expression would be a second place for the
+    /// exposure, the wind direction and the density to be got subtly differently, and the two would
+    /// disagree only on the ships where it mattered.
+    /// </para>
+    ///
+    /// <para>
+    /// These tests are about the arithmetic and the refusals. Whether the force is *applied* is the
+    /// game layer, which no harness runs — see known-issues.md.
+    /// </para>
+    /// </summary>
     public class DragForceTests
     {
 

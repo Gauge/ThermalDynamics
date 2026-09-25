@@ -5,6 +5,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The blueprint corpus, read once and shared by every test that wants it. **Opt-in**, behind
+    /// <c>THERMAL_CORPUS_TESTS</c>, because it reads gigabytes that live outside the repository and
+    /// takes minutes.
+    ///
+    /// <code>
+    ///     THERMAL_CORPUS_TESTS=1 dotnet test --filter LabInvariantTests
+    /// </code>
+    /// </summary>
     internal static class CorpusFixture
     {
 

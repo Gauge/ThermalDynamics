@@ -7,6 +7,32 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The stopping rule must not be part of the difference.**
+    ///
+    /// <para>
+    /// `Battery.Run` stops when the hottest block moves less than `SettleWithin` — a quarter of a
+    /// kelvin — over a sixty-second chunk, which is what makes a corpus walk affordable: most runs
+    /// are flat long before their clock runs out, and the sampled trial for `CorpusCapWalk` had 232
+    /// of 320 runs stopping at 120 s of an 1,800 s scenario.
+    /// </para>
+    ///
+    /// <para>
+    /// That is fine for a figure read one run at a time and wrong for a *paired* one. Two
+    /// configurations of the same ship stop at different instants, and the difference `C3` is about
+    /// is a hundredth of a kelvin — two orders of magnitude under the tolerance that decides where
+    /// each run stopped. A pair compared that way measures the stopping rule (`M1`, `P6`). So the
+    /// control arm runs first and hands its own elapsed clock to the other through
+    /// <see cref="Battery.RunForSeconds"/>, and these tests are what say that machinery works: that
+    /// the clock is honoured, that the outcome records where it stopped, and that a pair given the
+    /// same settings lands on the same numbers.
+    /// </para>
+    ///
+    /// <para>
+    /// Synthetic blueprints, in the tradition of `BlueprintTests`: the end of the chain is the walk
+    /// itself, and what needs a test here is the harness the walk depends on.
+    /// </para>
+    /// </summary>
     public class PairedRunTests
     {
 

@@ -5,6 +5,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a block is made of, turned into what a block is thermally.
+    ///
+    /// Before this existed, twenty-eight block types out of a hundred and one had hand-written
+    /// thermal properties and everything else in the game — and every block of every other mod —
+    /// fell through to a single entry describing mild steel. A window, a battery, a medical bay and
+    /// a plushie were the same object. The game already publishes what every block is built from,
+    /// so none of that had to be true.
+    /// </summary>
     public class BlockDerivationTests
     {
 

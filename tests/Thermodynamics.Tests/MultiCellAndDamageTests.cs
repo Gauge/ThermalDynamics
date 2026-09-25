@@ -5,6 +5,14 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Two properties the game adapter depends on and cannot check for itself.
+    ///
+    /// A host holds its own map from game block to simulation node. These pin down what that map
+    /// has to be keyed on, and what the host is guaranteed to be told about damage — both of
+    /// which had adapter bugs that only showed up on blocks larger than one cell, or on ticks
+    /// that ran more than one step.
+    /// </summary>
     public class MultiCellAndDamageTests
     {
 

@@ -5,6 +5,14 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Formatting of the report and the CSVs.
+    ///
+    /// The culture tests are the point of this file. Space Engineers runs on whatever locale the
+    /// player has, and a German or French client formats 1.5 as "1,5" — which in a comma
+    /// separated file is not a decimal point but a new column. A CSV that parses on one machine
+    /// and silently shifts every column on another is worse than no CSV at all.
+    /// </summary>
     public class TelemetryFormatTests
     {
 

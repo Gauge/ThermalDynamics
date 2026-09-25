@@ -6,6 +6,20 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// `SurfaceMap` holds its live and structural layers in one dictionary, packed, and is held
+    /// against the two-dictionary map it replaced — kept verbatim below — over every cell and every
+    /// neighbouring cell of a census hull and of a shell with a door, after a rebuild and after
+    /// blocks are added and removed one at a time (`D8`).
+    ///
+    /// <para>
+    /// The map answers four questions — a cell's live state, its structural state, whether a face
+    /// seals in either layer — and every reader of it (the flood fill, exposure, room contacts) is
+    /// downstream of those four, so agreement on them is agreement everywhere. The reference is
+    /// the old code and not a re-derivation, because the old code is the only oracle for *did this
+    /// change anything* (`P4`).
+    /// </para>
+    /// </summary>
     public class SurfaceMapPackingTests
     {
     public class TwoDictionarySurfaceMap

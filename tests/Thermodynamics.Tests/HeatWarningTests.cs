@@ -7,6 +7,15 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The lead cue's forecast, and the defect it exists to avoid.
+    ///
+    /// <para>
+    /// The interesting tests here are the last two. Everything above them checks the arithmetic
+    /// against itself, which is worth doing and proves nothing about whether the forecast is right
+    /// about a real block; the last two run an actual grid and ask the solver.
+    /// </para>
+    /// </summary>
     public class HeatWarningTests
     {
         [Fact]

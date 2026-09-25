@@ -6,6 +6,27 @@ using VRageMath;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The total conductance into a coolant loop and into a room's air is summed once per rebuild
+    /// rather than once per caller, and a cache is only worth having if it is invalidated
+    /// correctly.
+    ///
+    /// <para>
+    /// The reason it exists: both totals are read by the stability estimate and by the thermal
+    /// mass floor, and both of those run twice in a step — once through
+    /// <c>AffordableStepSeconds</c> asking what the step can afford, and once inside
+    /// <c>BeginStep</c> taking it. So a step walked every room link four times to re-sum a number
+    /// that only changes when the graph is rebuilt. On a 126,731-block hull that is 139,120 links
+    /// walked four times before the first substep runs, for four identical answers.
+    /// </para>
+    ///
+    /// <para>
+    /// The failure mode a cache introduces is silence: a stale total makes the stability estimate
+    /// wrong, which makes the step too long, which the overshoot clamps then absorb — so nothing
+    /// throws and nothing looks wrong, the grid simply integrates worse. These pin the four paths
+    /// that change what the totals are summing.
+    /// </para>
+    /// </summary>
     public class CoupledConductanceCacheTests
     {
 

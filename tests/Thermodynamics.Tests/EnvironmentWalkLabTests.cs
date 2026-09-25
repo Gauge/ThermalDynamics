@@ -3,6 +3,14 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The environment-walk lab prices the buried-branch residue against a compacted walk on
+    /// redesign.md's second sweep, and its own agreement check — both shapes must produce the
+    /// same watts row exactly, or it throws before timing anything — is the load-bearing half.
+    /// What is pinned here is that the check can actually fire's precondition: the fixture holds
+    /// both classes of node, so agreement is over buried and exposed alike, and both timed rows
+    /// come back with a clock on them (`E8`).
+    /// </summary>
     public class EnvironmentWalkLabTests
     {
         [Fact]

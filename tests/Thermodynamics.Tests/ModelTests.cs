@@ -7,6 +7,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The twenty-four rotations a block can be built in, as a permutation of the six faces.
+    ///
+    /// <para>
+    /// Orientation is where a geometry fault hides longest, because a wrongly rotated block is still a
+    /// block and still conducts — it conducts through the wrong faces. These check the group
+    /// properties directly: that rotate and unrotate are inverses, that opposite pairs stay opposite,
+    /// and that there are exactly twenty-four distinct ones.
+    /// </para>
+    /// </summary>
     public class BlockOrientationTests
     {
         [Fact]
@@ -77,6 +87,15 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// One placed block: the cells it occupies, and the surface bits it carries into them.
+    ///
+    /// <para>
+    /// The door cases are the subtle ones. A door's structural surfaces must not move when it opens,
+    /// because rooms are built from structure so that cycling a door costs a walk over the doors
+    /// rather than a remap of the grid.
+    /// </para>
+    /// </summary>
     public class BlockInstanceTests
     {
         [Fact]
@@ -200,6 +219,14 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// The grid's own bookkeeping: what occupies a cell, what neighbours what, and what a removal leaves behind.
+    ///
+    /// <para>
+    /// This is the layer the game adapter mirrors a real grid into, so an error here is invisible to
+    /// the physics and fatal to it: the solver would be stepping a ship of a different shape.
+    /// </para>
+    /// </summary>
     public class GridModelTests
     {
         [Fact]

@@ -5,6 +5,34 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A block that leaves the world above its critical temperature leaves its heat behind.**
+    ///
+    /// <para>
+    /// Heat departing with a departing block is a deliberate limit, argued in
+    /// known-issues.md, Deliberate limits, and pinned by
+    /// `EnergyIsNotConservedWhenTheBlockPopulationChanges`. The argument for it is about a block a
+    /// **player takes away**: conserving that means a grinder that heats the ship around it and a
+    /// welder that chills it, a mechanism nobody would connect to a cause.
+    /// </para>
+    ///
+    /// <para>
+    /// **A node past critical is a different event.** It did not leave — it failed in place, and
+    /// the mod is what destroyed it. Letting its energy go makes overheating a *reward*: cook a
+    /// cheap block and the world is that much cooler, for free and repeatably. That is the exploit
+    /// backlog.md `B42` names and the half of it the coolant consumable
+    /// (`B43`, `B44`) does not price — the sacrificial block, the grind-and-reweld timer on a
+    /// glowing block, and the crudest version that needs no grinder at all, because the mod
+    /// destroys the block for you.
+    /// </para>
+    ///
+    /// <para>
+    /// **The rule is read off the temperature rather than off the cause**, because the cause is not
+    /// knowable where the decision is made: the game removes a block and the mod is told, with
+    /// nothing to say whether a grinder or a fire did it. One test answers all three variants and
+    /// leaves a cool block ground off exactly as it was.
+    /// </para>
+    /// </summary>
     public class OverheatSpillTests
     {
 

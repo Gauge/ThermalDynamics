@@ -5,6 +5,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A step has never been measured by its parts, and three passes have tried to make it
+    /// faster.** Two of them changed the layout of the link stream on the strength of a guess about
+    /// which part of a step was expensive; both were reverted on measurement. `bench stepphases`
+    /// times each stage of a step on its own clock, and these hold the two properties that make its
+    /// reading a reading.
+    ///
+    /// <para>
+    /// The first is that **the instrument does not change what it measures**: the same hull stepped
+    /// with the profile on and with it off must reach the same temperatures, to the bit. An
+    /// instrument on the stepping path that perturbs the step would be worse than none.
+    /// </para>
+    ///
+    /// <para>
+    /// The second is that **each stage is charged the elements it actually walks** — nodes for the
+    /// environment and apply stages, links for conduction, once per substep — which is what makes
+    /// two readings comparable and what says a stage was entered at all (`M6`).
+    /// </para>
+    /// </summary>
     [Collection("the stage lab's dials")]
     public class StepPhaseLabTests
     {

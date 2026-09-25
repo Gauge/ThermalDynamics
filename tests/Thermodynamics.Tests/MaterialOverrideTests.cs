@@ -5,6 +5,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// That a material override actually reaches a block built the corpus way.
+    ///
+    /// <para>
+    /// This is the load-bearing assertion under every knob sweep. Models are built once and shared,
+    /// with the derived thermal properties baked in, so an override that arrives after the cache is
+    /// warm applies to nothing at all — and the failure is silent in the worst way: the sweep runs,
+    /// every configuration produces numbers, and every dial reads as having no effect. A response
+    /// surface of flat lines looks like a finding rather than a bug.
+    /// </para>
+    /// </summary>
     public class MaterialOverrideTests
     {
         [Fact]

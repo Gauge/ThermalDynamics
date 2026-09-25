@@ -4,6 +4,22 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a hot room does to a player.
+    ///
+    /// <para>
+    /// The one place heat stopped being consequential: every block on a burning ship could be past
+    /// its limit while the person standing between them was untouched. Backlog `B10`.
+    /// </para>
+    ///
+    /// <para>
+    /// The model is a suit as a refrigerator rather than as a threshold, so what these check is
+    /// that the *consequences* follow from the machine: where it holds, where it gives up, how long
+    /// a player has once it does, and that an open helmet costs them most of that margin. The
+    /// numbers are derived from the settings rather than transcribed, so a world that moves a dial
+    /// moves the assertion with it.
+    /// </para>
+    /// </summary>
     public class SuitThermalTests
     {
 

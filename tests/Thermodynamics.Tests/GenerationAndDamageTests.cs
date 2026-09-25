@@ -6,6 +6,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Power crossing a block turned into watts of heat.
+    ///
+    /// <para>
+    /// The producer and consumer fractions are separate dials on separate flows, and thrust counts as
+    /// consumption — which is what makes hydrogen thrusters the hottest thing on most ships. The last
+    /// case is the one that matters for balance: generation is watts, so it must not change when the
+    /// step rate does.
+    /// </para>
+    /// </summary>
     public class HeatGenerationTests
     {
 
@@ -118,6 +128,16 @@ namespace Thermodynamics.Tests
         }
     }
 
+    /// <summary>
+    /// What happens above a block's critical temperature.
+    ///
+    /// <para>
+    /// The rate has to be per second rather than per step, or a server running at a different
+    /// frequency destroys ships at a different speed. The pre-fix per-step behaviour is kept behind a
+    /// setting and pinned as still scaling with frequency, so the difference between the two stays a
+    /// measurement rather than a memory.
+    /// </para>
+    /// </summary>
     public class DamageTests
     {
 

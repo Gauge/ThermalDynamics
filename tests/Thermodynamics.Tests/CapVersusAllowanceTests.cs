@@ -6,6 +6,32 @@ using Xunit.Abstractions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **A shortened step against a floored one, on the same hull at the same allowance** —
+    /// configuration.md, under FloorBlocksWhenOverBudget.
+    ///
+    /// <para>
+    /// `C3` measured a per-block cap on all 8,144 published blueprints and refused it as a global
+    /// default: the error is charged per block and the throughput is collected per grid, so four
+    /// fifths of the population would pay and collect nothing. Where the budget *does* bind the
+    /// mechanism is right, and this is the measurement that says whether swapping it in is an
+    /// improvement rather than a different loss.
+    /// </para>
+    ///
+    /// <para>
+    /// **What today does is not an approximation.** `ThermalSimulation.AffordableStepSeconds`
+    /// shortens the step when a grid cannot afford its demand, so the grid advances less simulated
+    /// time per real second and its whole thermal clock runs slow — a loss with no bound on it. A
+    /// cap lowers the demand instead, so the grid keeps its clock and pays a bounded error on its
+    /// stiffest blocks.
+    /// </para>
+    ///
+    /// <para>
+    /// Both sides are priced in kelvin from measurements this repository already has: the lost rate
+    /// through `AllowanceLab.PriceRates`, which runs the mechanism rather than scaling a single
+    /// point, and the cap through the population walk of `C3`.
+    /// </para>
+    /// </summary>
     [Trait("speed", "slow")]
     public class CapVersusAllowanceTests
     {

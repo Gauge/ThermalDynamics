@@ -5,6 +5,16 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// A ship digging from the surface to the core.
+    ///
+    /// The descent is where four parts of the environment hand over to each other, and each was
+    /// written on its own: the sun goes at the surface, the wind over the hull's own height, the
+    /// day's swing over tens of metres of rock, and the rock's own warmth only below the deadzone.
+    /// A field dump showed the second of those was never happening — a grid ten metres under the
+    /// surface was still reading four metres a second of wind, because the wind model clamped a
+    /// negative height to zero and then blew at ground level.
+    /// </summary>
     public class DescentTests
     {
 

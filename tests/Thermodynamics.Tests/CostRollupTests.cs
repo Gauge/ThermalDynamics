@@ -2,6 +2,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The cost table's total, and the nesting rule behind it.
+    ///
+    /// The report measures the same milliseconds at several depths: the session frame wraps the
+    /// call that drives every grid, grid simulation sits inside it, and the solver and the mapping
+    /// passes sit inside that. Adding an inner row to the outer one it lives in charges the same
+    /// work twice — which is what the table did for grid simulation, reporting a field dump that
+    /// cost 36.8 % of real time as costing 73.1 %.
+    ///
+    /// These tests exist because the arithmetic has no other guard: a report is written from a live
+    /// session and read by eye, and a total that is twice the truth still looks like a plausible
+    /// total.
+    /// </summary>
     public class CostRollupTests
     {
         [Fact]

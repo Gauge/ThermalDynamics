@@ -3,6 +3,22 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The wind's roughness length comes from the ground under the grid.
+    ///
+    /// <para>
+    /// It used to be one number for a whole world, while the ground material under a grid was
+    /// already being classified for the temperature model — and roughness is exactly what it should
+    /// vary with. backlog.md `B16`.
+    /// </para>
+    ///
+    /// <para>
+    /// **It is also the one figure in that table that is not an opinion.** The temperature offsets
+    /// and the swing multipliers are numbers chosen to look like Earth and are recorded as such
+    /// (`C7`); roughness length is a standard wind-engineering quantity with a published table
+    /// behind it, so these check the model against that table rather than against itself.
+    /// </para>
+    /// </summary>
     public class GroundRoughnessTests
     {
         private const float WorldSetting = 0.03f;

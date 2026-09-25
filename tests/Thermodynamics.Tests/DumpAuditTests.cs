@@ -6,6 +6,17 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The auditor that reads a field dump.
+    ///
+    /// <para>Every check in it exists because a document claims something about a real world, and
+    /// the auditor is what turns that claim into a count. So each test here builds the smallest CSV
+    /// that could break one check, and asserts that the check breaks — a check that cannot fail is
+    /// worse than no check, because it reads as evidence.</para>
+    ///
+    /// <para>A dump this repository can no longer produce is still audited, since the checks skip
+    /// the columns a dump does not carry. That is tested too: a skip must never read as a pass.</para>
+    /// </summary>
     public class DumpAuditTests : IDisposable
     {
 

@@ -7,6 +7,19 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The promises <see cref="WindSolver"/> makes to everything that calls it.
+    ///
+    /// <para>Three callers now run this one function — the grids in game, the planet probe sweep, and
+    /// the offline model — which is what stops them drifting apart. The price of that is that the
+    /// function's contract is load-bearing for all three, and none of the tests around it were
+    /// checking the contract itself: they check what the model *says*, not what the call
+    /// guarantees.</para>
+    ///
+    /// <para>These check the guarantees. A unit direction, a decomposition that adds back up,
+    /// determinism, no allocation, and no way to make it produce a number that poisons a solver
+    /// downstream.</para>
+    /// </summary>
     public class WindSolverContractTests
     {
 

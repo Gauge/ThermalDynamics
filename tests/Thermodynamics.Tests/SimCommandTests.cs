@@ -5,6 +5,23 @@ using System.Text.RegularExpressions;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Every command the harness answers to is one a reader can find.
+    ///
+    /// <para>
+    /// The front end had grown thirty-nine commands and six of them appeared in no usage text:
+    /// the wind day, the planet climate table and its file generator, the sealed-block scan, and
+    /// three benchmarks. Each of those is a measurement somebody built and then had no way of
+    /// discovering again, which is how `CoolingLadder` ended up written, wired to nothing and
+    /// unread for the life of the repository.
+    /// </para>
+    ///
+    /// <para>
+    /// Read from the source rather than by running the program, because the point is the dispatch
+    /// table and the help text agreeing, and both are text. It cannot check that a description is
+    /// *accurate* — only that a command cannot be added silently.
+    /// </para>
+    /// </summary>
     public class SimCommandTests
     {
 

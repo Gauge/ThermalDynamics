@@ -4,6 +4,29 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// **The per-face frame four places used to compute for themselves.**
+    ///
+    /// <para>
+    /// Counting a block's exposure, auditing it and building a room map each walked the six faces
+    /// of a block's bounds, and each worked out the same six numbers to do it: which axis the face
+    /// is normal to, whether it is the positive side, which row of cells it is, and the two axes it
+    /// spans with their half-open bounds.
+    /// </para>
+    ///
+    /// <para>
+    /// **The slab is the part worth a test.** It is the far row on a positive face and the near row
+    /// on a negative one, and the `- 1` that makes the far row work is the half-open bound — which
+    /// is exactly the kind of thing that is right in three copies and wrong in the fourth, silently,
+    /// because a wrong slab still walks a real face of a real block. It reads a row of neighbours
+    /// that are not the neighbours.
+    /// </para>
+    ///
+    /// <para>
+    /// These tests are written against the arithmetic rather than against the extraction, so they
+    /// would have caught a copy that had drifted before it was one function.
+    /// </para>
+    /// </summary>
     public class FaceSpanTests
     {
         [Theory]

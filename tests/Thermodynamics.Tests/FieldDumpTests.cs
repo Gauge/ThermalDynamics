@@ -5,6 +5,25 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// The auditor against a real field dump rather than invented rows.
+    ///
+    /// <para>Separate from <see cref="DumpAuditTests"/> on purpose. Those tests build the smallest
+    /// CSV that could break one check and assert that it breaks; nothing about them changes when a
+    /// new dump arrives. These read a dump a world produced, and every number in them is a fact
+    /// about that dump — so refreshing the fixture changes this file and only this file.</para>
+    ///
+    /// <para>Synthetic rows prove a check can fire. They cannot prove it holds against numbers a
+    /// planet produced, which is the only place the model and the world meet — the same reason
+    /// `Census` keeps a real ship's block population rather than a plausible one.</para>
+    ///
+    /// <para>The fixture is the 2026-08-21 ToastyBugs dump — five planets, a grid buried 99 m
+    /// into Mars, a Hailstorm, and the first session with per-stage after-step timing: 597 climate
+    /// rows thinned one in twenty and then completed with the minority rows a uniform sample would
+    /// drop (every row under weather or over the engine's ceiling; one in ten of the buried,
+    /// airless and slope-wind rows), beside all 304 of its grids and 720 block types. Refresh it
+    /// from `-- dump`.</para>
+    /// </summary>
     public class FieldDumpTests
     {
 

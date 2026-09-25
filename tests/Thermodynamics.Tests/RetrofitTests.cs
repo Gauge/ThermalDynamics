@@ -3,6 +3,23 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// Whether cooling fitted to a ship somebody built does anything — criterion G3, answered on
+    /// real hulls rather than on a rig.
+    ///
+    /// <para>
+    /// `CoolingLadder` measured one reactor with blocks stacked against it. That is a measurement
+    /// of blocks. `RetrofitLab` parses a workshop blueprint, runs it under load to find where its
+    /// heat actually is, and puts the mod's own blocks in the cells that hull left free — so the
+    /// constraint a player is under is part of the answer.
+    /// </para>
+    ///
+    /// <para>
+    /// The conclusions are pinned here rather than the figures. The corpus run takes seven minutes
+    /// and needs a corpus; these cases are the claims that run without one, plus a re-measurement
+    /// on a small stride when `THERMAL_CORPUS_TESTS` is set.
+    /// </para>
+    /// </summary>
     [Collection("alone")]
     public class RetrofitTests
     {

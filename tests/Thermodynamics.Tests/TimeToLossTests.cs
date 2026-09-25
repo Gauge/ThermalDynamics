@@ -7,6 +7,20 @@ using Xunit;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// How long a block has after it crosses its critical temperature — the second half of the
+    /// event the balance survey had only measured the first half of.
+    ///
+    /// <para>
+    /// The solver damages an overheating block by <c>(T - critical) x OverheatDamagePerKelvin</c>
+    /// per simulated second, so at the crossing the damage rate is exactly zero and the block is
+    /// losing nothing. What it costs a player is when its hit points run out, and
+    /// <see cref="BlockHeatIndex.SecondsFromCriticalToLoss"/> is the closed answer to that.
+    /// This class is what stops that answer being its own oracle (`E7`): the closed form against
+    /// arithmetic where arithmetic has an answer, and against the shipped solver where it does not.
+    /// See balance.md, How long a block has after it crosses.
+    /// </para>
+    /// </summary>
     public class TimeToLossTests
     {
         private readonly Xunit.Abstractions.ITestOutputHelper output;
