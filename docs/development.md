@@ -35,7 +35,7 @@ The adjacent [`mdk.ini`](../Thermodynamics/mdk.ini) identifies this as a mod;
 the NuGet package references alone are not sufficient for Hub recognition.
 Keep this shared configuration in Git. Put machine-specific game and output
 paths in `Thermodynamics/mdk.local.ini`, which stays ignored, or configure them
-in MDK Hub. Build `ThermalDynamics.sln` to compile the mod and isolated projects.
+in MDK Hub. Build `Thermodynamics.sln` to compile the mod and isolated projects.
 
 ## Building
 
@@ -135,11 +135,11 @@ Space Engineers loads local mods from its `Mods` directory. On Windows, junction
 `%AppData%/SpaceEngineers/Mods`. On Linux, symlink it:
 
 ```bash
-ln -s /home/gauge/Content/git/SpaceEngineers/One/ThermalDynamics \
-      ~/.local/share/SpaceEngineers/Mods/ThermalDynamics
+ln -s /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics \
+      ~/.local/share/SpaceEngineers/Mods/Thermodynamics
 ```
 
-Then enable "ThermalDynamics" in the world's mod list alongside the two dependencies.
+Then enable "Thermodynamics" in the world's mod list alongside the two dependencies.
 
 Script changes take effect on world reload. Definition XML changes also require a reload.
 

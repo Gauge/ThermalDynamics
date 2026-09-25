@@ -1,4 +1,4 @@
-# Thermal Dynamics
+# Thermodynamics
 
 A Space Engineers mod that simulates heat as a first-class resource, built as a framework other
 mods can stand on. Every block is a thermal node with mass, specific heat, conductivity, emissivity

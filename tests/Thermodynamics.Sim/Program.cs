@@ -1980,7 +1980,7 @@ namespace Thermodynamics.Sim
 
         private static void PrintUsage()
         {
-            Console.WriteLine("Thermal Dynamics simulation harness");
+            Console.WriteLine("Thermodynamics simulation harness");
             Console.WriteLine();
             Console.WriteLine("  list                    show available scenarios");
             Console.WriteLine("  run <name|all>          run a scenario");

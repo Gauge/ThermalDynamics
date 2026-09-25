@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netframework48</TargetFramework>
-    <RootNamespace>ThermalDynamics</RootNamespace>
+    <RootNamespace>Thermodynamics</RootNamespace>
     <LangVersion>6</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Release;Debug</Configurations>

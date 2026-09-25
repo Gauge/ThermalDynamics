@@ -1,4 +1,4 @@
-# Building on Thermal Dynamics from another mod
+# Building on Thermodynamics from another mod
 
 What this page covers: how to bind another Space Engineers mod or in-game script to Thermal
 Dynamics' API and drive it — the setup, the binding lifecycle, a worked task for each system, and
@@ -17,19 +17,19 @@ authoritative on how to use them.
 ## The fast path: the drop-in client
 
 If you want to be calling the API in five minutes, copy one file —
-[`tools/modkit/ThermalDynamicsApi.cs`](../tools/modkit/ThermalDynamicsApi.cs) — into your mod's
+[`tools/modkit/ThermodynamicsApi.cs`](../tools/modkit/ThermodynamicsApi.cs) — into your mod's
 `Data/Scripts` folder. It does all of the setup and teardown below for you and exposes the whole
 API as typed methods that return friendly structs instead of raw tuples. The rest of this guide is
 what that file does and why, for when you want to understand or extend it; you do not need any of
 it to use the client.
 
 ```csharp
-using ThermalDynamics.Client;   // or whatever you rename the namespace to
+using Thermodynamics.Client;   // or whatever you rename the namespace to
 
 [MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
 public class MyMod : MySessionComponentBase
 {
-    private readonly ThermalDynamicsApi thermal = new ThermalDynamicsApi();
+    private readonly ThermodynamicsApi thermal = new ThermodynamicsApi();
 
     public override void LoadData()      { thermal.Init(); }     // register + request, once
     protected override void UnloadData() { thermal.Dispose(); }  // unregister, once
@@ -51,11 +51,11 @@ joules)`, `thermal.AddHeatSource(entity, watts, range)`, `thermal.AddThreshold(4
 ThresholdDirection.Rising, e => { ... })`, `thermal.GetCoolantLoop(pipe)`,
 `thermal.GetGridAeroForces(grid)`, `thermal.GetSetting(name)`. Check `thermal.IsReady` (or pass a
 callback to `Init`) if you need the moment it binds; read `thermal.MissingKeys` if you want to know
-whether a key you use is absent on the player's build of Thermal Dynamics.
+whether a key you use is absent on the player's build of Thermodynamics.
 
-Change the `namespace ThermalDynamics.Client` line to anything you like if it clashes with your
+Change the `namespace Thermodynamics.Client` line to anything you like if it clashes with your
 own. The file is plain C# 6 and references only game types, so it compiles wherever your mod does,
-and Thermal Dynamics' own test suite holds it identical to the API it wraps, so a copy you take
+and Thermodynamics' own test suite holds it identical to the API it wraps, so a copy you take
 today will not silently disagree with the contract.
 
 The rest of this page is the manual path — use it to understand the client, or if you would rather
@@ -63,7 +63,7 @@ bind the delegate table yourself.
 
 ## What the API is, in one paragraph
 
-Space Engineers mods cannot reference one another's compiled assemblies, so Thermal Dynamics
+Space Engineers mods cannot reference one another's compiled assemblies, so Thermodynamics
 publishes its surface as a `Dictionary<string, Delegate>` sent over a mod-message channel. You
 register a handler on the channel, receive the dictionary, and cast the delegates you want to
 their documented `Func<...>` types. Every delegate uses only whitelisted types, so an in-game
@@ -104,7 +104,7 @@ public class ThermalConsumer : MySessionComponentBase
     {
         MyAPIGateway.Utilities.RegisterMessageHandler(ThermalChannel, OnThermalApi);
 
-        // Ask for the table, in case Thermal Dynamics loaded before us and its one-time
+        // Ask for the table, in case Thermodynamics loaded before us and its one-time
         // broadcast has already gone out. Any non-dictionary payload is treated as a request,
         // so null is fine, and re-requesting is idempotent.
         MyAPIGateway.Utilities.SendModMessage(ThermalChannel, null);
@@ -136,7 +136,7 @@ public class ThermalConsumer : MySessionComponentBase
 * **Binding too early.** If you cast delegates in `LoadData` before the table has arrived, they
   are null. Bind in the message handler, as above, and treat "not yet bound" as a normal state
   your code tolerates until `OnThermalApi` fires.
-* **Not requesting.** Thermal Dynamics broadcasts once at session start. If you loaded after that,
+* **Not requesting.** Thermodynamics broadcasts once at session start. If you loaded after that,
   the broadcast is gone and you will wait forever unless you send a request. Always send one in
   `LoadData`.
 * **Not null-checking the cast.** A key you did not expect, a delegate whose signature changed
@@ -156,7 +156,7 @@ live and change every step.
 Read `ApiVersion` first and refuse a major you were not written against. The major moves only when
 a caller written against the previous major could bind and then be wrong — a key removed, a
 signature changed, or a meaning changed without the signature. A key that is merely *added* does
-not move it, so a newer Thermal Dynamics than you were built against still satisfies a correct
+not move it, so a newer Thermodynamics than you were built against still satisfies a correct
 `== RequiredMajor` consumer, and you simply will not see the keys added since. Never test `>=` on
 the major: a higher major is, by definition, one your casts may now get wrong.
 
@@ -254,7 +254,7 @@ set("EnableSolarSelfShadowing", 1f);                    // switches are 0 and 1;
 ```
 
 `GetSetting` returns `float.NaN` for a name that does not exist (and answers with the defaults, not
-zero, if Thermal Dynamics has not finished loading its own config yet). A write is not saved to the
+zero, if Thermodynamics has not finished loading its own config yet). A write is not saved to the
 config file — it lasts the session unless an administrator runs `/thermal save`. The names are in
 [configuration.md](configuration.md).
 
@@ -292,7 +292,7 @@ Vector3 liftNewtons = f.Item2;   // perpendicular to it
 ```
 
 Drag is zero unless the friction term is enabled; lift is zero unless both `EnableShapeDrag` and
-`EnableLift` are, and zero for a still grid. These are assembled the same way Thermal Dynamics'
+`EnableLift` are, and zero for a still grid. These are assembled the same way Thermodynamics'
 own aerodynamics apply them, so if the mod is applying them you are reading the force already on
 the grid — apply it again only if you mean to.
 
@@ -315,7 +315,7 @@ the wind's convection, not the sun.
 
 ## Multiplayer
 
-Thermal Dynamics simulates on the server and on each client (a client predicts locally rather than
+Thermodynamics simulates on the server and on each client (a client predicts locally rather than
 having every temperature replicated to it), and the **server is authoritative over damage**. That
 sets where your calls belong:
 
@@ -347,7 +347,7 @@ sets where your calls belong:
 These are stated in full, and enforced, in [api.md](api.md#guarantees). In short:
 
 * No call throws into you. A bad argument or an internal failure returns the type's default —
-  `false`, `0`, `NaN`, an empty tuple — and the exception is recorded in Thermal Dynamics'
+  `false`, `0`, `NaN`, an empty tuple — and the exception is recorded in Thermodynamics'
   telemetry, not yours.
 * Keys do not change meaning within a major version. New keys may appear; a missing key means an
   older build, so test for null after casting.
@@ -356,7 +356,7 @@ These are stated in full, and enforced, in [api.md](api.md#guarantees). In short
 
 ## When the message API is not enough
 
-A mod willing to couple to Thermal Dynamics' source, rather than only its message table, can drive
+A mod willing to couple to Thermodynamics' source, rather than only its message table, can drive
 the simulation core directly — it has no dependency on the game session and its seams
 (`IBlockAdjacency`, `ThermalSimulation`) are meant to be used. That path, and its cost, is in
 [api.md](api.md#in-process-extension).
@@ -365,5 +365,6 @@ the simulation core directly — it has no dependency on the game session and it
 
 | Date | Change |
 | --- | --- |
-| 2026-09-05 | **Added the drop-in client** ([`tools/modkit/ThermalDynamicsApi.cs`](../tools/modkit/ThermalDynamicsApi.cs)) and the fast-path section: one file a consumer copies in, `Init`/`Dispose` and typed methods returning structs, held identical to the API table by `ThermalDynamicsClientTests`. The manual binding walkthrough stays below it. |
+| 2026-09-24 | **Renamed the drop-in client** to `ThermodynamicsApi` in namespace `Thermodynamics.Client` (file `tools/modkit/ThermodynamicsApi.cs`), matching the mod's name. The message channel and table keys are unchanged, so a copy taken under the old name keeps working; only a fresh copy needs its `using` and type name updated. |
+| 2026-09-05 | **Added the drop-in client** ([`tools/modkit/ThermodynamicsApi.cs`](../tools/modkit/ThermodynamicsApi.cs)) and the fast-path section: one file a consumer copies in, `Init`/`Dispose` and typed methods returning structs, held identical to the API table by `ThermodynamicsClientTests`. The manual binding walkthrough stays below it. |
 | 2026-09-05 | Written, alongside an audit that added `GetGridAeroForces` and `GetCoolantLoop` to close the two shipped systems that had no read accessor. Covers setup, the binding lifecycle, a task per system, and the multiplayer and threading rules; the key-by-key contract stays in [api.md](api.md). |

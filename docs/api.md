@@ -1,6 +1,6 @@
 # Mod API
 
-Thermal Dynamics is meant to be built on. Everything the simulation knows is readable, everything
+Thermodynamics is meant to be built on. Everything the simulation knows is readable, everything
 it does is switchable, and both heat sources and temperature events can be driven from another mod.
 
 > The rule argued here is stated canonically in [rules.md](rules.md): `R9`, and the principle
@@ -21,7 +21,7 @@ delegates passed by mod message. Bind to it once and hold the delegates you need
 
 ## Binding
 
-Register a handler and send anything on the channel to ask for the table. Thermal Dynamics also
+Register a handler and send anything on the channel to ask for the table. Thermodynamics also
 broadcasts once at session start, so either order works.
 
 ```csharp

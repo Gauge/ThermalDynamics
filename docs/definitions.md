@@ -1,6 +1,6 @@
 # Definition reference
 
-Thermal Dynamics reads none of its tuning values from its own C# constants. Everything lives in
+Thermodynamics reads none of its tuning values from its own C# constants. Everything lives in
 `<ModExtensions>` groups attached to game definitions, read at runtime through Draygo's
 **Definition Extensions** mod. That means any mod — including one that does not depend on this
 one — can declare thermal properties for its own blocks, and this mod will pick them up.
