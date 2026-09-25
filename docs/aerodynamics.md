@@ -786,6 +786,30 @@ at a rim points diagonally. Round 5 calibrated at radius 24, where rims are a fe
 **the scale a hull is built at is radius 3 to 8, where they are most of it.** So the model is right-ish
 where nobody flies and wrong where everyone does, and no criterion registered so far could see that.
 
+### Round 6, registered before it is run — and why there is one
+
+**Round 5 said there would be no sixth round, and this is one.** The stopping rule was written against
+fitting the same held-out data a sixth time. What forces this round is not a drag result but a
+**defect in the instrument, found by a game-scale rig**, and the fix is judged against exact geometry
+before any drag data touches it. The calibration has to be redone because the coefficients are fitted
+through the instrument; the optimism that repeated model selection adds to leave-one-out estimates is
+stated here rather than hidden.
+
+**The change: a face's surface normal is read from the surface around that face, not from the block's
+occupancy gradient.** For each exposed face, the surface's depth along the face normal is read in the
+3×3 columns around it, up to two cells in or out; a column past an edge has no surface and is skipped,
+not read as a slope; a plane is fitted to what was found. A flat face is then flat to its rim, and a
+staircase reads as the slope it is.
+
+| # | Prediction | Falsified by |
+| --- | --- | --- |
+| X1 | every front face of a square plate and of a cube face-on reads cos²φ = 1, rims included | any below 0.999 |
+| X2 | a 45° wedge's staircase reads cos²φ = 0.5 ± 0.02 on its interior faces | outside |
+| X3 | a hemisphere's mean cos²φ within 0.03 of the exact 0.5 at radius 8 | outside |
+| X4 | **resolution invariance**: the square plate, the cube face-on, the 30° cone and the hemisphere, each at radius 4, 8 and 24, read `C_D` within ±10 % of their radius-24 value | any outside |
+| X5 | round 5's W1 and W2 on the new instrument | as before |
+| S5–S8 | as registered | as registered |
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -804,6 +828,7 @@ where nobody flies and wrong where everyone does, and no criterion registered so
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 6 registered, against round 5's own stopping rule, and the page says why.** The trigger is an instrument defect found at game scale, not a drag result; the new normal is read from the surface around each face and is judged on exact geometry first. Resolution invariance across radius 4 to 24 is a new requirement, because it is the property round 5 lacked and nothing had asked for. |
 | 2026-09-25 | **Step 1b's first flight found two faults and one finding.** The guard was capping the restoring moment; the in-flight damping was missing. And a 7×7 plate reads a drag coefficient of 0.29 against 1.17, because the block normal tilts every rim cell and a game-scale plate is mostly rim: round 5's calibration does not transfer to the scale hulls are built at. |
 | 2026-09-25 | **Round 5 recorded: W1 and W2 fail, W3 holds, and the registered fallback is taken.** The in-sample fit ships as `AeroCoefficients.Fitted` with its errors stated beside it: blunt bodies mostly within 15 %, stubby rounded ones up to 72 % too draggy. `AeroCalibrationTests` pins it; `AeroIncidenceTests` pins the geometry's convergence. |
 | 2026-09-25 | **Round 4 recorded as failing, and the geometry measured against exact truth for the first time.** The reconstructed normal converges on blunt bodies as the rig gets finer and has a floor on slender ones; four rounds were partly fitted to the radius-8 rigs' rim artefact. **Round 5 registered**: leave-one-out cross-validation over every sourced body, at radius 24, with a stated fallback if it fails. |
