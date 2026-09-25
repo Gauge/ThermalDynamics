@@ -92,7 +92,7 @@ def measured_current_definitions(composition):
 
     recorded = seen[-1]
 
-    cubes = os.path.join(repo_root(), "Data", "Cubes.xml")
+    cubes = os.path.join(repo_root(), "Thermodynamics", "Content", "Data", "Cubes.xml")
     if not os.path.exists(cubes):
         return None
 
@@ -215,7 +215,7 @@ def repo_root():
 # authored operation.
 def authored(path=None):
     """(TypeId, SubtypeId, property) -> provenance, for every waste fraction in `Cubes.xml`."""
-    path = path or os.path.join(repo_root(), "Data", "Cubes.xml")
+    path = path or os.path.join(repo_root(), "Thermodynamics", "Content", "Data", "Cubes.xml")
     text = open(path, encoding="utf-8").read()
 
     found = {}
@@ -344,7 +344,7 @@ def main(argv):
     tally = counts(table)
     total = sum(tally.values())
 
-    print(f"{total} waste fractions authored in Data/Cubes.xml")
+    print(f"{total} waste fractions authored in Thermodynamics/Content/Data/Cubes.xml")
     for name in CLASSES + ["none"]:
         if tally[name]:
             print(f"  {name:>12} {tally[name]:4d}  {tally[name] / total * 100:5.1f} %")
