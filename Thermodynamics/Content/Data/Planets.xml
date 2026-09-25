@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--GENERATED FILE — do not edit by hand.-->
+<!--
+  GENERATED FILE — do not edit by hand.
+
+  Regenerate with the sim's planets command; see tests/README.md.
+
+  Every figure below is derived from the world's own generator definition by
+  Thermodynamics.Core.PlanetThermalDerivation. What each derivation is and why is
+  documented there and in docs/environment.md; the per-entry comments here say
+  what the engine supplied and what came out.
+-->
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<CubeBlocks>
 
@@ -9,7 +18,10 @@
 				<SubtypeId>DefaultThermodynamics</SubtypeId>
 			</Id>
 
-			<!--The fallback for any planet without an entry of its own.-->
+			<!--
+			The fallback for any planet without an entry of its own. Earthlike, and unchanged
+			from what this mod shipped before the per-planet entries existed.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -19,16 +31,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="294.261" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="4" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -43,13 +58,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="2000" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.5" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -61,7 +78,11 @@
 				<SubtypeId>EarthLike</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 1 g, air density 1 breathable, solar protection 1.8.-->
+			<!--
+			From the definition: gravity 1 g, air density 1 breathable, solar protection 1.8.
+			DefaultSurfaceTemperature not authored, so Cozy by engine default.
+			Real analogue: Earth, mean 288 K.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -71,16 +92,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="293.5" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="6.4424" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -95,13 +119,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="600" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.3" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -113,7 +139,11 @@
 				<SubtypeId>Alien</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 1.1 g, air density 1.2 breathable, solar protection 1.8.-->
+			<!--
+			From the definition: gravity 1.1 g, air density 1.2 breathable, solar protection 1.8.
+			DefaultSurfaceTemperature not authored, so Cozy by engine default.
+			Real analogue: none — a thick-aired earthlike, mean 288 K.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -123,16 +153,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="293.5" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="7.0866" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -147,13 +180,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="600" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.3" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -165,7 +200,13 @@
 				<SubtypeId>Mars</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 0.9 g, air density 1 unbreathable, solar protection 0.2.-->
+			<!--
+			From the definition: gravity 0.9 g, air density 1 unbreathable, solar protection 0.2.
+			DefaultSurfaceTemperature not authored, so Cozy by engine default.
+			Real analogue: Mars, mean 215 K.
+
+			DEPARTS FROM THE DERIVATION: the definition does not author DefaultSurfaceTemperature, so the engine's Cozy default would put Mars at 288 K. Anchored to the real planet's 215 K mean and its ~60 K daily range instead, which its thin real air cannot damp.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -175,16 +216,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="245" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="6.8555" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -199,13 +243,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="600" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.0333" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -217,7 +263,11 @@
 				<SubtypeId>Pertam</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 1.2 g, air density 1 breathable, solar protection 0.75.-->
+			<!--
+			From the definition: gravity 1.2 g, air density 1 breathable, solar protection 0.75.
+			DefaultSurfaceTemperature Hot.
+			Real analogue: none — a desert world, mean 325 K.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -227,16 +277,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="330.5" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="7.7309" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -251,13 +304,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="750" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.125" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -269,7 +324,11 @@
 				<SubtypeId>Triton</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 1 g, air density 1 breathable, solar protection 1.8.-->
+			<!--
+			From the definition: gravity 1 g, air density 1 breathable, solar protection 1.8.
+			DefaultSurfaceTemperature ExtremeFreeze.
+			Real analogue: Triton (38 K) — but SE's is breathable, mean 38 K.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -279,16 +338,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="105.5" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="6.4424" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -303,13 +365,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="2000" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.3" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -321,7 +385,11 @@
 				<SubtypeId>Europa</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 0.25 g, air density 1 unbreathable, solar protection 0.-->
+			<!--
+			From the definition: gravity 0.25 g, air density 1 unbreathable, solar protection 0.
+			DefaultSurfaceTemperature ExtremeFreeze.
+			Real analogue: Europa, mean 102 K.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -331,16 +399,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="105.5" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="1.9043" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -355,13 +426,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="285" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -373,7 +446,13 @@
 				<SubtypeId>Titan</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 0.25 g, air density 1 breathable, solar protection 1.8.-->
+			<!--
+			From the definition: gravity 0.25 g, air density 1 breathable, solar protection 1.8.
+			DefaultSurfaceTemperature not authored, so Cozy by engine default.
+			Real analogue: Titan, mean 94 K.
+
+			DEPARTS FROM THE DERIVATION: unauthored, so the engine default would make an ice moon 288 K. Anchored to Titan's measured 94 K, with the very small daily range its thick cold nitrogen atmosphere gives it.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -383,16 +462,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="95.5" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="40" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="45" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="1.6106" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -407,13 +489,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="285" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0.3" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="50" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>
@@ -425,7 +509,13 @@
 				<SubtypeId>Moon</SubtypeId>
 			</Id>
 
-			<!--From the definition: gravity 0.25 g, no atmosphere, solar protection 1.-->
+			<!--
+			From the definition: gravity 0.25 g, no atmosphere, solar protection 1.
+			DefaultSurfaceTemperature not authored, so Cozy by engine default.
+			Real analogue: the Moon, mean 245 K.
+
+			DEPARTS FROM THE DERIVATION: unauthored. The derivation already gets an airless world's enormous swing right from having no atmosphere; this pins it to the Moon's measured 100 K before dawn and 390 K at noon rather than leaving the mean at the Cozy default.
+			-->
 			<ModExtensions>
 				<Group Name="ThermalPlanetProperties">
 
@@ -435,16 +525,19 @@
 					<!--Air temperature at the equator at noon, K.-->
 					<Decimal Name="DayTemperature" Value="390" />
 
-					<!--How much colder a pole is than the equator, K.-->
+					<!--How much colder a pole is than the equator, K. Air carries heat polewards, so a
+					thin-aired world keeps more of what each latitude is given.-->
 					<Decimal Name="PoleTemperatureDrop" Value="120" />
 
-					<!--Seconds the air takes to answer the sun.-->
+					<!--Seconds the air takes to answer the sun. What puts the day's peak after noon,
+					and the fallback for a session that has not yet measured a day.-->
 					<Decimal Name="AmbientLagSeconds" Value="5" />
 
-					<!--The same lag as a share of this world's own day, which is what it should be.-->
+					<!--The same lag as a share of this world's own day, which is what it should be.
+					Earth peaks about two hours after noon out of twenty-four.-->
 					<Decimal Name="AmbientLagShareOfDay" Value="0.083" />
 
-					<!--How much colder a kilometre up is, K/km.-->
+					<!--How much colder a kilometre up is, K/km. Derived: g/cp, two thirds for moisture.-->
 					<Decimal Name="AmbientLapseRate" Value="0" />
 
 					<!--Rock temperature below the damping depth, K — the surface's own daily mean.-->
@@ -459,13 +552,15 @@
 					<!--Metres below sea level before the rock starts warming toward the core.-->
 					<Decimal Name="SealevelDeadzone" Value="285" />
 
-					<!--Fraction of the sun a full atmosphere absorbs, 0..1.-->
+					<!--Fraction of the sun a full atmosphere absorbs, 0..1. From the engine's own
+					SolarRadiationProtectionFactor.-->
 					<Decimal Name="SolarDecay" Value="0" />
 
 					<!--Convective coefficient at the surface, W/(m^2 K), in proportion to the air.-->
 					<Decimal Name="ConvectionCoefficient" Value="0" />
 
-					<!--The same for a grid buried in rock, W/(m^2 K).-->
+					<!--The same for a grid buried in rock, W/(m^2 K). Rock is a far worse heat sink
+					than moving air: 2k/D for k 2.5 W/(m K) over a 2.5 m block.-->
 					<Decimal Name="UndergroundConvectionCoefficient" Value="2" />
 				</Group>
 			</ModExtensions>

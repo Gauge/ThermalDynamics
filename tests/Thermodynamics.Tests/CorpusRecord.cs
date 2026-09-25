@@ -7,6 +7,17 @@ using Thermodynamics.Harness;
 
 namespace Thermodynamics.Tests
 {
+    /// <summary>
+    /// What a corpus pass **learned**, written down: the invariants are pass or fail, and every figure
+    /// the run measured to answer them used to die with the assertion. Written down once, the same
+    /// pass names the specimens that answer the question in minutes afterwards.
+    ///
+    /// <para>
+    /// Off unless <c>THERMAL_CORPUS_DATA</c> names a directory. One file per kind of row, appended a
+    /// batch at a time, because thirty workers opening a file per ship is its own bottleneck.
+    /// See balance.md, The datasets.
+    /// </para>
+    /// </summary>
     internal static class CorpusRecord
     {
 
@@ -52,7 +63,7 @@ namespace Thermodynamics.Tests
             foreach (string definition in Definitions)
             {
                 text.Append(definition).Append(' ')
-                    .AppendLine(HashOf(Path.Combine(Root(), "Data", definition)));
+                    .AppendLine(HashOf(Path.Combine(ShippedBlocks.DataRoot(), definition)));
             }
 
             try
