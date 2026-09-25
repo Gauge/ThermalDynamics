@@ -24,6 +24,56 @@ namespace Thermodynamics.Core
 
         /// <summary>The fineness at which flow that left a bluff front has reattached along the sides.</summary>
         public float ReattachLength;
+
+        /// <summary>
+        /// Round 5's in-sample fit to every sourced body, at radius 24. Out of sample it reaches 14 of
+        /// 22 bodies within 25 %, and reads rounded noses too draggy; see aerodynamics.md, Round 5.
+        /// </summary>
+        public static AeroCoefficients Fitted
+        {
+            get
+            {
+                return new AeroCoefficients
+                {
+                    Offset = -0.08209f,
+                    Stagnation = 0.54126f,
+                    BaseAttached = 0.33405f,
+                    BaseSeparated = 0.69401f,
+                    ReattachLength = 1.13172f,
+                };
+            }
+        }
+    }
+
+    /// <summary>The sums of one view the drag model reads, and their moments in grid-local metres.</summary>
+    public struct AeroSummary
+    {
+        /// <summary>Projected windward area, m².</summary>
+        public float Silhouette;
+
+        /// <summary>First moment of <see cref="Silhouette"/>.</summary>
+        public Vector3 SilhouetteMoment;
+
+        /// <summary>Projected windward area weighted by cos²φ, m².</summary>
+        public float Facing;
+
+        /// <summary>First moment of <see cref="Facing"/>.</summary>
+        public Vector3 FacingMoment;
+
+        /// <summary>Projected leeward area in separated flow, m².</summary>
+        public float Base;
+
+        /// <summary>First moment of <see cref="Base"/>.</summary>
+        public Vector3 BaseMoment;
+
+        /// <summary>Wetted skin, m².</summary>
+        public float Wetted;
+
+        /// <summary>First moment of <see cref="Wetted"/>.</summary>
+        public Vector3 WettedMoment;
+
+        /// <summary>Length along the flow over the square root of the silhouette.</summary>
+        public float Fineness;
     }
 
     /// <summary>Drag of an <see cref="AeroView"/>: forebody pressure, base suction and skin friction.</summary>
@@ -69,51 +119,76 @@ namespace Thermodynamics.Core
         }
 
         /// <summary>
-        /// Drag area C_D·A in m², and the point the drag acts through in grid-local metres. The
-        /// point is the centre of each contribution weighted by its share of the drag.
+        /// The sums the drag model reads from a view, so that a drag is a handful of multiplies: what a
+        /// profile stores for each wind direction (aerodynamics.md, AR19).
         /// </summary>
-        public static float DragArea(AeroView view, AeroCoefficients c, float friction, out Vector3 centre)
+        public static AeroSummary Summarise(AeroView view)
         {
-            centre = Vector3.Zero;
-            if (view == null || view.Silhouette <= 0f) return 0f;
-
-            float total = 0f;
-            float facing = 0f;
-            Vector3 moment = Vector3.Zero;
+            AeroSummary summary = new AeroSummary();
+            if (view == null || view.Silhouette <= 0f) return summary;
 
             for (int i = 0; i < view.Front.Count; i++)
             {
                 AeroElement e = view.Front[i];
-                float squared = e.Incidence * e.Incidence;
-                float share = (c.Offset + (c.Stagnation * squared)) * e.Area;
-                facing += squared * e.Area;
-                total += share;
-                moment += e.Centre * share;
+                float squared = e.Incidence * e.Incidence * e.Area;
+                summary.Silhouette += e.Area;
+                summary.SilhouetteMoment += e.Centre * e.Area;
+                summary.Facing += squared;
+                summary.FacingMoment += e.Centre * squared;
             }
 
-            float suction = BaseSuction(c, facing / view.Silhouette, Fineness(view));
             for (int i = 0; i < view.Base.Count; i++)
             {
                 AeroElement e = view.Base[i];
-                float share = suction * e.Area * Separated(e.Incidence);
-                total += share;
-                moment += e.Centre * share;
+                float separated = e.Area * Separated(e.Incidence);
+                summary.Base += separated;
+                summary.BaseMoment += e.Centre * separated;
             }
 
-            float skin = friction * view.Wetted;
-            total += skin;
-            moment += view.WettedCentre * skin;
+            summary.Wetted = view.Wetted;
+            summary.WettedMoment = view.WettedCentre * view.Wetted;
+            summary.Fineness = Fineness(view);
+            return summary;
+        }
+
+        /// <summary>
+        /// Drag area C_D·A in m², and the point the drag acts through in grid-local metres: the centre
+        /// of each contribution weighted by its share of the drag.
+        /// </summary>
+        public static float DragArea(AeroSummary s, AeroCoefficients c, float friction, out Vector3 centre)
+        {
+            centre = Vector3.Zero;
+            if (s.Silhouette <= 0f) return 0f;
+
+            float suction = BaseSuction(c, s.Facing / s.Silhouette, s.Fineness);
+
+            float total = (c.Offset * s.Silhouette) + (c.Stagnation * s.Facing)
+                + (suction * s.Base) + (friction * s.Wetted);
+            Vector3 moment = (s.SilhouetteMoment * c.Offset) + (s.FacingMoment * c.Stagnation)
+                + (s.BaseMoment * suction) + (s.WettedMoment * friction);
 
             if (total > 0f) centre = moment / total;
             return total;
         }
 
+        /// <summary>Drag area of a view; see <see cref="DragArea(AeroSummary, AeroCoefficients, float, out Vector3)"/>.</summary>
+        public static float DragArea(AeroView view, AeroCoefficients c, float friction, out Vector3 centre)
+        {
+            return DragArea(Summarise(view), c, friction, out centre);
+        }
+
         /// <summary>Drag coefficient on the silhouette.</summary>
-        public static float Coefficient(AeroView view, AeroCoefficients c, float friction)
+        public static float Coefficient(AeroSummary summary, AeroCoefficients c, float friction)
         {
             Vector3 centre;
-            float area = DragArea(view, c, friction, out centre);
-            return view != null && view.Silhouette > 0f ? area / view.Silhouette : 0f;
+            float area = DragArea(summary, c, friction, out centre);
+            return summary.Silhouette > 0f ? area / summary.Silhouette : 0f;
+        }
+
+        /// <summary>Drag coefficient of a view on its silhouette.</summary>
+        public static float Coefficient(AeroView view, AeroCoefficients c, float friction)
+        {
+            return Coefficient(Summarise(view), c, friction);
         }
 
         /// <summary>

@@ -64,7 +64,7 @@ namespace Thermodynamics.Sim
                     return PrefabCommand(args);
 
                 case "aero-calibrate":
-                    Console.WriteLine(AeroCalibrationLab.Report(AeroCalibrationLab.Fit(AeroCalibrationLab.Rigs())));
+                    Console.WriteLine(AeroCalibrationLab.Report(AeroCalibrationLab.Fit(AeroCalibrationLab.Rigs(AeroCalibrationLab.CalibrationRadius))));
                     return 0;
 
                 case "thermal-corpus-export":

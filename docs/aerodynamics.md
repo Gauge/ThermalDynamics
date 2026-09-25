@@ -692,7 +692,7 @@ failure on the page. The ellipsoids are reported beside the result, against both
 **The fitted suction term came out positive, +0.20, and that sent the investigation to the geometry.**
 The cones' drag is linear in the *true* `sin²θ`, but the model never sees the true angle — it sees the
 normal reconstructed from cells. Measured against exact geometry, with no drag data involved
-(`AeroIncidenceProbe`), the reconstructed mean `cos²φ` over each cone's front:
+(`AeroIncidenceTests`), the reconstructed mean `cos²φ` over each cone's front:
 
 | cone | exact | radius 8 | radius 16 | radius 32 |
 | --- | ---: | ---: | ---: | ---: |
@@ -737,6 +737,34 @@ prediction is then out of sample, and the in-sample fit is reported beside it.
 this resolution, and step 1 proceeds with the best in-sample fit and its errors stated beside every
 force**, rather than with a sixth round. The owner's S1 and S2 stay as recorded: tested once, failed.
 
+### Round 5: the bars are missed, the fallback is taken, and the errors ship with the model
+
+| | Registered | Result |
+| --- | --- | --- |
+| W1 bodies within ±25 %, out of sample | at least 18 of 22 | **14 — fails** |
+| W2 no body worse than ±50 % | none | **three — fails**: hemisphere curve-first +84 %, ellipsoids `L/d` 0.75 +56 % and 2 +58 % |
+| W3 tapered tail below blunt base by 5 % | yes | **0.691 against 0.824, 16 % lower — holds** |
+
+**The fitted suction term is negative now**, −0.082, which is the shoulder suction the physics said
+was missing; resolving the geometry was what let the fit find it. **What remains is one systematic
+bias**: stubby rounded bodies read too draggy — the hemisphere curve-first 0.72 in-sample against
+0.42 — because a pressure law applied locally to cell-scale normals recovers only part of a rounded
+shoulder's suction. Blunt bodies, which is most of what players build, sit mostly within 15 %.
+
+**So, as registered, the model is recorded as unable to reach textbook drag on cell-built bodies at
+this resolution, and step 1 proceeds with the in-sample fit**, `AeroCoefficients.Fitted`:
+
+| `P₀` | `P₂` | `C_att` | `C_sep` | `λ_r` |
+| ---: | ---: | ---: | ---: | ---: |
+| −0.08209 | 0.54126 | 0.33405 | 0.69401 | 1.13172 |
+
+**What a player will feel from the bias**: a rounded or pointed nose helps, and less than it would in
+air; a tapered tail helps by about as much as a real one; a brick is about as draggy as a brick is.
+`AeroCalibrationTests` holds the shipped constants to the fit and pins round 5's outcome, so that an
+improvement fails a test and gets read rather than passing silently. Skin friction at ship scale is
+Prandtl's `0.074·Re^−0.2`, not the lab's fitted 0.00408, which stands in for the wind-tunnel Reynolds
+numbers the reference data were taken at.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -755,6 +783,7 @@ force**, rather than with a sixth round. The owner's S1 and S2 stay as recorded:
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 5 recorded: W1 and W2 fail, W3 holds, and the registered fallback is taken.** The in-sample fit ships as `AeroCoefficients.Fitted` with its errors stated beside it: blunt bodies mostly within 15 %, stubby rounded ones up to 72 % too draggy. `AeroCalibrationTests` pins it; `AeroIncidenceTests` pins the geometry's convergence. |
 | 2026-09-25 | **Round 4 recorded as failing, and the geometry measured against exact truth for the first time.** The reconstructed normal converges on blunt bodies as the rig gets finer and has a floor on slender ones; four rounds were partly fitted to the radius-8 rigs' rim artefact. **Round 5 registered**: leave-one-out cross-validation over every sourced body, at radius 24, with a stated fallback if it fails. |
 | 2026-09-25 | **Round 4 registered before it runs**: a forebody pressure that can go negative, `P₀ + P₂·cos²φ`, from the cones' own shape, held out on two hemispheres and a rough sphere no round has used. The rough-sphere comparator is chosen after round 3's smooth-turbulent miss and says so. |
 | 2026-09-25 | **Round 3 recorded: it misses its own calibration and reads the ellipsoids 3.6–4.2× high.** The cause is the forebody law, which could never go negative and so could not price shoulder suction; the cone data are linear in sin²θ, which is the law the next round needs. Whether a stepped hull reaches the drag crisis White's turbulent values assume is recorded as open, not decided. |

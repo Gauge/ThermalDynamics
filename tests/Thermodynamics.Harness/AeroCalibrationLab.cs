@@ -8,34 +8,54 @@ using VRageMath;
 namespace Thermodynamics.Harness
 {
     /// <summary>
-    /// Fits the subsonic drag model to White's Table 7.3 and predicts the bodies it was not fitted to.
-    /// The bodies are built from cells, flown with the air coming from +Z. Calibration is round 3's:
-    /// the cones from 10° to 75°, the flat-faced cylinders, the square plate and the cube. Held out are
-    /// round 4's two hemispheres and sphere; the ellipsoids, the edge-on cube and the boat-tail pair are
-    /// reported. See aerodynamics.md, Round 4.
+    /// Fits the subsonic drag model to White's Table 7.3, Hoerner and the hemispheres, and predicts each
+    /// body from a fit that did not see it (leave-one-out). The bodies are built from cells, flown with
+    /// the air coming from +Z. See aerodynamics.md, Round 5.
     /// </summary>
     public static class AeroCalibrationLab
     {
-        /// <summary>Radius of every round body, in cells.</summary>
+        /// <summary>Default radius of the round bodies, in cells.</summary>
         public const int Radius = 8;
 
-        /// <summary>A body, the direction the air comes from, and White's coefficient for it.</summary>
+        /// <summary>Round 5's radius, where the reconstructed normal has converged on blunt bodies.</summary>
+        public const int CalibrationRadius = 24;
+
+        /// <summary>A body, the direction the air comes from, and its reference coefficient.</summary>
         public sealed class Rig
         {
             public string Name;
             public float Reference;
-            public bool Calibration;
-            public AeroView View;
+            public bool Scored;
+            public AeroSummary Summary;
         }
 
-        /// <summary>The fit and what it predicts.</summary>
+        /// <summary>The in-sample fit, and each body predicted without itself.</summary>
         public sealed class Result
         {
             public AeroCoefficients Coefficients;
             public float LabFriction;
             public double Residual;
             public readonly List<Rig> Rigs = new List<Rig>();
-            public readonly Dictionary<string, float> Predicted = new Dictionary<string, float>();
+            public readonly Dictionary<string, float> InSample = new Dictionary<string, float>();
+            public readonly Dictionary<string, float> OutOfSample = new Dictionary<string, float>();
+
+            /// <summary>Scored bodies predicted out of sample within <paramref name="band"/> of their reference.</summary>
+            public int Within(float band)
+            {
+                int n = 0;
+                foreach (Rig rig in Rigs)
+                {
+                    if (!rig.Scored) continue;
+                    if (Math.Abs((OutOfSample[rig.Name] / rig.Reference) - 1f) <= band) n++;
+                }
+                return n;
+            }
+
+            /// <summary>The number of scored bodies.</summary>
+            public int Scored
+            {
+                get { return Rigs.FindAll(r => r.Scored).Count; }
+            }
         }
 
         private static readonly Vector3 Upstream = Vector3.Backward;
@@ -45,56 +65,85 @@ namespace Thermodynamics.Harness
         private static readonly float[] CylinderRatios = { 0.5f, 1f, 2f, 4f, 8f };
         private static readonly float[] CylinderDrag = { 1.15f, 0.90f, 0.85f, 0.87f, 0.99f };
         private static readonly float[] EllipsoidRatios = { 0.75f, 1f, 2f, 4f, 8f };
-        private static readonly float[] EllipsoidDrag = { 0.2f, 0.2f, 0.13f, 0.1f, 0.08f };
+        private static readonly float[] EllipsoidSubcritical = { 0.5f, 0.47f, 0.27f, 0.25f, 0.2f };
 
-        /// <summary>Every rig, views built.</summary>
-        public static List<Rig> Rigs()
+        /// <summary>Round 5's bodies at <paramref name="radius"/> cells, summaries built.</summary>
+        public static List<Rig> Rigs(int radius)
         {
             List<Rig> rigs = new List<Rig>();
             for (int i = 0; i < ConeAngles.Length; i++)
             {
                 rigs.Add(Make("cone " + ConeAngles[i].ToString("0", CultureInfo.InvariantCulture) + "°",
-                    ConeDrag[i], true, Cone(ConeAngles[i]), Upstream));
+                    ConeDrag[i], Cone(ConeAngles[i], radius), Upstream));
             }
+            rigs.Add(Make("disk", 1.17f, Cylinder(0.5f / radius, radius), Upstream));
             for (int i = 0; i < CylinderRatios.Length; i++)
             {
                 rigs.Add(Make("cylinder L/d " + CylinderRatios[i].ToString("0.#", CultureInfo.InvariantCulture),
-                    CylinderDrag[i], true, Cylinder(CylinderRatios[i]), Upstream));
+                    CylinderDrag[i], Cylinder(CylinderRatios[i], radius), Upstream));
             }
 
-            rigs.Add(Make("cube face-on", 1.07f, true, Box(8, 8, 8), Upstream));
-            rigs.Add(Make("square plate", 1.18f, true, Box(8, 8, 1), Upstream));
-            rigs.Add(Make("V2 hemisphere, curve first", 0.42f, false, Hemisphere(), Upstream));
-            rigs.Add(Make("V3 hemisphere, flat first", 1.17f, false, Hemisphere(), -Upstream));
-            rigs.Add(Make("V4 sphere (rough)", 0.47f, false, Ellipsoid(1f), Upstream));
+            int side = radius;
+            rigs.Add(Make("cube face-on", 1.07f, Box(side, side, side), Upstream));
+            rigs.Add(Make("cube edge-on", 0.81f, Box(side, side, side), new Vector3(1f, 0f, 1f)));
+            rigs.Add(Make("square plate", 1.18f, Box(side, side, 1), Upstream));
 
             for (int i = 0; i < EllipsoidRatios.Length; i++)
             {
                 rigs.Add(Make("ellipsoid L/d " + EllipsoidRatios[i].ToString("0.##", CultureInfo.InvariantCulture),
-                    EllipsoidDrag[i], false, Ellipsoid(EllipsoidRatios[i]), Upstream));
+                    EllipsoidSubcritical[i], Ellipsoid(EllipsoidRatios[i], radius), Upstream));
             }
+            rigs.Add(Make("hemisphere, curve first", 0.42f, Hemisphere(radius), Upstream));
+            rigs.Add(Make("hemisphere, flat first", 1.17f, Hemisphere(radius), -Upstream));
 
-            rigs.Add(Make("S3 cube edge-on", 0.81f, false, Box(8, 8, 8), new Vector3(1f, 0f, 1f)));
-            rigs.Add(Make("S4 blunt base", 0f, false, Cylinder(2f), Upstream));
-            rigs.Add(Make("S4 tapered tail", 0f, false, BoatTailed(2f), Upstream));
+            rigs.Add(Make("W3 blunt base", 0f, Cylinder(2f, radius), Upstream));
+            rigs.Add(Make("W3 tapered tail", 0f, BoatTailed(2f, radius), Upstream));
             return rigs;
         }
 
-        /// <summary>Fits the calibration rigs and predicts the held-out ones.</summary>
+        /// <summary>Round 5: fit every scored body, then predict each without itself.</summary>
         public static Result Fit(List<Rig> rigs)
         {
-            List<Rig> calibration = rigs.FindAll(r => r.Calibration);
+            Result result = new Result();
+            result.Rigs.AddRange(rigs);
+            List<Rig> scored = rigs.FindAll(r => r.Scored);
 
+            double residual;
+            double[] all = FitTo(scored, out residual);
+            result.Coefficients = FromParameters(all);
+            result.LabFriction = (float)Math.Exp(all[5]);
+            result.Residual = residual;
+            foreach (Rig rig in rigs)
+            {
+                result.InSample[rig.Name] = AeroDrag.Coefficient(rig.Summary, result.Coefficients, result.LabFriction);
+            }
+
+            foreach (Rig left in scored)
+            {
+                List<Rig> others = scored.FindAll(r => r != left);
+                double ignored;
+                double[] p = FitTo(others, out ignored);
+                result.OutOfSample[left.Name] = AeroDrag.Coefficient(left.Summary, FromParameters(p), (float)Math.Exp(p[5]));
+            }
+            foreach (Rig rig in rigs)
+            {
+                if (!rig.Scored) result.OutOfSample[rig.Name] = result.InSample[rig.Name];
+            }
+            return result;
+        }
+
+        private static double[] FitTo(List<Rig> set, out double residual)
+        {
             Func<double[], double> objective = p =>
             {
                 AeroCoefficients c = FromParameters(p);
                 float friction = (float)Math.Exp(p[5]);
                 double sum = 0d;
-                for (int i = 0; i < calibration.Count; i++)
+                for (int i = 0; i < set.Count; i++)
                 {
-                    float model = AeroDrag.Coefficient(calibration[i].View, c, friction);
+                    float model = AeroDrag.Coefficient(set[i].Summary, c, friction);
                     if (!(model > 0f)) return 1e9;
-                    double error = Math.Log(model / calibration[i].Reference);
+                    double error = Math.Log(model / set[i].Reference);
                     sum += error * error;
                 }
                 return sum;
@@ -104,19 +153,16 @@ namespace Thermodynamics.Harness
             {
                 0.0, Math.Log(0.9), Math.Log(0.15), Math.Log(0.4), Math.Log(1.1), Math.Log(0.005),
             };
-            double residual;
-            double[] best = NelderMead.Minimise(objective, start, 0.4, 4000, out residual);
-
-            Result result = new Result();
-            result.Coefficients = FromParameters(best);
-            result.LabFriction = (float)Math.Exp(best[5]);
-            result.Residual = residual;
-            result.Rigs.AddRange(rigs);
-            for (int i = 0; i < rigs.Count; i++)
+            double best = double.MaxValue;
+            double[] found = start;
+            foreach (double step in new[] { 0.4, 1.0 })
             {
-                result.Predicted[rigs[i].Name] = AeroDrag.Coefficient(rigs[i].View, result.Coefficients, result.LabFriction);
+                double value;
+                double[] p = NelderMead.Minimise(objective, found, step, 6000, out value);
+                if (value < best) { best = value; found = p; }
             }
-            return result;
+            residual = best;
+            return found;
         }
 
         private static AeroCoefficients FromParameters(double[] p)
@@ -136,33 +182,42 @@ namespace Thermodynamics.Harness
         {
             StringBuilder sb = new StringBuilder();
             AeroCoefficients c = result.Coefficients;
-            sb.AppendLine("Subsonic drag model fitted to White, Fluid Mechanics, Table 7.3 (Re >= 1e4)");
+            sb.AppendLine("Subsonic drag model, round 5: every sourced body, each predicted without itself");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                "  offset {0:0.000}  stagnation {1:0.000}  base attached {2:0.000}  base separated {3:0.000}  reattach {4:0.000}  lab friction {5:0.00000}  residual {6:0.0000}",
+                "  offset {0:0.00000}  stagnation {1:0.00000}  base attached {2:0.00000}  base separated {3:0.00000}  reattach {4:0.00000}  lab friction {5:0.00000}  residual {6:0.0000}",
                 c.Offset, c.Stagnation, c.BaseAttached, c.BaseSeparated, c.ReattachLength, result.LabFriction, result.Residual));
             sb.AppendLine();
-            sb.AppendLine(string.Format("  {0,-22} {1,6} {2,8} {3,8} {4,9} {5,9}", "body", "set", "White", "model", "error", "fineness"));
+            sb.AppendLine(string.Format("  {0,-26} {1,6} {2,9} {3,8} {4,12} {5,8}", "body", "ref", "in-sample", "error", "out-of-sample", "error"));
             foreach (Rig rig in result.Rigs)
             {
-                float model = result.Predicted[rig.Name];
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "  {0,-22} {1,6} {2,8} {3,8:0.000} {4,9} {5,9:0.00}",
-                    rig.Name, rig.Calibration ? "fit" : "held",
-                    rig.Reference > 0f ? rig.Reference.ToString("0.00", CultureInfo.InvariantCulture) : "—",
-                    model,
-                    rig.Reference > 0f ? ((model / rig.Reference) - 1f).ToString("+0.0%;-0.0%", CultureInfo.InvariantCulture) : "",
-                    AeroDrag.Fineness(rig.View)));
+                float inside = result.InSample[rig.Name];
+                float outside = result.OutOfSample[rig.Name];
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "  {0,-26} {1,6} {2,9:0.000} {3,8} {4,12:0.000} {5,8}",
+                    rig.Name,
+                    rig.Scored ? rig.Reference.ToString("0.00", CultureInfo.InvariantCulture) : "—",
+                    inside, Error(rig, inside), rig.Scored ? outside.ToString("0.000", CultureInfo.InvariantCulture) : "", Error(rig, outside)));
             }
+            sb.AppendLine();
+            sb.AppendLine(string.Format("  W1: {0} of {1} within ±25 % out of sample; W2: {2} of {1} within ±50 %",
+                result.Within(0.25f), result.Scored, result.Within(0.5f)));
             return sb.ToString();
         }
 
-        private static Rig Make(string name, float reference, bool calibration, GridModel grid, Vector3 upstream)
+        private static string Error(Rig rig, float value)
+        {
+            return rig.Scored
+                ? ((value / rig.Reference) - 1f).ToString("+0.0%;-0.0%", CultureInfo.InvariantCulture)
+                : "";
+        }
+
+        private static Rig Make(string name, float reference, GridModel grid, Vector3 upstream)
         {
             return new Rig
             {
                 Name = name,
                 Reference = reference,
-                Calibration = calibration,
-                View = AeroGeometry.View(grid, upstream),
+                Scored = reference > 0f,
+                Summary = AeroDrag.Summarise(AeroGeometry.View(grid, upstream)),
             };
         }
 
