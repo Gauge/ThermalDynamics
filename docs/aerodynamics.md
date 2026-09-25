@@ -583,6 +583,28 @@ passing. What remains held out, with its band unchanged:
 is already one more than a clean test allows; a third would be fitting to it. A further revision would
 need held-out data neither round has seen.
 
+### Round 2: passes on the letter, and the fit says the model is wrong
+
+| | Registered | Result |
+| --- | --- | --- |
+| S3 cube edge-on | 0.66–0.96 | **0.667** — inside by 0.007 |
+| S4 tapered tail against blunt base | lower | **0.934 against 0.935** — lower by 0.1 % |
+| R1 cylinders `L/d` 0.5, 1 (reported) | — | 1.118 (−2.8 %), 0.950 (+5.6 %) |
+
+**Both pass as written and neither is evidence.** A pass by 0.7 % of a band and a boat-tail worth a
+tenth of a per cent are inside any honest noise, and the fit that produced them misses its own
+calibration cube by **−14.8 %**. Its coefficients say why: base suction falls from 2.04 to 0.004
+over a fineness of 0.24, so any body longer than about half its width carries all its drag on the
+forebody, and nothing about its tail can matter. That is not a subsonic body — a flat-faced cylinder's
+base carries a tenth or more of its drag at any length — and it is why the tapered tail cannot help.
+
+**The cause is structural, and it is one variable doing two jobs.** Fineness stood in for *has the flow
+recovered by the time it reaches the base*, and the answer depends on where the flow left the body. On
+a cone it stays attached down the surface and leaves at the base edge, so the base sees a gentle
+wake at any length; on a flat-fronted body it separates at the front rim and reaches the base only if
+it has reattached along the sides first. The slender cones pulled suction down with length to be slow,
+and that starved the cube. Round 3 separates the two, and tests on data neither round has seen.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -601,6 +623,7 @@ need held-out data neither round has seen.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 2 recorded: S3 and S4 pass on the letter, by 0.007 and 0.1 %, and are not counted as evidence.** The fit misses its own calibration cube by 14.8 % and puts no base suction on any body longer than half its width, so a tail cannot matter. The diagnosis is that fineness conflated front-edge separation with attached flow. |
 | 2026-09-25 | **Round 2 of step 1 registered before it runs.** Leeward surfaces count as base only where the flow separates (12° to 22°, sourced), and base suction is calibrated on the square plate and cube with long cylinders for the reattached end. The owner's S1 and S2 become calibration and are recorded as tested once and failed; S3 and S4 stay held out, and a failure ends revisions on this data. |
 | 2026-09-25 | **Round 1 of step 1 fails, recorded as run.** The profile's geometry is built and checked against hand geometry (`AeroGeometryTests`); the drag model fitted to White's round bodies predicts all four held-out bodies outside their bands. The diagnosis is written beside the numbers: a round section reattaches sooner than a square one, and the model counted a boat-tail's attached surfaces as base. |
 | 2026-09-24 | **Step 1's criteria are registered before any of it is built.** The reference is White's Table 7.3; calibration is the cones and the flat-faced cylinders, and the owner's cube and plate criteria are held out with two more (edge-on cube, boat-tail pair), so none can pass by construction. The finned-hull rig moves to step 2, because a fin restores through lift, not drag; step 1 tests the drag-stabilised case, a shuttlecock. `K5`'s population pair is re-registered unchanged, and a failure is recorded as a realism-against-playability conflict for the owner rather than retuned away. |

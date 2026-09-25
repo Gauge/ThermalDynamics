@@ -29,6 +29,15 @@ namespace Thermodynamics.Core
     /// <summary>Drag of an <see cref="AeroView"/>: forebody pressure, base suction and skin friction.</summary>
     public static class AeroDrag
     {
+        /// <summary>Below this angle to the flow a leeward surface keeps its flow attached.</summary>
+        public const float AttachedDegrees = 12f;
+
+        /// <summary>Above this angle to the flow a leeward surface has shed its flow into the wake.</summary>
+        public const float SeparatedDegrees = 22f;
+
+        private static readonly float AttachedSine = (float)Math.Sin(AttachedDegrees * Math.PI / 180d);
+        private static readonly float SeparatedSine = (float)Math.Sin(SeparatedDegrees * Math.PI / 180d);
+
         /// <summary>The hull's length along the flow over the square root of its silhouette.</summary>
         public static float Fineness(AeroView view)
         {
@@ -77,7 +86,7 @@ namespace Thermodynamics.Core
             for (int i = 0; i < view.Base.Count; i++)
             {
                 AeroElement e = view.Base[i];
-                float share = suction * e.Area * Weight(e.Incidence, falloff);
+                float share = suction * e.Area * Separated(e.Incidence);
                 total += share;
                 moment += e.Centre * share;
             }
@@ -96,6 +105,19 @@ namespace Thermodynamics.Core
             Vector3 centre;
             float area = DragArea(view, c, friction, out centre);
             return view != null && view.Silhouette > 0f ? area / view.Silhouette : 0f;
+        }
+
+        /// <summary>
+        /// How much of a leeward surface sits in separated flow, from its incidence: the sine of the
+        /// angle its surface meets the flow at. Zero at <see cref="AttachedDegrees"/> and below, one at
+        /// <see cref="SeparatedDegrees"/> and above; see aerodynamics.md, Round 2.
+        /// </summary>
+        public static float Separated(float incidence)
+        {
+            if (incidence <= AttachedSine) return 0f;
+            if (incidence >= SeparatedSine) return 1f;
+            float t = (incidence - AttachedSine) / (SeparatedSine - AttachedSine);
+            return t * t * (3f - (2f * t));
         }
 
         private static float Weight(float incidence, float falloff)

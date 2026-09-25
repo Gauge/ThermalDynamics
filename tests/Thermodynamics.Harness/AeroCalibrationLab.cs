@@ -9,9 +9,9 @@ namespace Thermodynamics.Harness
 {
     /// <summary>
     /// Fits the subsonic drag model to White's Table 7.3 and predicts the bodies it was not fitted to.
-    /// The bodies are built from cells, flown with the air coming from +Z. Calibration is the cones
-    /// from 10° to 75° and the flat-faced cylinders; everything else is held out. See aerodynamics.md,
-    /// Step 1's criteria.
+    /// The bodies are built from cells, flown with the air coming from +Z. Calibration is round 2's:
+    /// the cones from 10° to 75°, the square plate and cube, and the flat-faced cylinders at L/d 2, 4
+    /// and 8; everything else is held out. See aerodynamics.md, Round 2.
     /// </summary>
     public static class AeroCalibrationLab
     {
@@ -55,12 +55,13 @@ namespace Thermodynamics.Harness
             }
             for (int i = 0; i < CylinderRatios.Length; i++)
             {
-                rigs.Add(Make("cylinder L/d " + CylinderRatios[i].ToString("0.#", CultureInfo.InvariantCulture),
-                    CylinderDrag[i], true, Cylinder(CylinderRatios[i]), Upstream));
+                bool reattached = CylinderRatios[i] >= 2f;
+                rigs.Add(Make((reattached ? "" : "R1 ") + "cylinder L/d " + CylinderRatios[i].ToString("0.#", CultureInfo.InvariantCulture),
+                    CylinderDrag[i], reattached, Cylinder(CylinderRatios[i]), Upstream));
             }
 
-            rigs.Add(Make("S1 cube face-on", 1.07f, false, Box(8, 8, 8), Upstream));
-            rigs.Add(Make("S2 plate", 1.18f, false, Box(8, 8, 1), Upstream));
+            rigs.Add(Make("cube face-on", 1.07f, true, Box(8, 8, 8), Upstream));
+            rigs.Add(Make("square plate", 1.18f, true, Box(8, 8, 1), Upstream));
             rigs.Add(Make("S3 cube edge-on", 0.81f, false, Box(8, 8, 8), new Vector3(1f, 0f, 1f)));
             rigs.Add(Make("S4 blunt base", 0f, false, Cylinder(2f), Upstream));
             rigs.Add(Make("S4 tapered tail", 0f, false, BoatTailed(2f), Upstream));
