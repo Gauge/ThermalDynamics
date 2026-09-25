@@ -4,17 +4,17 @@ using VRageMath;
 namespace Thermodynamics.Core
 {
     /// <summary>
-    /// The subsonic drag model's coefficients: forebody pressure and its falloff with a surface's
-    /// inclination, and base suction for flow that stayed attached against flow that left a bluff
-    /// front and has not reattached. Fitted to White's Table 7.3; see aerodynamics.md, Round 3.
+    /// The subsonic drag model's coefficients: a forebody pressure <c>P0 + P2·cos²φ</c> that can go
+    /// negative on a rounded shoulder, and base suction for flow that stayed attached against flow that
+    /// left a bluff front and has not reattached. Fitted to White's Table 7.3; see aerodynamics.md, Round 4.
     /// </summary>
     public struct AeroCoefficients
     {
-        /// <summary>Pressure coefficient on a surface square to the flow.</summary>
-        public float Forebody;
+        /// <summary>The part of a surface's pressure coefficient that does not depend on its inclination; negative is shoulder suction.</summary>
+        public float Offset;
 
-        /// <summary>Exponent on the incidence a surface's pressure falls off with.</summary>
-        public float Falloff;
+        /// <summary>The part that grows with cos²φ, the square of how squarely the surface faces the flow.</summary>
+        public float Stagnation;
 
         /// <summary>Base suction where the flow reaches the base attached, or reattached along the sides.</summary>
         public float BaseAttached;
@@ -77,7 +77,6 @@ namespace Thermodynamics.Core
             centre = Vector3.Zero;
             if (view == null || view.Silhouette <= 0f) return 0f;
 
-            float falloff = c.Falloff;
             float total = 0f;
             float facing = 0f;
             Vector3 moment = Vector3.Zero;
@@ -85,9 +84,9 @@ namespace Thermodynamics.Core
             for (int i = 0; i < view.Front.Count; i++)
             {
                 AeroElement e = view.Front[i];
-                float weighted = e.Area * Weight(e.Incidence, falloff);
-                float share = c.Forebody * weighted;
-                facing += weighted;
+                float squared = e.Incidence * e.Incidence;
+                float share = (c.Offset + (c.Stagnation * squared)) * e.Area;
+                facing += squared * e.Area;
                 total += share;
                 moment += e.Centre * share;
             }
@@ -128,12 +127,6 @@ namespace Thermodynamics.Core
             if (incidence >= SeparatedSine) return 1f;
             float t = (incidence - AttachedSine) / (SeparatedSine - AttachedSine);
             return t * t * (3f - (2f * t));
-        }
-
-        private static float Weight(float incidence, float falloff)
-        {
-            if (incidence <= 0f) return 0f;
-            return incidence >= 1f ? 1f : (float)Math.Pow(incidence, falloff);
         }
     }
 }

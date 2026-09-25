@@ -680,6 +680,63 @@ crisis a rough one does not reach. This is chosen before V4 is run and *after* r
 ellipsoids against smooth-turbulent values — so it is stated here as a choice, and round 3's T2 stays a
 failure on the page. The ellipsoids are reported beside the result, against both White columns.
 
+### Round 4: fails, and the instrument, not the drag law, is most of why
+
+| | Registered | Result |
+| --- | --- | --- |
+| V1 calibration within ±12 % | all | **fails** — cone 10° +18.4 %, cylinder `L/d` 2 +16.8 %, cube −15.2 %, and three more |
+| V2 hemisphere, curve first | 0.27–0.57 | **0.690, fails** |
+| V3 hemisphere, flat first | 0.99–1.35 | **0.980, fails** |
+| V4 sphere | 0.31–0.63 | **0.675, fails** |
+
+**The fitted suction term came out positive, +0.20, and that sent the investigation to the geometry.**
+The cones' drag is linear in the *true* `sin²θ`, but the model never sees the true angle — it sees the
+normal reconstructed from cells. Measured against exact geometry, with no drag data involved
+(`AeroIncidenceProbe`), the reconstructed mean `cos²φ` over each cone's front:
+
+| cone | exact | radius 8 | radius 16 | radius 32 |
+| --- | ---: | ---: | ---: | ---: |
+| 10° | 0.030 | 0.063 | 0.060 | 0.060 |
+| 30° | 0.250 | 0.208 | 0.217 | 0.220 |
+| 60° | 0.750 | 0.503 | 0.619 | 0.709 |
+| 75° | 0.933 | 0.390 | 0.640 | 0.786 |
+| hemisphere | 0.500 | 0.487 | 0.499 | 0.505 |
+
+**Two separate limits, and only one of them costs anything.** On blunt bodies the reading converges as
+the rig gets finer: a 75° cone eight cells in radius is two cells deep, so nearly every cell is a rim
+cell and the radius-one gradient there points diagonally — an artefact of the rig, not of the air. On
+slender bodies it does not converge — a 10° slope reads as twice its `cos²φ` at every size, which is the
+radius-one reconstruction's known floor — but `cos²φ` is small there, so it moves little drag. **Four
+rounds were fitted partly to the first limit.** The rigs were eight cells in radius from the start, and
+nothing had measured the instrument before the coefficients were fitted through it.
+
+### Round 5, registered before it is run: every body is used, and each is predicted without itself
+
+**Every independent held-out set is spent**, and a fifth holdout drawn from the same pages would be a
+pretence. The method that stays honest on a small dataset is **leave-one-out cross-validation**: fit
+the six coefficients to every body but one, predict that one, and repeat for each body. Each body's
+prediction is then out of sample, and the in-sample fit is reported beside it.
+
+* **The instrument**: every rig is 24 cells in radius, where the blunt-cone reading has converged to
+  within about 15 % of exact and the hemisphere to 1 %.
+* **The model**: round 4's, unchanged — forebody `P₀ + P₂·cos²φ`, base suction by bluffness and
+  reattachment, leeward separation between 12° and 22°.
+* **The data**: White's cones from 10° to 90° (90° is the disk, 1.17 — Hoerner gives the same 1.17 with
+  a rear-side pressure of −0.42), the five flat-faced cylinders, the cube face-on 1.07 and edge-on 0.81,
+  the square plate 1.18, the ellipsoids' **subcritical** column (0.5, 0.47, 0.27, 0.25, 0.2 — its sphere
+  is the rough sphere's 0.47, which is round 4's stated reason for the comparator), and the two
+  hemispheres (0.42, 1.17).
+
+| # | Prediction, out of sample | Falsified by |
+| --- | --- | --- |
+| W1 | at least 80 % of the bodies predicted within ±25 % of their reference | fewer |
+| W2 | no body predicted worse than ±50 % | any |
+| W3 | the tapered tail below the blunt base by at least 5 % — seen before, so reported, and the one quantity a player shaping a tail would feel | not |
+
+**If W1 or W2 fails, the model is recorded as unable to reach textbook drag on cell-built bodies at
+this resolution, and step 1 proceeds with the best in-sample fit and its errors stated beside every
+force**, rather than with a sixth round. The owner's S1 and S2 stay as recorded: tested once, failed.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -698,6 +755,7 @@ failure on the page. The ellipsoids are reported beside the result, against both
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 4 recorded as failing, and the geometry measured against exact truth for the first time.** The reconstructed normal converges on blunt bodies as the rig gets finer and has a floor on slender ones; four rounds were partly fitted to the radius-8 rigs' rim artefact. **Round 5 registered**: leave-one-out cross-validation over every sourced body, at radius 24, with a stated fallback if it fails. |
 | 2026-09-25 | **Round 4 registered before it runs**: a forebody pressure that can go negative, `P₀ + P₂·cos²φ`, from the cones' own shape, held out on two hemispheres and a rough sphere no round has used. The rough-sphere comparator is chosen after round 3's smooth-turbulent miss and says so. |
 | 2026-09-25 | **Round 3 recorded: it misses its own calibration and reads the ellipsoids 3.6–4.2× high.** The cause is the forebody law, which could never go negative and so could not price shoulder suction; the cone data are linear in sin²θ, which is the law the next round needs. Whether a stepped hull reaches the drag crisis White's turbulent values assume is recorded as open, not decided. |
 | 2026-09-25 | **Round 3 registered before it runs**, on data no round has seen: White's turbulent ellipsoids. Base suction becomes a function of the front's bluffness and of reattachment length rather than of fineness alone; calibration is every body the earlier rounds saw, and the fit must meet its own data within ±12 %. |

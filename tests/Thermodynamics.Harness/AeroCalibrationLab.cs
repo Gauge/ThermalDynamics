@@ -11,8 +11,8 @@ namespace Thermodynamics.Harness
     /// Fits the subsonic drag model to White's Table 7.3 and predicts the bodies it was not fitted to.
     /// The bodies are built from cells, flown with the air coming from +Z. Calibration is round 3's:
     /// the cones from 10° to 75°, the flat-faced cylinders, the square plate and the cube. Held out are
-    /// the turbulent ellipsoids, never used by any round; the edge-on cube and the boat-tail pair are
-    /// reported. See aerodynamics.md, Round 3.
+    /// round 4's two hemispheres and sphere; the ellipsoids, the edge-on cube and the boat-tail pair are
+    /// reported. See aerodynamics.md, Round 4.
     /// </summary>
     public static class AeroCalibrationLab
     {
@@ -64,9 +64,13 @@ namespace Thermodynamics.Harness
 
             rigs.Add(Make("cube face-on", 1.07f, true, Box(8, 8, 8), Upstream));
             rigs.Add(Make("square plate", 1.18f, true, Box(8, 8, 1), Upstream));
+            rigs.Add(Make("V2 hemisphere, curve first", 0.42f, false, Hemisphere(), Upstream));
+            rigs.Add(Make("V3 hemisphere, flat first", 1.17f, false, Hemisphere(), -Upstream));
+            rigs.Add(Make("V4 sphere (rough)", 0.47f, false, Ellipsoid(1f), Upstream));
+
             for (int i = 0; i < EllipsoidRatios.Length; i++)
             {
-                rigs.Add(Make("T2 ellipsoid L/d " + EllipsoidRatios[i].ToString("0.##", CultureInfo.InvariantCulture),
+                rigs.Add(Make("ellipsoid L/d " + EllipsoidRatios[i].ToString("0.##", CultureInfo.InvariantCulture),
                     EllipsoidDrag[i], false, Ellipsoid(EllipsoidRatios[i]), Upstream));
             }
 
@@ -98,7 +102,7 @@ namespace Thermodynamics.Harness
 
             double[] start =
             {
-                Math.Log(0.8), Math.Log(2.0), Math.Log(0.15), Math.Log(0.4), Math.Log(1.1), Math.Log(0.005),
+                0.0, Math.Log(0.9), Math.Log(0.15), Math.Log(0.4), Math.Log(1.1), Math.Log(0.005),
             };
             double residual;
             double[] best = NelderMead.Minimise(objective, start, 0.4, 4000, out residual);
@@ -119,8 +123,8 @@ namespace Thermodynamics.Harness
         {
             return new AeroCoefficients
             {
-                Forebody = (float)Math.Exp(p[0]),
-                Falloff = (float)Math.Exp(p[1]),
+                Offset = (float)p[0],
+                Stagnation = (float)Math.Exp(p[1]),
                 BaseAttached = (float)Math.Exp(p[2]),
                 BaseSeparated = (float)Math.Exp(p[3]),
                 ReattachLength = (float)Math.Exp(p[4]),
@@ -134,8 +138,8 @@ namespace Thermodynamics.Harness
             AeroCoefficients c = result.Coefficients;
             sb.AppendLine("Subsonic drag model fitted to White, Fluid Mechanics, Table 7.3 (Re >= 1e4)");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                "  forebody {0:0.000}  falloff {1:0.000}  base attached {2:0.000}  base separated {3:0.000}  reattach {4:0.000}  lab friction {5:0.00000}  residual {6:0.0000}",
-                c.Forebody, c.Falloff, c.BaseAttached, c.BaseSeparated, c.ReattachLength, result.LabFriction, result.Residual));
+                "  offset {0:0.000}  stagnation {1:0.000}  base attached {2:0.000}  base separated {3:0.000}  reattach {4:0.000}  lab friction {5:0.00000}  residual {6:0.0000}",
+                c.Offset, c.Stagnation, c.BaseAttached, c.BaseSeparated, c.ReattachLength, result.LabFriction, result.Residual));
             sb.AppendLine();
             sb.AppendLine(string.Format("  {0,-22} {1,6} {2,8} {3,8} {4,9} {5,9}", "body", "set", "White", "model", "error", "fineness"));
             foreach (Rig rig in result.Rigs)
@@ -180,15 +184,21 @@ namespace Thermodynamics.Harness
         /// <summary>A cone of half-angle <paramref name="degrees"/>, apex upstream, flat base downstream.</summary>
         public static GridModel Cone(float degrees)
         {
+            return Cone(degrees, Radius);
+        }
+
+        /// <summary>The same body at a chosen radius in cells.</summary>
+        public static GridModel Cone(float degrees, int radius)
+        {
             GridModel grid = Grid();
-            double length = Radius / Math.Tan(degrees * Math.PI / 180d);
+            double length = radius / Math.Tan(degrees * Math.PI / 180d);
             int cells = Math.Max(1, (int)Math.Round(length));
             for (int z = 0; z < cells; z++)
             {
-                float r = Radius * (float)(1d - ((z + 0.5d) / length));
+                float r = radius * (float)(1d - ((z + 0.5d) / length));
                 if (r <= 0f) continue;
-                for (int x = -Radius; x <= Radius; x++)
-                    for (int y = -Radius; y <= Radius; y++)
+                for (int x = -radius; x <= radius; x++)
+                    for (int y = -radius; y <= radius; y++)
                         if (InDisk(x, y, r)) Add(grid, x, y, z);
             }
             return grid;
@@ -197,12 +207,18 @@ namespace Thermodynamics.Harness
         /// <summary>A flat-faced cylinder of length-to-diameter <paramref name="ratio"/>, axis along the flow.</summary>
         public static GridModel Cylinder(float ratio)
         {
+            return Cylinder(ratio, Radius);
+        }
+
+        /// <summary>The same body at a chosen radius in cells.</summary>
+        public static GridModel Cylinder(float ratio, int radius)
+        {
             GridModel grid = Grid();
-            int cells = Math.Max(1, (int)Math.Round(ratio * 2 * Radius));
+            int cells = Math.Max(1, (int)Math.Round(ratio * 2 * radius));
             for (int z = 0; z < cells; z++)
-                for (int x = -Radius; x <= Radius; x++)
-                    for (int y = -Radius; y <= Radius; y++)
-                        if (InDisk(x, y, Radius)) Add(grid, x, y, z);
+                for (int x = -radius; x <= radius; x++)
+                    for (int y = -radius; y <= radius; y++)
+                        if (InDisk(x, y, radius)) Add(grid, x, y, z);
             return grid;
         }
 
@@ -212,30 +228,59 @@ namespace Thermodynamics.Harness
         /// </summary>
         public static GridModel BoatTailed(float ratio)
         {
-            GridModel grid = Cylinder(ratio);
+            return BoatTailed(ratio, Radius);
+        }
+
+        /// <summary>The same body at a chosen radius in cells.</summary>
+        public static GridModel BoatTailed(float ratio, int radius)
+        {
+            GridModel grid = Cylinder(ratio, radius);
             double taper = Math.Tan(15d * Math.PI / 180d);
-            int tail = (int)Math.Round((Radius / 2d) / taper);
+            int tail = (int)Math.Round((radius / 2d) / taper);
             for (int k = 1; k <= tail; k++)
             {
-                float r = Radius - (float)(k * taper);
-                for (int x = -Radius; x <= Radius; x++)
-                    for (int y = -Radius; y <= Radius; y++)
+                float r = radius - (float)(k * taper);
+                for (int x = -radius; x <= radius; x++)
+                    for (int y = -radius; y <= radius; y++)
                         if (InDisk(x, y, r)) Add(grid, x, y, -k);
             }
+            return grid;
+        }
+
+        /// <summary>A hemisphere, curved side toward +Z and flat side toward -Z.</summary>
+        public static GridModel Hemisphere()
+        {
+            return Hemisphere(Radius);
+        }
+
+        /// <summary>The same body at a chosen radius in cells.</summary>
+        public static GridModel Hemisphere(int radius)
+        {
+            GridModel grid = Grid();
+            for (int z = 0; z <= radius; z++)
+                for (int x = -radius; x <= radius; x++)
+                    for (int y = -radius; y <= radius; y++)
+                        if ((x * x) + (y * y) + (z * z) <= radius * radius) Add(grid, x, y, z);
             return grid;
         }
 
         /// <summary>A prolate ellipsoid, axis along the flow, of length-to-diameter <paramref name="ratio"/>.</summary>
         public static GridModel Ellipsoid(float ratio)
         {
+            return Ellipsoid(ratio, Radius);
+        }
+
+        /// <summary>The same body at a chosen radius in cells.</summary>
+        public static GridModel Ellipsoid(float ratio, int radius)
+        {
             GridModel grid = Grid();
-            double half = ratio * Radius;
+            double half = ratio * radius;
             int reach = (int)Math.Ceiling(half);
             for (int z = -reach; z <= reach; z++)
-                for (int x = -Radius; x <= Radius; x++)
-                    for (int y = -Radius; y <= Radius; y++)
+                for (int x = -radius; x <= radius; x++)
+                    for (int y = -radius; y <= radius; y++)
                     {
-                        double q = (((double)x * x) + ((double)y * y)) / ((double)Radius * Radius)
+                        double q = (((double)x * x) + ((double)y * y)) / ((double)radius * radius)
                             + ((double)z * z) / (half * half);
                         if (q <= 1d) Add(grid, x, y, z);
                     }
