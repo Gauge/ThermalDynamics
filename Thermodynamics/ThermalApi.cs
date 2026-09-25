@@ -225,28 +225,13 @@ namespace Thermodynamics
             return true;
         }
 
+        /// <summary>
+        /// The aerodynamic drag and lift this mod applies to a grid, in world newtons. It applies none
+        /// while the force model is rebuilt, so both are zero, which is the truth; see aerodynamics.md.
+        /// </summary>
         private static MyTuple<Vector3, Vector3> GetGridAeroForces(IMyCubeGrid grid)
         {
-            ThermalGrid thermals = GridOf(grid);
-            if (thermals == null || thermals.Simulation == null || grid.Physics == null)
-            {
-                return new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero);
-            }
-
-            float watts = thermals.Simulation.FrictionWatts;
-            if (watts <= 0f) return new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero);
-
-            EnvironmentState state = thermals.LastState;
-            Vector3 localWind = state.WindDirectionLocal * state.WindSpeed;
-            MatrixD world = grid.WorldMatrix;
-            Vector3 worldWind = Vector3.TransformNormal(localWind, world);
-
-            Vector3 drag = DragForce.Vector(watts, worldWind, thermals.Simulation.Settings);
-            Vector3 pressure = Vector3.TransformNormal(
-                thermals.Simulation.Solver.LastPressureWatts, world);
-            Vector3 lift = LiftForce.Vector(pressure, worldWind, thermals.Simulation.Settings);
-
-            return new MyTuple<Vector3, Vector3>(drag, lift);
+            return new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero);
         }
 
         private static MyTuple<bool, float, float, float, int> GetCoolantLoop(IMySlimBlock block)

@@ -175,10 +175,10 @@ class TheHullShapeFactorScalesTheDrag(unittest.TestCase):
         self.assertEqual(1.0, cruise.shape_of({"shape_factor": "0.4"}, False))
         self.assertAlmostEqual(0.4, cruise.shape_of({"shape_factor": "0.4"}, True))
 
-# test the tool scores the coefficient the mod ships operation.
-    def test_the_tool_scores_the_coefficient_the_mod_ships(self):
-        """Pinned here as well as in C#, so the Python side states the value it is claiming."""
-        self.assertEqual(0.5, cruise.SHIPPED_DRAG_COEFFICIENT)
+# test the default is the coefficient the retired force applied operation.
+    def test_the_default_is_the_coefficient_the_retired_force_applied(self):
+        """The figures this tool published were taken at 1.54; the default keeps them reproducible."""
+        self.assertEqual(1.54, cruise.RETIRED_DRAG_COEFFICIENT)
 
 if __name__ == "__main__":
     unittest.main()

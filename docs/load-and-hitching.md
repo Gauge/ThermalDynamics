@@ -519,10 +519,11 @@ so what a remap costs falls from about 5.6 ms to 4.1 ms, and the part that stops
 unsliced part. `ExposureSkipTests` asserts the answers are bit-identical and that the skip engages
 on every node of an unchanged hull; `SimulationWork.ExposureNodeWrites` is what says so at runtime.
 
-### 12. The shape normals are their own pass, on their own budget
+### 12. Reconstructing a surface normal costs seven times counting exposed faces
 
-**Reconstructing a node's effective surface normal costs about seven times what counting its exposed
-faces does**, and it was measured before it was budgeted:
+**No step reconstructs normals any more** — the friction row stopped reading them when the aerodynamic
+force was stripped — but the force profile that replaces it will, whenever a hull changes
+(aerodynamics.md, `AR19`), so what one costs is kept:
 
 | at 126,731 blocks | `shapenormals` | `exposure` |
 | --- | ---: | ---: |
@@ -532,19 +533,34 @@ faces does**, and it was measured before it was budgeted:
 
 *`bench stages --stages shapenormals,exposure --size 125000`, both confirmed — each reproduced its
 own best within 2 % five times, so neither is a capped row. The work column is 126,731 nodes for
-both, which is what says the two are the same walk doing different things at each stop.*
+both, which is what says the two are the same walk doing different things at each stop.* The
+`shapenormals` stage now times `ShapeNormal.Of` over every node directly rather than the solver pass
+it was taken on, which it replaced one for one.
 
-**So it cannot land whole.** Unsliced, a layout change on a 126,731-block hull is a 24.8 ms frame,
-and the hull this mod is bounded by is four times that. `SimulationScheduler.ShapeNormalBudget` is
-therefore a seventh of the exposure budget — `nodeCount / 280`, floored at 32 and capped at 512 —
-which puts the two passes at about the same cost to a frame.
+**So a rebuild that reconstructs normals cannot land whole.** Unsliced, a layout change on a
+126,731-block hull is a 24.8 ms frame, and the hull this mod is bounded by is four times that; the
+profile's rebuild has to be budgeted the way exposure is.
 
-**Slicing is safe here for a reason worth stating, because it is not true of every pass.** A node
-the pass has not reached holds a zero normal, and zero reads as a factor of *one* — the full
-projected area, which is the model without the term at all. A half-finished pass therefore degrades
-toward the old answer and never past it: there is no interruption that charges a hull less than it
-was charged before. `ShapeDragTests` pins that, and it is why the pass needs no completion flag
-guarding the friction row.
+**A one-cell block's neighbourhood is a table, and that is worth 6.8 % — which is the finding rather
+than the saving.** Its centre is its own cell, so the 26 offsets and their unit vectors are the same
+for every such block; the general walk arrived at those constants by 26 square roots and 26 divisions
+per node, and a census hull is mostly one-cell blocks. Replaced by a lookup — the same values summed in
+the same order, held to the walk *exactly* rather than to a tolerance by `ShapeNormalOneCellTests`,
+because float addition is not associative and a table read in a different order is a different
+answer. **24.797 ms → 23.110 ms** at 126,731 blocks, 195.7 → 182.4 ns a node, with `exposure` flat at
+3.536 against 3.561 as the control.
+
+**Removing every square root bought 6.8 %, so reconstruction is not compute-bound — it is the
+probes.** Twenty-six scattered reads into the occupancy bitset is what a node costs, and the
+arithmetic on top of them was nearly free. That is where a cheaper reconstruction has to aim: the 26
+neighbours of a cell occupy nine rows of three adjacent bits, so nine word reads could replace
+twenty-six probes. Not built.
+
+**And it belongs on the grid's own version, not on exposure's event.** Exposure is recomputed
+whenever a room-mapping pass completes — a door is enough — and a door does not move a hull. A normal
+is a function of occupancy alone, so a rebuild keyed on the grid's version skips every change that does
+not add or remove a block, and one that is never restarted mid-pass finishes on a hull under
+construction.
 
 ### 14. The surface rebuild keeps its scratch
 
@@ -645,31 +661,6 @@ still a behaviour change, so it keeps its regrowth.
 
 **The `place` stage still measures the unsized path**, deliberately. That is what the incremental
 per-block path does, and changing what an instrument measures changes what its history means.
-
-### 12. The shape normals are their own pass, on their own budget — continued
-
-**A one-cell block's neighbourhood is a table, and that is worth 6.8 % — which is the finding
-rather than the saving.** Its centre is its own cell, so the 26 offsets and their unit vectors are
-the same for every such block; the general walk arrived at those constants by 26 square roots and 26
-divisions per node, and a census hull is mostly one-cell blocks. Replaced by a lookup — the same
-values summed in the same order, held to the walk *exactly* rather than to a tolerance by
-`ShapeNormalOneCellTests`, because float addition is not associative and a table read in a different
-order is a different answer. **24.797 ms → 23.110 ms** at 126,731 blocks, 195.7 → 182.4 ns a node,
-with `exposure` flat at 3.536 against 3.561 as the control.
-
-**Removing every square root bought 6.8 %, so the pass is not compute-bound — it is the probes.**
-Twenty-six scattered reads into the occupancy bitset is what a node costs, and the arithmetic on top
-of them was nearly free. That is where a further pass has to aim, and the shape of it is fewer reads
-rather than cheaper ones: the 26 neighbours of a cell occupy nine rows of three adjacent bits, so
-nine word reads could replace twenty-six probes. Not built, because this pass runs only where
-`EnableShapeDrag` is on and that ships off — the cost is real but almost nobody pays it.
-
-**It is also rebuilt on the right event, which is the other half of the cost.** Exposure is
-recomputed whenever a room-mapping pass completes — a door is enough — and a door does not move a
-hull. A normal is a function of occupancy, so this pass is keyed on the grid's own version and skips
-entirely on every change that does not add or remove a block. A running pass is never restarted
-either, the rule the wind shadow already follows: a hull under construction changes every few frames,
-and a pass that starts over each time never finishes.
 
 ## Catching it again
 
@@ -967,6 +958,7 @@ reasoning that produced it was sound and the premise was not.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | **Section 12 describes a cost rather than a pass.** The shape-normal pass left the solver with the aerodynamic force (`K25` step 0), so `SimulationScheduler.ShapeNormalBudget` and the slicing argument that went with it are gone; the measurements stay, because the force profile's rebuild will reconstruct the same normals, and the two halves of the section are one section now. |
 | 2026-09-04 | **The ladder is re-audited and survives**: 580 ms of build at a million blocks against the published 582, settle exactly 3,934 ticks, every stage inside session spread. The step and resident columns read 14 % and 7 % lower with no change to explain them and are left to the session (`M7`). The table now carries the 2026-09-04 figures with the audit note. |
 | 2026-09-04 | **The hitch distribution is re-taken** after the bounded step, the spread step and the prologue hoist: p99 26.47 → 3.11 ms at 126,731 blocks and 28.71 → 6.90 at 505,566, max 60.83 → 24.38 and 208.68 → 50.13, with the one outlier attributed to the process's first walk of the step path (the JIT) rather than to anything a second grid would pay. The superseded rows stay printed beside the new ones. Also: `UncalledCodeTests` crossed two seconds and is tagged slow — the lane checker found it on this pass's refresh. |
 | 2026-09-04 | **The first-step outlier is corrected and mostly gone**: the step prologue runs on the rebuild tick (`D4`), a warm first step reads 12.5 ms against a steady 8.3 at 505,566 blocks, and the old first-touch attribution is measured at one to two milliseconds of the spike it was blamed for. |

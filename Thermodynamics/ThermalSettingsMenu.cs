@@ -179,16 +179,6 @@ namespace Thermodynamics
             { "FrictionScale", new Entry(Aero, "Friction heating scale", "Multiplier on the v3 heating term, so moving it retunes temperatures and leaves handling alone.", 0f, 0.01f) },
 
 
-            { "EnableDrag", new Entry(Aero, "Apply drag", "Takes the drag the friction term already computes out of the ship's motion; off, so an aerodynamics mod is not doubled.", 0, 1) },
-
-            { "DragCoefficient", new Entry(Aero, "Drag coefficient", "The coefficient a hull is treated as having; 0.5 is measured, and authored rather than read off the shape.", 0f, 2f) },
-
-            { "EnableShapeDrag", new Entry(Aero, "Correct area for hull shape", "Corrects the projected area for which way the hull actually faces, which moves temperatures as well as handling.", 0, 1) },
-
-            { "EnableLift", new Entry(Aero, "Lift", "Applies the aerodynamic force across the airflow rather than along it; needs Apply drag AND Hull shape both on, and is small on real ships.", 0, 1) },
-
-            { "LiftCoefficient", new Entry(Aero, "Lift coefficient", "How much of the computed transverse force is applied; 1 is the model's own answer.", 0f, 2f) },
-
             { "EnableWindwardShielding", new Entry(Aero, "Shelter blocks behind others", "A block behind another is sheltered from the wind, for heat and for drag, at a second sliced pass over the hull.", 0, 1) },
 
             { "RoomConvectionCoefficient", new Entry(Environment, "Room air convection (W/m2 K)", "Convective coefficient between a block and room air, W/(m2 K).", 0f, 50f) },
@@ -231,7 +221,7 @@ namespace Thermodynamics
 
             { "DebugWindRaycast", new Entry(Display, "Draw wind vector", "The relative wind each grid is flying through, drawn from the grid.", 0, 1) },
 
-            { "DebugAeroOverlay", new Entry(Display, "Aero debug view", "The centre of mass, the drag, lift and wind vectors on your ship, and the name of whichever switch is stopping a force from applying.", 0, 1) },
+            { "DebugAeroOverlay", new Entry(Display, "Aero debug view", "Your ship's centre of mass, the wind it flies through, where the air heats it, and its top speed: RelativeTopSpeed's if that mod is installed, the engine's cap otherwise.", 0, 1) },
 
             { "DebugWindOverlay", new Entry(Display, "Wind map", "Draws the wind field as arrows: 1 a lattice around you, 2 the whole planet. Ctrl+Shift+W cycles it.", 0, WindOverlay.ModeCount - 1, true) },
 
@@ -247,44 +237,6 @@ namespace Thermodynamics
             { "EnableTelemetry", new Entry(Display, "Collect telemetry", "Per-grid and per-block-type data collection. Off for ordinary play.", 0, 1) },
 
             { "TelemetryPlanetProbes", new Entry(Display, "Wind probe interval (steps)", "Solver steps between planet-wide wind sweeps, or 0 for none; needs telemetry on.", 0, 3600, true) },
-
-            { "EnableTopSpeed", new Entry(Aero, "Mass sets top speed", "Raises the world's speed cap and holds each ship under a cruise speed that falls with its mass, by a force rather than a limit.", 0, 1) },
-
-            { "SpeedLimit", new Entry(Aero, "World speed limit (m/s)", "The ceiling no ship passes whatever its mass or its boost, written into the world's own environment definition.", 20f, 1000f) },
-
-            { "EnableSpeedBoost", new Entry(Aero, "Allow boosting past cruise", "Lets thrust push a ship past its cruise speed, up to the boost speed ceiling, and drags it back toward cruise. Off, a ship cannot pass its cruise speed at all.", 0, 1) },
-
-            { "LargeGridMinCruise", new Entry(Aero, "Large: cruise, light (m/s)", "Cruise speed of a large grid at or below the light mass below.", 10f, 1000f) },
-
-            { "LargeGridMidCruise", new Entry(Aero, "Large: cruise, middle (m/s)", "Cruise speed of a large grid at the middle mass below.", 10f, 1000f) },
-
-            { "LargeGridMaxCruise", new Entry(Aero, "Large: cruise, heavy (m/s)", "Cruise speed of a large grid at or above the heavy mass below.", 10f, 1000f) },
-
-            { "LargeGridMinMass", new Entry(Aero, "Large: light mass (kg)", "Mass below which a large grid holds its light cruise speed.", 0f, 2000000f) },
-
-            { "LargeGridMidMass", new Entry(Aero, "Large: middle mass (kg)", "The middle point of the large-grid curve, where the middle cruise speed applies.", 0f, 20000000f) },
-
-            { "LargeGridMaxMass", new Entry(Aero, "Large: heavy mass (kg)", "Mass above which a large grid holds its heavy cruise speed.", 0f, 40000000f) },
-
-            { "LargeGridResistance", new Entry(Aero, "Large: resistance (x)", "How hard a large grid is held to its cruise speed. Higher is a firmer hold.", 0f, 10f) },
-
-            { "LargeGridMaxBoostSpeed", new Entry(Aero, "Large: boost speed ceiling (m/s)", "The fastest a boosting large grid may travel. It is a speed, not a force: the resistance drags the ship back toward cruise and this is the speed the engine clamps it to on the way. Inert above the world speed limit.", 0f, 1000f) },
-
-            { "SmallGridMinCruise", new Entry(Aero, "Small: cruise, light (m/s)", "Cruise speed of a small grid at or below the light mass below.", 10f, 1000f) },
-
-            { "SmallGridMidCruise", new Entry(Aero, "Small: cruise, middle (m/s)", "Cruise speed of a small grid at the middle mass below.", 10f, 1000f) },
-
-            { "SmallGridMaxCruise", new Entry(Aero, "Small: cruise, heavy (m/s)", "Cruise speed of a small grid at or above the heavy mass below.", 10f, 1000f) },
-
-            { "SmallGridMinMass", new Entry(Aero, "Small: light mass (kg)", "Mass below which a small grid holds its light cruise speed.", 0f, 100000f) },
-
-            { "SmallGridMidMass", new Entry(Aero, "Small: middle mass (kg)", "The middle point of the small-grid curve, where the middle cruise speed applies.", 0f, 1000000f) },
-
-            { "SmallGridMaxMass", new Entry(Aero, "Small: heavy mass (kg)", "Mass above which a small grid holds its heavy cruise speed.", 0f, 2000000f) },
-
-            { "SmallGridResistance", new Entry(Aero, "Small: resistance (x)", "How hard a small grid is held to its cruise speed. Higher is a firmer hold.", 0f, 10f) },
-
-            { "SmallGridMaxBoostSpeed", new Entry(Aero, "Small: boost speed ceiling (m/s)", "The fastest a boosting small grid may travel. It is a speed, not a force: the resistance drags the ship back toward cruise and this is the speed the engine clamps it to on the way. Inert above the world speed limit.", 0f, 1000f) },
 
             { "ShadowDetail", new Entry(Solar, "Shadow detail", "How much work a shadow is worth: none, planets only, the world around the ship, or everything including other grids.", 0, 3, true) },
 
@@ -478,20 +430,7 @@ namespace Thermodynamics
 
                 new Leaf("Friction heating",
                     "EnableFriction")
-                    .Then("FrictionAtSpeedsAbove", "FrictionScale"),
-
-                new Leaf("Top speed",
-                    "EnableTopSpeed", "SpeedLimit", "EnableSpeedBoost")
-                    .Then("LargeGridMinCruise", "LargeGridMidCruise", "LargeGridMaxCruise",
-                        "LargeGridMinMass", "LargeGridMidMass", "LargeGridMaxMass",
-                        "LargeGridResistance", "LargeGridMaxBoostSpeed",
-                        "SmallGridMinCruise", "SmallGridMidCruise", "SmallGridMaxCruise",
-                        "SmallGridMinMass", "SmallGridMidMass", "SmallGridMaxMass",
-                        "SmallGridResistance", "SmallGridMaxBoostSpeed"),
-
-                new Leaf("Drag and lift",
-                    "EnableDrag", "DragCoefficient", "EnableLift")
-                    .Then("EnableShapeDrag", "EnableWindwardShielding", "LiftCoefficient")),
+                    .Then("FrictionAtSpeedsAbove", "FrictionScale", "EnableWindwardShielding")),
 
 
             new Folder("Multiplayer",
@@ -1010,8 +949,6 @@ namespace Thermodynamics
             { "Suit", "The occupant, and what the ship does to them" },
 
             { "Friction heating", "Air heating a hull at speed" },
-            { "Drag and lift", "The same air pushing back on the motion" },
-            { "Top speed", "How fast a ship of this mass may go, and the cap over all of them" },
 
             { "Temperatures", "What the server tells a client about its own blocks" },
 

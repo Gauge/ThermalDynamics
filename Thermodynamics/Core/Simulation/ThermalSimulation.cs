@@ -205,7 +205,6 @@ namespace Thermodynamics.Core
 
         private double roomCredit;
         private double exposureCredit;
-        private double shapeNormalCredit;
 
 
         private static int Share(ref double credit, int perTick, float frameSeconds)
@@ -443,7 +442,6 @@ namespace Thermodynamics.Core
 
             Begin(SimulationPhase.Exposure);
             solver.RefreshExposure(rooms.Map);
-            solver.RefreshShapeNormals();
             solver.RebuildRoomAir(rooms.Map);
             solver.RefreshHeatGeneration();
             End(SimulationPhase.Exposure);
@@ -631,12 +629,6 @@ namespace Thermodynamics.Core
                 if (!more) solver.RebuildRoomAir(rooms.Map);
 
                 End(SimulationPhase.Exposure);
-            }
-
-            if (solver.BeginShapeNormalRefresh())
-            {
-                solver.StepShapeNormalRefresh(Share(ref shapeNormalCredit,
-                    SimulationScheduler.ShapeNormalBudget(solver.Nodes.Count), frameSeconds));
             }
 
             Begin(SimulationPhase.Solver);

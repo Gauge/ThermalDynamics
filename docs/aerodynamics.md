@@ -417,7 +417,7 @@ back one switch at a time.
 | Top-speed port | `Game/ThermalGridTopSpeed.cs`, `Core/Simulation/TopSpeedForce.cs`, `Core/Simulation/CruiseCurve.cs`, the Top speed menu page | **Removed**, replaced by the RTS API client (AR15). |
 | Pressure accumulation in the solver | `ThermalSolver` `pressureAccumulator`, `LastPressureWatts`, `plan.LiftEnabled`, `plan.ShapeEnabled`, `ShapeFactorOf` on the friction row | **Removed** from the thermal step. The solver stops computing anything that exists only for a force. |
 | Friction heating row | `ThermalSolver` `nodeFrictionRow`, `frictionScale`, `FrictionWatts` | **Kept for now**, then rebuilt under AR16 (recovery temperature + the re-entry switch). It is heat, and heat stays load-bearing. |
-| Reconstructed normals | `Core/Model/ShapeNormal.cs`, `nodeShapeNormal`, its refresh budget | **Kept as surface data.** It stops being a `sin²θ` on the friction row and becomes an input to the profile (AR4 forebody, AR9 lifting surfaces). |
+| Reconstructed normals | `Core/Model/ShapeNormal.cs` | **Kept as surface data.** It stops being a `sin²θ` on the friction row and becomes an input to the profile (AR4 forebody, AR9 lifting surfaces). The solver's per-node buffer and its refresh budget were planned to stay and did not: once the friction row stopped reading them nothing in a step did, and a mechanism nobody reads must cost nothing (`P8`). The profile is rebuilt when the hull changes, which is when a normal changes, so it reconstructs them itself; what that costs is in [load-and-hitching.md](load-and-hitching.md). |
 | Windward shielding | `windShadow`, `nodeWindLit`, `EnableWindwardShielding` | **Kept for heat.** Its slicing is reused, per profile direction, to compute the silhouette at profile-rebuild time (AR3). |
 | Block drag profiles | `Core/Model/DragProfile.cs`, `SetBlockDragProfile` / `ClearBlockDragProfile` | **Kept.** They scale a block's contribution to the profile, which is what they already mean. |
 | Centre of pressure and overlay | `AeroOverlay.cs`, `CentreOfPressureTests` | **Rebuilt** to draw the profile's centre of pressure and forces, which are now the forces applied. It also gains the RTS line (AR15) and the build-mode view (AR21). |
@@ -463,9 +463,11 @@ is a number, not a rung.
 Each step ships on its own and names its rig checks. Population walks are proposed before they run
 ([corpus/README](../tools/corpus/README.md)).
 
-0. **Strip.** Everything in the *Removed* rows above, plus the retired settings, with the RTS API
-   client added in the same change so the speed readout never goes dark. Rigs: a grid in fast wind
-   gets friction heating and no force, and `GetGridAeroForces` returns zero.
+0. **Strip — done 2026-09-24.** Everything in the *Removed* rows above, plus the retired settings,
+   with the RTS API client added in the same change so the speed readout never goes dark: the aero
+   debug view prints RelativeTopSpeed's cruise speed and ceiling, or the engine's cap without it.
+   Rigs: `AerodynamicStripTests` — the friction row bit-identical to the old code with the shape
+   term off, nothing in the mod writing to a grid's motion, and `GetGridAeroForces` returning zero.
 1. **Profile and moments.** AR19 (profile, per-tick evaluation), AR5 (centre of pressure), AR6
    (damping), AR22 (guard), AR20 (server and client), with drag at textbook coefficients (AR2–AR4)
    from the start rather than a placeholder. Rigs: cube Cd, plate Cd, boat-tail pair, a finned hull
@@ -497,5 +499,6 @@ Each step ships on its own and names its rig checks. Population walks are propos
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | **Step 0 is built.** The force application, the lift and pressure plumbing, the top-speed port and its nineteen settings, and the shape factor on the friction row are removed; the retired `ProtoMember` numbers are recorded in `NoSettingReusesANumberThatWasDeliberatelyRetired`. `RtsApi.cs` is vendored unchanged from RelativeTopSpeed `0b4b21a` under `Thermodynamics/RelativeTopSpeed/`, and `RelativeTopSpeedLink` guards every call to it. **One departure from the inventory**: the solver's normal buffer went too, because nothing in a step read it (see the table). **Backlog rows retired into `K25`**: `K10` (the port, now removed); `K6` and `K22` (the shape term — its wake is `AR4`'s base drag); `K23` (lift — its criteria are re-registered under `AR8`); `K24` (the degenerate plate — `AR9`'s wing detector); and `K16` (the centre-of-pressure indicator — its caveat ends when `AR5` ships). What each measured stays in [thermal-model.md](thermal-model.md#change-log). |
 | 2026-09-24 | **Owner's decisions recorded** (see *Decisions taken*): cruise curve then drag; no SEDrag block extensions; re-entry heating configurable; forces simulated on server and client; the existing aerodynamics is stripped and rebuilt with switches; the embedded RelativeTopSpeed port is removed in favour of the original mod's read-only API (13 getters, channel 2772681332). The strip-and-rebuild inventory and switch table were added. |
 | 2026-09-24 | Page created. The owner asked for aerodynamics in line with SEDrag, then clarified the goal: *as realistic as possible, and learn what we can from SEDrag*. The SEDrag source (571920453) was read in full: `SEDrag.cs`, `GridCalculation.cs`, `DragBase.cs`, `Core.cs`, `LiftDefinition`, `AeroProperties.xml`. Twenty-two parts were evaluated against this mod and against subsonic physics. The drag and terminal-speed tables are derived from the source by hand, not measured in a session. An earlier reading in the same conversation, that SEDrag's drag was about 20× *weaker* than this mod's, was wrong: it missed `SpeedMod`, and above 27 m/s the relation inverts to 163×. |

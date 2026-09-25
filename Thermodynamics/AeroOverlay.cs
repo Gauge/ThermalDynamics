@@ -32,28 +32,25 @@ namespace Thermodynamics
 
             Vector3D centre;
             float mass;
-            Vector3 drag;
-            Vector3 lift;
             Vector3 worldWind;
-            bool anchored;
-            SumGroup(thermals, out centre, out mass, out drag, out lift, out worldWind, out anchored);
+            SumGroup(thermals, out centre, out mass, out worldWind);
             if (mass <= 0f) return;
 
             Vector3D eye = MyAPIGateway.Session.Camera.WorldMatrix.Translation;
             double radius = thermals.Grid.PositionComp.WorldVolume.Radius;
 
             DrawCentreOfMass(ref centre, ref eye, thermals.Grid);
-            DrawArrows(ref centre, ref eye, radius, ref drag, ref lift, ref worldWind);
+            DrawWind(ref centre, ref eye, radius, ref worldWind);
 
-            Vector3D pressureCentre;
-            bool hasPressureCentre = CentreOfPressure(out pressureCentre);
-            if (hasPressureCentre) DrawCentreOfPressure(ref pressureCentre, ref centre, ref eye, thermals.Grid);
+            Vector3D heatingCentre;
+            bool hasHeatingCentre = CentreOfHeating(out heatingCentre);
+            if (hasHeatingCentre) DrawCentreOfHeating(ref heatingCentre, ref centre, ref eye, thermals.Grid);
 
-            Report(thermals, ref drag, ref lift, ref worldWind, mass,
-                hasPressureCentre ? Vector3D.Distance(pressureCentre, centre) : -1d, anchored);
+            Report(thermals, ref worldWind, mass,
+                hasHeatingCentre ? Vector3D.Distance(heatingCentre, centre) : -1d);
         }
 
-        private static bool CentreOfPressure(out Vector3D centre)
+        private static bool CentreOfHeating(out Vector3D centre)
         {
             centre = Vector3D.Zero;
             Vector3D weighted = Vector3D.Zero;
@@ -91,7 +88,7 @@ namespace Thermodynamics
             return true;
         }
 
-        private static void DrawCentreOfPressure(ref Vector3D pressure, ref Vector3D mass,
+        private static void DrawCentreOfHeating(ref Vector3D pressure, ref Vector3D mass,
             ref Vector3D eye, IMyCubeGrid grid)
         {
             const double armMetres = 1.5d;
@@ -129,7 +126,7 @@ namespace Thermodynamics
         }
 
         private static void SumGroup(ThermalGrid leader, out Vector3D centre, out float mass,
-            out Vector3 drag, out Vector3 lift, out Vector3 worldWind, out bool anchored)
+            out Vector3 worldWind)
         {
             IMyGridGroupData group = leader.Grid.GetGridGroup(GridLinkTypeEnum.Physical);
 
@@ -141,15 +138,18 @@ namespace Thermodynamics
             worldWind = Vector3.TransformNormal(
                 state.WindDirectionLocal * state.WindSpeed, leader.Grid.WorldMatrix);
 
-            AeroGroupForces.Sum(GroupGrids, out centre, out mass, out drag, out lift);
-            if (mass > 0f) centre /= mass;
-
-            anchored = AeroGroupForces.Anchored(GroupGrids);
-            if (anchored)
+            centre = Vector3D.Zero;
+            mass = 0f;
+            for (int i = 0; i < GroupGrids.Count; i++)
             {
-                drag = Vector3.Zero;
-                lift = Vector3.Zero;
+                IMyCubeGrid grid = GroupGrids[i];
+                if (grid == null || grid.Physics == null || grid.Physics.Mass <= 0f) continue;
+
+                centre += grid.Physics.CenterOfMassWorld * grid.Physics.Mass;
+                mass += grid.Physics.Mass;
             }
+
+            if (mass > 0f) centre /= mass;
         }
 
         private static void DrawCentreOfMass(ref Vector3D centre, ref Vector3D eye, IMyCubeGrid grid)
@@ -163,33 +163,14 @@ namespace Thermodynamics
             XRayLine(centre - (world.Forward * armMetres), centre + (world.Forward * armMetres), ref eye, ref colour, 0.08d);
         }
 
-        private static void DrawArrows(ref Vector3D centre, ref Vector3D eye, double radius,
-            ref Vector3 drag, ref Vector3 lift, ref Vector3 worldWind)
+        private static void DrawWind(ref Vector3D centre, ref Vector3D eye, double radius,
+            ref Vector3 worldWind)
         {
+            if (worldWind.LengthSquared() <= 1e-4f) return;
+
             double reach = Math.Max(4d, radius * 0.75d);
-
-            if (worldWind.LengthSquared() > 1e-4f)
-            {
-                Vector4 blue = new Color(90, 160, 255).ToVector4();
-                Arrow(ref centre, Vector3D.Normalize((Vector3D)worldWind), reach * 0.6d, ref eye, ref blue);
-            }
-
-            float largest = Math.Max(drag.Length(), lift.Length());
-            if (largest <= 0f) return;
-
-            if (drag.LengthSquared() > 0f)
-            {
-                Vector4 red = new Color(240, 80, 60).ToVector4();
-                Arrow(ref centre, Vector3D.Normalize((Vector3D)drag),
-                    reach * (drag.Length() / largest), ref eye, ref red);
-            }
-
-            if (lift.LengthSquared() > 0f)
-            {
-                Vector4 green = new Color(90, 230, 110).ToVector4();
-                Arrow(ref centre, Vector3D.Normalize((Vector3D)lift),
-                    reach * (lift.Length() / largest), ref eye, ref green);
-            }
+            Vector4 blue = new Color(90, 160, 255).ToVector4();
+            Arrow(ref centre, Vector3D.Normalize((Vector3D)worldWind), reach * 0.6d, ref eye, ref blue);
         }
 
         private static void Arrow(ref Vector3D from, Vector3D direction, double length,
@@ -226,8 +207,8 @@ namespace Thermodynamics
                 (float)(thickness * BandScale), BlendTypeEnum.PostPP);
         }
 
-        private static void Report(ThermalGrid thermals, ref Vector3 drag, ref Vector3 lift,
-            ref Vector3 worldWind, float mass, double pressureArm, bool anchored)
+        private static void Report(ThermalGrid thermals, ref Vector3 worldWind, float mass,
+            double heatingArm)
         {
             EnvironmentState state = thermals.LastState;
             float friction = thermals.Simulation.FrictionWatts;
@@ -236,20 +217,42 @@ namespace Thermodynamics
                 "[Aero] wind: " + worldWind.Length().ToString("n1") + " m/s"
                 + "  air: " + state.AirDensity.ToString("n3")
                 + "  friction: " + (friction / 1000f).ToString("n1") + " kW"
-                + "  drag: " + drag.Length().ToString("n0") + " N"
-                + "  lift: " + lift.Length().ToString("n0") + " N"
                 + "  mass: " + mass.ToString("n0") + " kg"
-                + (pressureArm >= 0d
-                    ? "  CoP offset: " + pressureArm.ToString("n1") + " m (no torque is applied from it)"
-                    : ""), 1, "White");
+                + (heatingArm >= 0d
+                    ? "  heating centre: " + heatingArm.ToString("n1") + " m from the centre of mass"
+                    : "")
+                + "  (no aerodynamic force is applied while it is rebuilt)", 1, "White");
 
-            string blocked = Gates(thermals, ref worldWind, anchored);
+            string blocked = Gates(thermals, ref worldWind);
             if (blocked.Length > 0)
             {
                 MyAPIGateway.Utilities.ShowNotification("[Aero gates] " + blocked, 1, "Red");
             }
 
             ReportCrossover(ref worldWind, friction);
+            ReportSpeedLimit(thermals.Grid);
+        }
+
+        private static void ReportSpeedLimit(IMyCubeGrid grid)
+        {
+            float cruise;
+            float ceiling;
+            string line;
+
+            if (RelativeTopSpeedLink.TryLimits(grid, out cruise, out ceiling))
+            {
+                line = "[Speed] RelativeTopSpeed: cruise " + cruise.ToString("n0")
+                    + " m/s, ceiling " + ceiling.ToString("n0") + " m/s";
+            }
+            else
+            {
+                float limit = RelativeTopSpeedLink.WorldSpeedLimit(grid.GridSizeEnum == MyCubeSize.Large);
+                line = RelativeTopSpeedLink.IsReady
+                    ? "[Speed] not governed by RelativeTopSpeed; world limit " + limit.ToString("n0") + " m/s"
+                    : "[Speed] the engine's cap, " + limit.ToString("n0") + " m/s (RelativeTopSpeed not installed)";
+            }
+
+            MyAPIGateway.Utilities.ShowNotification(line, 1, "White");
         }
 
         private static void ReportCrossover(ref Vector3 worldWind, float friction)
@@ -319,12 +322,10 @@ namespace Thermodynamics
             return (low + high) * 0.5d;
         }
 
-        private static string Gates(ThermalGrid thermals, ref Vector3 worldWind, bool anchored)
+        private static string Gates(ThermalGrid thermals, ref Vector3 worldWind)
         {
             Settings settings = Settings.Instance;
             string blocked = "";
-
-            if (anchored) blocked += "anchored: a static grid is in the group, so no force is applied; ";
 
             if (!settings.EnableFriction) blocked += "EnableFriction off; ";
             if (thermals.LastState.AirDensity <= 0.01f) blocked += "no atmosphere; ";
@@ -340,17 +341,7 @@ namespace Thermodynamics
                     + settings.FrictionAtSpeedsAbove.ToString("n0") + "; ";
             }
 
-            if (!settings.EnableDrag) blocked += "EnableDrag off (this gate also stops lift); ";
-            if (!settings.EnableShapeDrag) blocked += "EnableShapeDrag off (no pressure vector, so no lift); ";
-            if (!settings.EnableLift) blocked += "EnableLift off; ";
-            if (settings.EnableLift && settings.LiftCoefficient <= 0f) blocked += "LiftCoefficient 0; ";
-            if (settings.DragCoefficient <= 0f) blocked += "DragCoefficient 0; ";
             if (settings.FrictionScale <= 0f) blocked += "FrictionScale 0; ";
-
-            if (MyAPIGateway.Session != null && !MyAPIGateway.Session.IsServer)
-            {
-                blocked += "client of a server (forces apply server-side); ";
-            }
 
             return blocked.TrimEnd(' ', ';');
         }

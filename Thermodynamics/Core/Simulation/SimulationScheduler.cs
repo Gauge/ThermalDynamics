@@ -74,30 +74,6 @@ namespace Thermodynamics.Core
 
 
         /// <summary>
-        /// Calculates the work budget for shape normal calculations.
-        /// Budget scales with node count but has different caps than other budgets.
-        /// </summary>
-        /// <param name="nodeCount">Number of thermal nodes in the simulation.</param>
-        /// <returns>Budget of nodes to process per step.</returns>
-        /// <remarks>
-        /// Budget calculation:
-        ///   budget = nodeCount / 280
-        ///   min = 32 nodes
-        ///   max = 512 nodes
-        ///
-        /// Shape normal calculations are more expensive per node, so the
-        /// budget is smaller and has tighter limits.
-        /// </remarks>
-        public static int ShapeNormalBudget(int nodeCount)
-        {
-            int budget = nodeCount / 280;
-            if (budget < 32) budget = 32;
-            if (budget > 512) budget = 512;
-            return budget;
-        }
-
-
-        /// <summary>
         /// Calculates the number of items to process in a single sweep slice.
         /// Used for incremental processing of large workloads across multiple steps.
         /// </summary>

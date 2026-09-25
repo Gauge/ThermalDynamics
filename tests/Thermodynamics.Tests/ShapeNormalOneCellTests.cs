@@ -30,7 +30,6 @@ namespace Thermodynamics.Tests
         {
 
             ThermalSettings settings = new ThermalSettings();
-            settings.EnableShapeDrag = true;
             settings.Derive();
 
             GridBuilder builder = GridBuilder.Large();

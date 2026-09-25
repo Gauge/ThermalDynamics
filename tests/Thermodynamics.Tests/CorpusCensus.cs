@@ -84,81 +84,10 @@ namespace Thermodynamics.Tests
             + "waste_idle_w,waste_full_w,waste_burn_w,"
             + "exposure_m2_per_kw,capacity_j_per_k_per_w,top_source,top_source_w,top_source_n,"
             + "heat_sources,w_per_m2,max_depth,heat_depth_mean,heat_depth_max,clumping,heat_gini,"
-            + "local_w_max,local_w_per_m2_max,heat_spread_m,hottest_conductance_w_per_k,"
-            + "shape_factor,lift_over_drag";
+            + "local_w_max,local_w_per_m2_max,heat_spread_m,hottest_conductance_w_per_k";
 
         public const string CompositionHeader =
             "ship,workshop_id,subtype,type_id,count,waste_full_w,share_of_waste";
-
-        private struct Aerodynamics
-        {
-            public float ShapeFactor;
-
-            public float LiftOverDrag;
-        }
-
-
-        private static Aerodynamics Aero(ShipAssembly assembly)
-        {
-            double shapeSum = 0d;
-            double ratioSum = 0d;
-            int directions = 0;
-
-            for (int f = 0; f < Face.Count; f++)
-            {
-                Vector3 wind = Face.Normals[f];
-                double weighted = 0d;
-                double projected = 0d;
-                Vector3 pressure = Vector3.Zero;
-
-                for (int g = 0; g < assembly.Simulations.Count; g++)
-                {
-                    ThermalSimulation simulation = assembly.Simulations[g];
-                    ThermalSolver solver = simulation.Solver;
-                    CellBitset occupancy = simulation.Grid.Occupancy();
-
-                    for (int i = 0; i < solver.Nodes.Count; i++)
-                    {
-                        ThermalNode node = solver.Nodes[i];
-                        int total = node.TotalExposedFaces;
-                        if (total <= 0 || node.ExposedArea <= 0f) continue;
-
-                        double share = (double)node.GetExposedFaces(f) / total;
-                        if (share <= 0d) continue;
-
-                        double area = node.ExposedArea * share;
-                        Vector3 normal = ShapeNormal.Of(occupancy, node.Block);
-                        float factor = ShapeNormal.Factor(normal, wind);
-
-                        projected += area;
-                        weighted += area * factor;
-
-                        pressure -= normal * (float)(area * factor);
-                    }
-                }
-
-                if (projected <= 0d) continue;
-
-                shapeSum += weighted / projected;
-                directions++;
-
-                float along = Vector3.Dot(pressure, wind);
-                float drag = along < 0f ? -along : along;
-                if (drag > 0f)
-                {
-                    Vector3 transverse = pressure - (along * wind);
-                    ratioSum += transverse.Length() / drag;
-                }
-            }
-
-
-            Aerodynamics aero = new Aerodynamics();
-
-            aero.ShapeFactor = directions == 0 ? 1f : (float)(shapeSum / directions);
-            aero.LiftOverDrag = directions == 0 ? 0f : (float)(ratioSum / directions);
-            return aero;
-        }
-
 
         private static Censused Count(Blueprints.Ship ship)
         {
@@ -332,11 +261,7 @@ namespace Thermodynamics.Tests
             row.Append(CorpusRecord.Num((float)geometry.LocalWattsMax)).Append(',');
             row.Append(CorpusRecord.Num((float)geometry.LocalWattsPerAreaMax)).Append(',');
             row.Append(CorpusRecord.Num((float)geometry.SpreadMetres)).Append(',');
-            row.Append(CorpusRecord.Num((float)geometry.HottestSourceConductance)).Append(',');
-
-            Aerodynamics aero = Aero(assembly);
-            row.Append(CorpusRecord.Num(aero.ShapeFactor)).Append(',');
-            row.Append(CorpusRecord.Num(aero.LiftOverDrag));
+            row.Append(CorpusRecord.Num((float)geometry.HottestSourceConductance));
 
             censused.Row = row.ToString();
 

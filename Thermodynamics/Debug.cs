@@ -76,24 +76,19 @@ namespace Thermodynamics
             MyAPIGateway.Utilities.ShowNotification(
                 "[Faces] " + Exposure(simulation, node.Block), 1, "White");
 
-            MyAPIGateway.Utilities.ShowNotification("[Aero] " + Aero(solver, node, state), 1, "White");
+            MyAPIGateway.Utilities.ShowNotification("[Aero] " + Aero(simulation, node, state), 1, "White");
         }
 
-        private static string Aero(ThermalSolver solver, ThermalNode node, EnvironmentState state)
+        private static string Aero(ThermalSimulation simulation, ThermalNode node, EnvironmentState state)
         {
-            Vector3 normal = solver.NodeShapeNormal(node.Index);
-            float watts = node.LastFrictionWatts;
+            Vector3 normal = ShapeNormal.Of(simulation.Grid.Occupancy(), node.Block);
 
-            string text = "friction: " + watts.ToString("n1") + "W"
+            string text = "friction: " + node.LastFrictionWatts.ToString("n1") + "W"
                 + "  wind(local): " + Compact(state.WindDirectionLocal * state.WindSpeed) + "m/s";
 
-            if (normal == Vector3.Zero)
-            {
-                return text + "  normal: none (shape term off, or its pass has not reached this block)";
-            }
-
-            Vector3 push = watts > 0f ? -normal * watts : Vector3.Zero;
-            return text + "  normal: " + Compact(normal) + "  pressure push: " + Compact(push) + "W";
+            return normal == Vector3.Zero
+                ? text + "  surface normal: none (no open neighbourhood)"
+                : text + "  surface normal: " + Compact(normal);
         }
 
         private static string Compact(Vector3 v)

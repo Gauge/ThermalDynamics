@@ -1380,8 +1380,10 @@ frame buffer. That is a statement about difficulty, not about intent — it is w
   peak above critical describes the harness rather than the mod. Crossing times are unaffected.
 * **Not authoritative over the game's own systems.** Room pressure is the game's answer, not this
   model's, and none of the three sources that can empty a room may insist on air — only refuse it.
-  ~~**The mod reads a grid's velocity and writes nothing to its physics.**~~ **It does now, behind a
-  switch that ships off** — `EnableDrag`, built 2026-08-30 as [backlog.md](backlog.md) `K1`. *Whether
+  ~~**The mod reads a grid's velocity and writes nothing to its physics.**~~ **It did from
+  2026-08-30, and writes nothing again while the force is rebuilt** — `K25` stripped it on
+  2026-09-24, and it returns as a channel of its own ([aerodynamics.md](aerodynamics.md) `AR4`,
+  `AR19`, `AR20`). It was built as `EnableDrag` under [backlog.md](backlog.md) `K1`. *Whether
   the mod should push a ship at all* was the first question in that milestone rather than an
   assumption inside it, and the answer turns on what kind of change it is: the friction term already
   computes the rate at which the air does work on a hull, turns it into heat, and takes nothing from
@@ -1524,6 +1526,7 @@ as a *second* change rather than as a substitute. [backlog](backlog.md) `D19`.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | *Not authoritative over the game's own systems* says the mod writes nothing to a ship's physics again: `K25`'s first step stripped the aerodynamic force, and the owner's decisions recorded the same day (aerodynamics.md) are what brings it back. The reasoning around it is unchanged. |
 | 2026-09-20 | Describe soft heat patches, bounded lights and explicit visual verification limits. |
 | 2026-08-28 | *Basic environmental information should be on screen as a matter of course* is built, and the page says which half of it is judged: what the readout **says** is a decision in `Core` and pinned by tests; whether it reads as the game's own HUD is the half only a session can settle. |
 | 2026-08-25 | Gave *realism wins where the difference is visible* its second worked example, which is the reactor's taken the other way. The oxygen generator's 0.6 was an invention with a sourced 0.20-0.40 sitting beside it, and what moved it was not the provenance: at 0.6 two of the game's six generators are past their own critical temperature alone in open space at their rated draw. The reactor kept an invention because the real number destroyed it; the generator lost one because the invention destroyed it. The prior reads better with both, because one case alone reads as *inventions are fine*.

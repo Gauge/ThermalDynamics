@@ -39,7 +39,9 @@ ENGINE_CAP = 100.0
 PROJECTED_SHARE = 0.25
 
 
-SHIPPED_DRAG_COEFFICIENT = 1.54
+# The coefficient the mod's force applied until the K25 strip removed the force (2026-09-24). No
+# coefficient ships now; this stays the default so the figures taken with it reproduce.
+RETIRED_DRAG_COEFFICIENT = 1.54
 
 
 # cruise operation.
@@ -52,8 +54,9 @@ def cruise(thrust, area, coefficient, density, shape=1.0):
     `shape` is the hull's own shape factor from the census's `shape_factor` column — the
     projected-area-weighted mean of the Newtonian `sin^2(theta)` the flat-plate projection is
     missing, averaged over the six axis winds. **One is the model without the shape term**, which is
-    what a census taken before 2026-08-31 gets and what `--no-shape` forces, so the two readings are
-    the same arithmetic with one factor switched. See backlog.md `K22`.
+    what a census taken before 2026-08-31 or after 2026-09-24 gets — the column existed only while the
+    shape term did — and what `--no-shape` forces, so the two readings are
+    the same arithmetic with one factor switched. See aerodynamics.md, AR4.
     """
     if thrust is None or area is None or thrust <= 0 or area <= 0:
         return None
@@ -80,7 +83,7 @@ def main():
     args = scoring.positionals(("--cd", "--rho", "--csv"))
 
     path = args[0] if args else "out/census-2026-08-25/census.csv"
-    coefficient = float(scoring.flag("--cd", SHIPPED_DRAG_COEFFICIENT))
+    coefficient = float(scoring.flag("--cd", RETIRED_DRAG_COEFFICIENT))
     density = float(scoring.flag("--rho", SEA_LEVEL_DENSITY))
     out = scoring.flag("--csv", None)
 
@@ -113,7 +116,7 @@ def main():
     print("  C_d %.2f%s, air density %.3f kg/m^3 — where a ship flies fastest and where the"
           " authored curve was tuned"
           % (coefficient,
-             " (the shipped default)" if coefficient == SHIPPED_DRAG_COEFFICIENT else "",
+             " (the retired force model's)" if coefficient == RETIRED_DRAG_COEFFICIENT else "",
              density))
 
     carried = sum(1 for row in rows if scoring.number(row, "shape_factor") is not None)

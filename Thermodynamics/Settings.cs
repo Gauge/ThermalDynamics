@@ -126,14 +126,8 @@ namespace Thermodynamics
         [ProtoMember(42)] public float FrictionAtSpeedsAbove = 0f;
         [ProtoMember(43)] public float FrictionScale = 0.001f;
 
-        [ProtoMember(135)] public bool EnableDrag = true;
-
-        [ProtoMember(136)] public float DragCoefficient = 1.54f;
 
         [ProtoMember(137)] public bool EnableWindwardShielding = false;
-        [ProtoMember(138)] public bool EnableShapeDrag = true;
-        [ProtoMember(139)] public bool EnableLift = true;
-        [ProtoMember(140)] public float LiftCoefficient = 1f;
         [ProtoMember(44)] public float RoomConvectionCoefficient = 8f;
         [ProtoMember(45)] public float RoomAirDensity = 1.225f;
 
@@ -238,47 +232,6 @@ namespace Thermodynamics
         [ProtoMember(79)] public float RoomOverlayMaxKelvin = 323.15f;
 
 
-
-
-        [ProtoMember(145)] public bool EnableTopSpeed = true;
-
-        [ProtoMember(146)] public float SpeedLimit = 140f;
-
-        [ProtoMember(147)] public bool EnableSpeedBoost = true;
-
-        [ProtoMember(148)] public float LargeGridMinCruise = 60f;
-
-        [ProtoMember(149)] public float LargeGridMidCruise = 80f;
-
-        [ProtoMember(150)] public float LargeGridMaxCruise = 110f;
-
-        [ProtoMember(151)] public float LargeGridMinMass = 200000f;
-
-        [ProtoMember(152)] public float LargeGridMidMass = 5000000f;
-
-        [ProtoMember(153)] public float LargeGridMaxMass = 8000000f;
-
-        [ProtoMember(154)] public float LargeGridMaxBoostSpeed = 140f;
-
-        [ProtoMember(155)] public float LargeGridResistance = 1.5f;
-
-        [ProtoMember(156)] public float SmallGridMinCruise = 90f;
-
-        [ProtoMember(157)] public float SmallGridMidCruise = 95f;
-
-        [ProtoMember(158)] public float SmallGridMaxCruise = 110f;
-
-        [ProtoMember(159)] public float SmallGridMinMass = 10000f;
-
-        [ProtoMember(160)] public float SmallGridMidMass = 300000f;
-
-        [ProtoMember(161)] public float SmallGridMaxMass = 400000f;
-
-        [ProtoMember(162)] public float SmallGridMaxBoostSpeed = 140f;
-
-        [ProtoMember(163)] public float SmallGridResistance = 1f;
-
-
         [ProtoMember(123)] public bool EnableTemperatureSync = true;
 
         [ProtoMember(124)] public float TemperatureSyncInterval = 5f;
@@ -320,11 +273,6 @@ namespace Thermodynamics
             if (MaxSubstepsPerBlock < 0) MaxSubstepsPerBlock = 0;
             if (TelemetrySampleStride < 1) TelemetrySampleStride = 1;
             if (SolarOcclusionInterval < 1) SolarOcclusionInterval = 1;
-            if (SpeedLimit < 1f) SpeedLimit = 1f;
-            if (LargeGridResistance < 0f) LargeGridResistance = 0f;
-            if (SmallGridResistance < 0f) SmallGridResistance = 0f;
-            if (LargeGridMaxBoostSpeed < 0f) LargeGridMaxBoostSpeed = 0f;
-            if (SmallGridMaxBoostSpeed < 0f) SmallGridMaxBoostSpeed = 0f;
             if (SolarTerrainRange < 0f) SolarTerrainRange = 0f;
             if (ClimateGroundInfluence < 0f) ClimateGroundInfluence = 0f;
             if (ClimateGroundInfluence > 1f) ClimateGroundInfluence = 1f;
@@ -472,12 +420,7 @@ namespace Thermodynamics
             core.SolarEnergy = SolarEnergy;
             core.FrictionAtSpeedsAbove = FrictionAtSpeedsAbove;
             core.FrictionScale = FrictionScale;
-            core.EnableDrag = EnableDrag;
-            core.DragCoefficient = DragCoefficient;
             core.EnableWindwardShielding = EnableWindwardShielding;
-            core.EnableShapeDrag = EnableShapeDrag;
-            core.EnableLift = EnableLift;
-            core.LiftCoefficient = LiftCoefficient;
             core.RoomConvectionCoefficient = RoomConvectionCoefficient;
             core.RoomAirDensity = RoomAirDensity;
             core.HeatPumpCarnotFraction = HeatPumpCarnotFraction;
@@ -530,8 +473,7 @@ namespace Thermodynamics
                 "Frequency", "HeatTimeScale", "MaxElementVisitsPerStep",
                 "MaxSubsteps", "MaxSubstepsPerBlock", "FloorBlocksWhenOverBudget",
                 "VacuumTemperature", "SolarEnergy", "FrictionAtSpeedsAbove", "FrictionScale",
-                "EnableDrag", "DragCoefficient", "EnableWindwardShielding", "EnableShapeDrag",
-                "EnableLift", "LiftCoefficient",
+                "EnableWindwardShielding",
                 "RoomConvectionCoefficient", "RoomAirDensity", "SolarOcclusionInterval",
                 "ClimateGroundInfluence", "ClimateWeatherInfluence",
                 "HeatPumpCarnotFraction", "HeatPumpMaxCoefficient",
@@ -560,14 +502,6 @@ namespace Thermodynamics
                 "PlanetSolarDecay", "PlanetUndergroundTemperature",
                 "PlanetUndergroundDampingDepth", "PlanetCoreTemperature",
                 "PlanetSealevelDeadzone",
-
-                "EnableTopSpeed", "SpeedLimit", "EnableSpeedBoost",
-                "LargeGridMinCruise", "LargeGridMidCruise", "LargeGridMaxCruise",
-                "LargeGridMinMass", "LargeGridMidMass", "LargeGridMaxMass",
-                "LargeGridMaxBoostSpeed", "LargeGridResistance",
-                "SmallGridMinCruise", "SmallGridMidCruise", "SmallGridMaxCruise",
-                "SmallGridMinMass", "SmallGridMidMass", "SmallGridMaxMass",
-                "SmallGridMaxBoostSpeed", "SmallGridResistance",
             };
         }
 
@@ -575,25 +509,6 @@ namespace Thermodynamics
         {
             switch (name)
             {
-                case "EnableTopSpeed": return Flag(EnableTopSpeed);
-                case "SpeedLimit": return SpeedLimit;
-                case "EnableSpeedBoost": return Flag(EnableSpeedBoost);
-                case "LargeGridMinCruise": return LargeGridMinCruise;
-                case "LargeGridMidCruise": return LargeGridMidCruise;
-                case "LargeGridMaxCruise": return LargeGridMaxCruise;
-                case "LargeGridMinMass": return LargeGridMinMass;
-                case "LargeGridMidMass": return LargeGridMidMass;
-                case "LargeGridMaxMass": return LargeGridMaxMass;
-                case "LargeGridMaxBoostSpeed": return LargeGridMaxBoostSpeed;
-                case "LargeGridResistance": return LargeGridResistance;
-                case "SmallGridMinCruise": return SmallGridMinCruise;
-                case "SmallGridMidCruise": return SmallGridMidCruise;
-                case "SmallGridMaxCruise": return SmallGridMaxCruise;
-                case "SmallGridMinMass": return SmallGridMinMass;
-                case "SmallGridMidMass": return SmallGridMidMass;
-                case "SmallGridMaxMass": return SmallGridMaxMass;
-                case "SmallGridMaxBoostSpeed": return SmallGridMaxBoostSpeed;
-                case "SmallGridResistance": return SmallGridResistance;
                 case "EnableEnvironment": return Flag(EnableEnvironment);
                 case "EnableConduction": return Flag(EnableConduction);
                 case "EnableRadiation": return Flag(EnableRadiation);
@@ -624,12 +539,7 @@ namespace Thermodynamics
                 case "SolarEnergy": return SolarEnergy;
                 case "FrictionAtSpeedsAbove": return FrictionAtSpeedsAbove;
                 case "FrictionScale": return FrictionScale;
-                case "EnableDrag": return EnableDrag ? 1f : 0f;
-                case "DragCoefficient": return DragCoefficient;
                 case "EnableWindwardShielding": return EnableWindwardShielding ? 1f : 0f;
-                case "EnableShapeDrag": return EnableShapeDrag ? 1f : 0f;
-                case "EnableLift": return EnableLift ? 1f : 0f;
-                case "LiftCoefficient": return LiftCoefficient;
                 case "RoomConvectionCoefficient": return RoomConvectionCoefficient;
                 case "RoomAirDensity": return RoomAirDensity;
                 case "HeatPumpCarnotFraction": return HeatPumpCarnotFraction;
@@ -700,25 +610,6 @@ namespace Thermodynamics
         {
             switch (name)
             {
-                case "EnableTopSpeed": EnableTopSpeed = Flag(value); return true;
-                case "SpeedLimit": SpeedLimit = value; return true;
-                case "EnableSpeedBoost": EnableSpeedBoost = Flag(value); return true;
-                case "LargeGridMinCruise": LargeGridMinCruise = value; return true;
-                case "LargeGridMidCruise": LargeGridMidCruise = value; return true;
-                case "LargeGridMaxCruise": LargeGridMaxCruise = value; return true;
-                case "LargeGridMinMass": LargeGridMinMass = value; return true;
-                case "LargeGridMidMass": LargeGridMidMass = value; return true;
-                case "LargeGridMaxMass": LargeGridMaxMass = value; return true;
-                case "LargeGridMaxBoostSpeed": LargeGridMaxBoostSpeed = value; return true;
-                case "LargeGridResistance": LargeGridResistance = value; return true;
-                case "SmallGridMinCruise": SmallGridMinCruise = value; return true;
-                case "SmallGridMidCruise": SmallGridMidCruise = value; return true;
-                case "SmallGridMaxCruise": SmallGridMaxCruise = value; return true;
-                case "SmallGridMinMass": SmallGridMinMass = value; return true;
-                case "SmallGridMidMass": SmallGridMidMass = value; return true;
-                case "SmallGridMaxMass": SmallGridMaxMass = value; return true;
-                case "SmallGridMaxBoostSpeed": SmallGridMaxBoostSpeed = value; return true;
-                case "SmallGridResistance": SmallGridResistance = value; return true;
                 case "EnableEnvironment": EnableEnvironment = Flag(value); return true;
                 case "EnableConduction": EnableConduction = Flag(value); return true;
                 case "EnableRadiation": EnableRadiation = Flag(value); return true;
@@ -749,12 +640,7 @@ namespace Thermodynamics
                 case "SolarEnergy": SolarEnergy = value; return true;
                 case "FrictionAtSpeedsAbove": FrictionAtSpeedsAbove = value; return true;
                 case "FrictionScale": FrictionScale = value; return true;
-                case "EnableDrag": EnableDrag = value != 0f; return true;
-                case "DragCoefficient": DragCoefficient = value; return true;
                 case "EnableWindwardShielding": EnableWindwardShielding = value != 0f; return true;
-                case "EnableShapeDrag": EnableShapeDrag = value != 0f; return true;
-                case "EnableLift": EnableLift = value != 0f; return true;
-                case "LiftCoefficient": LiftCoefficient = value; return true;
                 case "RoomConvectionCoefficient": RoomConvectionCoefficient = value; return true;
                 case "RoomAirDensity": RoomAirDensity = value; return true;
                 case "HeatPumpCarnotFraction": HeatPumpCarnotFraction = value; return true;
