@@ -528,6 +528,31 @@ was a balance dial; this one's coefficients are textbook figures, so if realisti
 playability criterion, that is recorded as the conflict it is and decided by the owner, not by moving
 a coefficient off its source.
 
+### Round 1: the registered design fails its held-out bodies
+
+Run 2026-09-24 (`dotnet run --project tests/Thermodynamics.Sim -- aero-calibrate`). The model is
+`C_D·A = C_front·Σ a·cosᵐφ + C_base(λ)·Σ b·cosᵐψ + C_f·S_wet`: forebody pressure on the windward
+projected area falling off with each surface's inclination, base suction on the leeward area falling
+from `C_near` to `C_far` over a fineness `λ = L/√A`, and skin friction on the wetted area. Six
+coefficients were fitted to the eleven calibration bodies, residual 0.032 in squared log error, every
+body within ±10 %:
+
+| Held out | Registered | Predicted | |
+| --- | --- | ---: | --- |
+| S1 cube face-on | 0.95–1.15 | 0.869 | **fails** |
+| S2 square plate | 1.17–1.28 | 1.374 | **fails** |
+| S3 cube edge-on | 0.66–0.96 | 0.637 | **fails** |
+| S4 tapered tail against blunt base | lower | 0.899 against 0.894 | **fails** |
+
+**The fit is what says why.** It put base suction at 2.6 falling to nothing over a fineness of 0.23,
+which no body has: the eleven round bodies could only be matched by a suction that vanishes the moment
+a body has any length. That is White's own contrast read backwards. **A round section reattaches
+sooner than a square one**: the flat-faced cylinder at `L/d` 1 is 0.90 where the cube is 1.07, with
+the same forebody, so the difference is base suction the flow had already recovered from on the round
+body. Fitted on round bodies, the model cannot transfer to square ones, and every hull this game builds
+is square-sectioned. The tapered tail failed for a second reason: every leeward surface counted as base,
+however shallowly it closed, where a boat-tail's flow stays attached and carries no base suction.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -546,6 +571,7 @@ a coefficient off its source.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 1 of step 1 fails, recorded as run.** The profile's geometry is built and checked against hand geometry (`AeroGeometryTests`); the drag model fitted to White's round bodies predicts all four held-out bodies outside their bands. The diagnosis is written beside the numbers: a round section reattaches sooner than a square one, and the model counted a boat-tail's attached surfaces as base. |
 | 2026-09-24 | **Step 1's criteria are registered before any of it is built.** The reference is White's Table 7.3; calibration is the cones and the flat-faced cylinders, and the owner's cube and plate criteria are held out with two more (edge-on cube, boat-tail pair), so none can pass by construction. The finned-hull rig moves to step 2, because a fin restores through lift, not drag; step 1 tests the drag-stabilised case, a shuttlecock. `K5`'s population pair is re-registered unchanged, and a failure is recorded as a realism-against-playability conflict for the owner rather than retuned away. |
 | 2026-09-24 | **Step 0 is built.** The force application, the lift and pressure plumbing, the top-speed port and its nineteen settings, and the shape factor on the friction row are removed; the retired `ProtoMember` numbers are recorded in `NoSettingReusesANumberThatWasDeliberatelyRetired`. `RtsApi.cs` is vendored unchanged from RelativeTopSpeed `0b4b21a` under `Thermodynamics/RelativeTopSpeed/`, and `RelativeTopSpeedLink` guards every call to it. **One departure from the inventory**: the solver's normal buffer went too, because nothing in a step read it (see the table). **Backlog rows retired into `K25`**: `K10` (the port, now removed); `K6` and `K22` (the shape term — its wake is `AR4`'s base drag); `K23` (lift — its criteria are re-registered under `AR8`); `K24` (the degenerate plate — `AR9`'s wing detector); and `K16` (the centre-of-pressure indicator — its caveat ends when `AR5` ships). What each measured stays in [thermal-model.md](thermal-model.md#change-log). |
 | 2026-09-24 | **Owner's decisions recorded** (see *Decisions taken*): cruise curve then drag; no SEDrag block extensions; re-entry heating configurable; forces simulated on server and client; the existing aerodynamics is stripped and rebuilt with switches; the embedded RelativeTopSpeed port is removed in favour of the original mod's read-only API (13 getters, channel 2772681332). The strip-and-rebuild inventory and switch table were added. |

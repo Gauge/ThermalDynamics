@@ -63,6 +63,10 @@ namespace Thermodynamics.Sim
 
                     return PrefabCommand(args);
 
+                case "aero-calibrate":
+                    Console.WriteLine(AeroCalibrationLab.Report(AeroCalibrationLab.Fit(AeroCalibrationLab.Rigs())));
+                    return 0;
+
                 case "thermal-corpus-export":
                     if (args.Length != 2) { Console.Error.WriteLine("thermal-corpus-export requires output directory"); return 1; }
                     return ThermalCorpusExport.Run(args[1]);
@@ -2022,6 +2026,7 @@ namespace Thermodynamics.Sim
             Console.WriteLine("    --load                    full load instead of idle: the control, not G7");
             Console.WriteLine("  drift                   how long a client that joined stale stays wrong");
             Console.WriteLine("  inputs                  each input a client drives its sim from, degraded");
+            Console.WriteLine("  aero-calibrate          fit the drag model to White's Table 7.3 and predict what it was not fitted to");
             Console.WriteLine("  thermal-corpus-export <out>  temperature fields of three corpus ships, for the thermal-vision studies");
             Console.WriteLine("  thermal-vision <out> [--require-complete]  shared rendering core, synthetic depth and readiness report");
             Console.WriteLine("  thermal-vision-rays <out>  synthetic sensor resolution and query-workload study (not game rendering)");
