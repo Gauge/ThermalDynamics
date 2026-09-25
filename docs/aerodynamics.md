@@ -765,6 +765,27 @@ improvement fails a test and gets read rather than passing silently. Skin fricti
 Prandtl's `0.074·Re^−0.2`, not the lab's fitted 0.00408, which stands in for the wind-tunnel Reynolds
 numbers the reference data were taken at.
 
+### Step 1b, first flight: the calibration does not transfer to the scale players build at
+
+The profile (`AeroProfile`: 26 or 98 directions, an `AeroSummary` each, interpolated) and the flight lab
+(`aero-flight`, a rigid body at 60 Hz) were built to run S5–S8. **Two faults came out before any
+criterion could be read, and neither is the air's.**
+
+1. **The guard held the restoring moment.** It capped any torque opposing the spin at what stops it, so
+   at each swing's extreme — spin near zero — the aerodynamic moment that should turn the body back was
+   cut to nothing, and the shuttlecock hung at 18° with the guard binding fifteen times. The guard now
+   caps the damping alone, which is what `AR22` is for; a restoring moment reverses a turn by right.
+2. **The in-flight damping was missing.** Only a hull turning in still air was damped. In flight the
+   dominant term is the tail swinging across a 50 m/s flow, which tilts the local air — `AR6`'s `ω × r`
+   — and the drag is now evaluated in the air at the centre of pressure, turn included.
+
+**Then the probe that says why the shuttlecock still decays too slowly.** At 50 m/s its drag is
+136 kN: a drag area of 88.6 m² for a 7×7 plate of 306 m², a coefficient of **0.29 where a plate reads
+1.17**. A 7×7 plate is nearly all rim, and the block normal is the occupancy gradient at radius one, which
+at a rim points diagonally. Round 5 calibrated at radius 24, where rims are a few per cent of a face;
+**the scale a hull is built at is radius 3 to 8, where they are most of it.** So the model is right-ish
+where nobody flies and wrong where everyone does, and no criterion registered so far could see that.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -783,6 +804,7 @@ numbers the reference data were taken at.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Step 1b's first flight found two faults and one finding.** The guard was capping the restoring moment; the in-flight damping was missing. And a 7×7 plate reads a drag coefficient of 0.29 against 1.17, because the block normal tilts every rim cell and a game-scale plate is mostly rim: round 5's calibration does not transfer to the scale hulls are built at. |
 | 2026-09-25 | **Round 5 recorded: W1 and W2 fail, W3 holds, and the registered fallback is taken.** The in-sample fit ships as `AeroCoefficients.Fitted` with its errors stated beside it: blunt bodies mostly within 15 %, stubby rounded ones up to 72 % too draggy. `AeroCalibrationTests` pins it; `AeroIncidenceTests` pins the geometry's convergence. |
 | 2026-09-25 | **Round 4 recorded as failing, and the geometry measured against exact truth for the first time.** The reconstructed normal converges on blunt bodies as the rig gets finer and has a floor on slender ones; four rounds were partly fitted to the radius-8 rigs' rim artefact. **Round 5 registered**: leave-one-out cross-validation over every sourced body, at radius 24, with a stated fallback if it fails. |
 | 2026-09-25 | **Round 4 registered before it runs**: a forebody pressure that can go negative, `P₀ + P₂·cos²φ`, from the cones' own shape, held out on two hemispheres and a rough sphere no round has used. The rough-sphere comparator is chosen after round 3's smooth-turbulent miss and says so. |

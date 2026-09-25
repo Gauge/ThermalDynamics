@@ -63,6 +63,10 @@ namespace Thermodynamics.Sim
 
                     return PrefabCommand(args);
 
+                case "aero-flight":
+                    Console.WriteLine(AeroFlightLab.Report());
+                    return 0;
+
                 case "aero-calibrate":
                     Console.WriteLine(AeroCalibrationLab.Report(AeroCalibrationLab.Fit(AeroCalibrationLab.Rigs(AeroCalibrationLab.CalibrationRadius))));
                     return 0;
@@ -2026,6 +2030,7 @@ namespace Thermodynamics.Sim
             Console.WriteLine("    --load                    full load instead of idle: the control, not G7");
             Console.WriteLine("  drift                   how long a client that joined stale stays wrong");
             Console.WriteLine("  inputs                  each input a client drives its sim from, degraded");
+            Console.WriteLine("  aero-flight             the step 1 moment rigs: a shuttlecock both ways round, and a spin decaying");
             Console.WriteLine("  aero-calibrate          fit the drag model to White's Table 7.3 and predict what it was not fitted to");
             Console.WriteLine("  thermal-corpus-export <out>  temperature fields of three corpus ships, for the thermal-vision studies");
             Console.WriteLine("  thermal-vision <out> [--require-complete]  shared rendering core, synthetic depth and readiness report");
