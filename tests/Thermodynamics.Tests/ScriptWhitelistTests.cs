@@ -134,4 +134,40 @@ namespace Thermodynamics.Tests
             return index < 0 ? path : path.Substring(index);
         }
     }
+
+    public class ScriptPreprocessorTests
+    {
+        [Fact]
+        public void NoModSourceUsesAPragma()
+        {
+            // The game's script compiler refuses '#pragma warning' outright, so a
+            // suppression that keeps the mod build quiet stops a session loading it.
+            // Scope warnings in .editorconfig instead.
+            List<string> sources = ScriptWhitelist.Sources();
+            Assert.True(sources.Count > 50,
+                "found " + sources.Count + " mod source files, which is not the mod");
+
+            List<string> findings = new List<string>();
+            foreach (string path in sources)
+            {
+                string[] lines = File.ReadAllLines(path);
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (lines[i].TrimStart().StartsWith("#pragma", StringComparison.Ordinal))
+                        findings.Add("  " + Short(path) + "(" + (i + 1) + "): " + lines[i].Trim());
+                }
+            }
+
+            Assert.True(findings.Count == 0,
+                findings.Count + " '#pragma' line(s); the game will not compile the mod:\n"
+                + string.Join("\n", findings));
+        }
+
+
+        private static string Short(string path)
+        {
+            int index = path.IndexOf("Data" + Path.DirectorySeparatorChar, StringComparison.Ordinal);
+            return index < 0 ? path : path.Substring(index);
+        }
+    }
 }

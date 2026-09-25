@@ -98,11 +98,9 @@ namespace Thermodynamics
         {
             if(!a.Valid || !b.Valid || !c.Valid) return;
             Vector3 normal=(Vector3)MyAPIGateway.Session.Camera.WorldMatrix.Backward;
-#pragma warning disable CS0618
             MyTransparentGeometry.AddTriangleBillboard(a.Position,b.Position,c.Position,normal,normal,normal,
                 a.Uv,b.Uv,c.Uv,known?(State.Current==ThermalVisionState.Mode.Cividis?GradientColour:GradientGrey):CompositeSurfaceMaterial,
                 0,(a.Position+b.Position+c.Position)/3,known?Vector4.One:RegionNeutral,MyBillboard.BlendTypeEnum.PostPP);
-#pragma warning restore CS0618
             regionBillboards++; drawn++; examined++;
         }
     }

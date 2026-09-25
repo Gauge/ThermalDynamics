@@ -1,0 +1,10 @@
+# SENetworkAPI is vendored and replaced wholesale (docs/rules.md R6).
+# Keep its legacy message-handler warnings scoped to the upstream source file.
+[Thermodynamics/NetworkAPI/Network.cs]
+dotnet_diagnostic.CS0618.severity = none
+
+# MyTransparentGeometry.AddTriangleBillboard is marked obsolete but has no
+# replacement the thermal overlay can use. The game's script compiler refuses
+# '#pragma warning', so the suppression lives here instead of in the source.
+[Thermodynamics/Game/ThermalVision/ThermalVision{Probe,Regions,GradientLab,FleetGradient,Celestial}.cs]
+dotnet_diagnostic.CS0618.severity = none
