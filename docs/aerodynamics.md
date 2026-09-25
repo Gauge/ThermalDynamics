@@ -481,6 +481,53 @@ Each step ships on its own and names its rig checks. Population walks are propos
    AR1's compressibility.
 5. **Optional.** AR18, AR21's build-mode view, AR13's two checks.
 
+## Step 1's criteria, registered before anything is measured
+
+Written 2026-09-24, before the profile or its coefficients exist (`E1`). A threshold here moves only in
+the open (`E11`).
+
+**The reference data is one textbook table.** White, *Fluid Mechanics* (4th ed.), Table 7.3, "Drag of
+three-dimensional bodies at Re ≥ 10⁴", `C_D` on frontal area: cube face-on **1.07**, cube edge-on
+**0.81**, disk **1.17**; cones by half-angle θ, 10° to 90°: **0.30, 0.40, 0.55, 0.65, 0.80, 1.05,
+1.15**; flat-faced cylinders by `L/d`, 0.5 to 8: **1.15, 0.90, 0.85, 0.87, 0.99**; rectangular plates
+by aspect ratio 1 to 20: 1.18, 1.2, 1.3, 1.5.
+
+**Calibration and validation are disjoint.** The drag model's free coefficients — forebody pressure,
+its falloff with a surface's inclination, base pressure against fineness — are fitted to the **cones
+from 10° to 75°** and the **flat-faced cylinders**, built from cells the way a player would build
+them, and nothing else. Everything below is predicted by the fitted model, never fitted to:
+
+| # | Held out | Prediction | Falsified by |
+| --- | --- | --- | --- |
+| S1 | a cube, flow square to a face | `C_D` 1.05 ± 0.1 (registered with this page; White 1.07) | outside 0.95–1.15 |
+| S2 | a one-cell-thick square plate, flow square to it | `C_D` 1.17–1.28 (registered with this page) | outside that band |
+| S3 | a cube, flow along a face diagonal | `C_D` 0.81 ± 0.15 (White) | outside 0.66–0.96 |
+| S4 | a hull with a tapered tail against the same hull with a blunt base, equal frontal area | the tapered one has the lower `C_D` | equal or higher |
+| S5 | a shuttlecock: frontal area concentrated behind the centre of mass, flown at 50 m/s in sea-level air, kicked 20° in yaw | back within 5° of its heading, and still there after 30 s | not |
+| S6 | the same body flown the other way round | diverges past 45° from the heading it was kicked off | stays within 45° |
+| S7 | a free hull spun at 1 rad/s in air | its spin halves in finite time, and faster at density 1 than at 0.5 | not, or not faster |
+| S8 | every rig above at 60 Hz | the numerical guard (`AR22`) binds on none of them | binds on any |
+
+**The finned-hull rig the build order named moves to step 2, and the reason is physics.** Drag acts
+along the flow at the centre of the windward projected area. At a small yaw β that centre is the
+nose's, with weight cos β, while a fin's side contributes at sin β — so fin area restores only at
+second order and a finned body flown nose-first is destabilised at first order. What makes a real fin
+restore is its *lift*, a normal force proportional to β (`AR8`, `AR9`). A body stabilised by drag
+alone is a shuttlecock, which is what S5 and S6 test; the finned hull is step 2's rig.
+
+**The population criterion is `K5`'s, re-registered unchanged** ([balance-lab.md](balance-lab.md#the-criterion-k5-actually-needs-written-before-it-is-measured)),
+over hulls that can lift themselves, in sea-level air at 1.225 kg/m³:
+
+| # | Prediction | Falsified by |
+| --- | --- | --- |
+| P1 | on no more than 5 % of them does drag at 100 m/s exceed the ship's own thrust | more than 5 % |
+| P2 | the p1 hull still reaches 60 m/s at full thrust | a p1 ceiling under 60 m/s |
+
+**A failure of P1 or P2 is a finding and not a retune.** They were written for a model whose coefficient
+was a balance dial; this one's coefficients are textbook figures, so if realistic drag fails a
+playability criterion, that is recorded as the conflict it is and decided by the owner, not by moving
+a coefficient off its source.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -499,6 +546,7 @@ Each step ships on its own and names its rig checks. Population walks are propos
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | **Step 1's criteria are registered before any of it is built.** The reference is White's Table 7.3; calibration is the cones and the flat-faced cylinders, and the owner's cube and plate criteria are held out with two more (edge-on cube, boat-tail pair), so none can pass by construction. The finned-hull rig moves to step 2, because a fin restores through lift, not drag; step 1 tests the drag-stabilised case, a shuttlecock. `K5`'s population pair is re-registered unchanged, and a failure is recorded as a realism-against-playability conflict for the owner rather than retuned away. |
 | 2026-09-24 | **Step 0 is built.** The force application, the lift and pressure plumbing, the top-speed port and its nineteen settings, and the shape factor on the friction row are removed; the retired `ProtoMember` numbers are recorded in `NoSettingReusesANumberThatWasDeliberatelyRetired`. `RtsApi.cs` is vendored unchanged from RelativeTopSpeed `0b4b21a` under `Thermodynamics/RelativeTopSpeed/`, and `RelativeTopSpeedLink` guards every call to it. **One departure from the inventory**: the solver's normal buffer went too, because nothing in a step read it (see the table). **Backlog rows retired into `K25`**: `K10` (the port, now removed); `K6` and `K22` (the shape term — its wake is `AR4`'s base drag); `K23` (lift — its criteria are re-registered under `AR8`); `K24` (the degenerate plate — `AR9`'s wing detector); and `K16` (the centre-of-pressure indicator — its caveat ends when `AR5` ships). What each measured stays in [thermal-model.md](thermal-model.md#change-log). |
 | 2026-09-24 | **Owner's decisions recorded** (see *Decisions taken*): cruise curve then drag; no SEDrag block extensions; re-entry heating configurable; forces simulated on server and client; the existing aerodynamics is stripped and rebuilt with switches; the embedded RelativeTopSpeed port is removed in favour of the original mod's read-only API (13 getters, channel 2772681332). The strip-and-rebuild inventory and switch table were added. |
 | 2026-09-24 | Page created. The owner asked for aerodynamics in line with SEDrag, then clarified the goal: *as realistic as possible, and learn what we can from SEDrag*. The SEDrag source (571920453) was read in full: `SEDrag.cs`, `GridCalculation.cs`, `DragBase.cs`, `Core.cs`, `LiftDefinition`, `AeroProperties.xml`. Twenty-two parts were evaluated against this mod and against subsonic physics. The drag and terminal-speed tables are derived from the source by hand, not measured in a session. An earlier reading in the same conversation, that SEDrag's drag was about 20× *weaker* than this mod's, was wrong: it missed `SpeedMod`, and above 27 m/s the relation inverts to 163×. |
