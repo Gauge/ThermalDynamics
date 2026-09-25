@@ -281,8 +281,8 @@ player placed is stable.
 
 ### Read the aerodynamic forces
 
-`GetGridFrictionWatts` gives the drag *power*; this gives the drag and lift *vectors* in world
-newtons, which is what you need to apply a force.
+`GetGridFrictionWatts` gives the air's heating *power*; this gives the drag and lift *vectors*
+this mod applies, in world newtons.
 
 ```csharp
 var aeroForces = api["GetGridAeroForces"] as Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>;
@@ -291,14 +291,14 @@ Vector3 dragNewtons = f.Item1;   // along the relative wind
 Vector3 liftNewtons = f.Item2;   // perpendicular to it
 ```
 
-Drag is zero unless the friction term is enabled; lift is zero unless both `EnableShapeDrag` and
-`EnableLift` are, and zero for a still grid. These are assembled the same way Thermodynamics'
-own aerodynamics apply them, so if the mod is applying them you are reading the force already on
-the grid — apply it again only if you mean to.
+**Both are zero at present**: the mod's aerodynamic force was stripped so it can be rebuilt from a
+surface profile of its own ([aerodynamics.md](aerodynamics.md)), and zero is the force it applies.
+When the rebuilt force ships, this reads the force already on the grid — apply it again only if you
+mean to.
 
-### Tell the drag model a block's shape
+### Tell the aerodynamic terms a block's shape
 
-The drag model's only shape term is a projected area, so it cannot tell a jet nacelle from a box.
+The friction term's only shape is a projected area, so it cannot tell a jet nacelle from a box.
 If your block is slippery nose-on and blunt side-on, say so with six per-face multipliers.
 
 ```csharp
@@ -310,8 +310,8 @@ setDrag(nacelle, new[] { 0.2f, 0.2f, 1f, 1f, 1f, 1f });   // slippery on the fir
 
 Exactly six entries in face order, each `0..1`. **A profile may only reduce** — anything over 1,
 under 0, or `NaN` is clamped to 1 (no change), because a registration must never throw into the
-simulation's loop and *no change* is the direction that cannot break a ship. It touches drag and
-the wind's convection, not the sun.
+simulation's loop and *no change* is the direction that cannot break a ship. It touches friction
+heating and the wind's convection, not the sun, and the rebuilt force reads it too.
 
 ## Multiplayer
 
@@ -365,6 +365,7 @@ the simulation core directly — it has no dependency on the game session and it
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | The aerodynamic-force section says the force is zero while it is rebuilt, and the drag-profile section says what a profile touches now. |
 | 2026-09-24 | **Renamed the drop-in client** to `ThermodynamicsApi` in namespace `Thermodynamics.Client` (file `tools/modkit/ThermodynamicsApi.cs`), matching the mod's name. The message channel and table keys are unchanged, so a copy taken under the old name keeps working; only a fresh copy needs its `using` and type name updated. |
 | 2026-09-05 | **Added the drop-in client** ([`tools/modkit/ThermodynamicsApi.cs`](../tools/modkit/ThermodynamicsApi.cs)) and the fast-path section: one file a consumer copies in, `Init`/`Dispose` and typed methods returning structs, held identical to the API table by `ThermodynamicsClientTests`. The manual binding walkthrough stays below it. |
 | 2026-09-05 | Written, alongside an audit that added `GetGridAeroForces` and `GetCoolantLoop` to close the two shipped systems that had no read accessor. Covers setup, the binding lifecycle, a task per system, and the multiplayer and threading rules; the key-by-key contract stays in [api.md](api.md). |

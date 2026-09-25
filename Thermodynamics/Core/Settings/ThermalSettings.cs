@@ -168,42 +168,11 @@ namespace Thermodynamics.Core
         public float FrictionScale = 0.001f;
 
         /// <summary>
-        /// Enables/disables drag force simulation.
-        /// Drag affects both motion and generates heating at high speeds.
-        /// </summary>
-        public bool EnableDrag = true;
-
-        /// <summary>
         /// Enables windward shielding (leeward side of blocks receives less wind).
         /// When true, blocks on the leeward side of other blocks have reduced wind effects.
         /// </summary>
         public bool EnableWindwardShielding = false;
 
-        /// <summary>
-        /// Enables/disables shape-based drag calculations.
-        /// When true, drag depends on block orientation and shape.
-        /// </summary>
-        public bool EnableShapeDrag = true;
-
-        /// <summary>
-        /// Enables/disables lift force calculations.
-        /// Lift is perpendicular to wind direction and can provide upward force.
-        /// </summary>
-        public bool EnableLift = true;
-
-        /// <summary>
-        /// Multiplier for lift coefficient calculations.
-        /// Scales the base lift force from pressure distribution.
-        /// Default: 1.0
-        /// </summary>
-        public float LiftCoefficient = 1f;
-
-        /// <summary>
-        /// Base drag coefficient for shape drag calculations.
-        /// Higher values = more drag from shape/size.
-        /// Default: 1.54 (approximate for a sphere).
-        /// </summary>
-        public float DragCoefficient = 1.54f;
 
 
         /// <summary>
@@ -376,8 +345,6 @@ namespace Thermodynamics.Core
             if (VacuumTemperature < 0f) VacuumTemperature = 0f;
             if (SolarEnergy < 0f) SolarEnergy = 0f;
             if (FrictionAtSpeedsAbove < 0f) FrictionAtSpeedsAbove = 0f;
-            if (DragCoefficient < 0f) DragCoefficient = 0f;
-            if (LiftCoefficient < 0f) LiftCoefficient = 0f;
             if (FrictionScale < 0f) FrictionScale = 0f;
             if (RoomConvectionCoefficient < 0f) RoomConvectionCoefficient = 0f;
             if (RoomAirDensity < 0f) RoomAirDensity = 0f;

@@ -8,23 +8,15 @@ using Xunit.Abstractions;
 namespace Thermodynamics.Tests
 {
     /// <summary>
-    /// **Where the drag actually acts, against where this mod applies it.**
+    /// **Where the air acts on a hull, read from the friction row, against its centre of mass.**
     ///
     /// <para>
-    /// the drag milestone applies one force per constraint group at the group's **centre of mass**, which
-    /// produces no torque. That is a deliberate simplification — the drag milestone required one force at one
-    /// point, because a force per subgrid at each subgrid's own centre loads the joints with a
-    /// torque no real air produces — but it is still a simplification: real drag acts at the
-    /// **centre of pressure**, and a centre of pressure behind the centre of mass is what makes a
-    /// dart weathervane into the airflow.
-    /// </para>
-    ///
-    /// <para>
-    /// **The offset between the two is the price of that choice, and this measures it.** The data
-    /// is already in the loop: each node's exposed area, its incidence against the relative wind,
-    /// and where it sits. `K16` wants the pair drawn for a player; this wants the number for a
-    /// developer, and the two uses are separable — the flight-model one is refused with lift
-    /// (the drag milestone), and this one is not, because drag exists whether or not lift does.
+    /// The mod applies no aerodynamic force since the `K25` strip, and the force its rebuild applies
+    /// acts at the centre of pressure of the hull's surface profile (aerodynamics.md, `AR5`). What
+    /// the solver can already say is where the friction watts concentrate, which `AeroOverlay` draws
+    /// as the heating centre. These pin that centre's geometry: only its offset *across* the flow
+    /// can make a torque, and a fin on one flank moves it a measured distance — the baseline the
+    /// profile's centre of pressure will be compared against.
     /// </para>
     /// </summary>
     public class CentreOfPressureTests

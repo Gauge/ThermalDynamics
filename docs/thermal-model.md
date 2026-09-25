@@ -262,272 +262,65 @@ game-feel coefficient. `v_rel` is the wind minus the grid's own velocity, compos
 still air. The wind is the mod's own field rather than the engine's rating — see
 [environment.md](environment.md#wind).
 
+**This is heat, and the mod applies no aerodynamic force.** The drag, lift and top-speed force the
+mod applied until 2026-09-24 were derived from these watts, and were stripped so that the force can
+be rebuilt from a surface profile of its own; [aerodynamics.md](aerodynamics.md) holds the
+requirements and the plan. What this row computes is untouched by that, apart from the shape factor
+described below.
+
 **The term is live at every speed, and the cooling-to-heating crossover is emergent.**
 `FrictionAtSpeedsAbove` shipped at 50 m/s for ten months as a guard against low-speed heating, and
 the v³ law makes the guard redundant: at 10 m/s the term is about 1 W per windward m² against
-1,000 at 100 m/s, so slow flight is cool by arithmetic rather than by a gate — and the gate put a
-step in the heat, the drag and the lift at the one speed it named. What the gate looked like it
-was doing happens on its own: convection removes `h·A·(T − T_ambient)` and grows with `√v`
-([environment.md](environment.md#wind)), friction adds `∝ v³`, so slow air net-cools a hull that
-is warmer than ambient and fast air net-heats it — at a speed that depends on how hot the hull
-is, which is why no constant could name it. A hull *at* ambient is heated by any airspeed,
-because there is nothing for the convection half to remove. The floor remains a dial for worlds
-that want the legacy cut, and the aero debug view (`DebugAeroOverlay`) reports the net air watts
-and the crossover speed for the hull as it stands.
+1,000 at 100 m/s, so slow flight is cool by arithmetic rather than by a gate. Convection removes
+`h·A·(T − T_ambient)` and grows with `√v` ([environment.md](environment.md#wind)), friction adds
+`∝ v³`, so slow air net-cools a hull that is warmer than ambient and fast air net-heats it — at a
+speed that depends on how hot the hull is, which is why no constant could name it. A hull *at*
+ambient is heated by any airspeed, because there is nothing for the convection half to remove. The
+floor remains a dial for worlds that want the legacy cut, and the aero debug view
+(`DebugAeroOverlay`) reports the net air watts and the crossover speed for the hull as it stands.
 
-**This expression is drag power, and the momentum is not taken.** Real drag power is
+**The expression is drag power, and that is why it cannot also be the force.** Real drag power is
 `½ C_d ρ A v³` — the same expression, with `FrictionScale` in the place of `½ C_d` and
-`A_exposed × faceWeight` in the place of the frontal area. So the model computes what the air does
-to the ship's *energy* every step, turns it into heat in the hull, and removes nothing from the
-ship's motion: nothing anywhere writes to `Physics`, only reads `LinearVelocity` from it. Measured
-over the 8,144 published blueprints at `reentry` — 300 m/s in 0.8 density air — the median hull is
-given **5.05 MW** this way, the ninety-fifth **218 MW**, and every one of them something. At 300 m/s
-a median 5.05 MW is **16.8 kN** of force that is never applied.
+`A_exposed × faceWeight` in the place of the frontal area. Written out, `FrictionScale = ½ · C_d · η`,
+where `η` is the share of the work done against drag that ends up in the *surface* rather than in the
+wake; at the shipped 0.001 against a bluff body's `C_d ≈ 1`, `η` is about 0.002, a game-feel figure
+rather than a measured one. Base drag leaves its energy in the wake, so it heats nothing and cannot be
+read off this row, which is one of the reasons the rebuilt force is a channel of its own
+(aerodynamics.md, `AR4`).
 
-**Whether it should be applied is [backlog.md](backlog.md) `K1`, and it is not obvious.** The
-coefficient is the reason: `FrictionScale` is 0.001, which as `½ C_d` implies a drag coefficient of
-0.002 against roughly 1 for a bluff body. That is right for heat and wrong for force, because only
-a fraction of the work done against drag lands as heat in the surface — the rest goes into the wake
-— so the two are different numbers and neither can be read off the other.
+**The row sees a projected area, and a projected area is not a shape.** What it sums is exposed cell
+faces weighted by `max(0, dot(faceNormal, wind))` over the six axis directions, so a stair-stepped
+wedge presents exactly the wind-facing faces of the brick that shares its frontal cross-section.
+`DragShapeTests` builds that pair — 64 blocks against 40 — and the two take **identical** friction
+watts, 172,800 W each at 120 m/s in thick air, while their real drag coefficients differ by about ten
+times. For heat that is an accepted limit; for a force it is the first thing the rebuild has to pass.
 
-**Written out, the two constants are one product.** `FrictionScale = ½ · C_d · η`, where `η` is the
-share of the work done against drag that ends up in the *surface* rather than in the wake. Two of
-the three are free and the third follows, so the question `K3` asks is which two the mod authors.
-**It authors `FrictionScale` and `C_d`, and `η` is the derived consequence** — at the shipped 0.001
-against a bluff body's `C_d ≈ 1`, `η` is **0.002**, two parts in a thousand. That is low, and it is
-a game-feel figure rather than a measured one; what matters here is that it is now a figure the mod
-can state rather than a discrepancy between two numbers that looked like they should agree.
+**Windward shielding is a switch, and it moves temperatures.** `EnableWindwardShielding` runs the
+sun's self-shadowing pass aimed at the relative wind, so a face in another block's lee contributes
+only what the wind can reach of it. It ships **off**, because the six-face sum it modifies is read by
+the *convection* factor as well as the friction row: sheltering a face reduces the forced convection
+over it, which is physically right and measurably large — on a sheltered pair driven in thick moving
+air the shielded hull runs **7.4 K hotter**, 316.1 K against 323.5 K. Its cadence is not the sun's:
+the wind direction is grid-local, so it moves when the *ship* turns, and at the sun's 2° threshold a
+capital hull's 1.75 s pass would restart five times a second under a 10 °/s yaw and never complete.
+The threshold is 20°, worth 2.0 % of faces in staleness, and a running pass is never restarted.
 
-**Authoring `FrictionScale` rather than deriving it is what protects a tuned world.** A world that
-has moved `FrictionScale` moved it to change *heat*, and heat is what it still changes. Handling
-will be driven by the drag coefficient, which is a separate dial with its own default, so applying
-the force does not silently re-tune anybody's hull temperatures — and a world that wants a draggier
-sky changes the dial that is about drag.
+### The surface normal, and why the friction row no longer uses it
 
-**And `C_d` cannot be derived from the hull, which is measured rather than assumed.** The obvious
-hope is that a model already computing a windward area could compute the coefficient too and spare
-an authored number (`P7`). It cannot: what the solver sums is exposed cell faces weighted by
-`max(0, dot(faceNormal, wind))`, which is a **projected area**, and a projected area is not a shape.
-`DragShapeTests` builds a four-cell brick and a stair-stepped wedge that share its frontal
-cross-section — 64 blocks against 40, so they are genuinely different hulls — and **the drag power
-the solver computes for them is identical**, while their real drag coefficients differ by about ten
-times. Halving the frontal area halves the drag; reshaping everything behind it changes nothing.
-The lever is the projection and only the projection.
+**`ShapeNormal` reconstructs the direction a block's surface faces from the occupancy around it** —
+the negative gradient over a radius of one — so a 3×3×3 neighbourhood straddling a slope has its
+occupied half on one side and the sum lands on the diagonal. The cells down the wedge's windward
+staircase come back as `(0, 0.707, 0.707)` exactly; a 45° slope reads the same at radius one, two and
+three, and radius one cannot tell a 26.6° slope from an 18.4° one, while wider radii start
+overshooting. `ShapeNormalGeometryTests` and `ShapeNormalOneCellTests` pin the geometry.
 
-So the coefficient is authored until there is a shape term to derive it from, which is what `K6` and
-`K7` are about. The counter-example is a test rather than an argument, so the next reader who
-proposes deriving it finds the pair of hulls that says why not.
-
-**With drag on, a ship's top speed becomes altitude-dependent, and that is a change a player will
-notice.** A ship stops accelerating where its thrust balances `½ C_d ρ A v²`, so it is slow in thick
-air and fast where the air runs out: over the census the median published hull balances at **199.2
-m/s at sea level, 284.7 at half density, 402.6 thin and 697.3 very thin**
-([`summary-cruise-2026-08-31.csv`](../tools/corpus/summary-cruise-2026-08-31.csv)). **11.6 % of ships
-balance below the 100 m/s the engine already enforces**, so for those the air is what limits them and
-for the rest the engine's cap binds first, as it does today.
-
-That is physically right and it is *not* what a world running
-[RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed) has, because a cruise speed
-interpolated through authored mass points has no altitude in it at all. It is named here rather than
-left to be discovered ([backlog.md](backlog.md) `K18`).
-
-**Windward shielding is a switch, and it moves temperatures as well as forces.**
-`EnableWindwardShielding` runs the sun's self-shadowing pass aimed at the relative wind, so a face
-in another block's lee contributes only what the wind can reach of it. It ships **off**, and the
-reason is that the six-face sum it modifies is read by the *convection* factor as well as the
-friction row: sheltering a face reduces the forced convection over it, which is physically right — a
-face with less air moving across it loses less — and measurably large. On a sheltered pair driven in
-thick moving air the shielded hull runs **7.4 K hotter**, 316.1 K against 323.5 K. A feature that
-changes the shipped answer is not an addition ([backlog.md](backlog.md) `K9`), so what stands
-between the switch and a default is a corpus re-walk with `G6` and `G7` rescored.
-
-Its cadence is not the sun's and that is measured: the wind direction is grid-local, so it moves
-when the *ship* turns, and at the sun's 2° threshold a capital hull's 1.75 s pass would restart five
-times a second under a 10 °/s yaw and never complete. The threshold is 20°, worth 2.0 % of faces in
-staleness, and a running pass is never restarted — which bounds the error at the pass's own length
-times the turn rate rather than leaving it unbounded.
-
-**The same fact decides how a force would have to be grouped, and it is worse news than `K15`
-expected.** Real frontal area is additive, so a per-grid sum of drag looks about right for a ship
-that is several grids. This model's area is not additive: it charges for the windward projection and
-the depth along the wind never enters the sum, so **each half of a hull cut across the wind takes the
-same drag as the whole hull**. `DragGroupingTests` measures 172,800 W for a 4×4×4 hull and 172,800 W
-for each of its halves — a per-grid sum of **exactly 2×**, and exactly N× for N pieces. A cut *along*
-the wind is exactly additive, halving the projection and the drag with it. Those are the two extremes
-and there is no case between them.
-
-So a drag force cannot be summed per grid: it has to be computed over the physical constraint group,
-`IMyCubeGrid.GetGridGroup(GridLinkTypeEnum.Physical)`, which is broader than this mod's own
-`ThermalBridges` — a connector links two grids physically and conducts no heat. A ship would
-otherwise get draggier for growing a turret, which is the same shape of defect `K15` found in the
-mass curve and larger.
-
-### The shape term, and why it cannot be improved in place
-
-**What the solver sums is a projected area, and that is a structural limit rather than a coarse
-one.** Per node, over the six axis-aligned faces:
-
-```
-wind_i  = Σ_f  exposure_if × max(0, n_f · ŵ) × windLit_if × dragProfile_f
-watts_i = FrictionScale × ρ × v³ × A_i × wind_i
-```
-
-`n_f` are the six axis directions and nothing else; the incidence weight is **linear** in
-`n_f · ŵ`. Newtonian impact theory — which is the model this expression is reaching for, and the one
-that is right in the free-molecular hypersonic flow it was derived for — puts the pressure on a
-surface element at `Cp = 2 sin²θ`, so the element's contribution to drag goes as **`sin³θ`**. The
-two agree exactly at `θ = 90°`, a flat plate square to the flow, and disagree everywhere else.
-
-**Stair-stepping is what turns that disagreement into blindness.** A hull built of cells has every
-surface element at `θ = 0°` or `θ = 90°`, so a 45° slope is not a 45° surface to this sum — it is a
-staircase of squares and edges, and the squares project onto exactly the area a flat plate would.
-`DragShapeTests` is the measurement: a four-cell brick and a stair-stepped wedge sharing its frontal
-cross-section — 64 blocks against 40, genuinely different hulls — compute drag powers equal to three
-decimal places, while their real drag coefficients differ by about ten times.
-
-**And the conservation is why no further weighted sum over the same six faces can repair it.** The
-obvious next terms all fail for one reason. A base-pressure or wake term keyed on the leeward
-projection does not separate the pair, because a closed hull's leeward projection equals its windward
-one — the same conservation that makes the windward sums equal. A fineness or slenderness correction
-needs a streamwise extent, and the depth along the wind never enters this sum at all, which is the
-same fact `DragGroupingTests` found from the other side: each half of a hull cut across the wind
-takes the *whole* hull's drag. **The projection is the only lever, and every function of the
-projection is blind to everything behind it.** What escapes it is a surface normal that is not one of
-the six axis directions.
-
-**Built 2026-08-31, behind `EnableShapeDrag`, which ships off.** `ShapeNormal` gives each node an
-effective outward normal from the occupancy around it — the negative gradient over a radius of one,
-so a 3×3×3 neighbourhood straddling a slope has its occupied half on one side and the sum lands on
-the diagonal. The factor applied to the projected area is then the `sin²θ` it was missing.
-
-**The property that makes it affordable: a normal is a function of geometry alone.** It is rebuilt
-when the grid's version changes — blocks added or removed — and *not* when the wind moves, unlike
-the shielding pass, which is rebuilt on a 20° change of a direction that turns with the ship. A step
-spends one dot product a node. The array is three floats a node, allocated only where the switch is
-on, which is **6.07 MB** at 505,566 blocks by arithmetic against the 3 MB shielding costs on a
-126,731-block hull; octahedral packing to two bytes would make it 1.01 MB and has not been done.
-
-**The pass itself is 195.5 ns a node — seven times what counting a node's exposed faces costs — so
-it is sliced.** At 126,731 blocks it is **24.781 ms** against exposure's 3.561 (`bench stages`),
-which lands as a frame if taken whole, so it runs at a seventh of the exposure budget. Slicing is
-safe because an unvisited node holds a zero normal and zero reads as *no correction*: a half-finished
-pass degrades toward the model without the term and never past it. See
-[load-and-hitching.md](load-and-hitching.md#12-the-shape-normals-are-their-own-pass-on-their-own-budget).
-
-**Measured on the pair that motivated it.** The brick and the stair-stepped wedge read **172,800 W
-each** with the term off — the blindness, to three decimal places — and **100,800 W against
-82,215 W** with it on, a ratio of **0.816** where there was no ratio at all. The mechanism is
-visible in the reconstruction itself: the cells down the wedge's windward staircase come back as
-`(0, 0.707, 0.707)` **exactly**, the diagonal, carrying `sin²45° = 0.5`. Nothing about one cell's
-own six faces could produce that — its tread is square to the flow and its riser is parallel to it.
-`ShapeDragTests` pins all of it.
-
-**It applies to the friction row and deliberately not to the convection factor**, which reads the
-same six-face sum. They are different questions: shielding changes how much air crosses a face,
-inclination changes the pressure on it. Folding the second into the first is how windward shielding
-came to be worth 7.4 K on a sheltered hull.
-
-**Lift is the direction this factor throws away.** `Factor` returns `max(0, n̂·ŵ)²`, a scalar, and
-the moment it does the normal's direction is gone — so drag has always been the *axial* component of
-a Newtonian pressure sum whose transverse component was computed and discarded rather than absent.
-`EnableLift` keeps the vector: `LastPressureWatts` is `Σ wattsᵢ · (−n̂ᵢ)`, and `LiftForce` applies
-what is perpendicular to the flow. **It is added rather than re-derived**, so drag is bit-identical
-with lift on and a world can take one without re-tuning the other. **It needs the shape term** —
-without a reconstructed normal every surface is one of six axis planes and the transverse sum would
-describe how a hull was drawn rather than what shape it is — and it is **small**: over 8,137
-published hulls the median lift-to-drag is **0.057**, p95 **0.148**, and lift exceeds a hull's own
-weight on none of the 5,649 that can lift themselves. A ship symmetric about its flight axis cancels
-most of the sum, which is why a cube makes no lift at all. See [backlog.md](backlog.md) `K23`.
-
-**And it can only reduce.** The factor is `sin²θ`, at most one, which is the bound `DragProfile`
-carries and for the same reason: a shape may say the air slips past more easily than the projection
-suggests, never that a hull has more surface than it has. Switching it on lowers heating and drag or
-leaves them alone.
-
-**On the population it is worth 4.56 K at the median, and the control did not move.** A paired walk
-over **500 ships** — the unshaped arm settle-stopped, its clock handed to the shaped one so the
-stopping rule is not part of the difference (`M1`, `P6`) — reads a median **−4.56 K** at `reentry`,
-p5 −9.47, p95 −1.08, and a largest of **−15.40 K**. **496 of 500 run cooler and none runs hotter**,
-which is the factor's own bound of one holding on real hulls rather than on the two it was designed
-against. The effect *shrinks* with size — −5.27 K under 200 blocks to −3.24 K over 10,000 — which is
-the shape factor rising with size seen from the other end.
-**`vacuum-shadow` moved on none of the 500**: there is no air in it, so a term that reaches only the
-friction row must leave it alone, and it does
-([`summary-shape-2026-08-31.csv`](../tools/corpus/summary-shape-2026-08-31.csv)).
-
-**A hull overstated it by about two, and the reason is the speed.** The toy figures below were taken
-at 300 m/s and the corpus's `reentry` is 200, where `v³` is 3.4 times smaller — so the two-hull
-reading is the right shape and the wrong size, which is the argument for the walk rather than
-against the rig.
-
-**It moves temperatures by about ten kelvin on a hull, and that is the reading that opened the
-question.**
-The friction watts it scales are what warm a hull, so this is a change to the heat model and not
-only to the force one. At the `reentry` scenario's air — 300 m/s in 0.8 density — a settled four-cell
-brick peaks **344.80 K** with the term off and **334.83 K** with it on, **9.96 K cooler**; the
-stair-stepped wedge reads 343.63 K against 332.27 K, **11.36 K**. Both are larger than the 7.4 K
-windward shielding is worth, which is already enough to keep *that* switch off.
-
-**The sign is the opposite of shielding's, and that follows from where the factor is applied rather
-than from anything about the air.** Shielding multiplies the six-face sum the *convection* factor
-reads as well, so a sheltered hull loses less to moving air and runs hotter. The shape factor is
-applied to the friction row alone, so a shaped hull is heated less and runs cooler. `ShapeDragTests`
-pins the sign as well as the size, which is what would notice if the factor were ever folded into
-`windFactor`.
-
-**Three things are open, and the first is why it ships off.** The brick's *own* drag falls to
-**0.583** of its unshaped value, because a four-cell cube is nearly all edge and an edge cell's
-reconstructed normal is diagonal. The fraction falls with hull size, but it means the absolute
-calibration moves and `DragCoefficient` — measured at 0.5 against a population — has to be re-scored
-before this could be a default. Second, the radius is **one**, the smallest that can see a slope at
-all: it cannot tell a 45° slope from a 27° one. **Widening it was measured rather than argued, and
-it buys almost nothing.** On a ramp rig wide enough to hold the neighbourhood — the first one was
-not, and read a spurious lateral normal off its own edges — a 45° slope reads **0.500 at radius one,
-two and three alike**, which is `sin²45°` exactly; a 26.6° slope reads **0.134 against an ideal
-0.200 at all three**. What a wider read buys is separating slopes *below* about 27°, which radius one
-conflates: an 18.4° ramp reads 0.134 at radius one and 0.056 at radius two, against an ideal 0.100 —
-it stops conflating and starts overshooting. **The cost claim first published here was also wrong**:
-it said the cube of the radius, and measured on 13,824 nodes with the result consumed radius two is
-**2.07×** and radius three **3.28×**, below the 4.8× and 13.2× the neighbourhood counts imply. So
-radius one stays, and it stays on evidence rather than on being the cheap one. Third, there
-is still **no wake**: a hull that closes bluffly and one that boat-tails present the same leeward
-projection, so the term separates them not at all. Newtonian gives no base pressure, and base
-pressure is most of a real bluff body's drag.
-
-**And the wake is not the fourth paragraph of this one — it forks the drag milestone's central
-simplification.** `DragForce.Newtons` is *one division on the friction watts*: the force is derived
-entirely from the heat, which is what makes the two consistent by construction and is the reason
-this model has one aerodynamic quantity rather than two that can disagree. That construction assumes
-every newton of drag deposits a fixed fraction `η` of its work in the surface. **Base drag does
-not.** A pressure deficit behind a hull takes momentum from the ship and leaves its energy in the
-wake as turbulence, dissipating in the fluid downstream rather than in the boundary layer against
-the plating — `η ≈ 0`, where skin friction's is the 0.002 `FrictionScale` implies. So a base term
-added to the friction row would heat the leeward faces of every ship in the world for a drag that
-warms nothing, and a base term kept out of the friction row cannot reach the force through the one
-division that computes it.
-
-**So the wake needs a second, force-only channel**, and that is a change to the shape of the drag
-milestone rather than an addition inside it: two quantities where there is now one, with the
-standing question of what keeps them from disagreeing. It is worth saying that the reason to want it
-is strong — base pressure is most of what makes a real brick draggy — and that the reason to be slow
-is the same one that refused lift: the mod would be asserting a force it does not compute the energy
-for.
-
-**Why this is a milestone and not a change.** `FrictionScale` is `½ · C_d · η` — one product in
-which the geometric factor sits — so moving the geometry term moves the heat and the handling
-together. Every temperature the `reentry` scenario produces changes, every cruise speed in
-[`summary-cruise-2026-08-31.csv`](../tools/corpus/summary-cruise-2026-08-31.csv) changes, and `K5`'s
-population criterion has to be re-scored rather than assumed to survive. That is also the prize: a
-coefficient that is authored at 0.5 today *because* a projected area is not a shape becomes
-derivable, which is what `P7` wanted and what this section has said was impossible since it was
-written.
-
-**It is also what lift was missing, and that does not by itself reopen the question.** `K8` refused
-lift on the ground that drag corrects something the mod computes wrongly while lift asserts something
-it does not compute at all — a decision about what kind of claim the mod makes, not about arithmetic.
-But the arithmetic gap named beside it was real: an angle-of-attack response is exactly what six axis
-face weights cannot give, and a reconstructed normal is one. Closing the gap makes the refusal a
-choice again rather than a constraint. See [backlog.md](backlog.md) `K22`.
+**It is surface data now rather than a term.** From 2026-08-31 to 2026-09-24 the friction row was
+multiplied by the Newtonian `sin²θ` of each node's normal against the wind, which took the brick to
+100,800 W and the wedge to 82,215 W, and a median 4.56 K off a published hull at re-entry. That factor
+existed to correct the force derived from these watts, and it left with the force: the row is the
+projected area again, pinned bit for bit against the code that computed it with the factor off
+(`AerodynamicStripTests`). The solver keeps no normals; the force profile computes them when a hull
+changes, which is when they change (aerodynamics.md, `AR4` and `AR9`).
 
 ### Waste heat
 
@@ -1187,6 +980,7 @@ several tests compare against it so the differences stay pinned rather than reme
 
 | Date | Change |
 | --- | --- |
+| 2026-09-24 | **The aerodynamic force is stripped, and the friction row is heat again** (`K25` step 0; [aerodynamics.md](aerodynamics.md#strip-and-rebuild)). The drag and lift derived from the friction watts, the pressure vector the solver summed for lift, the top-speed port and the Newtonian shape factor on the friction row are removed, and so is the solver's per-node normal buffer and its refresh budget: nothing in a step reads a normal now. The row is pinned bit for bit against the old code with the shape term off, and it raises friction heating back to the projected area — 1.71× on the four-cube brick, 2.10× on the wedge, and the median 4.56 K at re-entry that the shape term had taken off. The two sections that described the force, the shape term and lift in the present tense are rewritten to describe what remains; what they measured stays in the rows below. |
 | 2026-09-09 | **The aerodynamic model is what the mod ships now**: `EnableDrag`, `EnableShapeDrag` and `EnableLift` all default on, with `DragCoefficient` at **1.54** rather than 0.5. The coefficient is not a separate decision — the shape term multiplies the projected area by a `sin²θ` whose population median is 0.3250, so the pairing that reproduces what 0.5 delivered without it is `0.5 / 0.325 ≈ 1.54`, and that is the pairing `K22` re-scored the drag milestone's criterion at (3.42 % and 78.2 m/s against 5 % and 60 m/s). **The heat side moves with it and downward**: the friction watts the shape term scales are what warm a hull, so atmospheric flight is a median 4.56 K cooler than it was. **One geometry reads badly and it was found by this change** — a bare plate one cell thick has no occupancy gradient along the flow, so the reconstruction charges it 0.111 where a flat plate square to the flow is the one case Newtonian and a projected area agree on exactly; the `reentry` scenario's 3×3×1 fixture is that shape and its nose rise fell from 35.2 K to 2.6 K. Solid hulls read 0.583 at 4³ and 0.843 at 12³, and hull skins are not the case, because the ship behind them breaks the symmetry ([backlog.md](backlog.md) `K24`). |
 | 2026-08-31 | **Lift built as the transverse half of the pressure sum** ([backlog.md](backlog.md) `K23`). Newtonian pressure acts along `−n̂`; the solver sums that magnitude per node and `ShapeNormal.Factor` collapses it to a scalar, keeping only the axial part as drag. `LastPressureWatts` is the same sum with the normals left on, and `LiftForce` takes what is perpendicular to the flow. Added rather than re-derived, so drag does not move when lift is switched on. Over 8,137 hulls the median lift-to-drag is **0.057** and p95 **0.148**, and lift never exceeds a hull's own weight — a ship symmetric about its flight axis cancels most of the transverse sum, which is why a cube makes none. |
 | 2026-08-31 | **Measured the shape term's radius instead of arguing it, and it corrects a claim this page had already published.** A 45° slope reads `sin²45°` **exactly at radius one, two and three alike**, and a 26.6° slope reads 0.134 against an ideal 0.200 at all three — so a wider read does not improve the accuracy it was wanted for. It buys separating slopes below about 27°, where it then overshoots. **The cost was stated as the cube of the radius and is not**: 2.07× at radius two and 3.28× at three, on 13,824 nodes with the result consumed. The first rig was four cells across, narrower than a radius-two neighbourhood, and read a lateral normal off its own edges on a ramp uniform in that axis — the rig is sixteen wide now and the test asserts that component is nought, which is what says the rest of the reading is about the slope. |

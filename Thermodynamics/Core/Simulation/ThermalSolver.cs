@@ -65,7 +65,6 @@ namespace Thermodynamics.Core
 
         private float[] nodeFaceWeights = new float[0];
 
-        private float[] nodeShapeNormal = new float[0];
 
         private float[] nodeRelaxation = new float[0];
 
@@ -157,22 +156,11 @@ namespace Thermodynamics.Core
 
         public float LastFrictionWatts { get; private set; }
 
-        public Vector3 LastPressureWatts { get; private set; }
-
-
-        public Vector3 NodeShapeNormal(int index)
-        {
-            int b = index * 3;
-            if (index < 0 || b + 2 >= nodeShapeNormal.Length) return Vector3.Zero;
-            return new Vector3(nodeShapeNormal[b], nodeShapeNormal[b + 1], nodeShapeNormal[b + 2]);
-        }
 
         private float environmentWattsAccumulator;
         private float heatGainAccumulator;
         private float frictionAccumulator;
 
-        private Vector3 pressureAccumulator;
-        private Vector3 pressureRowTotal;
 
         private float heatGainRowTotal;
 
@@ -186,7 +174,6 @@ namespace Thermodynamics.Core
             environmentWattsAccumulator = 0f;
             heatGainAccumulator = 0f;
             frictionAccumulator = 0f;
-            pressureAccumulator = Vector3.Zero;
         }
 
 
@@ -196,7 +183,6 @@ namespace Thermodynamics.Core
             {
                 heatGainRowTotal = heatGainAccumulator;
                 frictionRowTotal = frictionAccumulator;
-                pressureRowTotal = pressureAccumulator;
                 heatGainRowTotalValid = true;
                 return;
             }
@@ -204,7 +190,6 @@ namespace Thermodynamics.Core
             heatGainAccumulator += heatGainRowTotal;
 
             frictionAccumulator += frictionRowTotal;
-            pressureAccumulator += pressureRowTotal;
         }
 
 
@@ -213,7 +198,6 @@ namespace Thermodynamics.Core
             LastEnvironmentWatts = environmentWattsAccumulator;
             LastHeatGainWatts = heatGainAccumulator;
             LastFrictionWatts = frictionAccumulator;
-            LastPressureWatts = pressureAccumulator;
         }
 
 
@@ -1653,11 +1637,6 @@ namespace Thermodynamics.Core
             public bool Windy;
             public bool SolarEnabled;
             public bool FrictionEnabled;
-
-            public bool ShapeEnabled;
-            public Vector3 WindDirection;
-
-            public bool LiftEnabled;
             public bool SourcesEnabled;
             public bool Generating;
             public bool Diagnostics;
@@ -1718,12 +1697,6 @@ namespace Thermodynamics.Core
                 Vector3 wind = env.WindDirectionLocal;
                 ResolveDirection(ref wind, windWeights);
 
-                plan.ShapeEnabled = settings.EnableShapeDrag && plan.FrictionEnabled
-                    && nodeShapeNormal.Length >= nodes.Count * 3;
-                plan.WindDirection = wind;
-
-                plan.LiftEnabled = plan.ShapeEnabled && settings.EnableLift;
-
                 if (RefreshWindShadow(ref wind)) InvalidateEnvironmentRows();
             }
 
@@ -1737,100 +1710,6 @@ namespace Thermodynamics.Core
 
             return plan;
         }
-
-        private int shapeNormalVersion = -1;
-
-        private int shapeNormalTarget;
-
-        private bool shapeNormalPass;
-        private int shapeNormalCursor;
-
-        public bool ShapeNormalRefreshPending
-        {
-            get { return shapeNormalPass; }
-        }
-
-
-        public void RefreshShapeNormals()
-        {
-            if (!BeginShapeNormalRefresh()) return;
-            while (StepShapeNormalRefresh(int.MaxValue)) { }
-        }
-
-
-        public bool BeginShapeNormalRefresh()
-        {
-            if (shapeNormalPass) return true;
-            if (!settings.EnableShapeDrag) return false;
-            if (shapeNormalVersion == grid.Version) return false;
-
-            if (nodeShapeNormal.Length < nodes.Count * 3)
-            {
-                nodeShapeNormal = new float[nodes.Count * 3];
-            }
-
-            shapeNormalPass = true;
-            shapeNormalCursor = 0;
-            shapeNormalTarget = grid.Version;
-            return true;
-        }
-
-
-        public bool StepShapeNormalRefresh(int nodeBudget)
-        {
-            if (!shapeNormalPass) return false;
-            if (nodeBudget <= 0) return true;
-
-            CellBitset occupancy = grid.Occupancy();
-
-            int end = shapeNormalCursor + nodeBudget;
-            if (end > nodes.Count) end = nodes.Count;
-
-            for (int i = shapeNormalCursor; i < end; i++)
-            {
-                Vector3 normal = ShapeNormal.Of(occupancy, nodes[i].Block);
-
-                int b = i * 3;
-                nodeShapeNormal[b] = normal.X;
-                nodeShapeNormal[b + 1] = normal.Y;
-                nodeShapeNormal[b + 2] = normal.Z;
-            }
-
-            shapeNormalCursor = end;
-            if (shapeNormalCursor < nodes.Count) return true;
-
-            shapeNormalPass = false;
-            shapeNormalCursor = 0;
-            shapeNormalVersion = shapeNormalTarget;
-
-            InvalidateEnvironmentRows();
-            return false;
-        }
-
-
-        public void RebuildShapeNormals()
-        {
-            if (nodeShapeNormal.Length < nodes.Count * 3)
-            {
-                nodeShapeNormal = new float[nodes.Count * 3];
-            }
-
-            shapeNormalPass = true;
-            shapeNormalCursor = 0;
-            shapeNormalTarget = grid.Version;
-            while (StepShapeNormalRefresh(int.MaxValue)) { }
-        }
-
-
-        private float ShapeFactorOf(int index, ref Vector3 wind)
-        {
-            int b = index * 3;
-            return ShapeNormal.Factor(
-
-                new Vector3(nodeShapeNormal[b], nodeShapeNormal[b + 1], nodeShapeNormal[b + 2]),
-                wind);
-        }
-
 
         private void AccumulateEnvironmentRange(ref EnvironmentState env, ref EnvironmentPlan plan,
             float h, int from, int to)
@@ -1886,9 +1765,6 @@ namespace Thermodynamics.Core
             bool windy = plan.Windy;
             bool solarEnabled = plan.SolarEnabled;
             bool frictionEnabled = plan.FrictionEnabled;
-            bool shapeEnabled = plan.ShapeEnabled;
-            bool liftEnabled = plan.LiftEnabled;
-            Vector3 shapeWind = plan.WindDirection;
             float radiationShare = plan.RadiationShare;
             float frictionScale = plan.FrictionScale;
 
@@ -1976,7 +1852,6 @@ namespace Thermodynamics.Core
                     nodeSolarRow[i] = solar;
 
                     float friction = frictionEnabled ? frictionScale * area * wind : 0f;
-                    if (shapeEnabled && friction > 0f) friction *= ShapeFactorOf(i, ref shapeWind);
 
                     nodeFrictionRow[i] = friction;
 
@@ -2032,15 +1907,6 @@ namespace Thermodynamics.Core
                     heatGainAccumulator += source;
 
                     frictionAccumulator += nodeFrictionRow[i];
-
-                    if (liftEnabled)
-                    {
-                        int b = i * 3;
-                        float pressure = nodeFrictionRow[i];
-                        pressureAccumulator.X -= pressure * nodeShapeNormal[b];
-                        pressureAccumulator.Y -= pressure * nodeShapeNormal[b + 1];
-                        pressureAccumulator.Z -= pressure * nodeShapeNormal[b + 2];
-                    }
                 }
 
                 if (!diagnostics) continue;
@@ -3182,8 +3048,6 @@ namespace Thermodynamics.Core
                     ? new float[size * Face.Count]
                     : new float[0];
 
-                nodeShapeNormal = settings.EnableShapeDrag ? new float[size * 3] : new float[0];
-                shapeNormalVersion = -1;
             }
             if (loopEffectiveMass.Length < loops.Count)
             {

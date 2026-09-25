@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import provenance
 
-PINNED = {"sourced": 43, "derived": 1, "unreachable": 108, "invented": 76}
+PINNED = {"sourced": 45, "derived": 1, "unreachable": 110, "invented": 76}
 
 
 class BothReadersOfTheGrammarCountTheSame(unittest.TestCase):
@@ -113,7 +113,7 @@ class ARestatementAppliesOnlyToADatasetThatPredatesTheChange(unittest.TestCase):
 # cubes hash operation.
     def cubes_hash(self):
         digest = hashlib.sha256()
-        with open(os.path.join(provenance.repo_root(), "Data", "Cubes.xml"), "rb") as handle:
+        with open(os.path.join(provenance.repo_root(), "Thermodynamics", "Content", "Data", "Cubes.xml"), "rb") as handle:
             for block in iter(lambda: handle.read(65536), b""):
                 digest.update(block)
         return digest.hexdigest()[:16]

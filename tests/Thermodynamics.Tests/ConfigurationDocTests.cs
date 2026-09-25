@@ -29,28 +29,6 @@ namespace Thermodynamics.Tests
     /// </summary>
     public class ConfigurationDocTests
     {
-        [Fact]
-
-        public void TheCruiseToolScoresTheCoefficientTheModShips()
-        {
-            string path = Path.Combine(ShippedBlocks.RepoRoot(), "tools", "corpus", "cruise.py");
-            Assert.True(File.Exists(path), path + " does not exist");
-
-            Match declared = Regex.Match(File.ReadAllText(path),
-                @"^SHIPPED_DRAG_COEFFICIENT\s*=\s*([0-9.]+)", RegexOptions.Multiline);
-
-            Assert.True(declared.Success,
-                "cruise.py declares no SHIPPED_DRAG_COEFFICIENT, so nothing pins it to the setting");
-
-            float pinned = float.Parse(declared.Groups[1].Value, CultureInfo.InvariantCulture);
-            float shipped = new Thermodynamics.Core.ThermalSettings().DragCoefficient;
-
-            Assert.True(Math.Abs(pinned - shipped) < 1e-6f,
-                "cruise.py scores C_d " + pinned + " and the mod ships " + shipped
-                    + ". Every cruise figure taken with the tool's default describes a"
-                    + " configuration nobody runs — move the constant with the setting.");
-        }
-
         private static readonly HashSet<string> NotTunable =
             new HashSet<string> { "Version", "LegacyLoopConductivity" };
 

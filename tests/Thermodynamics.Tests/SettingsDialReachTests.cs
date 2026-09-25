@@ -61,16 +61,6 @@ namespace Thermodynamics.Tests
             { "StepSeconds", "derived from Frequency and SimulationSpeed" },
             { "StepsPerSecond", "derived from Frequency and SimulationSpeed" },
             { "Revision", "a change counter the host reads, not an input" },
-
-            { "EnableDrag", "switches a force applied in the game layer; DragForceTests covers the"
-                + " arithmetic and no rig here models motion" },
-            { "DragCoefficient", "scales a force applied in the game layer; DragForceTests pins that"
-                + " doubling it doubles the force" },
-
-            { "EnableLift", "switches the transverse half of a force applied in the game layer;"
-                + " LiftTests covers the arithmetic and no rig here models motion" },
-            { "LiftCoefficient", "scales a force applied in the game layer; LiftTests pins that"
-                + " halving it halves the force" },
         };
 
 

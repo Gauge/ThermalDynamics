@@ -451,20 +451,24 @@ namespace Thermodynamics.Harness
 
 
             Row row = NewRow("shapenormals", simulation, "nodes");
-            int nodes = simulation.Solver.Nodes.Count;
+            IList<ThermalNode> all = simulation.Solver.Nodes;
+            int nodes = all.Count;
+            CellBitset occupancy = simulation.Grid.Occupancy();
+            float sink = 0f;
 
             for (int r = 0; !Settled(row); r++)
             {
 
                 long allocated = r == 1 ? Allocated() : 0;
                 Stopwatch watch = Stopwatch.StartNew();
-                simulation.Solver.RebuildShapeNormals();
+                for (int i = 0; i < nodes; i++) sink += ShapeNormal.Of(occupancy, all[i].Block).X;
                 watch.Stop();
                 if (r == 1) row.AllocatedBytes = Allocated() - allocated;
                 Take(row, watch.Elapsed.TotalMilliseconds);
                 Work(row, nodes, r);
             }
 
+            if (float.IsNaN(sink)) row.AllocatedBytes = -1;
             return row;
         }
 

@@ -66,6 +66,8 @@ namespace Thermodynamics
 
             ThermalApi.Register();
 
+            RelativeTopSpeedLink.Load();
+
             ThermalDebugView.Current = (ThermalDebugView.Mode)Settings.Instance.DebugBlockOverlay;
             WindOverlay.Current = (WindOverlay.Mode)Settings.Instance.DebugWindOverlay;
 
@@ -88,6 +90,7 @@ namespace Thermodynamics
                 ThermalGlow.Clear,
                 ThermalVisionProbe.Reset,
                 ThermalApi.Unregister,
+                RelativeTopSpeedLink.Unload,
                 ThermalTerminal.Unregister,
                 SettingsRequests.Unregister,
                 ThermalGridSync.Unregister,
@@ -146,9 +149,6 @@ namespace Thermodynamics
             PollKeys();
 
             ThermalGridScheduler.Tick();
-
-            ThermalGridDrag.Tick();
-            ThermalGridTopSpeed.Tick();
 
             PlanetProbes.Step(ThermalGrid.TickSeconds);
             ThermalHeatSourceDebug.Update(ThermalGrid.TickSeconds);

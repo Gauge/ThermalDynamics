@@ -135,16 +135,5 @@ namespace Thermodynamics.Core
 
             return sum / magnitude;
         }
-
-
-        public static float Factor(Vector3 normal, Vector3 wind)
-        {
-            if (normal.X == 0f && normal.Y == 0f && normal.Z == 0f) return 1f;
-
-            float dot = Vector3.Dot(normal, wind);
-            if (dot <= 0f) return 0f;
-
-            return dot > 1f ? 1f : dot * dot;
-        }
     }
 }
