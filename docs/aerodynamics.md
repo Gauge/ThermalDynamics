@@ -656,6 +656,30 @@ Whether a hull built of cells — stepped where it is not built of slope blocks 
 regime, or sits nearer a rough sphere's 0.47 at the same Reynolds number, is a physical question this
 lab cannot answer. It is noted so the next round's choice of comparator can be judged.
 
+### Round 4, registered before it is run
+
+**The forebody law becomes `Cp = P₀ + P₂·cos²φ`**, where `φ` is the angle between a surface's
+reconstructed normal and the oncoming flow, and `P₀` may be negative. That is the form White's cones
+take in the calibration data — drag close to linear in `sin²θ` — and the form that can put suction on a
+rounded shoulder. How bluff a front is, for the base term, becomes the same measure: `b = Σ a·cos²φ / A`.
+Base suction is round 3's; leeward surfaces are round 2's. Six coefficients: `P₀`, `P₂`, `C_att`,
+`C_sep`, `λ_r`, and the lab's skin friction. Calibration is round 3's set.
+
+**Held out, never used by any round**, from two sources outside White:
+
+| # | Body | Reference | Falsified by |
+| --- | --- | --- | --- |
+| V1 | the calibration set itself | every body within ±12 % | any outside |
+| V2 | a hemisphere, curved side into the flow | 0.42 (Engineering ToolBox) | outside 0.27–0.57 (±35 %) |
+| V3 | a hemisphere, flat side into the flow | 1.17 (Engineering ToolBox) | outside 0.99–1.35 (±15 %) |
+| V4 | a sphere | 0.47, a rough sphere at Re 10⁶ (Wikipedia, *Drag coefficient*) | outside 0.31–0.63 (±35 %) |
+
+**Why a rough sphere and not a smooth one**: a hull of cells is stepped wherever it is not built of slope
+blocks, which is roughness at the scale of the body, and a smooth sphere's 0.1 at Re 10⁶ is the drag
+crisis a rough one does not reach. This is chosen before V4 is run and *after* round 3 read the
+ellipsoids against smooth-turbulent values — so it is stated here as a choice, and round 3's T2 stays a
+failure on the page. The ellipsoids are reported beside the result, against both White columns.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -674,6 +698,7 @@ lab cannot answer. It is noted so the next round's choice of comparator can be j
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 4 registered before it runs**: a forebody pressure that can go negative, `P₀ + P₂·cos²φ`, from the cones' own shape, held out on two hemispheres and a rough sphere no round has used. The rough-sphere comparator is chosen after round 3's smooth-turbulent miss and says so. |
 | 2026-09-25 | **Round 3 recorded: it misses its own calibration and reads the ellipsoids 3.6–4.2× high.** The cause is the forebody law, which could never go negative and so could not price shoulder suction; the cone data are linear in sin²θ, which is the law the next round needs. Whether a stepped hull reaches the drag crisis White's turbulent values assume is recorded as open, not decided. |
 | 2026-09-25 | **Round 3 registered before it runs**, on data no round has seen: White's turbulent ellipsoids. Base suction becomes a function of the front's bluffness and of reattachment length rather than of fineness alone; calibration is every body the earlier rounds saw, and the fit must meet its own data within ±12 %. |
 | 2026-09-25 | **Round 2 recorded: S3 and S4 pass on the letter, by 0.007 and 0.1 %, and are not counted as evidence.** The fit misses its own calibration cube by 14.8 % and puts no base suction on any body longer than half its width, so a tail cannot matter. The diagnosis is that fineness conflated front-edge separation with attached flow. |
