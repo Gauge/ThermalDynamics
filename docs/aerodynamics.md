@@ -481,6 +481,290 @@ Each step ships on its own and names its rig checks. Population walks are propos
    AR1's compressibility.
 5. **Optional.** AR18, AR21's build-mode view, AR13's two checks.
 
+## Step 1's criteria, registered before anything is measured
+
+Written 2026-09-24, before the profile or its coefficients exist (`E1`). A threshold here moves only in
+the open (`E11`).
+
+**The reference data is one textbook table.** White, *Fluid Mechanics* (4th ed.), Table 7.3, "Drag of
+three-dimensional bodies at Re ≥ 10⁴", `C_D` on frontal area: cube face-on **1.07**, cube edge-on
+**0.81**, disk **1.17**; cones by half-angle θ, 10° to 90°: **0.30, 0.40, 0.55, 0.65, 0.80, 1.05,
+1.15**; flat-faced cylinders by `L/d`, 0.5 to 8: **1.15, 0.90, 0.85, 0.87, 0.99**; rectangular plates
+by aspect ratio 1 to 20: 1.18, 1.2, 1.3, 1.5.
+
+**Calibration and validation are disjoint.** The drag model's free coefficients — forebody pressure,
+its falloff with a surface's inclination, base pressure against fineness — are fitted to the **cones
+from 10° to 75°** and the **flat-faced cylinders**, built from cells the way a player would build
+them, and nothing else. Everything below is predicted by the fitted model, never fitted to:
+
+| # | Held out | Prediction | Falsified by |
+| --- | --- | --- | --- |
+| S1 | a cube, flow square to a face | `C_D` 1.05 ± 0.1 (registered with this page; White 1.07) | outside 0.95–1.15 |
+| S2 | a one-cell-thick square plate, flow square to it | `C_D` 1.17–1.28 (registered with this page) | outside that band |
+| S3 | a cube, flow along a face diagonal | `C_D` 0.81 ± 0.15 (White) | outside 0.66–0.96 |
+| S4 | a hull with a tapered tail against the same hull with a blunt base, equal frontal area | the tapered one has the lower `C_D` | equal or higher |
+| S5 | a shuttlecock: frontal area concentrated behind the centre of mass, flown at 50 m/s in sea-level air, kicked 20° in yaw | back within 5° of its heading, and still there after 30 s | not |
+| S6 | the same body flown the other way round | diverges past 45° from the heading it was kicked off | stays within 45° |
+| S7 | a free hull spun at 1 rad/s in air | its spin halves in finite time, and faster at density 1 than at 0.5 | not, or not faster |
+| S8 | every rig above at 60 Hz | the numerical guard (`AR22`) binds on none of them | binds on any |
+
+**The finned-hull rig the build order named moves to step 2, and the reason is physics.** Drag acts
+along the flow at the centre of the windward projected area. At a small yaw β that centre is the
+nose's, with weight cos β, while a fin's side contributes at sin β — so fin area restores only at
+second order and a finned body flown nose-first is destabilised at first order. What makes a real fin
+restore is its *lift*, a normal force proportional to β (`AR8`, `AR9`). A body stabilised by drag
+alone is a shuttlecock, which is what S5 and S6 test; the finned hull is step 2's rig.
+
+**The population criterion is `K5`'s, re-registered unchanged** ([balance-lab.md](balance-lab.md#the-criterion-k5-actually-needs-written-before-it-is-measured)),
+over hulls that can lift themselves, in sea-level air at 1.225 kg/m³:
+
+| # | Prediction | Falsified by |
+| --- | --- | --- |
+| P1 | on no more than 5 % of them does drag at 100 m/s exceed the ship's own thrust | more than 5 % |
+| P2 | the p1 hull still reaches 60 m/s at full thrust | a p1 ceiling under 60 m/s |
+
+**A failure of P1 or P2 is a finding and not a retune.** They were written for a model whose coefficient
+was a balance dial; this one's coefficients are textbook figures, so if realistic drag fails a
+playability criterion, that is recorded as the conflict it is and decided by the owner, not by moving
+a coefficient off its source.
+
+### Round 1: the registered design fails its held-out bodies
+
+Run 2026-09-24 (`dotnet run --project tests/Thermodynamics.Sim -- aero-calibrate`). The model is
+`C_D·A = C_front·Σ a·cosᵐφ + C_base(λ)·Σ b·cosᵐψ + C_f·S_wet`: forebody pressure on the windward
+projected area falling off with each surface's inclination, base suction on the leeward area falling
+from `C_near` to `C_far` over a fineness `λ = L/√A`, and skin friction on the wetted area. Six
+coefficients were fitted to the eleven calibration bodies, residual 0.032 in squared log error, every
+body within ±10 %:
+
+| Held out | Registered | Predicted | |
+| --- | --- | ---: | --- |
+| S1 cube face-on | 0.95–1.15 | 0.869 | **fails** |
+| S2 square plate | 1.17–1.28 | 1.374 | **fails** |
+| S3 cube edge-on | 0.66–0.96 | 0.637 | **fails** |
+| S4 tapered tail against blunt base | lower | 0.899 against 0.894 | **fails** |
+
+**The fit is what says why.** It put base suction at 2.6 falling to nothing over a fineness of 0.23,
+which no body has: the eleven round bodies could only be matched by a suction that vanishes the moment
+a body has any length. That is White's own contrast read backwards. **A round section reattaches
+sooner than a square one**: the flat-faced cylinder at `L/d` 1 is 0.90 where the cube is 1.07, with
+the same forebody, so the difference is base suction the flow had already recovered from on the round
+body. Fitted on round bodies, the model cannot transfer to square ones, and every hull this game builds
+is square-sectioned. The tapered tail failed for a second reason: every leeward surface counted as base,
+however shallowly it closed, where a boat-tail's flow stays attached and carries no base suction.
+
+### Round 2, registered before it is run
+
+**Two changes, each a response to one half of round 1's diagnosis and neither to a number.**
+
+1. **A leeward surface is base only where the flow has left it.** Its weight runs from 0 when its
+   surface meets the flow at 12° or less to 1 at 22° or more, smoothly between: boat-tail flow forms a
+   separation bubble from 12° to 20° and is fully separated at 22°, with the least drag near 15°
+   (grooved boat-tail study; Heriot-Watt heavy-vehicle boat-tails). The angle is read off the
+   reconstructed normal, as the forebody's is.
+2. **Base suction is calibrated on square sections, because the hulls are square.** The calibration
+   set becomes the cones from 10° to 75° (forebody falloff), White's **square plate** 1.18 and
+   **cube** 1.07 (base suction of a sharp-edged square body, short), and the flat-faced cylinders at
+   `L/d` 2, 4 and 8 (long bodies, where the flow has reattached and the section's shape matters less —
+   an assumption, stated here so it can be found).
+
+**What that costs the criteria, said plainly.** S1 and S2 were predictions in round 1 and failed. In
+round 2 the cube and the plate are calibration, so matching them is by construction and is **not
+evidence**; the owner's two criteria are recorded as having been tested once and failed, not as
+passing. What remains held out, with its band unchanged:
+
+| # | Held out in round 2 | Falsified by |
+| --- | --- | --- |
+| S3 | cube edge-on, `C_D` 0.81 ± 0.15 — seen in round 1, never fitted | outside 0.66–0.96 |
+| S4 | tapered tail against blunt base, equal frontal area | tapered not lower |
+| R1 | flat-faced cylinders at `L/d` 0.5 and 1, reported only | — a known gap: round sections reattach sooner than the square ones this is fitted to |
+
+**If round 2 also fails S3 or S4, there is no round 3 on these bodies.** Two looks at one held-out set
+is already one more than a clean test allows; a third would be fitting to it. A further revision would
+need held-out data neither round has seen.
+
+### Round 2: passes on the letter, and the fit says the model is wrong
+
+| | Registered | Result |
+| --- | --- | --- |
+| S3 cube edge-on | 0.66–0.96 | **0.667** — inside by 0.007 |
+| S4 tapered tail against blunt base | lower | **0.934 against 0.935** — lower by 0.1 % |
+| R1 cylinders `L/d` 0.5, 1 (reported) | — | 1.118 (−2.8 %), 0.950 (+5.6 %) |
+
+**Both pass as written and neither is evidence.** A pass by 0.7 % of a band and a boat-tail worth a
+tenth of a per cent are inside any honest noise, and the fit that produced them misses its own
+calibration cube by **−14.8 %**. Its coefficients say why: base suction falls from 2.04 to 0.004
+over a fineness of 0.24, so any body longer than about half its width carries all its drag on the
+forebody, and nothing about its tail can matter. That is not a subsonic body — a flat-faced cylinder's
+base carries a tenth or more of its drag at any length — and it is why the tapered tail cannot help.
+
+**The cause is structural, and it is one variable doing two jobs.** Fineness stood in for *has the flow
+recovered by the time it reaches the base*, and the answer depends on where the flow left the body. On
+a cone it stays attached down the surface and leaves at the base edge, so the base sees a gentle
+wake at any length; on a flat-fronted body it separates at the front rim and reaches the base only if
+it has reattached along the sides first. The slender cones pulled suction down with length to be slow,
+and that starved the cube. Round 3 separates the two, and tests on data neither round has seen.
+
+### Round 3, registered before it is run
+
+**One structural change: base suction depends on where the flow left the body.**
+`C_base = C_att + b·(C_sep − C_att)·R(λ)`, where `b` is how bluff the front is — the forebody's own
+pressure-weighted share of the silhouette, `Σ a·cosᵐφ / A`, one for a flat front and small for a
+slender cone — and `R(λ) = 1 / (1 + (λ/λ_r)⁸)` is whether the body is too short for flow that left a
+front rim to reattach along its sides. A flat-fronted body shorter than `λ_r` keeps the full separated
+suction; a longer one, or one whose front never shed its flow, sees the attached value. Leeward surfaces
+count as base only where separated (round 2's 12° to 22°). Six coefficients again: `C_front`, `m`,
+`C_att`, `C_sep`, `λ_r`, the lab's skin friction.
+
+**Calibration is every body the earlier rounds used**, since all of them have now been seen: the cones
+from 10° to 75°, all five flat-faced cylinders, the square plate and the cube.
+
+**Held out, and never used by any round: White's turbulent ellipsoids** — `L/d` 0.75, 1, 2, 4, 8 at
+**0.2, 0.2, 0.13, 0.1, 0.08**, flown along the axis. They are the attached-flow, gradually-closing body
+S4 is about, and a hull with a rounded nose and a tapered tail is exactly what a player builds to go
+fast.
+
+| # | Prediction | Falsified by |
+| --- | --- | --- |
+| T1 | every calibration body within ±12 % of White — a fit that misses its own data is not a model | any outside |
+| T2 | each ellipsoid within 0.5× to 1.75× of White's turbulent value | any outside |
+| T3 | the ellipsoids at `L/d` 4 and 8 read below the one at `L/d` 1 | either not below |
+
+S3 and S4 are reported beside these and not counted: both have been seen twice.
+
+### Round 3: fails its own data and its held-out bodies, and the new data says why
+
+| | Registered | Result |
+| --- | --- | --- |
+| T1 calibration within ±12 % | all | **fails** — cylinder `L/d` 2 +15.0 %, cube −13.7 %, cylinder `L/d` 0.5 −12.1 % |
+| T2 ellipsoids within 0.5–1.75× | all five | **fails** — every one 3.6–4.2× White's turbulent value (0.773, 0.718, 0.542, 0.411, 0.332) |
+| T3 long ellipsoids below the sphere | both | holds — 0.411 and 0.332 against 0.718 |
+| S3, S4 (reported) | — | 0.683; 0.978 against 0.978 |
+
+**The forebody law is what is wrong, and the ellipsoids are what showed it.** Every version so far
+made a surface's pressure `C·cosᵐφ` — never negative. A rounded nose is low-drag because of
+**suction on its shoulders**: potential flow puts `Cp = −1.25` on a sphere's equator, and that
+suction on forward-facing surfaces cancels most of the stagnation pressure. A law that cannot go
+negative prices a rounded nose like a blunt one, which is what 0.718 against 0.2 is. The calibration
+cones already said what the law is: White's cone drags run close to linear in `sin²θ` — 1.15 at 90°
+falling by about 0.88·cos²θ — which is a local `Cp = P₀ + P₂·cos²φ` with nothing stopping `P₀` from
+being negative.
+
+**One question is recorded rather than decided, because deciding it now would move a criterion after
+seeing the result** (`E11`). White's *turbulent* ellipsoid values are smooth bodies past the drag crisis.
+Whether a hull built of cells — stepped where it is not built of slope blocks — ever reaches that
+regime, or sits nearer a rough sphere's 0.47 at the same Reynolds number, is a physical question this
+lab cannot answer. It is noted so the next round's choice of comparator can be judged.
+
+### Round 4, registered before it is run
+
+**The forebody law becomes `Cp = P₀ + P₂·cos²φ`**, where `φ` is the angle between a surface's
+reconstructed normal and the oncoming flow, and `P₀` may be negative. That is the form White's cones
+take in the calibration data — drag close to linear in `sin²θ` — and the form that can put suction on a
+rounded shoulder. How bluff a front is, for the base term, becomes the same measure: `b = Σ a·cos²φ / A`.
+Base suction is round 3's; leeward surfaces are round 2's. Six coefficients: `P₀`, `P₂`, `C_att`,
+`C_sep`, `λ_r`, and the lab's skin friction. Calibration is round 3's set.
+
+**Held out, never used by any round**, from two sources outside White:
+
+| # | Body | Reference | Falsified by |
+| --- | --- | --- | --- |
+| V1 | the calibration set itself | every body within ±12 % | any outside |
+| V2 | a hemisphere, curved side into the flow | 0.42 (Engineering ToolBox) | outside 0.27–0.57 (±35 %) |
+| V3 | a hemisphere, flat side into the flow | 1.17 (Engineering ToolBox) | outside 0.99–1.35 (±15 %) |
+| V4 | a sphere | 0.47, a rough sphere at Re 10⁶ (Wikipedia, *Drag coefficient*) | outside 0.31–0.63 (±35 %) |
+
+**Why a rough sphere and not a smooth one**: a hull of cells is stepped wherever it is not built of slope
+blocks, which is roughness at the scale of the body, and a smooth sphere's 0.1 at Re 10⁶ is the drag
+crisis a rough one does not reach. This is chosen before V4 is run and *after* round 3 read the
+ellipsoids against smooth-turbulent values — so it is stated here as a choice, and round 3's T2 stays a
+failure on the page. The ellipsoids are reported beside the result, against both White columns.
+
+### Round 4: fails, and the instrument, not the drag law, is most of why
+
+| | Registered | Result |
+| --- | --- | --- |
+| V1 calibration within ±12 % | all | **fails** — cone 10° +18.4 %, cylinder `L/d` 2 +16.8 %, cube −15.2 %, and three more |
+| V2 hemisphere, curve first | 0.27–0.57 | **0.690, fails** |
+| V3 hemisphere, flat first | 0.99–1.35 | **0.980, fails** |
+| V4 sphere | 0.31–0.63 | **0.675, fails** |
+
+**The fitted suction term came out positive, +0.20, and that sent the investigation to the geometry.**
+The cones' drag is linear in the *true* `sin²θ`, but the model never sees the true angle — it sees the
+normal reconstructed from cells. Measured against exact geometry, with no drag data involved
+(`AeroIncidenceTests`), the reconstructed mean `cos²φ` over each cone's front:
+
+| cone | exact | radius 8 | radius 16 | radius 32 |
+| --- | ---: | ---: | ---: | ---: |
+| 10° | 0.030 | 0.063 | 0.060 | 0.060 |
+| 30° | 0.250 | 0.208 | 0.217 | 0.220 |
+| 60° | 0.750 | 0.503 | 0.619 | 0.709 |
+| 75° | 0.933 | 0.390 | 0.640 | 0.786 |
+| hemisphere | 0.500 | 0.487 | 0.499 | 0.505 |
+
+**Two separate limits, and only one of them costs anything.** On blunt bodies the reading converges as
+the rig gets finer: a 75° cone eight cells in radius is two cells deep, so nearly every cell is a rim
+cell and the radius-one gradient there points diagonally — an artefact of the rig, not of the air. On
+slender bodies it does not converge — a 10° slope reads as twice its `cos²φ` at every size, which is the
+radius-one reconstruction's known floor — but `cos²φ` is small there, so it moves little drag. **Four
+rounds were fitted partly to the first limit.** The rigs were eight cells in radius from the start, and
+nothing had measured the instrument before the coefficients were fitted through it.
+
+### Round 5, registered before it is run: every body is used, and each is predicted without itself
+
+**Every independent held-out set is spent**, and a fifth holdout drawn from the same pages would be a
+pretence. The method that stays honest on a small dataset is **leave-one-out cross-validation**: fit
+the six coefficients to every body but one, predict that one, and repeat for each body. Each body's
+prediction is then out of sample, and the in-sample fit is reported beside it.
+
+* **The instrument**: every rig is 24 cells in radius, where the blunt-cone reading has converged to
+  within about 15 % of exact and the hemisphere to 1 %.
+* **The model**: round 4's, unchanged — forebody `P₀ + P₂·cos²φ`, base suction by bluffness and
+  reattachment, leeward separation between 12° and 22°.
+* **The data**: White's cones from 10° to 90° (90° is the disk, 1.17 — Hoerner gives the same 1.17 with
+  a rear-side pressure of −0.42), the five flat-faced cylinders, the cube face-on 1.07 and edge-on 0.81,
+  the square plate 1.18, the ellipsoids' **subcritical** column (0.5, 0.47, 0.27, 0.25, 0.2 — its sphere
+  is the rough sphere's 0.47, which is round 4's stated reason for the comparator), and the two
+  hemispheres (0.42, 1.17).
+
+| # | Prediction, out of sample | Falsified by |
+| --- | --- | --- |
+| W1 | at least 80 % of the bodies predicted within ±25 % of their reference | fewer |
+| W2 | no body predicted worse than ±50 % | any |
+| W3 | the tapered tail below the blunt base by at least 5 % — seen before, so reported, and the one quantity a player shaping a tail would feel | not |
+
+**If W1 or W2 fails, the model is recorded as unable to reach textbook drag on cell-built bodies at
+this resolution, and step 1 proceeds with the best in-sample fit and its errors stated beside every
+force**, rather than with a sixth round. The owner's S1 and S2 stay as recorded: tested once, failed.
+
+### Round 5: the bars are missed, the fallback is taken, and the errors ship with the model
+
+| | Registered | Result |
+| --- | --- | --- |
+| W1 bodies within ±25 %, out of sample | at least 18 of 22 | **14 — fails** |
+| W2 no body worse than ±50 % | none | **three — fails**: hemisphere curve-first +84 %, ellipsoids `L/d` 0.75 +56 % and 2 +58 % |
+| W3 tapered tail below blunt base by 5 % | yes | **0.691 against 0.824, 16 % lower — holds** |
+
+**The fitted suction term is negative now**, −0.082, which is the shoulder suction the physics said
+was missing; resolving the geometry was what let the fit find it. **What remains is one systematic
+bias**: stubby rounded bodies read too draggy — the hemisphere curve-first 0.72 in-sample against
+0.42 — because a pressure law applied locally to cell-scale normals recovers only part of a rounded
+shoulder's suction. Blunt bodies, which is most of what players build, sit mostly within 15 %.
+
+**So, as registered, the model is recorded as unable to reach textbook drag on cell-built bodies at
+this resolution, and step 1 proceeds with the in-sample fit**, `AeroCoefficients.Fitted`:
+
+| `P₀` | `P₂` | `C_att` | `C_sep` | `λ_r` |
+| ---: | ---: | ---: | ---: | ---: |
+| −0.08209 | 0.54126 | 0.33405 | 0.69401 | 1.13172 |
+
+**What a player will feel from the bias**: a rounded or pointed nose helps, and less than it would in
+air; a tapered tail helps by about as much as a real one; a brick is about as draggy as a brick is.
+`AeroCalibrationTests` holds the shipped constants to the fit and pins round 5's outcome, so that an
+improvement fails a test and gets read rather than passing silently. Skin friction at ship scale is
+Prandtl's `0.074·Re^−0.2`, not the lab's fitted 0.00408, which stands in for the wind-tunnel Reynolds
+numbers the reference data were taken at.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -499,6 +783,15 @@ Each step ships on its own and names its rig checks. Population walks are propos
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 5 recorded: W1 and W2 fail, W3 holds, and the registered fallback is taken.** The in-sample fit ships as `AeroCoefficients.Fitted` with its errors stated beside it: blunt bodies mostly within 15 %, stubby rounded ones up to 72 % too draggy. `AeroCalibrationTests` pins it; `AeroIncidenceTests` pins the geometry's convergence. |
+| 2026-09-25 | **Round 4 recorded as failing, and the geometry measured against exact truth for the first time.** The reconstructed normal converges on blunt bodies as the rig gets finer and has a floor on slender ones; four rounds were partly fitted to the radius-8 rigs' rim artefact. **Round 5 registered**: leave-one-out cross-validation over every sourced body, at radius 24, with a stated fallback if it fails. |
+| 2026-09-25 | **Round 4 registered before it runs**: a forebody pressure that can go negative, `P₀ + P₂·cos²φ`, from the cones' own shape, held out on two hemispheres and a rough sphere no round has used. The rough-sphere comparator is chosen after round 3's smooth-turbulent miss and says so. |
+| 2026-09-25 | **Round 3 recorded: it misses its own calibration and reads the ellipsoids 3.6–4.2× high.** The cause is the forebody law, which could never go negative and so could not price shoulder suction; the cone data are linear in sin²θ, which is the law the next round needs. Whether a stepped hull reaches the drag crisis White's turbulent values assume is recorded as open, not decided. |
+| 2026-09-25 | **Round 3 registered before it runs**, on data no round has seen: White's turbulent ellipsoids. Base suction becomes a function of the front's bluffness and of reattachment length rather than of fineness alone; calibration is every body the earlier rounds saw, and the fit must meet its own data within ±12 %. |
+| 2026-09-25 | **Round 2 recorded: S3 and S4 pass on the letter, by 0.007 and 0.1 %, and are not counted as evidence.** The fit misses its own calibration cube by 14.8 % and puts no base suction on any body longer than half its width, so a tail cannot matter. The diagnosis is that fineness conflated front-edge separation with attached flow. |
+| 2026-09-25 | **Round 2 of step 1 registered before it runs.** Leeward surfaces count as base only where the flow separates (12° to 22°, sourced), and base suction is calibrated on the square plate and cube with long cylinders for the reattached end. The owner's S1 and S2 become calibration and are recorded as tested once and failed; S3 and S4 stay held out, and a failure ends revisions on this data. |
+| 2026-09-25 | **Round 1 of step 1 fails, recorded as run.** The profile's geometry is built and checked against hand geometry (`AeroGeometryTests`); the drag model fitted to White's round bodies predicts all four held-out bodies outside their bands. The diagnosis is written beside the numbers: a round section reattaches sooner than a square one, and the model counted a boat-tail's attached surfaces as base. |
+| 2026-09-24 | **Step 1's criteria are registered before any of it is built.** The reference is White's Table 7.3; calibration is the cones and the flat-faced cylinders, and the owner's cube and plate criteria are held out with two more (edge-on cube, boat-tail pair), so none can pass by construction. The finned-hull rig moves to step 2, because a fin restores through lift, not drag; step 1 tests the drag-stabilised case, a shuttlecock. `K5`'s population pair is re-registered unchanged, and a failure is recorded as a realism-against-playability conflict for the owner rather than retuned away. |
 | 2026-09-24 | **Step 0 is built.** The force application, the lift and pressure plumbing, the top-speed port and its nineteen settings, and the shape factor on the friction row are removed; the retired `ProtoMember` numbers are recorded in `NoSettingReusesANumberThatWasDeliberatelyRetired`. `RtsApi.cs` is vendored unchanged from RelativeTopSpeed `0b4b21a` under `Thermodynamics/RelativeTopSpeed/`, and `RelativeTopSpeedLink` guards every call to it. **One departure from the inventory**: the solver's normal buffer went too, because nothing in a step read it (see the table). **Backlog rows retired into `K25`**: `K10` (the port, now removed); `K6` and `K22` (the shape term — its wake is `AR4`'s base drag); `K23` (lift — its criteria are re-registered under `AR8`); `K24` (the degenerate plate — `AR9`'s wing detector); and `K16` (the centre-of-pressure indicator — its caveat ends when `AR5` ships). What each measured stays in [thermal-model.md](thermal-model.md#change-log). |
 | 2026-09-24 | **Owner's decisions recorded** (see *Decisions taken*): cruise curve then drag; no SEDrag block extensions; re-entry heating configurable; forces simulated on server and client; the existing aerodynamics is stripped and rebuilt with switches; the embedded RelativeTopSpeed port is removed in favour of the original mod's read-only API (13 getters, channel 2772681332). The strip-and-rebuild inventory and switch table were added. |
 | 2026-09-24 | Page created. The owner asked for aerodynamics in line with SEDrag, then clarified the goal: *as realistic as possible, and learn what we can from SEDrag*. The SEDrag source (571920453) was read in full: `SEDrag.cs`, `GridCalculation.cs`, `DragBase.cs`, `Core.cs`, `LiftDefinition`, `AeroProperties.xml`. Twenty-two parts were evaluated against this mod and against subsonic physics. The drag and terminal-speed tables are derived from the source by hand, not measured in a session. An earlier reading in the same conversation, that SEDrag's drag was about 20× *weaker* than this mod's, was wrong: it missed `SpeedMod`, and above 27 m/s the relation inverts to 163×. |
