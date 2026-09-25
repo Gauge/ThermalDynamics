@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics", "Thermodynamics\Thermodynamics.csproj", "{D2E57207-581E-43FF-B531-8FE4BF7CDA93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Tests", "tests\Thermodynamics.Tests\Thermodynamics.Tests.csproj", "{37E9E838-77F5-472F-B5DF-95242203BC72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Sim", "tests\Thermodynamics.Sim\Thermodynamics.Sim.csproj", "{70B08688-9377-4D0B-9009-6D7F73F8654E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Presentation", "tests\Thermodynamics.Presentation\Thermodynamics.Presentation.csproj", "{4D087A90-CB71-412D-9D1F-8DF6EDC7E392}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Harness", "tests\Thermodynamics.Harness\Thermodynamics.Harness.csproj", "{75E0702F-44B4-4779-ACEF-319B04E1A709}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Core", "tests\Thermodynamics.Core\Thermodynamics.Core.csproj", "{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2E57207-581E-43FF-B531-8FE4BF7CDA93}.Debug|x64.ActiveCfg = Debug|x64
+		{D2E57207-581E-43FF-B531-8FE4BF7CDA93}.Debug|x64.Build.0 = Debug|x64
+		{D2E57207-581E-43FF-B531-8FE4BF7CDA93}.Release|x64.ActiveCfg = Release|x64
+		{D2E57207-581E-43FF-B531-8FE4BF7CDA93}.Release|x64.Build.0 = Release|x64
+		{37E9E838-77F5-472F-B5DF-95242203BC72}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{37E9E838-77F5-472F-B5DF-95242203BC72}.Debug|x64.Build.0 = Debug|Any CPU
+		{37E9E838-77F5-472F-B5DF-95242203BC72}.Release|x64.ActiveCfg = Release|Any CPU
+		{37E9E838-77F5-472F-B5DF-95242203BC72}.Release|x64.Build.0 = Release|Any CPU
+		{70B08688-9377-4D0B-9009-6D7F73F8654E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{70B08688-9377-4D0B-9009-6D7F73F8654E}.Debug|x64.Build.0 = Debug|Any CPU
+		{70B08688-9377-4D0B-9009-6D7F73F8654E}.Release|x64.ActiveCfg = Release|Any CPU
+		{70B08688-9377-4D0B-9009-6D7F73F8654E}.Release|x64.Build.0 = Release|Any CPU
+		{4D087A90-CB71-412D-9D1F-8DF6EDC7E392}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4D087A90-CB71-412D-9D1F-8DF6EDC7E392}.Debug|x64.Build.0 = Debug|Any CPU
+		{4D087A90-CB71-412D-9D1F-8DF6EDC7E392}.Release|x64.ActiveCfg = Release|Any CPU
+		{4D087A90-CB71-412D-9D1F-8DF6EDC7E392}.Release|x64.Build.0 = Release|Any CPU
+		{75E0702F-44B4-4779-ACEF-319B04E1A709}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{75E0702F-44B4-4779-ACEF-319B04E1A709}.Debug|x64.Build.0 = Debug|Any CPU
+		{75E0702F-44B4-4779-ACEF-319B04E1A709}.Release|x64.ActiveCfg = Release|Any CPU
+		{75E0702F-44B4-4779-ACEF-319B04E1A709}.Release|x64.Build.0 = Release|Any CPU
+		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Debug|x64.Build.0 = Debug|Any CPU
+		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Release|x64.ActiveCfg = Release|Any CPU
+		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
