@@ -4,6 +4,8 @@
     It is not a test project and runs nothing; see rules.md C11.
   -->
   <Project Path="../Thermodynamics/Thermodynamics.csproj" />
+  <!-- The drop-in API client, compiled as a consumer would compile it; see tools/modkit/README.md. -->
+  <Project Path="../tools/modkit/Modkit.csproj" />
   <Project Path="Thermodynamics.Presentation/Thermodynamics.Presentation.csproj" />
   <Project Path="Thermodynamics.Core/Thermodynamics.Core.csproj" />
   <Project Path="Thermodynamics.Harness/Thermodynamics.Harness.csproj" />

@@ -1,8 +1,8 @@
 # The mod kit: a drop-in client for the Thermodynamics API
 
 What this folder holds: a single C# file another mod copies in to talk to Thermodynamics without
-touching the raw mod-message protocol. It is not part of this mod — Space Engineers compiles only
-`Data/Scripts`, so this file never runs here — it is a template for *consumers*.
+touching the raw mod-message protocol. It is not part of this mod — the packed mod holds only what
+is under `Thermodynamics/`, so this file never runs here — it is a template for *consumers*.
 
 | File | What it is |
 | --- | --- |
@@ -44,8 +44,8 @@ casts to null in a player's session with no message anywhere. `ThermodynamicsCli
 mod's own suite parses this file's bindings and holds them identical to `ThermalApi.cs` — every key,
 same signature, both directions, plus the channel id and the major version — so a copy taken from
 here agrees with the contract it was taken against. The file is also compiled against the game
-assemblies by the mod project (`Generic.csproj` sweeps it, `Data/Scripts` does not), which is what
-proves it is valid C# 6 the game will accept.
+assemblies by `Modkit.csproj`, a member of the test solution, as C# 6 and through MDK2's copy of the
+game's script whitelist, which is what proves it is valid C# 6 a consumer's mod can compile.
 
 ## Change log
 
