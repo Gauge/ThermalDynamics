@@ -553,6 +553,36 @@ body. Fitted on round bodies, the model cannot transfer to square ones, and ever
 is square-sectioned. The tapered tail failed for a second reason: every leeward surface counted as base,
 however shallowly it closed, where a boat-tail's flow stays attached and carries no base suction.
 
+### Round 2, registered before it is run
+
+**Two changes, each a response to one half of round 1's diagnosis and neither to a number.**
+
+1. **A leeward surface is base only where the flow has left it.** Its weight runs from 0 when its
+   surface meets the flow at 12° or less to 1 at 22° or more, smoothly between: boat-tail flow forms a
+   separation bubble from 12° to 20° and is fully separated at 22°, with the least drag near 15°
+   (grooved boat-tail study; Heriot-Watt heavy-vehicle boat-tails). The angle is read off the
+   reconstructed normal, as the forebody's is.
+2. **Base suction is calibrated on square sections, because the hulls are square.** The calibration
+   set becomes the cones from 10° to 75° (forebody falloff), White's **square plate** 1.18 and
+   **cube** 1.07 (base suction of a sharp-edged square body, short), and the flat-faced cylinders at
+   `L/d` 2, 4 and 8 (long bodies, where the flow has reattached and the section's shape matters less —
+   an assumption, stated here so it can be found).
+
+**What that costs the criteria, said plainly.** S1 and S2 were predictions in round 1 and failed. In
+round 2 the cube and the plate are calibration, so matching them is by construction and is **not
+evidence**; the owner's two criteria are recorded as having been tested once and failed, not as
+passing. What remains held out, with its band unchanged:
+
+| # | Held out in round 2 | Falsified by |
+| --- | --- | --- |
+| S3 | cube edge-on, `C_D` 0.81 ± 0.15 — seen in round 1, never fitted | outside 0.66–0.96 |
+| S4 | tapered tail against blunt base, equal frontal area | tapered not lower |
+| R1 | flat-faced cylinders at `L/d` 0.5 and 1, reported only | — a known gap: round sections reattach sooner than the square ones this is fitted to |
+
+**If round 2 also fails S3 or S4, there is no round 3 on these bodies.** Two looks at one held-out set
+is already one more than a clean test allows; a third would be fitting to it. A further revision would
+need held-out data neither round has seen.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -571,6 +601,7 @@ however shallowly it closed, where a boat-tail's flow stays attached and carries
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 2 of step 1 registered before it runs.** Leeward surfaces count as base only where the flow separates (12° to 22°, sourced), and base suction is calibrated on the square plate and cube with long cylinders for the reattached end. The owner's S1 and S2 become calibration and are recorded as tested once and failed; S3 and S4 stay held out, and a failure ends revisions on this data. |
 | 2026-09-25 | **Round 1 of step 1 fails, recorded as run.** The profile's geometry is built and checked against hand geometry (`AeroGeometryTests`); the drag model fitted to White's round bodies predicts all four held-out bodies outside their bands. The diagnosis is written beside the numbers: a round section reattaches sooner than a square one, and the model counted a boat-tail's attached surfaces as base. |
 | 2026-09-24 | **Step 1's criteria are registered before any of it is built.** The reference is White's Table 7.3; calibration is the cones and the flat-faced cylinders, and the owner's cube and plate criteria are held out with two more (edge-on cube, boat-tail pair), so none can pass by construction. The finned-hull rig moves to step 2, because a fin restores through lift, not drag; step 1 tests the drag-stabilised case, a shuttlecock. `K5`'s population pair is re-registered unchanged, and a failure is recorded as a realism-against-playability conflict for the owner rather than retuned away. |
 | 2026-09-24 | **Step 0 is built.** The force application, the lift and pressure plumbing, the top-speed port and its nineteen settings, and the shape factor on the friction row are removed; the retired `ProtoMember` numbers are recorded in `NoSettingReusesANumberThatWasDeliberatelyRetired`. `RtsApi.cs` is vendored unchanged from RelativeTopSpeed `0b4b21a` under `Thermodynamics/RelativeTopSpeed/`, and `RelativeTopSpeedLink` guards every call to it. **One departure from the inventory**: the solver's normal buffer went too, because nothing in a step read it (see the table). **Backlog rows retired into `K25`**: `K10` (the port, now removed); `K6` and `K22` (the shape term — its wake is `AR4`'s base drag); `K23` (lift — its criteria are re-registered under `AR8`); `K24` (the degenerate plate — `AR9`'s wing detector); and `K16` (the centre-of-pressure indicator — its caveat ends when `AR5` ships). What each measured stays in [thermal-model.md](thermal-model.md#change-log). |
