@@ -30,4 +30,6 @@ TestResults/
 # Python bytecode, from the corpus scorers and their checks.
 __pycache__/
 *.pyc
-/.idea
+
+# Jetbrains IDE
+*.idea/

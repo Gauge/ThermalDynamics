@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Generated;
 using Sandbox.ModAPI;
 using VRageMath;
 
@@ -32,6 +33,13 @@ namespace Thermodynamics
                 ThermalHeatSources.Remove(Ours[i].Id);
                 Ours.RemoveAt(i);
             }
+        }
+
+        /// <summary>Controls debug heat sources.</summary>
+        [ChatCommand("heat")]
+        internal static void Heat(string argument = "")
+        {
+            ThermalChatCommands.Reply(Run(argument));
         }
 
         public static string Run(string argument)

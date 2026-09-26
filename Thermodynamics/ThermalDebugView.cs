@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Generated;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Thermodynamics.Core;
@@ -55,6 +56,14 @@ namespace Thermodynamics
         public static bool NeedsWatts
         {
             get { return Current == Mode.SolarWatts || Current == Mode.FrictionWatts; }
+        }
+
+        /// <summary>Cycles the block thermal overlay.</summary>
+        [ChatCommand("overlay")]
+        internal static void Overlay()
+        {
+            Cycle();
+            ThermalChatCommands.Reply("block overlay: " + Describe(Current));
         }
 
         public static void Cycle()

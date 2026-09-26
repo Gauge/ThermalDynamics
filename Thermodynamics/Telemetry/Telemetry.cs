@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Generated;
 using Thermodynamics.Core;
 using VRage.Game;
 using VRage.Utils;
@@ -124,6 +125,32 @@ namespace Thermodynamics
             MyLog.Default.Info("[" + Settings.Name + "] [Telemetry] collection " + (Enabled ? "started" : "disabled"));
         }
 
+        /// <summary>Enables or disables telemetry collection.</summary>
+        [ChatCommand("telemetry")]
+        internal static void SetTelemetryCommand(bool enabled)
+        {
+            SetEnabled(enabled);
+            if (enabled)
+            {
+                ThermalChatCommands.Reply("telemetry collection ON (stride " + Telemetry.SampleStride + ")");
+                return;
+            }
+
+            ThermalChatCommands.Reply("telemetry collection OFF");
+        }
+
+        [ChatCommand("dump")]
+        internal static void Dump()
+        {
+            if (!Enabled)
+            {
+                ThermalChatCommands.Reply("telemetry is off; /thermal telemetry on first");
+                return;
+            }
+
+            Finish("manual dump", true);
+            ThermalChatCommands.Reply("telemetry report written to world storage");
+        }
 
         public static void SetEnabled(bool enabled)
         {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using Generated;
 using RichHudFramework.UI;
 using RichHudFramework.UI.Client;
 using RichHudFramework.UI.Rendering;
@@ -178,6 +179,9 @@ namespace Thermodynamics
             rowIdentity = lastOutcome = rowKey = null;
         }
 
+        /// <summary>Controls the thermal-vision display.</summary>
+        [ChatCommand("vision")]
+        internal static void VisionCommand(string argument = "") => ThermalChatCommands.Reply(Run(argument));
 
         public static string Run(string argument)
         {

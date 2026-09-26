@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Generated;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
+using ThermalDynamics;
+using Thermodynamics.Audio;
 using Thermodynamics.Core;
 using VRage.Game.ModAPI;
 using VRage.Utils;
@@ -13,12 +16,6 @@ namespace Thermodynamics
     {
         private const int CueInterval = 4;
 
-        private static readonly MySoundPair ApproachingSound =
-            new MySoundPair("ArcBlockDestroyedSmall");
-
-        private static readonly MySoundPair CriticalSound =
-            new MySoundPair("ArcBlockDestroyed");
-
         private readonly HeatCueState cueState = new HeatCueState();
         private readonly List<HeatCue> cues = new List<HeatCue>();
 
@@ -26,17 +23,16 @@ namespace Thermodynamics
 
         private readonly List<LitBlock> litBlocks = new List<LitBlock>();
 
-        public IList<LitBlock> LitBlocks
-        {
-            get { return litBlocks; }
-        }
+        public IList<LitBlock> LitBlocks => litBlocks;
 
         private readonly List<Vector3I> faded = new List<Vector3I>();
 
         private int stepsSinceCues;
         private float secondsSinceCues;
 
-        private static MyEntity3DSoundEmitter cueEmitter;
+#if DEBUG
+        private static IMyHudNotification _hudNotification;
+#endif
 
         private void UpdateCues(int steps, float seconds)
         {
@@ -111,31 +107,60 @@ namespace Thermodynamics
             glowing[cue.Block.Position] = glow;
         }
 
-        private void Announce(HeatCue cue)
+        [ChatCommand("playcue")]
+        public static void PlayAudioCue(string stage = "overheat-warning")
         {
-            if (!IsPilotedLocally()) return;
+            IMyPlayer player = MyAPIGateway.Session == null
+                ? null
+                : MyAPIGateway.Session.LocalHumanPlayer;
+            IMyCockpit cockpit = player == null || player.Controller == null
+                ? null
+                : player.Controller.ControlledEntity as IMyCockpit;
 
-            if (cueEmitter == null) cueEmitter = new MyEntity3DSoundEmitter(null);
-            if (cueEmitter.IsPlaying) return;
+            if (cockpit == null)
+            {
+                ThermalChatCommands.Reply("playcue requires the local player to occupy a cockpit");
+                return;
+            }
 
-            cueEmitter.SetPosition(null);
-            cueEmitter.Force2D = true;
-            cueEmitter.PlaySound(
-                cue.Stage == HeatCueStage.Critical ? CriticalSound : ApproachingSound, true);
+            PlayAudioCue(cockpit.CubeGrid, stage);
         }
 
-        private bool IsPilotedLocally()
+        private static void PlayAudioCue(IMyCubeGrid grid, string stage)
         {
-            if (MyAPIGateway.Session == null) return false;
+            PwmAudioGeneratorDefinition pwmAudioGeneratorDefinition;
+            if(PwmAudioGeneratorDefinition.Default.TryGetValue(stage, out pwmAudioGeneratorDefinition))
+            {
+                byte[] pcm = WarningToneGenerator.GeneratePcm16(pwmAudioGeneratorDefinition);
+                int cockpitCount = ThermalCockpitAudio.PlayOnGrid(grid, pcm);
+                if (cockpitCount == 0)
+                {
+                    LogHelper.Log(MyLogSeverity.Warning,
+                        "ThermalGrid.PlaySound: No cockpit audio components found on grid " + grid.EntityId);
+                }
 
-            IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-            if (player == null) return false;
+#if DEBUG
+                if(_hudNotification == null)
+                    _hudNotification = MyAPIGateway.Utilities.CreateNotification("", 2000, "Red");
 
-            IMyCubeBlock seat = player.Controller == null
-                ? null
-                : player.Controller.ControlledEntity as IMyCubeBlock;
+                _hudNotification.Hide();
+                _hudNotification.Text = $"Thermal cue: {stage}";
+                _hudNotification.Show();
+#endif
 
-            return seat != null && seat.CubeGrid == Grid;
+                return;
+            }
+
+            LogHelper.Log(MyLogSeverity.Warning, "ThermalGrid.PlaySound: No recipe found for stage " + stage);
+        }
+
+        private void Announce(HeatCue cue)
+        {
+            if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated) return;
+            if (ThermalCockpitAudio.IsPlayingOnGrid(Grid)) return;
+
+            PlayAudioCue(Grid,
+                cue.Stage == HeatCueStage.Critical ? "overheat-critical" : "overheat-warning");
         }
 
         private void FadeBlocksNoLongerCued()

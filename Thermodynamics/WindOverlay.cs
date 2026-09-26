@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Generated;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
@@ -95,6 +96,14 @@ namespace Thermodynamics
         private const int PlayerSampleInterval = 10;
 
         private static int sincePlayerSample = int.MaxValue;
+
+        /// <summary>Cycles the wind map.</summary>
+        [ChatCommand("wind")]
+        internal static void Wind()
+        {
+            Cycle();
+            ThermalChatCommands.Reply("wind map: " + Describe(Current));
+        }
 
         public static void Cycle()
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Generated;
 using RichHudFramework.Client;
 using RichHudFramework.UI;
 using RichHudFramework.UI.Client;
@@ -338,6 +339,8 @@ namespace Thermodynamics
         private static int framesSinceStatistics;
 
 
+        /// <summary>Opens the thermal settings menu.</summary>
+        [ChatCommand("menu")]
         public static void Open()
         {
             if (window == null)
