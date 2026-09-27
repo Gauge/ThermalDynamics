@@ -1,0 +1,77 @@
+Source commit: 90c74f09945c3bbda10252e98848b6ee18eafbe0
+Command: DOTNET_TieredCompilation=0 dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-profile
+Memory cap: 12 GiB, swap disabled; no concurrent validation run.
+
+Aerodynamic profile cost; synthetic solid cubes, not a corpus or live-game measurement
+Host: fedora; UTC: 2026-09-27T03:30:06Z
+Core binary MVID: 9d4c40fb-2cf1-48c3-88e7-fda98f3c4e4e
+Runtime: 9.0.19; DOTNET_TieredCompilation: 0
+Times are per row's work count; settled rows contain 1000 evaluations. Allocations are maximum bytes per repeat.
+Spread is (slowest - fastest)/fastest; first and shifted are single-call samples and may be noisy.
+Slice-peak samples are the maximum Advance time within each complete build at 256 work units per call.
+Their allocation count is the maximum per Advance call; constructor allocations are excluded. These are observed peaks, not deadlines.
+  stage        blocks       best ms    median ms   best/med      worst ms   spread  repeats  stopped          work  unit              ns/unit      alloc KB  note
+  build-26          64         0.134        0.149      0.90         0.250      86%       40  capped                1  profiles          134,000.0            26  cube; warm occupancy; 26 directions
+  first-26          64         0.000        0.001      0.80         0.002     400%       40  confirmed             1  evaluations          400.0             0  cube; warm occupancy; 26 directions
+  settled-26        64         0.462        0.470      0.98         0.496       7%       40  capped            1,000  evaluations          461.5             0  cube; warm occupancy; 26 directions
+  shifted-26        64         0.002        0.003      0.92         0.272  11,225%       40  confirmed             1  evaluations        2,400.0             0  cube; warm occupancy; 26 directions
+  slice-peak-26        64         0.023        0.023      1.00         0.026      14%       12  confirmed             1  maximum-slice     22,800.0             9  cube; budget=256; work=4990; slices=20; maximum Advance time per build; constructor excluded
+  build-98          64         0.408        0.419      0.97         0.553      36%       32  confirmed             1  profiles          408,200.0            38  cube; warm occupancy; 98 directions
+  first-98          64         0.001        0.001      1.00         0.002      42%       32  confirmed             1  evaluations        1,200.0             0  cube; warm occupancy; 98 directions
+  settled-98        64         1.204        1.221      0.99         1.326      10%       32  confirmed         1,000  evaluations        1,204.4             0  cube; warm occupancy; 98 directions
+  shifted-98        64         0.003        0.003      0.91         0.011     268%       32  confirmed             1  evaluations        3,100.0             0  cube; warm occupancy; 98 directions
+  slice-peak-98        64         0.033        0.033      1.00         0.034       4%        8  confirmed             1  maximum-slice     32,700.0             9  cube; budget=256; work=18118; slices=71; maximum Advance time per build; constructor excluded
+  build-26         512         0.533        0.549      0.97         0.604      13%       33  confirmed             1  profiles          532,800.0           105  cube; warm occupancy; 26 directions
+  first-26         512         0.001        0.001      1.00         0.001     140%       33  confirmed             1  evaluations          500.0             0  cube; warm occupancy; 26 directions
+  settled-26       512         0.459        0.467      0.98         0.483       5%       33  confirmed         1,000  evaluations          459.2             0  cube; warm occupancy; 26 directions
+  shifted-26       512         0.009        0.010      0.90         0.012      42%       33  confirmed             1  evaluations        8,600.0             0  cube; warm occupancy; 26 directions
+  slice-peak-26       512         0.026        0.027      0.97         0.036      38%       22  confirmed             1  maximum-slice     25,900.0            36  cube; budget=256; work=22430; slices=88; maximum Advance time per build; constructor excluded
+  build-98         512         1.682        1.702      0.99         1.792       7%       27  confirmed             1  profiles          1,682,200.0           117  cube; warm occupancy; 98 directions
+  first-98         512         0.001        0.002      0.87         0.002      77%       27  confirmed             1  evaluations        1,300.0             0  cube; warm occupancy; 98 directions
+  settled-98       512         1.211        1.225      0.99         1.291       7%       27  confirmed         1,000  evaluations        1,210.6             0  cube; warm occupancy; 98 directions
+  shifted-98       512         0.010        0.011      0.93         0.013      29%       27  confirmed             1  evaluations        9,800.0             0  cube; warm occupancy; 98 directions
+  slice-peak-98       512         0.074        0.075      0.99         0.080       8%       11  confirmed             1  maximum-slice     74,500.0            36  cube; budget=256; work=74726; slices=292; maximum Advance time per build; constructor excluded
+  build-26       4,096         2.534        2.562      0.99         2.712       7%       40  confirmed             1  profiles          2,534,100.0           517  cube; warm occupancy; 26 directions
+  first-26       4,096         0.001        0.001      0.60         0.002     150%       40  capped                1  evaluations          600.0             0  cube; warm occupancy; 26 directions
+  settled-26     4,096         0.464        0.469      0.99         0.491       6%       40  confirmed         1,000  evaluations          464.1             0  cube; warm occupancy; 26 directions
+  shifted-26     4,096         0.034        0.036      0.95         0.039      15%       40  capped                1  evaluations       33,900.0             0  cube; warm occupancy; 26 directions
+  slice-peak-26     4,096         0.027        0.030      0.91         0.054      97%       40  capped                1  maximum-slice     27,400.0           144  cube; budget=256; work=110110; slices=431; maximum Advance time per build; constructor excluded
+  build-98       4,096         7.337        7.443      0.99         7.584       3%       40  confirmed             1  profiles          7,337,000.0           529  cube; warm occupancy; 98 directions
+  first-98       4,096         0.002        0.003      0.64         0.006     239%       40  capped                1  evaluations        1,800.0             0  cube; warm occupancy; 98 directions
+  settled-98     4,096         1.210        1.226      0.99         1.452      20%       40  confirmed         1,000  evaluations        1,209.6             0  cube; warm occupancy; 98 directions
+  shifted-98     4,096         0.035        0.037      0.95         0.040      16%       40  capped                1  evaluations       34,900.0             0  cube; warm occupancy; 98 directions
+  slice-peak-98     4,096         0.077        0.084      0.92         0.118      54%       21  confirmed             1  maximum-slice     77,000.0           144  cube; budget=256; work=319078; slices=1247; maximum Advance time per build; constructor excluded
+
+stage,blocks,best_ms,median_ms,fast_mode_share,worst_ms,spread_percent,repeats,confirmed_best,stopped,work,work_unit,ns_per_unit,allocated_bytes,taken_utc,host
+build-26,64,0.134,0.149,0.8993288590604028,0.2496,86.2686567164179,40,3,capped,1,profiles,134000,27312,2026-09-27T03:30:06Z,fedora
+first-26,64,0.0004,0.0005,0.8,0.002,400,40,5,confirmed,1,evaluations,400,0,2026-09-27T03:30:06Z,fedora
+settled-26,64,0.4615,0.4705,0.9808714133900107,0.4958,7.432286023835319,40,4,capped,1000,evaluations,461.5,0,2026-09-27T03:30:06Z,fedora
+shifted-26,64,0.0024,0.0026,0.923076923076923,0.2718,11225,40,12,confirmed,1,evaluations,2400,0,2026-09-27T03:30:06Z,fedora
+slice-peak-26,64,0.0228,0.0229,0.9956331877729258,0.0261,14.473684210526319,12,5,confirmed,1,maximum-slice,22800,9288,2026-09-27T03:30:06Z,fedora
+build-98,64,0.4082,0.4192,0.9737595419847328,0.5534,35.57079862812347,32,5,confirmed,1,profiles,408200,39216,2026-09-27T03:30:06Z,fedora
+first-98,64,0.0012,0.0012,1,0.0017,41.66666666666667,32,23,confirmed,1,evaluations,1200,0,2026-09-27T03:30:06Z,fedora
+settled-98,64,1.2044,1.2208,0.9865661861074704,1.3263,10.121222185320502,32,22,confirmed,1000,evaluations,1204.4,0,2026-09-27T03:30:06Z,fedora
+shifted-98,64,0.0031,0.0034,0.9117647058823529,0.0114,267.741935483871,32,7,confirmed,1,evaluations,3100,0,2026-09-27T03:30:06Z,fedora
+slice-peak-98,64,0.0327,0.0328,0.996951219512195,0.0339,3.6697247706422007,8,5,confirmed,1,maximum-slice,32700,9288,2026-09-27T03:30:06Z,fedora
+build-26,512,0.5328,0.5486,0.9711994166970471,0.6037,13.30705705705705,33,7,confirmed,1,profiles,532800,107912,2026-09-27T03:30:06Z,fedora
+first-26,512,0.0005,0.0005,1,0.0012,139.99999999999997,33,18,confirmed,1,evaluations,500,0,2026-09-27T03:30:06Z,fedora
+settled-26,512,0.4592,0.4674,0.9824561403508772,0.4829,5.161149825783973,33,13,confirmed,1000,evaluations,459.2,0,2026-09-27T03:30:06Z,fedora
+shifted-26,512,0.0086,0.0096,0.8958333333333334,0.0122,41.86046511627908,33,5,confirmed,1,evaluations,8600,0,2026-09-27T03:30:06Z,fedora
+slice-peak-26,512,0.0259,0.0267,0.9700374531835205,0.0357,37.83783783783785,22,5,confirmed,1,maximum-slice,25900,36936,2026-09-27T03:30:06Z,fedora
+build-98,512,1.6822,1.7024,0.9881343984962406,1.7921,6.5331114017358285,27,5,confirmed,1,profiles,1682200,119816,2026-09-27T03:30:06Z,fedora
+first-98,512,0.0013,0.0015,0.8666666666666666,0.0023,76.92307692307693,27,5,confirmed,1,evaluations,1300,0,2026-09-27T03:30:06Z,fedora
+settled-98,512,1.2106,1.2249,0.9883255775981711,1.2907,6.616553774987614,27,17,confirmed,1000,evaluations,1210.6,0,2026-09-27T03:30:06Z,fedora
+shifted-98,512,0.0098,0.0105,0.9333333333333332,0.0126,28.571428571428577,27,7,confirmed,1,evaluations,9800,0,2026-09-27T03:30:06Z,fedora
+slice-peak-98,512,0.0745,0.075,0.9933333333333333,0.0802,7.651006711409392,11,5,confirmed,1,maximum-slice,74500,36936,2026-09-27T03:30:06Z,fedora
+build-26,4096,2.5341,2.5624,0.9889556665625977,2.7118,7.012351525196329,40,24,confirmed,1,profiles,2534100,530016,2026-09-27T03:30:06Z,fedora
+first-26,4096,0.0006,0.001,0.6,0.0015,150.00000000000003,40,2,capped,1,evaluations,600,0,2026-09-27T03:30:06Z,fedora
+settled-26,4096,0.4641,0.4691,0.9893412918354295,0.4911,5.817711700064634,40,10,confirmed,1000,evaluations,464.1,0,2026-09-27T03:30:06Z,fedora
+shifted-26,4096,0.0339,0.0358,0.946927374301676,0.0389,14.74926253687315,40,3,capped,1,evaluations,33900,0,2026-09-27T03:30:06Z,fedora
+slice-peak-26,4096,0.0274,0.0302,0.9072847682119205,0.0541,97.44525547445255,40,1,capped,1,maximum-slice,27400,147528,2026-09-27T03:30:06Z,fedora
+build-98,4096,7.337,7.4429,0.9857716750191458,7.584,3.366498568897368,40,13,confirmed,1,profiles,7337000,541920,2026-09-27T03:30:06Z,fedora
+first-98,4096,0.0018,0.0028,0.6428571428571428,0.0061,238.88888888888889,40,2,capped,1,evaluations,1800,0,2026-09-27T03:30:06Z,fedora
+settled-98,4096,1.2096,1.2264,0.9863013698630138,1.4524,20.072751322751316,40,15,confirmed,1000,evaluations,1209.6,0,2026-09-27T03:30:06Z,fedora
+shifted-98,4096,0.0349,0.0367,0.9509536784741144,0.0404,15.7593123209169,40,2,capped,1,evaluations,34900,0,2026-09-27T03:30:06Z,fedora
+slice-peak-98,4096,0.077,0.0839,0.9177592371871275,0.1184,53.766233766233775,21,5,confirmed,1,maximum-slice,77000,147528,2026-09-27T03:30:06Z,fedora
+
+

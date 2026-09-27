@@ -370,6 +370,14 @@ The columns match the environment dump's, so a descent flown in game can be laid
 modelled one. It found the wind fault A15 — a buried grid was still in the ground-level wind — and
 it is where the unmodelled rock contact (A16) is visible.
 
+## Aerodynamic profile cost lab
+
+From the repository root, run `DOTNET_TieredCompilation=0 dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-profile`
+after building the solution. It separates synchronous construction, first/settled/centre-shifted
+evaluation and the maximum 256-unit construction slice in each build. Run it under the required
+memory cap without concurrent tests. The [aerodynamics lab record](../docs/aerodynamics.md#profile-construction-and-tick-cost)
+carries provenance, results and limits; synthetic timing is not population or live-frame validation.
+
 ## The balance commands
 
 Five commands, none of them a scenario or a benchmark. Each answers one balance question, each

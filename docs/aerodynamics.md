@@ -983,6 +983,25 @@ capacity growth, garbage collection and OS scheduling can still pause a slice: a
 not a wall-clock deadline. Synthetic observed peaks do not establish population or game-frame
 performance, and are not compared as speed ratios to the earlier runtime/binary measurements.
 
+**Measured after the implementation, 2026-09-27 UTC:** the
+[budgeted profile run](../tests/benchmarks/aerodynamics/profile-cost-budgeted-2026-09-27.txt)
+records source `90c74f0`, host `fedora`, .NET 9.0.19, tiering disabled and the core MVID.
+For the 4,096-block, 98-direction cube, the per-build peak slice takes **0.0770/0.0839 ms**
+fastest/median over 21 builds; the largest observed slice is **0.1184 ms**, a 53.77 % spread.
+Each build consumes **319,078 work units in 1,247 slices**. The corresponding 26-direction
+peaks are 0.0274/0.0302 ms, with a 0.0541 ms maximum and 97.45 % spread; its minimum remains
+unconfirmed at the 40-build cap. Both resolutions allocate up to **147,528 bytes in one slice**,
+so the list-growth caveat is material even though the measured slices are short.
+
+Synchronous 98-direction construction on the largest cube reads **7.3370/7.4429 ms**
+fastest/median, 3.37 % spread over 40 builds, and 541,920 allocated bytes. First, settled and
+centre-shifted evaluations report **zero allocated bytes throughout the ladder**. The largest
+cube's centre-shifted evaluation still takes 0.0349/0.0367 ms fastest/median (15.76 % spread,
+minimum unconfirmed at 40 repeats), consistent with its retained surface pass. None of these
+numbers is a before/after speed ratio. The game-target build and **2,539 offline tests pass**;
+corpus walks were not enabled. Engine scheduling, mass-centre updates and P1/P2 population
+validation remain open.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -1001,6 +1020,7 @@ performance, and are not compared as speed ratios to the earlier runtime/binary 
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Recorded source-identified maximum-slice measurements and zero evaluation allocations, with list-growth and centre-change costs still explicit. Full offline suite: 2,539 passing cases. |
 | 2026-09-26 | Added resumable profile construction, per-cell ray stepping and stale-result rejection. Registered exact legacy-equivalence checks and maximum-slice timing before measurement. Initial damping is prepared during construction; centre changes still require a surface pass. |
 | 2026-09-26 | Recorded both profile-cost runs with source, binary and runtime provenance. Construction exceeds a frame on a 4,096-block cube in both configurations; settled ticks allocate zero, but first and centre-shifted evaluations allocate 64 bytes. This makes budgeted construction and prepared damping prerequisites for AR19 integration. |
 | 2026-09-26 | Added the reachable `aero-profile` cost lab to separate profile construction, lazy first evaluation, settled ticks and centre changes before integrating AR19 into the adapter. |
