@@ -539,6 +539,9 @@ namespace Thermodynamics
                     () => (int)ThermalDebugView.Current);
             }
 
+            if (name == "AeroProfileDirections")
+                return Choice(name, enabled, label, tip, new[] { "26: coarse", "98: fine" }, null, new[] { 26, 98 });
+
             if (name == "ShadowDetail")
             {
 
@@ -594,9 +597,10 @@ namespace Thermodynamics
 
 
         private HudElementBase Choice(string name, bool enabled, Label label, ToolTip tip,
-            string[] labels, Func<int> live)
+            string[] labels, Func<int> live, int[] values = null)
         {
-            Func<int> selected = live ?? (() => (int)Settings.Instance.GetValue(name));
+            Func<int> selected = live ?? (() => values == null ? (int)Settings.Instance.GetValue(name)
+                : Array.IndexOf(values, (int)Settings.Instance.GetValue(name)));
 
             Dropdown<int> dropdown = new Dropdown<int>
             {
@@ -606,7 +610,7 @@ namespace Thermodynamics
                 Color = new Color(38, 48, 56),
             };
 
-            for (int i = 0; i < labels.Length; i++) dropdown.Add(new RichText(labels[i]), i);
+            for (int i = 0; i < labels.Length; i++) dropdown.Add(new RichText(labels[i]), values == null ? i : values[i]);
 
             dropdown.SetSelection(selected());
             dropdown.MouseInput.ToolTip = tip;

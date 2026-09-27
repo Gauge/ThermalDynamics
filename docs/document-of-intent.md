@@ -1247,9 +1247,9 @@ surface changes how a ship flies.
 **One mod beside this one can be detected, and it is worth naming because it is the exception.**
 [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed) publishes an API and speaks the same
 `SENetworkAPI` this repository vendors, so *is something else already slowing ships down* is a
-question with an answer — unlike *is something else already simulating heat*, which is not. Today
-the two do not collide at all, because RTS applies a force and no heat while this model applies heat
-and no force. [backlog.md](backlog.md) `K1` would end that, and `K14` is where the answer belongs.
+question with an answer — unlike *is something else already simulating heat*, which is not. The current decision is `AR15`: RTS owns the cruise curve and this mod owns atmospheric drag;
+both may act. `EnableAeroForces` can disable this mod's force channel for a different composition.
+The embedded top-speed port remains removed.
 
 **Every output can be turned off, and the last one that could not was fixed for this.** The
 terminal panel had no setting of its own until 2026-08-25 — every other thing the mod draws was
@@ -1381,8 +1381,8 @@ frame buffer. That is a statement about difficulty, not about intent — it is w
 * **Not authoritative over the game's own systems.** Room pressure is the game's answer, not this
   model's, and none of the three sources that can empty a room may insist on air — only refuse it.
   ~~**The mod reads a grid's velocity and writes nothing to its physics.**~~ **It did from
-  2026-08-30, and writes nothing again while the force is rebuilt** — `K25` stripped it on
-  2026-09-24, and it returns as a channel of its own ([aerodynamics.md](aerodynamics.md) `AR4`,
+  2026-08-30, was stripped on 2026-09-24, and now has a separate per-tick drag/moment adapter** —
+  native handling and population validation remain open under `K25` ([aerodynamics.md](aerodynamics.md) `AR4`,
   `AR19`, `AR20`). It was built as `EnableDrag` under [backlog.md](backlog.md) `K1`. *Whether
   the mod should push a ship at all* was the first question in that milestone rather than an
   assumption inside it, and the answer turns on what kind of change it is: the friction term already
@@ -1526,6 +1526,7 @@ as a *second* change rather than as a substitute. [backlog](backlog.md) `D19`.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Updated the current aerodynamic composition and implementation status for the rebuilt engine adapter; preserved the superseded design as historical context. |
 | 2026-09-24 | *Not authoritative over the game's own systems* says the mod writes nothing to a ship's physics again: `K25`'s first step stripped the aerodynamic force, and the owner's decisions recorded the same day (aerodynamics.md) are what brings it back. The reasoning around it is unchanged. |
 | 2026-09-20 | Describe soft heat patches, bounded lights and explicit visual verification limits. |
 | 2026-08-28 | *Basic environmental information should be on screen as a matter of course* is built, and the page says which half of it is judged: what the readout **says** is a decision in `Core` and pinned by tests; whether it reads as the game's own HUD is the half only a session can settle. |

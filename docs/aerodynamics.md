@@ -467,7 +467,8 @@ Each step ships on its own and names its rig checks. Population walks are propos
    with the RTS API client added in the same change so the speed readout never goes dark: the aero
    debug view prints RelativeTopSpeed's cruise speed and ceiling, or the engine's cap without it.
    Rigs: `AerodynamicStripTests` — the friction row bit-identical to the old code with the shape
-   term off, nothing in the mod writing to a grid's motion, and `GetGridAeroForces` returning zero.
+   term off. Its original no-force checks were replaced by force-write ownership and API reach
+   checks when the step-1 adapter landed.
 1. **Profile and moments.** AR19 (profile, per-tick evaluation), AR5 (centre of pressure), AR6
    (damping), AR22 (guard), AR20 (server and client), with drag at textbook coefficients (AR2–AR4)
    from the start rather than a placeholder. Rigs: cube Cd, plate Cd, boat-tail pair, a finned hull
@@ -849,10 +850,11 @@ round; damping of a turn in flight and at rest; and a guard that never binds in 
 does not have**: lift, so a finned hull is still step 2's rig; and a rounded nose reads up to 67 % too
 draggy, so streamlining is under-rewarded. `AeroCalibrationTests` and `AeroFlightTests` pin all of it.
 
-**This is not yet a game force.** The adapter still applies no aerodynamic force; the settings,
-profile invalidation, per-tick engine hookup and P1/P2 population validation remain open under `K25`.
-The complete solution build and 2,494 offline test cases pass on 2026-09-26, with corpus walks
-not opted in. The flight command reproduces S5–S8; this is synthetic-rig evidence, not a live-game
+**The game adapter now submits drag and moments each physics tick once its profile is ready.**
+The engine boundary and remaining validation are recorded below. Native handling and P1/P2
+population validation remain open under `K25`.
+The earlier round-6 validation passed the complete solution build and 2,494 offline cases on
+2026-09-26, with corpus walks not opted in. The flight command reproduces S5–S8; this is synthetic-rig evidence, not a live-game
 handling observation. Multi-cell diagonal inertia is independently checked below; the flight
 results above still concern the named synthetic rigs only.
 
@@ -954,7 +956,7 @@ normal-fitting stencil. It does not request a whole-grid occupancy or bounds reb
 `AeroProfile.Build` remains a synchronous wrapper for offline callers.
 
 A result is private until construction completes. Grid topology version changes reject unfinished
-and finished results; callers must also supply a monotonic input revision for mass changes, which
+and finished results; callers must also supply a monotonic input revision for mass or registered face-profile changes, which
 `GridModel.Version` does not track. These are single-threaded jobs: the caller must not mutate the
 grid concurrently inside `Advance`. Changing input cancels the job; a fresh job rebuilds it.
 A cancelled or incomplete job cannot publish a profile.
@@ -1044,6 +1046,59 @@ all six cube/resolution cases allocate **zero bytes**. These are synthetic .NET 
 observed scheduling noise, not engine deadlines or population validation. The game-target build
 and 2,553 offline tests pass; the corrected timing setup also has focused instrument checks.
 
+### Engine boundary and lifecycle
+
+`EnableAeroForces` defaults on; `AeroProfileDirections` selects 98 directions by default or 26.
+They own new protocol slots 165/166. Off clears the per-grid runtime and suppresses all geometry,
+centre preparation and physics writes on the next tick. The force path runs on server and client
+in the main-thread publish phase, before the thermal-step early return. Aerodynamic exceptions
+are logged separately so they do not suppress thermal damage and post-step publication. It reads current world
+velocity, angular velocity and atmospheric density. Air density is the engine's relative value
+times 1.225 kg/m³. Ambient wind uses the latest environmental wind sample in world coordinates;
+relative velocity and orientation are recomputed every physics tick. Wind sampling cadence and
+client/server wind history remain native validation concerns; no block temperature enters force.
+
+`AeroRuntime` invalidates on grid identity, topology, direction count and input revision. The
+adapter increments that revision on an observed block-mass change or an API face-profile update.
+Construction gets at most 4,096 work units and centre preparation 256 exposed faces per grid per
+tick. Those are per-grid budgets, not a bound on total fleet time. The runtime anchors a pending centre update within the existing 1 mm damping-cache tolerance,
+then publishes the latest centre after preparation. Alternating ±0.01 mm input noise prevented
+completion before this policy; its regression now completes the 54-face rig in eight seven-face
+slices. Material changes still restart preparation. An unprepared grid submits
+zero force; construction or frequent changes can therefore create a force gap. Cold-start and
+edit-under-flight latency must be checked in game before closing AR19. Close and disable release
+the retained state. Current engine mass guards translation; rotational guarding still uses the
+profile's cuboid diagonal inertia. This is an approximation, particularly for cargo, off-diagonal
+mass distributions and welded bodies; native spin and attachment cases remain unverified.
+
+The adapter uses `CenterOfMassWorld` transformed into grid coordinates, so a rigid body's origin
+is not mistaken for the grid origin. It submits force at the engine's centre of mass and submits
+the complete restoring/damping moment separately, avoiding a second pressure-centre lever arm.
+The installed engine's `APPLY_WORLD_FORCE` path ignores torque. The
+`APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE` path applies its torque argument times the engine
+timestep and simulation-speed factor internally. Accordingly the adapter makes separate calls with force in N and torque in
+N·m; it does not multiply that torque by the timestep a second time. The
+[installed-game probe](../tools/thermal-api-check/README.md) checks admission and statically pins
+these conversions; it rejects direct native inertia access. The [saved engine probe](../tests/benchmarks/aerodynamics/engine-boundary-2026-09-27.txt) carries
+assembly and source fingerprints. Native application itself is not executed by that probe.
+
+API face multipliers now live on `BlockInstance`, with `ThermalNode.Drag` forwarding to that
+single value. The builder applies them to front, base and wetted areas and their moments, and to
+each exposed face's rotational damping. A custom profile therefore changes effective fineness
+as well as pressure area; it is an authored override rather than reference-body calibration.
+Unregistered faces remain bit-identical to the earlier model. Clearing an override restores the
+original force and damping. `GetGridAeroForces` now reports submitted drag; lift remains zero.
+`GetGridAeroMoments` and `GetGridAeroStatus` expose moments, readiness, work and guard binding
+for native diagnosis. The API major stays 1 because existing keys retain their meaning.
+
+Acceptance checks in `AeroRuntimeTests` cover invalidation, bounds, off/on allocation, partial
+centre readiness, rotational covariance, linear density dependence, impulse units and face
+registration/clearing. The world-coordinate adapter is also flown against the independent
+body-coordinate control at 60/120 Hz: the S5 threshold remains unchanged, and final angle and
+recovery time must agree within 0.1°/0.1 s. The `aero-flight` command uses the world adapter for
+its moment rigs; its native counterpart, multiplayer prediction, population P1/P2 and public
+profile-table access remain open. These checks establish offline behavior, not native acceptance.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -1062,6 +1117,7 @@ and 2,553 offline tests pass; the corrected timing setup also has focused instru
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Connected bounded profiles to the engine adapter and documented engine force/angular conversion, centre jitter, API face overrides and remaining native limits. Recorded [adapter evidence](../tests/benchmarks/aerodynamics/engine-adapter-2026-09-27.txt): 2,565 offline cases pass; S5 recovers at 29.0 s, S6 diverges, S7 density scaling holds, with no guards in these flight rigs. |
 | 2026-09-26 | Added bounded centre preparation with atomic publication, exact legacy-equivalence checks and zero allocation. Recorded initial and warmed timing runs, including the warmup correction, repeat caps and observed maxima. |
 | 2026-09-26 | Corrected the budgeted builder cache for sub-millimetre centre changes before the first damping read. The legacy implementation measured at that first-read centre; the new preparation had incorrectly reused the initial centre. Added a bit-identity regression and corrected the first-use cost scope in place (E10). |
 | 2026-09-26 | Recorded source-identified maximum-slice measurements and zero evaluation allocations, with list-growth and centre-change costs still explicit. Full offline suite: 2,539 passing cases. |

@@ -337,13 +337,14 @@ namespace Thermodynamics
 
         public int SweepSlot = -1;
 
-        public void RefreshMass()
+        public bool RefreshMass()
         {
             float mass = Math.Max(0f, Block.Mass);
-            if (Instance.Mass == mass) return;
+            if (Instance.Mass == mass) return false;
 
             Instance.Mass = mass;
             if (Node != null) Node.RefreshThermalMass();
+            return true;
         }
 
         private void RefreshHeat()

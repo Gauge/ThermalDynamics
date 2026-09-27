@@ -161,7 +161,11 @@ namespace Thermodynamics.Core
             }
         }
 
-        public DragProfile Drag;
+        public DragProfile Drag
+        {
+            get { return Block.Drag; }
+            set { Block.Drag = value; }
+        }
 
         public float LastHeatSourceWatts
         {

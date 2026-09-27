@@ -136,6 +136,12 @@ namespace Thermodynamics
                     work.RoomCellsVisited - roomCellsBefore);
             }
 
+            try { TickAerodynamics(); }
+            catch (Exception e)
+            {
+                aerodynamics = null;
+                Telemetry.Exception("ThermalGrid.Aerodynamics", e);
+            }
             if (stepped <= 0) return;
 
             StepsRun += stepped;
@@ -317,7 +323,7 @@ namespace Thermodynamics
             for (int i = 0; i < share; i++)
             {
                 if (massSweepCursor >= count) massSweepCursor = 0;
-                sweepOrder[massSweepCursor++].RefreshMass();
+                if (sweepOrder[massSweepCursor++].RefreshMass()) InvalidateAerodynamics();
             }
         }
 

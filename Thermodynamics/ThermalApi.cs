@@ -108,6 +108,8 @@ namespace Thermodynamics
             methods["GetGridHeatBalance"] = Guard(new Func<IMyCubeGrid, MyTuple<float, float>>(GetGridHeatBalance), "GetGridHeatBalance");
             methods["GetGridFrictionWatts"] = Guard(new Func<IMyCubeGrid, float>(GetGridFrictionWatts), "GetGridFrictionWatts");
             methods["GetGridAeroForces"] = Guard(new Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>(GetGridAeroForces), "GetGridAeroForces");
+            methods["GetGridAeroMoments"] = Guard(new Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>(GetGridAeroMoments), "GetGridAeroMoments");
+            methods["GetGridAeroStatus"] = Guard(new Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>(GetGridAeroStatus), "GetGridAeroStatus");
             methods["GetCoolantLoop"] = Guard(new Func<IMySlimBlock, MyTuple<bool, float, float, float, int>>(GetCoolantLoop), "GetCoolantLoop");
             methods["SetBlockDragProfile"] = Guard(new Func<IMySlimBlock, float[], bool>(SetBlockDragProfile), "SetBlockDragProfile");
             methods["ClearBlockDragProfile"] = Guard(new Func<IMySlimBlock, bool>(ClearBlockDragProfile), "ClearBlockDragProfile");
@@ -213,6 +215,7 @@ namespace Thermodynamics
             if (bound == null || bound.Node == null) return false;
 
             bound.Node.Drag = DragProfile.Of(faces[0], faces[1], faces[2], faces[3], faces[4], faces[5]);
+            bound.Grid.InvalidateAerodynamics();
             return true;
         }
 
@@ -222,16 +225,35 @@ namespace Thermodynamics
             if (bound == null || bound.Node == null) return false;
 
             bound.Node.Drag = default(DragProfile);
+            bound.Grid.InvalidateAerodynamics();
             return true;
         }
 
         /// <summary>
-        /// The aerodynamic drag and lift this mod applies to a grid, in world newtons. It applies none
-        /// while the force model is rebuilt, so both are zero, which is the truth; see aerodynamics.md.
+        /// The aerodynamic drag and lift applied in the last physics tick, in world newtons.
+        /// Lift remains zero until its separate model is implemented; see aerodynamics.md.
         /// </summary>
         private static MyTuple<Vector3, Vector3> GetGridAeroForces(IMyCubeGrid grid)
         {
-            return new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero);
+            ThermalGrid thermals = GridOf(grid);
+            return new MyTuple<Vector3, Vector3>(thermals == null ? Vector3.Zero : thermals.AeroForceWorld, Vector3.Zero);
+        }
+
+        /// <summary>Latest world-space restoring and damping moments, N·m.</summary>
+        private static MyTuple<Vector3, Vector3> GetGridAeroMoments(IMyCubeGrid grid)
+        {
+            ThermalGrid thermals = GridOf(grid);
+            return thermals == null ? new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero)
+                : new MyTuple<Vector3, Vector3>(thermals.AeroRestoringWorld, thermals.AeroDampingWorld);
+        }
+
+        /// <summary>Latest profile readiness, guard binding, construction work and centre-update faces.</summary>
+        private static MyTuple<bool, bool, int, int> GetGridAeroStatus(IMyCubeGrid grid)
+        {
+            ThermalGrid thermals = GridOf(grid);
+            return thermals == null ? new MyTuple<bool, bool, int, int>(false, false, 0, 0)
+                : new MyTuple<bool, bool, int, int>(thermals.AeroReady, thermals.AeroGuarded,
+                    thermals.AeroBuildWork, thermals.AeroCentreWork);
         }
 
         private static MyTuple<bool, float, float, float, int> GetCoolantLoop(IMySlimBlock block)

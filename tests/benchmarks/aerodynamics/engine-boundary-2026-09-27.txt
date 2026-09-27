@@ -1,0 +1,47 @@
+Captured UTC: 2026-09-27T04:07:52.348335+00:00
+Command: python3 tools/thermal-api-check/run.py /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers
+Memory cap: 12 GiB, swap disabled.
+Scope: installed-game static force/torque contract and whitelist admission; no native simulation executed.
+Probe and assembly sources are identified by SHA-256 below.
+
+Artifacts: /tmp/thermal-api-check-cq_3ao0n
+SHA256: Sandbox.Game.dll de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf
+SHA256: VRage.Game.dll f0970c2b60335f7690e158a485cd528703717c8c5002f2713556e04f09c508e1
+SHA256: SpaceEngineers.Game.dll 6cefea4a73a5b806af4e565be5b41ed0b4199af2fc5031c575c4be7eb644c0c8
+SHA256: run.py 295925364dc17cda83520aaceab271e162f09f9d49317500b60cf872c2624e63
+SHA256: Program.cs 25cbcec58450b5e075d892fe341b0bacded74a56245d51e0adf22419f3c0826f
+You are not using the latest version of the tool, please update.
+Latest version is '11.1.0.9782' (yours is '11.0.0.9375')
+Aerodynamic force contract: expected force/torque units verified by static inspection; native execution not tested.
+You are not using the latest version of the tool, please update.
+Latest version is '11.1.0.9782' (yours is '11.0.0.9375')
+/tmp/thermal-api-check-cq_3ao0n/Bootstrap.cs(185,55): warning CS0618: 'MyPhysicsHelper' is obsolete: 'Use IMyPhysics instead' [/tmp/thermal-api-check-cq_3ao0n/check.csproj]
+aero-grid-inputs: compiler=0, whitelist=0
+aero-physics-interface: compiler=0, whitelist=0
+aero-physics-inertia: compiler=0, whitelist=1
+(1,120): error ProhibitedMemberRule: The type or member 'Matrix HkRigidBody.InertiaTensor' is prohibited
+thermal-celestial: compiler=0, whitelist=0
+thermal-local-frustum: compiler=0, whitelist=0
+occlusion-interface: compiler=0, whitelist=0
+occlusion-concrete-rejected: compiler=0, whitelist=4
+(1,109): error ProhibitedMemberRule: The type or member 'MySlimBlock' is prohibited
+(1,176): error ProhibitedMemberRule: The type or member 'bool MySlimBlock.IsFullIntegrity' is prohibited
+(1,201): error ProhibitedMemberRule: The type or member 'float MySlimBlock.BuildLevelRatio' is prohibited
+(1,230): error ProhibitedMemberRule: The type or member 'bool MySlimBlock.HasDeformation' is prohibited
+voxel-base-builder: compiler=0, whitelist=0
+voxel-xml-base: compiler=0, whitelist=0
+model-binary-reader: compiler=0, whitelist=0
+grid-render-data: compiler=0, whitelist=1
+(1,80): error ProhibitedMemberRule: The type or member 'MyCubeGridRenderData' is prohibited
+model-materials: compiler=0, whitelist=2
+(1,39): error ProhibitedMemberRule: The type or member 'MyModel' is prohibited
+(1,93): error ProhibitedMemberRule: The type or member 'List<MyMesh> MyModel.GetMeshList()' is prohibited
+voxel-enumeration: compiler=0, whitelist=0
+voxel-copy: compiler=0, whitelist=0
+voxel-direct: compiler=0, whitelist=2
+(1,102): error ProhibitedMemberRule: The type or member 'TextureSet[] MyRenderVoxelMaterialData.TextureSets' is prohibited
+(1,117): error ProhibitedMemberRule: The type or member 'string TextureSet.ColorMetalY' is prohibited
+entity-override: compiler=0, whitelist=0
+voxel-builder: compiler=0, whitelist=1
+(1,116): error ProhibitedMemberRule: The type or member 'MyObjectBuilder_Dx11VoxelMaterialDefinition' is prohibited
+

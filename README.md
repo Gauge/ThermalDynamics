@@ -36,7 +36,7 @@ into atmosphere and into the air of sealed rooms, arrives from the sun, and — 
 | Underground | Depth blunts the day out over tens of metres, then the rock warms toward the planet's core below the sea-level deadzone. |
 | Point sources | Other mods register heat sources bound to an entity or a position; they radiate like small suns. A **Debug Heat Source** block drives the same path from the terminal, so the mechanism can be seen without writing a second mod. |
 | Aerodynamic friction | Fast atmospheric flight heats leading surfaces with the cube of relative airspeed. |
-| Aerodynamic forces | **Being rebuilt, and off until it is.** The drag and lift this mod used to apply are removed while a flight model with real moments, lift and stall replaces them. A ship's top speed is the game's cap, or [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed)'s if you run that mod. |
+| Aerodynamic forces | **Drag and moments rebuilt; native validation is still open.** The default-on force channel uses cached geometry and current motion each physics tick. Lift and stall remain unfinished; `EnableAeroForces` disables the channel. A ship's top speed is the game's cap, or [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed)'s if you run that mod. |
 | Waste heat | Power producers and consumers convert a configurable share of throughput into heat; thrusters heat with throttle, which is what makes hydrogen thrusters run hot. |
 | Coolant loops | Closed rings of coolant pipe with a pump form a shared fluid mass that pulls heat out of adjacent blocks; radiators shed it to space. |
 | Heat pumps | The one block that moves heat *up* a gradient, for an electrical cost set by Carnot: cheap across a small difference, ruinous across a large one. |
@@ -89,6 +89,7 @@ repository is built and laid out.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Connected rebuilt aerodynamic drag and moments to the game adapter, with an off switch, resolution settings and API readouts. Native handling and population validation remain open. |
 | 2026-09-24 | The aerodynamic forces and the top-speed curve are gone while the flight model is rebuilt; a ship flies as the game flies it, and RelativeTopSpeed is the mod for per-mass top speeds. |
 | 2026-08-23 | Added multiplayer to **What it does**: temperatures now replicate, and a client that used to guess is told. |
 | 2026-08-22 | Moved the repository layout tree, the build-and-test section and the documentation index off this page. The stated audience is a workshop reader, with one section for modders, and all three were written for somebody who has cloned the repository ([docs/backlog.md](docs/backlog.md) `H5`). The layout and the build are now in [docs/development.md](docs/development.md); the index is [docs/README.md](docs/README.md). |

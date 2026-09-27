@@ -20,13 +20,16 @@ namespace Thermodynamics.Core
         /// <summary>Drag coefficient of a surface element sweeping through the air as the hull turns.</summary>
         public const float RotationalDrag = 1.17f;
 
+        /// <summary>Squared distance tolerance for cached damping centres, m².</summary>
+        public const float CentreCacheToleranceSquared = 1e-6f;
+
         private readonly Vector3[] directions;
         private readonly AeroSummary[] summaries;
         private readonly float sharpness;
 
         private readonly List<Vector3> faceCentres = new List<Vector3>();
         private readonly List<Vector3> faceNormals = new List<Vector3>();
-        private float faceArea;
+        private readonly List<float> faceAreas = new List<float>();
 
         private Vector3 dampingCentre = new Vector3(float.NaN);
         private readonly float[] damping = new float[6];
@@ -182,7 +185,7 @@ namespace Thermodynamics.Core
         {
             if (!(density > 0f) || faceNormals.Count == 0) return Vector3.Zero;
             if ((!dampingObserved && dampingCentre != CentreOfMass)
-                || Vector3.DistanceSquared(dampingCentre, CentreOfMass) > 1e-6f || float.IsNaN(dampingCentre.X)) MeasureDamping();
+                || Vector3.DistanceSquared(dampingCentre, CentreOfMass) > CentreCacheToleranceSquared || float.IsNaN(dampingCentre.X)) MeasureDamping();
             dampingObserved = true;
             float half = 0.5f * density * RotationalDrag;
             Vector3 result = Vector3.Zero;
@@ -256,7 +259,7 @@ namespace Thermodynamics.Core
                     throw new ArgumentException("The aerodynamic centre must be finite.", "centre");
             }
             if (faceCentres.Count == 0 || ((dampingObserved || dampingCentre == centre)
-                && Vector3.DistanceSquared(dampingCentre, centre) <= 1e-6f))
+                && Vector3.DistanceSquared(dampingCentre, centre) <= CentreCacheToleranceSquared))
             {
                 CentreOfMass = centre;
                 dampingObserved = true;
@@ -273,7 +276,7 @@ namespace Thermodynamics.Core
             }
             while (used < faceBudget && pendingFace < faceCentres.Count)
             {
-                AccumulateDamping(faceCentres[pendingFace] - centre, faceNormals[pendingFace], pendingDamping);
+                AccumulateDamping(faceCentres[pendingFace] - centre, faceNormals[pendingFace], faceAreas[pendingFace], pendingDamping);
                 pendingFace++;
                 used++;
             }
@@ -286,32 +289,32 @@ namespace Thermodynamics.Core
             return true;
         }
 
-        internal void SetMassProperties(float mass, Vector3 centre, Vector3 inertia, float area)
+        internal void SetMassProperties(float mass, Vector3 centre, Vector3 inertia)
         {
             Mass = mass;
             CentreOfMass = centre;
             Inertia = inertia;
-            faceArea = area;
             dampingCentre = centre;
         }
 
         internal void SetSummary(int index, AeroSummary summary) { summaries[index] = summary; }
 
-        internal void AddSkin(Vector3 centre, Vector3 normal)
+        internal void AddSkin(Vector3 centre, Vector3 normal, float area)
         {
             faceCentres.Add(centre);
             faceNormals.Add(normal);
-            AccumulateDamping(centre - CentreOfMass, normal, damping);
+            faceAreas.Add(area);
+            AccumulateDamping(centre - CentreOfMass, normal, area, damping);
         }
 
         private void MeasureDamping()
         {
             Array.Clear(damping, 0, damping.Length);
-            for (int i = 0; i < faceCentres.Count; i++) AccumulateDamping(faceCentres[i] - CentreOfMass, faceNormals[i], damping);
+            for (int i = 0; i < faceCentres.Count; i++) AccumulateDamping(faceCentres[i] - CentreOfMass, faceNormals[i], faceAreas[i], damping);
             dampingCentre = CentreOfMass;
         }
 
-        private void AccumulateDamping(Vector3 r, Vector3 n, float[] moments)
+        private static void AccumulateDamping(Vector3 r, Vector3 n, float area, float[] moments)
         {
             for (int axis = 0; axis < 3; axis++)
             {
@@ -320,7 +323,7 @@ namespace Thermodynamics.Core
                 float arm = motion.Length();
                 if (arm < 1e-4f) continue;
                 float facing = Vector3.Dot(n, motion) / arm;
-                float term = faceArea * Math.Abs(facing) * arm * arm * arm;
+                float term = area * Math.Abs(facing) * arm * arm * arm;
                 if (facing > 0f) moments[axis * 2] += term;
                 else if (facing < 0f) moments[(axis * 2) + 1] += term;
             }

@@ -6,7 +6,7 @@ namespace Thermodynamics.Core
 {
     /// <summary>
     /// Builds a profile in bounded work slices, including individual ray steps. The caller's revision
-    /// covers mass changes; topology is also checked against GridModel.Version. See aerodynamics.md.
+    /// covers mass and registered face-profile changes; topology is also checked against GridModel.Version. See aerodynamics.md.
     /// </summary>
     public sealed class AeroProfileBuilder
     {
@@ -23,6 +23,7 @@ namespace Thermodynamics.Core
             public Vector3 Centre;
             public Vector3 Normal;
             public Vector3 Reconstructed;
+            public float Area;
         }
 
         private readonly GridModel grid;
@@ -50,7 +51,7 @@ namespace Thermodynamics.Core
         public bool Complete { get { return stage == 4 && !Invalidated; } }
         public bool Invalidated { get { return stage == 5 || (grid != null && grid.Version != topology); } }
 
-        /// <summary>Creates a job without traversing the hull. Revision must change whenever an input mass changes.</summary>
+        /// <summary>Creates a job without traversing the hull. Revision must change whenever a mass or registered face profile changes.</summary>
         public AeroProfileBuilder(GridModel grid, int directionCount, long revision)
         {
             this.grid = grid;
@@ -119,7 +120,7 @@ namespace Thermodynamics.Core
             Vector3 centre = mass > 0f ? massMoment / mass : Vector3.Zero;
             if (block == bodies.Count)
             {
-                profile.SetMassProperties(mass, centre, inertia, grid.CellFaceArea);
+                profile.SetMassProperties(mass, centre, inertia);
                 block = 0;
                 stage = 2;
                 return;
@@ -139,9 +140,9 @@ namespace Thermodynamics.Core
                 if (!ray.Complete) { ray.Step(); return; }
                 if (!ray.Blocked)
                 {
-                    wetted += grid.CellFaceArea;
-                    wettedMoment += pendingSurface.Centre * grid.CellFaceArea;
-                    profile.AddSkin(pendingSurface.Centre, pendingSurface.Normal);
+                    wetted += pendingSurface.Area;
+                    wettedMoment += pendingSurface.Centre * pendingSurface.Area;
+                    profile.AddSkin(pendingSurface.Centre, pendingSurface.Normal, pendingSurface.Area);
                 }
                 surfaces.Add(pendingSurface);
                 rayPending = false;
@@ -161,7 +162,8 @@ namespace Thermodynamics.Core
                 Outside = outside,
                 Centre = (new Vector3(at.X, at.Y, at.Z) + normal * 0.5f) * grid.GridSize,
                 Normal = normal,
-                Reconstructed = AeroGeometry.SurfaceNormal(grid, at, f)
+                Reconstructed = AeroGeometry.SurfaceNormal(grid, at, f),
+                Area = grid.CellFaceArea * grid.Blocks[block].Drag[f]
             };
             ray.Start(grid, (Vector3D)outside, normal, minimum, maximum);
             rayPending = true;
@@ -205,7 +207,7 @@ namespace Thermodynamics.Core
             float incidence = Vector3.Dot(s.Reconstructed, u);
             pendingElement = new AeroElement
             {
-                Area = grid.CellFaceArea * (pendingFront ? dot : -dot),
+                Area = s.Area * (pendingFront ? dot : -dot),
                 Incidence = Math.Max(0f, pendingFront ? incidence : -incidence),
                 Centre = s.Centre
             };
