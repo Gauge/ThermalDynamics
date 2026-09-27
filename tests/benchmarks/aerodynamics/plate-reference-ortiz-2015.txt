@@ -1,0 +1,10 @@
+Primary experimental reference for future lift/drag rigs; not a model validation result.
+Ortiz, Xavier; Rival, David; Wood, David (2015). Forces and Moments on Flat Plates of Small Aspect Ratio with Application to PV Wind Loads and Small Wind Turbine Blades. Energies 8, 2438-2453. DOI 10.3390/en8042438. CC BY 4.0.
+Publisher: https://www.mdpi.com/1996-1073/8/4/2438
+Retrieved paper: https://pdfs.semanticscholar.org/c4c0/a5d7c05409401cbd2685167734947352c800.pdf
+PDF SHA256: b3f9f9880e6047589f039366c4e78df452d033b84f35d6c3756391f60c3067e8
+CSV source: Table 2, printed page 2442 (PDF page 5). All eight rows retained; no selection by force value. Numbers transcribed from the rendered page.
+Reference area is span times chord. Reynolds number uses the shorter dimension, not always chord. Nominal free-stream speed 19 m/s, turbulence 3.5%; 60-second records at 1 kHz. Table values are rounded as published; span/chord therefore need not exactly equal printed aspect ratio.
+Nonzero transverse forces at 90 degrees are retained, including CL=0.1133 at AR=2.48. They are observations, not targets requiring a symmetric model to violate symmetry.
+Figures 2 and 4 visually inspected; no graph ordinates digitized or assigned invented precision. Table 1 reproduces another study and is not treated as primary experimental data here.
+Scope: finite-thickness plates at low Reynolds number, free stream; no direct validation of ship-scale Reynolds numbers, arbitrary voxel bodies, attached-flow stall onset, or ground effect.

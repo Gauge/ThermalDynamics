@@ -224,6 +224,15 @@ make lift. Real aircraft reach 10–20, so the bound becomes a rig check against
 (a flat plate at 10° gives `CN` within 10 % of the textbook value). The population criterion that
 keeps bricks from flying without thrust stays.
 
+The primary [Ortiz, Rival and Wood plate experiment](https://www.mdpi.com/1996-1073/8/4/2438)
+is a candidate independent post-stall check. Its [eight normal-incidence measurements](../tests/benchmarks/aerodynamics/plate-reference-ortiz-2015.csv)
+and [provenance](../tests/benchmarks/aerodynamics/plate-reference-ortiz-2015.txt) retain the full
+aspect-ratio range and observed transverse residuals. Figures were visually inspected; no graph
+ordinates have yet been digitized. These finite-thickness, low-Reynolds-number plates do not
+establish the accuracy of a ship-scale body-lift law or locate its attached-flow stall boundary.
+The `1.2·sin α` expression above remains an approximation requiring a combined lift-and-drag
+comparison, not an experimentally verified law over every post-stall angle.
+
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
 SEDrag knows which blocks are wings because a file says so: `AeroProperties.xml` gives about a
@@ -1308,6 +1317,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Archived all eight primary flat-plate normal-incidence reference rows, including residuals and measurement basis, for independent lift/drag validation. No model fit or acceptance verdict is claimed. |
 | 2026-09-27 | Corrected AR8's claim that Helmbold is a universal body-lift law, citing NASA flight comparisons. Clarified AR11's common reference area and zero-lift drag basis before lift is implemented; no coefficients or acceptance thresholds changed. |
 | 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Recorded independent controls and a two-specimen pipeline/resume pilot; full corpus scoring remains outstanding. |
 | 2026-09-27 | Added a directional rated-thrust optimizer and schema-1 machine input export. Hand solutions and 80 nonzero vertex-enumeration controls validate force balance and independently recomputed dual bounds; complete population scoring remains open. |
