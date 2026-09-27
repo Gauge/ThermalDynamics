@@ -64,8 +64,9 @@ namespace Thermodynamics.Sim
                     return PrefabCommand(args);
 
                 case "aero-inputs":
-                    if (args.Length != 2) { Console.Error.WriteLine("aero-inputs requires one blueprint path"); return 1; }
-                    Console.WriteLine(AeroPopulationInputs.Report(args[1]));
+                    if (args.Length < 2 || args.Length > 3 || (args.Length == 3 && args[2] != "--json"))
+                    { Console.Error.WriteLine("aero-inputs requires one blueprint path and optional --json"); return 1; }
+                    Console.WriteLine(args.Length == 3 ? AeroPopulationInputs.Json(args[1]) : AeroPopulationInputs.Report(args[1]));
                     return 0;
 
                 case "aero-flight":
@@ -2039,7 +2040,7 @@ namespace Thermodynamics.Sim
             Console.WriteLine("    --load                    full load instead of idle: the control, not G7");
             Console.WriteLine("  drift                   how long a client that joined stale stays wrong");
             Console.WriteLine("  inputs                  each input a client drives its sim from, degraded");
-            Console.WriteLine("  aero-inputs <blueprint>   audit saved grid frames and atmosphere-adjusted rated thruster vectors");
+            Console.WriteLine("  aero-inputs <blueprint> [--json]   audit saved grid frames and atmosphere-adjusted rated thruster vectors");
             Console.WriteLine("  aero-flight             the step 1 moment rigs: a shuttlecock both ways round, and a spin decaying");
             Console.WriteLine("  aero-profile            profile build, first-tick, settled-tick and centre-change cost on synthetic cubes");
             Console.WriteLine("  aero-calibrate          fit the drag model to White's Table 7.3 and predict what it was not fitted to");

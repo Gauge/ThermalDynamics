@@ -242,6 +242,7 @@ server, and `K21` a debugging convenience.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added the K25 directional thrust-feasibility instrument, with checked throttle solutions and numerical bounds. Profile drag comparisons, complete resumable coverage and P1/P2 scoring remain open. |
 | 2026-09-27 | Added and validated K25 population-input prerequisites: saved subgrid frames, force/exhaust sign and atmospheric thrust effectiveness. The complete directional population scorer and P1/P2 walk remain open. |
 | 2026-09-27 | Recorded public drag-profile access and external consumer demand within K25; native handling, population validation and the later flight-model steps remain open. |
 | 2026-09-27 | Recorded the K25 engine adapter, switches and lifecycle implementation. Native handling, multiplayer, edit latency, profile-table API and P1/P2 remain open. |
