@@ -258,14 +258,15 @@ namespace Thermodynamics.Core
             CentreOfMass = mass > 0f ? moment / mass : Vector3.Zero;
 
             Vector3 inertia = Vector3.Zero;
-            float cube = grid.GridSize * grid.GridSize / 6f;
             for (int i = 0; i < blocks.Count; i++)
             {
                 BlockInstance b = blocks[i];
                 Vector3 r = (((Vector3)b.Min + (Vector3)b.MaxExclusive) * 0.5f - new Vector3(0.5f)) * grid.GridSize - CentreOfMass;
-                inertia.X += b.Mass * ((r.Y * r.Y) + (r.Z * r.Z) + cube);
-                inertia.Y += b.Mass * ((r.X * r.X) + (r.Z * r.Z) + cube);
-                inertia.Z += b.Mass * ((r.X * r.X) + (r.Y * r.Y) + cube);
+                Vector3 size = (Vector3)(b.MaxExclusive - b.Min) * grid.GridSize;
+                Vector3 squared = size * size;
+                inertia.X += b.Mass * ((r.Y * r.Y) + (r.Z * r.Z) + ((squared.Y + squared.Z) / 12f));
+                inertia.Y += b.Mass * ((r.X * r.X) + (r.Z * r.Z) + ((squared.X + squared.Z) / 12f));
+                inertia.Z += b.Mass * ((r.X * r.X) + (r.Y * r.Y) + ((squared.X + squared.Y) / 12f));
             }
             Inertia = inertia;
         }
