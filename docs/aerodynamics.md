@@ -1137,6 +1137,11 @@ must restore zero-work, zero-allocation disabled frames. Native API availability
 installed whitelist probe; a build alone is insufficient. These checks do not close native flight,
 multiplayer or the lift portion of AR19.
 
+[Recorded validation](../tests/benchmarks/aerodynamics/profile-api-2026-09-27.txt): clean game build,
+2,571 full offline cases and 47 final focused checks pass. The installed-game whitelist probe
+[admits the profile contract](../tests/benchmarks/aerodynamics/profile-api-whitelist-2026-09-27.txt);
+its two earlier instrument failures and the framework-subset correction are retained in that record.
+
 ## Change log
 
 | Date | Change |

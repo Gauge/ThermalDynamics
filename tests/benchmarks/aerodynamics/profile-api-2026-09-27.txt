@@ -1,0 +1,64 @@
+K25 public drag-profile API validation
+Recorded UTC: 2026-09-27T04:31:57.526030+00:00
+Final source commit: f98c3d284d540cca671ff8449db9694b0b760024
+Host: Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43
+Scope: synthetic offline fixtures; corpus walks disabled; no native session executed.
+All build/test commands used systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0 --quiet.
+Criteria registered in docs/aerodynamics.md before first test run.
+The full run preceded strengthening the array-ownership and consumer-release tests.
+Production source was unchanged; the final focused rerun includes both strengthened tests.
+Final build binary hashes follow (not the earlier full-run test binary):
+SHA256 tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll: 22b08cf0f5897baa09e90125b22ef8f598f1abd97b91aa4a9b7e65467e85ca1e
+SHA256 tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll: d1b64348f967308ee69d7c72b75ef9f0132587b7055682ea013a08a2622a0429
+
+dotnet build tests/Thermodynamics.slnx --no-restore
+  Found ini file: /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/mdk.ini
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Modkit -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/modkit/bin/Debug/netframework48/Modkit.dll
+  Thermodynamics.Presentation -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Presentation/bin/Debug/net9.0/Thermodynamics.Presentation.dll
+  Thermodynamics.Core -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Core/bin/Debug/net9.0/Thermodynamics.Core.dll
+  Thermodynamics -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/bin/Debug/netframework48/Thermodynamics.dll
+  Thermodynamics.Harness -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll
+  Thermodynamics.Sim -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll
+  Thermodynamics.Tests -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll
+  Your mod "Thermodynamics" has been successfully built.
+  The project was successfully packed.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.89
+
+
+dotnet test tests/Thermodynamics.Tests --no-build
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2571, Skipped:     0, Total:  2571, Duration: 1 m 33 s - Thermodynamics.Tests.dll (net9.0)
+
+
+dotnet test tests/Thermodynamics.Tests --no-build --filter 'FullyQualifiedName~AeroProfileApiTests|FullyQualifiedName~AeroRuntimeTests|FullyQualifiedName~ModApiShapeTests|FullyQualifiedName~ThermodynamicsClientTests|FullyQualifiedName~Documentation'
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    47, Skipped:     0, Total:    47, Duration: 2 s - Thermodynamics.Tests.dll (net9.0)
