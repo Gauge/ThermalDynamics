@@ -313,12 +313,12 @@ Where it fits against the other two ways of making one:
 
 A rifle-class hand item. Today it is a **thermal scanner**; the intent is that it also **cools a
 block rapidly, using expendable ammunition, as damage mitigation** — the thing you reach for when a
-block is about to go. **The two halves are priced**: undoing a crossing by hand is twenty-six
-five-kilogram CO2 bottles at the median block and twenty at once to beat its window, which is a
-large radiator with a trigger; but pulling that same block *ten kelvin back from its rating* is half
-a bottle, because damage tracks the overshoot rather than the heat. See
-[document-of-intent.md](document-of-intent.md#acting-on-heat-by-hand--damage-mitigation-and-priced) and
-[balance.md](balance.md#what-a-hand-tool-would-have-to-be-worth).
+block is about to go. The physical reference costs half a five-kilogram CO2 bottle to pull the
+median cooking block ten kelvin back from its rating, versus twenty-six to return it to ambient.
+These are physical-capacity inventory comparisons; the old twenty-at-once argument mixed physical
+energy with a game-time damage window and cannot establish the future tool's power requirement.
+See [the corrected basis](balance.md#what-a-hand-tool-would-have-to-be-worth) and
+[the intended mechanic](document-of-intent.md#acting-on-heat-by-hand--damage-mitigation-and-priced).
 
 | Definition | File |
 | --- | --- |
@@ -352,6 +352,27 @@ inspection finds server-side ammo accounting with special-mode exceptions, rever
 arguments in the installed hit dispatcher, and callbacks even when ordinary safe-zone damage is
 denied. The [boundary notes](../tools/thermal-api-check/README.md#extinguisher-projectile-boundary)
 record these constraints; callback occurrence alone cannot establish cost, range or permission.
+
+
+### Cooling energy boundary — implementation protocol
+
+Before a projectile adapter is enabled, the core energy operation must satisfy these controls:
+
+* Accept physical-equivalent joules, using `ThermalMass × HeatTimeScale` as the capacity. This
+  retains the solver's capacity floor and held-coolant capacity. For a 100 kg block at
+  450 J/(kg K), 4,500 J must remove 0.1 K at clocks 1, 90 and 225, within one stored-temperature ULP.
+* Apply only between completed solver steps, under the caller's exclusive access. Reject an
+  in-flight step, a foreign/removed block, nonfinite inputs or invalid capacity without mutation.
+  This is an ownership contract, not a thread lock.
+* Never heat the target, cross the requested minimum temperature (or the solver minimum), or
+  remove more energy than requested. Report removal from the actual representable temperature
+  difference; sub-resolution requests may remove zero. Float rounding must not mint coolant energy.
+* The next solve must begin from the cooled state; an intervening partial step must not overwrite
+  cooling. Refresh the hottest-block lookup. Existing prior-step damage records remain historical.
+* Independent analytic controls cover clipping, clock scaling, held coolant, repeated pulses,
+  roundoff, invalid inputs and rejection throughout a sliced solve. The operation must allocate
+  no memory after warm-up. Native targeting, consumption, permission policy and ammunition balance
+  remain separate gates; passing the core controls does not close backlog B32.
 
 ## The performance panel
 
@@ -482,6 +503,7 @@ all, so it is the readout that works in any world.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Registered the physical-energy cooling boundary and analytic acceptance controls before implementation; corrected the hand-tool introduction to the same clock basis as the balance page. |
 | 2026-09-27 | Recorded the admitted native projectile boundary for future extinguisher cooling; scanner-only behavior and remaining accounting/session work stay explicit. |
 | 2026-09-08 | **Added the debug heat source** ([backlog.md](backlog.md) `B11`), which is a block with two sliders that registers through `ThermalHeatSources` and nothing else — so what a session sees it do is what every consumer of that path gets. Its dials are saved with the world, which the coolant pump's speed and the heat pump's throttle are not. Its output dial runs from zero to a gigawatt over its own six-decade curve rather than the game's logarithmic slider, which cannot have a floor of zero — and zero **removes the registration** rather than emptying it, so a source turned down costs nothing rather than costing what a gigawatt costs. It draws no power by decision, and says so in three places, because a heat term that is not conserved against anything is the sort of thing that reads as a defect to whoever finds it next. |
 | 2026-08-26 | **The build advice on ring length was written against a model that has changed twice**, and every number in it was wrong. It said the fluid mass does not grow with the ring and that a 32-pipe and an 8-pipe ring carry the same 500 kg — true when the charge was per loop and false since it became per pipe — and it quoted 32,000 W/K against 8,000, which predates `C42`'s 6.25× on the pickup. It also cited `LongerRingsCoupleHarderAndCarryTheSameFluid`, a test that no longer exists. Re-measured: 56,250 W/K at 8 pipes and 181,250 at 28, taking a 500 kW block from **722.7 K to 577.5 K**, and the reason is the coupling rather than the mass. Pinned by `LongerRingsDeliverColderBlocks`, which is what actually asserts it. |
