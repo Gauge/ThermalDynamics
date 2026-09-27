@@ -220,10 +220,14 @@ estimate, not a measured boundary for the plates or block hulls modelled here. S
 validated over the intended geometry and flow range. The candidate separated-flow plate
 approximation is `CN ≈ 1.2·sin α`, subject to the joint force-accounting check below. On the
 drag side, AR11 then charges for the lift. Requirement: body lift is computed from the planform
-the air sees, with that law, and replaces the Newtonian transverse sum. **`K23`'s four criteria are
+the air sees and replaces the Newtonian transverse sum. Helmbold supplies a proposed small-angle
+baseline; it is not sufficient evidence for the complete body/surface force law. The independent
+plate diagnostic below now demonstrates that limitation even before stall. **`K23`'s four criteria are
 re-registered, not inherited.** Its "p95 lift-to-drag ≤ 2" was written against a model that cannot
 make lift. Real aircraft reach 10–20, so the bound becomes a rig check against the formula
-(a flat plate at 10° gives `CN` within 10 % of the textbook value). The population criterion that
+(a flat plate at 10° gives `CN` within 10 % of the textbook value). That formula check verifies
+implementation only; it cannot replace the independent CL/CD observations or establish stall
+behavior. The population criterion that
 keeps bricks from flying without thrust stays.
 
 The primary [Ortiz, Rival and Wood plate experiment](https://www.mdpi.com/1996-1073/8/4/2438)
@@ -1502,6 +1506,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Corrected AR8 in place after the independent comparison: Helmbold remains a baseline, and agreement with its formula is not physical validation of the complete lift law. |
 | 2026-09-27 | Recorded the unfitted small-angle comparison: 12 of 36 primary plate observations have nonoverlapping intervals; no coefficient was tuned. |
 | 2026-09-27 | Added reproducible primary-symbol digitization of plate CL/CD with separate measurement intervals and extraction bounds; no model fitting or acceptance verdict. |
 | 2026-09-27 | Withdrew the generic plate-stall angle and recorded primary bidirectional-incidence evidence; a static lift profile cannot silently claim hysteresis coverage. |
