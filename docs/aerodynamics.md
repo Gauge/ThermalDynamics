@@ -1367,6 +1367,13 @@ original-coordinate certificate reconstruction, the diagnosed specimen, and the 
 unbalanced-force rejection. Any failing case remains unresolved; no subset yields a population
 verdict.
 
+The implementation passes 229 Python checks, with the same unrelated historical-census
+integration check skipped. The new specimen regression fails against the previous implementation
+and passes with the coordinate transform. Forty analytic rotated boxes agree to a maximum
+relative error of 1.50×10⁻¹⁵. The [archived specimen and certificate](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.json)
+are consumed by that regression; the [validation log](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.txt)
+records the before/after check. Population acceptance remains unscored.
+
 ### Instrument validation and end-to-end pilot
 
 [Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at

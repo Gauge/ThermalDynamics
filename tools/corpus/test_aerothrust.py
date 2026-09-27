@@ -1,6 +1,8 @@
 """Directional LP controls: hand solutions, independent vertex enumeration and certificate faults."""
 import copy
 import itertools
+import json
+import pathlib
 import math
 import os
 import sys
@@ -93,6 +95,50 @@ class DirectionalCapacityTests(unittest.TestCase):
             nonzero += expected > 1e-3
         self.assertEqual(80, nonzero)
         print("Directional LP oracle: 80/80 nonzero cases; max absolute discrepancy %.9g N" % max_error)
+
+    def test_rotated_force_boxes_match_analytic_capacity_and_original_frame_certificate(self):
+        rng = np.random.default_rng(20260930)
+        maximum_relative_error = 0
+        for scale in [1e-3, 1, 1e3, 1e9]:
+            for _ in range(10):
+                rotation = np.linalg.qr(rng.normal(size=(3, 3)))[0]
+                positive = rng.uniform(1, 100, 3) * scale
+                negative = rng.uniform(1, 100, 3) * scale
+                local = rng.uniform(-1, 1, 3)
+                local /= np.linalg.norm(local)
+                bounds = np.where(local >= 0, positive, negative)
+                expected = np.min(bounds / np.abs(local))
+                axes = np.concatenate((np.eye(3), -np.eye(3))) @ rotation
+                ratings = np.concatenate((positive, negative))
+                target = local @ rotation
+                result = aerothrust.capacity(axes, ratings, target)
+                error = abs(expected - result['capacity_n'])
+                maximum_relative_error = max(maximum_relative_error, error / expected)
+                self.assertLessEqual(error, result['tolerance_n'])
+                force = (axes * ratings[:, None]).T @ np.array(result['throttles'])
+                self.assertLessEqual(np.linalg.norm(force - result['capacity_n'] * target), result['tolerance_n'])
+                normal = np.array(result['dual_normal'])
+                self.assertAlmostEqual(1, normal @ target)
+                upper = sum(max(0, float(r * (a @ normal))) for a, r in zip(axes, ratings))
+                self.assertLessEqual(abs(upper - expected), result['tolerance_n'])
+        print('Rotated analytic force boxes: 40/40; max relative error %.9g' % maximum_relative_error)
+
+    def test_diagnosed_rotated_box_has_a_valid_original_frame_certificate(self):
+        path = pathlib.Path(__file__).resolve().parents[2] / 'tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.json'
+        record = json.loads(path.read_text())
+        data = record['input']
+        axes = [t['direction'] for t in data['thrusters']]
+        ratings = [t['effective_n'] for t in data['thrusters']]
+        witness = np.array(record['result']['vertex_throttles'])
+        vectors = np.array(axes) * np.array(ratings)[:, None]
+        vector = witness @ vectors
+        expected = np.linalg.norm(vector)
+        direction = vector / expected
+        support = sum(max(0, f @ direction) for f in vectors)
+        self.assertLess(abs(support - expected), 1e-5)
+        result = aerothrust.capacity(axes, ratings, direction)
+        self.assertLessEqual(abs(expected - result['capacity_n']), result['tolerance_n'])
+        self.assertLessEqual(abs(result['duality_gap_n']), result['tolerance_n'])
 
     def test_invalid_inputs_fail_loudly(self):
         cases = [([[2, 0, 0]], [1], [1, 0, 0]), ([[1, 0, 0]], [-1], [1, 0, 0]),

@@ -1,0 +1,34 @@
+Directional LP coordinate correction
+Protocol source: 6f5d81b; implementation accompanies this record.
+Command: python3 -m unittest discover -s tools/corpus -p 'test_*.py'
+MemoryMax=12G, MemorySwapMax=0. Python 3.10.6, NumPy 2.2.6, SciPy 1.15.3.
+230 tests run: 229 passed, one historical census-column check skipped because its external dataset is absent in this isolated checkout.
+Known-resultant support bound is independent of the LP. The diagnosed specimen is development evidence, not a held-out control. New held-out analytic controls use seed 20260930, forty rotated six-axis boxes, rating scales 1e-3 through 1e9. Every primal force residual and dual support bound is recomputed in the original frame. No acceptance tolerance changed.
+
+Independent controls:
+...................................................s...........Near-rank global oracle: 40/40 nonzero cases; max discrepancy 9.09494702e-13 N
+Global thrust oracle: 80/80 nonzero cases; max discrepancy 4.54747351e-13 N
+Rotated analytic force boxes: 40/40; max relative error 1.49485324e-15
+Directional LP oracle: 80/80 nonzero cases; max absolute discrepancy 2.13162821e-13 N
+
+Original implementation, same specimen regression:
+test_diagnosed_rotated_box_has_a_valid_original_frame_certificate (test_aerothrust.DirectionalCapacityTests) ... ERROR
+
+======================================================================
+ERROR: test_diagnosed_rotated_box_has_a_valid_original_frame_certificate (test_aerothrust.DirectionalCapacityTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/k25-envelope-worktree/tools/corpus/test_aerothrust.py", line 139, in test_diagnosed_rotated_box_has_a_valid_original_frame_certificate
+    result = aerothrust.capacity(axes, ratings, direction)
+  File "/tmp/k25-envelope-diagnostic/aerothrust_before_frame.py", line 90, in capacity
+    raise RuntimeError("Primal residual or independent dual gap exceeds tolerance")
+RuntimeError: Primal residual or independent dual gap exceeds tolerance
+
+----------------------------------------------------------------------
+Ran 1 test in 0.004s
+
+FAILED (errors=1)
+
+Corrected complete suite:
+Ran 230 tests in 2.089s
+OK (skipped=1)

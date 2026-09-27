@@ -48,7 +48,8 @@ def capacity(directions, ratings, direction):
     tolerance = RELATIVE_TOLERANCE * scale
     forces = axes * (limits / scale)[:, None]
     # All-zero thrust still goes through the same LP and certificate checks.
-    equality = np.column_stack((forces.T, -target))
+    basis = np.linalg.qr(np.column_stack((target, np.eye(3))))[0]
+    equality = basis.T @ np.column_stack((forces.T, -target))
     objective = np.zeros(len(axes) + 1)
     objective[-1] = -1
     result = linprog(objective, A_eq=equality, b_eq=np.zeros(3),
@@ -79,6 +80,7 @@ def capacity(directions, ratings, direction):
     normal = np.asarray(result.eqlin.marginals, dtype=float)
     if normal.shape != (3,) or not np.isfinite(normal).all():
         raise RuntimeError("Invalid dual normal")
+    normal = basis @ normal
     denominator = float(normal @ target)
     if denominator <= 0 or not np.isfinite(denominator):
         raise RuntimeError("Dual normal does not bound the requested ray")

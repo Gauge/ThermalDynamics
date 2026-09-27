@@ -69,6 +69,9 @@ candidate; the selected resultant has its own feasible witness and support-plane
 A near-rank fixed-heading LP is retained as an unresolved cross-check, without discarding that
 independent proof. The `retained_points` diagnostic counts candidates, which need not all be
 extreme in force space.
+Directional LPs use target-aligned orthonormal coordinates internally; returned dual normals
+and every force certificate are checked in the original frame. Forty independent rotated
+force boxes and the archived gap-rejection specimen cover that numerical change.
 `test_aeropopulation.py` tests incomplete coverage, exclusions, quantiles, uncertainty,
 provenance changes and interrupted receipt replacement.
 
@@ -704,6 +707,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Documented target-aligned LP coordinates with original-frame certificates and independent rotation controls. |
 | 2026-09-27 | Documented near-rank candidate retention, known-resultant certification and forty additional exhaustive controls. |
 | 2026-09-27 | Added the resumable aeropopulation.py runner, aeroenvelope.py global thrust selection and independent envelope/receipt/scoring tests. |
 | 2026-09-27 | Added aerothrust.py, its optional pinned numerical dependencies and independent directional-capacity controls. Documented certificates, tolerances and the absence of a population verdict. |
