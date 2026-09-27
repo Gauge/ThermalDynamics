@@ -1012,7 +1012,8 @@ validation remain open.
 exposed faces per call. The old centre and damping remain visible until every face is ready;
 completion publishes both together. Changing the requested centre restarts partial preparation,
 and the legacy synchronous setter cancels it. The existing cumulative 1 mm cache threshold is
-preserved. The caller must wait for success before using the requested centre for physics; rapid
+preserved. The caller serializes preparation and evaluation and must wait for success before
+using the requested centre for physics; rapid
 mass changes can postpone completion. This is preparation, not a new model of inertia.
 
 Acceptance before timing: `AeroCentreUpdateTests` requires bit-identical force, pressure centre,
@@ -1033,6 +1034,16 @@ case has a 0.692 ms maximum against 0.0021/0.0022 ms fastest/median (32,852 % sp
 It cannot isolate warmed geometry work from first-invocation cost. The instrument now exercises
 centre preparation before collecting samples; this corrects the setup, not an acceptance threshold.
 
+The [warmed centre-cost run](../tests/benchmarks/aerodynamics/centre-cost-warmed-2026-09-27.txt)
+records source `ce1c8fc`, host `fedora`, .NET 9.0.19, tiering disabled and core MVID. On the
+4,096-block/98-direction cube, 1,536 exposed faces take six calls at a budget of 256. The
+per-update peak is **0.0061/0.0065 ms fastest/median**, with a **0.0100 ms maximum**, 63.93 %
+spread across 40 repeats and the minimum unconfirmed at the cap. The 26-direction case reads
+0.0059/0.0064 ms, maximum 0.0077 ms, spread 30.51 %, also capped at 40. All centre slices in
+all six cube/resolution cases allocate **zero bytes**. These are synthetic .NET 9 costs with
+observed scheduling noise, not engine deadlines or population validation. The game-target build
+and 2,553 offline tests pass; the corrected timing setup also has focused instrument checks.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -1051,6 +1062,7 @@ centre preparation before collecting samples; this corrects the setup, not an ac
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Added bounded centre preparation with atomic publication, exact legacy-equivalence checks and zero allocation. Recorded initial and warmed timing runs, including the warmup correction, repeat caps and observed maxima. |
 | 2026-09-26 | Corrected the budgeted builder cache for sub-millimetre centre changes before the first damping read. The legacy implementation measured at that first-read centre; the new preparation had incorrectly reused the initial centre. Added a bit-identity regression and corrected the first-use cost scope in place (E10). |
 | 2026-09-26 | Recorded source-identified maximum-slice measurements and zero evaluation allocations, with list-growth and centre-change costs still explicit. Full offline suite: 2,539 passing cases. |
 | 2026-09-26 | Added resumable profile construction, per-cell ray stepping and stale-result rejection. Registered exact legacy-equivalence checks and maximum-slice timing before measurement. Initial damping is prepared during construction; centre changes still require a surface pass. |

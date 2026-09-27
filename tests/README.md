@@ -374,7 +374,8 @@ it is where the unmodelled rock contact (A16) is visible.
 
 From the repository root, run `DOTNET_TieredCompilation=0 dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-profile`
 after building the solution. It separates synchronous construction, first/settled/centre-shifted
-evaluation and the maximum 256-unit construction slice in each build. Run it under the required
+evaluation, the maximum 256-unit construction slice in each build, and the maximum 256-face
+centre-preparation slice in each centre update. Run it under the required
 memory cap without concurrent tests. The [aerodynamics lab record](../docs/aerodynamics.md#profile-construction-and-tick-cost)
 carries provenance, results and limits; synthetic timing is not population or live-frame validation.
 
@@ -724,6 +725,7 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Added `AeroCentreUpdateTests` for bounded atomic centre changes, cancellation and zero allocation. Added the first-read cache regression and centre-slice instrument checks. Full offline suite: 2,553 passing cases. |
 | 2026-09-26 | Added `AeroProfileBuilderTests` and `VoxelCursorTests` for exact legacy equivalence, bounded work and stale-result rejection. Extended `AeroProfileLabTests` to check the per-build maximum-slice instrument. |
 | 2026-09-26 | Registered `AeroFlightTests` in the suite index and reproduced the round-6 calibration and S5–S8 flight claims. Full offline suite: 2,494 cases, no failures; corpus walks were not enabled. |
 | 2026-09-20 | Add teardown fault-injection and session-boundary regression checks. |
