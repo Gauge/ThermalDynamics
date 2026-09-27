@@ -296,6 +296,20 @@ An implementation matching its own formula still needs this independent physical
 An incompatible observation is retained as evidence of model scope, not deleted or reclassified
 as a bad measurement. Drag and hysteresis remain separate required validation work.
 
+The [complete pointwise diagnostic](../tests/benchmarks/aerodynamics/plate-small-angle-2026-09-27.json)
+retains all 36 selected observations. At AR=0.5, 3 of 18 intervals do not overlap; at AR=1,
+9 of 18 do not overlap. Maximum absolute centre residuals are 0.08480 and 0.08817 CL,
+respectively. These counts describe this experiment and its stated pointwise intervals; they
+are not a statistical significance test or an estimate of a ship population. The unfitted
+linear law therefore does not cover every observation even in this small-angle subset.
+No slope, offset or vortex coefficient was adjusted to remove the discrepancy.
+
+[plate_lift_check.py](../tools/corpus/plate_lift_check.py) reproduces the diagnostic from the
+committed reference. Analytic slope/uncertainty, invalid-input and complete-stratum controls
+pass; the full Python suite runs 240 checks, with 239 passing and the unrelated historical-data
+check skipped. The model expression and selection rule were committed in `57b102b` before
+computation. Physical lift validation remains open.
+
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
 SEDrag knows which blocks are wings because a file says so: `AeroProperties.xml` gives about a
@@ -1488,6 +1502,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Recorded the unfitted small-angle comparison: 12 of 36 primary plate observations have nonoverlapping intervals; no coefficient was tuned. |
 | 2026-09-27 | Added reproducible primary-symbol digitization of plate CL/CD with separate measurement intervals and extraction bounds; no model fitting or acceptance verdict. |
 | 2026-09-27 | Withdrew the generic plate-stall angle and recorded primary bidirectional-incidence evidence; a static lift profile cannot silently claim hysteresis coverage. |
 | 2026-09-27 | Corrected authored-data provenance for a runtime loaded from a different checkout; absent runtime metadata now fails explicitly. |

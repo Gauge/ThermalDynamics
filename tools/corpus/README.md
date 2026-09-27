@@ -61,6 +61,20 @@ state the scope and reproduction command. This is reference preparation, not a f
 `test_plate_reference.py` checks analytic coordinates, legend exclusion, ambiguous/missing bars,
 changed sources and preservation of the multivalued near-stall region.
 
+`plate_lift_check.py` compares the unfitted Helmbold small-angle proposal with every primary CL
+observation at `1° ≤ |α| ≤ 10°`. It propagates incidence extraction bounds and keeps measurement
+and coefficient-extraction bounds separate. This pointwise diagnostic does not fit a model or
+score flight/population acceptance:
+
+```
+python3 tools/corpus/plate_lift_check.py tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.csv /tmp/plate-small-angle.json
+```
+
+The [recorded result](../../tests/benchmarks/aerodynamics/plate-small-angle-2026-09-27.json)
+includes every selected observation and input/source hashes. Missing aspect/sign strata,
+duplicate observations and invalid intervals fail explicitly. `test_plate_lift_check.py` holds
+the analytical and coverage controls.
+
 ## Resumable aerodynamic population walk
 
 `aeropopulation.py` connects blueprint eligibility, `aeroenvelope.py` global maximum resultant
@@ -731,6 +745,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added the unfitted small-angle plate compatibility diagnostic with pointwise uncertainty and complete-stratum controls. |
 | 2026-09-27 | Added hash-bound primary plate-figure extraction and independent coordinate/failure controls. |
 | 2026-09-27 | Required runtime-reported authored-data provenance when fingerprinting a population generation. |
 | 2026-09-27 | Documented target-aligned LP coordinates with original-frame certificates and independent rotation controls. |
