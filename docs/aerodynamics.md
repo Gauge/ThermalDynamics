@@ -878,6 +878,32 @@ is suitable for bodies whose principal inertia axes coincide with the grid axes,
 cube and shuttlecock. Arbitrary asymmetric hulls need the products of inertia before their
 coupled rotations can be claimed accurate. This is not a replacement for the game's mass tensor.
 
+### Flight-lab validity and integration checks
+
+`AeroFlightLab` rejects empty or nonfinite mass properties, invalid inputs and durations that do
+not contain a positive tick or cannot fit its step counter. A nonfinite force, torque, spin or
+heading aborts the measurement before it can be interpreted as stability. A spin that has not
+halved within the observation limit returns positive infinity, meaning censored, not zero.
+The duration is rounded to the nearest whole tick; the default is 1/60 s.
+
+The validity checks reproduce three earlier failures: an empty or zero-duration flight could
+look stable, negative spin could appear to halve immediately, and an infinite duration could
+run for billions of ticks. The interrupted infinite-duration reproduction is not a completed
+test run. Half-life now compares the magnitude of either spin direction and timestamps a
+crossing after the tick that crossed it, removing a one-tick underestimate.
+
+`AeroFlightTests` checks both the physical controls and the integrator. In vacuum the initial
+20° kick persists for all 3,600 ticks. At 120 and 240 Hz the restoring rig still meets S5 without
+the numerical guard, with final heading within 0.1° and the last 5° crossing within 0.1 s of
+60 Hz. The spin clock also agrees within two default ticks with an independent ODE solution:
+for `I dω/dt = -ρ C K ω|ω|/2`, the half-life is `2 I/(ρ C K |ω₀|)`.
+
+For the four-cell cube used by that check, each cell is 2.5 m across and the half-width is
+`a = 5 m`. Face-centre quadrature gives
+`K = 2 × 4 × 6.25 × Σ |z|(a² + z²) = 17,968.75 m⁵`, with
+`z = {-3.75, -1.25, 1.25, 3.75} m`. This validates the clock against the model's stated spatial
+quadrature; it does not claim that face-centre quadrature is the exact continuous-surface drag.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -896,6 +922,7 @@ coupled rotations can be claimed accurate. This is not a replacement for the gam
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Hardened the flight instrument against empty, nonfinite and unbounded runs; corrected signed-spin detection and crossing timestamps. Added vacuum, tick-refinement and analytic quadratic-drag controls without changing S5–S8 acceptance criteria. |
 | 2026-09-26 | Corrected the flight profile's multi-cell inertia against analytic cuboids: five of seven new checks failed first, then all seven passed. Recorded the uniform-density and diagonal-tensor limits; the existing single-cell flight rigs retain their results. |
 | 2026-09-26 | Independently revalidated the inherited round-6 work: full solution build, 32 aerodynamics tests, 2,494 offline cases and the flight lab. Clarified that the profile remains an offline library and recorded the multi-cell inertia check still needed. |
 | 2026-09-25 | **Round 6 and the moment rigs recorded.** The surface-read normal holds X1 and X2; X3 failed on first implementation, was revised, and was re-judged on untuned geometry, all within 0.044 of exact. The drag misses round 5's bars again (15 of 22) and holds resolution invariance (X4) — the 7×7 plate reads 1.04 where it read 0.29. S5 to S8 all hold, S5 by one second. The constants shipped are round 6's. |
