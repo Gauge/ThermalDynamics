@@ -278,6 +278,24 @@ separate from measurement confidence intervals. Printed digits preserve the coor
 not experimental precision. All 235 Python checks pass, with one unrelated historical-data
 integration check skipped. This validates extraction, not an aerodynamic model.
 
+#### Small-angle compatibility lab, registered before computation
+
+Evaluate the already proposed unfitted Helmbold law `CL = CL_α·α` against every retained CL
+observation whose plotted incidence centre satisfies `1° ≤ |α| ≤ 10°`, for both available
+aspect ratios. Use radians in the law. Propagate the recorded incidence extraction bound
+through the linear slope, and expand each measured 95% interval by its separate coefficient
+extraction bound. Report interval overlap and signed centre residual for every selected row;
+do not fit a slope, offset, vortex term or stall angle, average away a branch, or extrapolate
+outside this subset. Missing/nonfinite inputs, empty coverage or absent aspect/sign strata
+invalidate the diagnostic.
+
+This is a pointwise compatibility check of a pre-existing proposal, not a new population or
+flight-model acceptance threshold and not a confidence statement about simultaneous coverage.
+The source plots were already inspected during extraction; this is not a blinded experiment.
+An implementation matching its own formula still needs this independent physical comparison.
+An incompatible observation is retained as evidence of model scope, not deleted or reclassified
+as a bad measurement. Drag and hysteresis remain separate required validation work.
+
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
 SEDrag knows which blocks are wings because a file says so: `AeroProperties.xml` gives about a
