@@ -18,6 +18,8 @@ namespace Thermodynamics.Core
 
         public float Mass;
 
+        public DragProfile Drag;
+
         public float PowerProducedWatts;
 
         public float PowerConsumedWatts;

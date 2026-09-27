@@ -26,10 +26,8 @@ namespace Thermodynamics.Tests
     /// </para>
     ///
     /// <para>
-    /// **And nothing writes to a grid's motion.** The source is read for the calls that apply a
-    /// force or an impulse, because the force pass is game code a harness cannot run. When the
-    /// profile's force pass lands this becomes a statement about where it is applied rather than
-    /// about its absence.
+    /// The new profile adapter owns every physics write. Source reach checks supplement the
+    /// independent wrench and lifecycle rigs; they do not execute the engine or prove native handling.
     /// </para>
     /// </summary>
     public class AerodynamicStripTests
@@ -91,7 +89,7 @@ namespace Thermodynamics.Tests
 
         [Fact]
 
-        public void NothingInTheModWritesToAGridsMotion()
+        public void TheProfileAdapterOwnsEveryPhysicsWrite()
         {
             string root = Path.Combine(ShippedBlocks.RepoRoot(), "Thermodynamics");
             Regex writes = new Regex(@"\.(AddForce|ApplyImpulse|ApplyForce)\s*\(|LinearVelocity\s*=[^=]");
@@ -113,13 +111,13 @@ namespace Thermodynamics.Tests
             }
 
             Assert.True(read > 100, "read only " + read + " mod source files, which is not the mod");
-            Assert.True(found.Count == 0,
-                "the mod writes to a grid's motion again:\n  " + string.Join("\n  ", found));
+            Assert.Equal(2, found.Count);
+            Assert.All(found, line => Assert.Contains("ThermalGridAerodynamics.cs", line));
         }
 
         [Fact]
 
-        public void TheApiReportsTheForceItAppliesWhichIsNone()
+        public void TheApiReportsTheForceAppliedByTheAdapter()
         {
             string api = File.ReadAllText(Path.Combine(ShippedBlocks.ModRoot(), "ThermalApi.cs"));
 
@@ -128,8 +126,8 @@ namespace Thermodynamics.Tests
                 RegexOptions.Singleline);
 
             Assert.True(body.Success, "GetGridAeroForces is no longer declared the way this reads it");
-            Assert.Equal("return new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero);",
-                body.Groups[1].Value.Trim());
+            Assert.Contains("thermals.AeroForceWorld", body.Groups[1].Value);
+            Assert.Contains("Vector3.Zero", body.Groups[1].Value);
         }
     }
 }

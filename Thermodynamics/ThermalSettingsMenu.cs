@@ -69,6 +69,8 @@ namespace Thermodynamics
 
             { "EnablePlanets", new Entry(Systems, "Planets", "Per-planet ambient, air and ground temperatures.", 0, 1) },
 
+            { "EnableAeroForces", new Entry(Aero, "Aerodynamic forces", "Drag, restoring moments and spin damping. Turn off when another mod owns aerodynamic forces.", 0, 1) },
+            { "AeroProfileDirections", new Entry(Aero, "Profile directions", "98 directions is the fidelity default; enter 26 for a cheaper profile. Other values resolve to 98.", 26, 98, true) },
             { "EnableFriction", new Entry(Aero, "Friction heating", "Atmospheric heating above the speed threshold: the share of the air's work on the hull that lands in the surface.", 0, 1) },
 
             { "EnableWind", new Entry(Environment, "Wind", "The wind field and everything that shapes it; off is no wind anywhere, though a grid still feels its own motion.", 0, 1) },
@@ -429,7 +431,7 @@ namespace Thermodynamics
             new Folder("Aerodynamics",
 
                 new Leaf("Friction heating",
-                    "EnableFriction")
+                    "EnableAeroForces", "AeroProfileDirections", "EnableFriction")
                     .Then("FrictionAtSpeedsAbove", "FrictionScale", "EnableWindwardShielding")),
 
 

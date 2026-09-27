@@ -53,7 +53,7 @@ namespace Thermodynamics.Harness
         /// <paramref name="seconds"/>, and reports the angle between the heading and the flight path.
         /// </summary>
         public static Flight Fly(AeroProfile profile, Vector3 heading, float speed, float density,
-            float kickDegrees, float seconds, float tick = Tick)
+            float kickDegrees, float seconds, float tick = Tick, bool worldAdapter = false)
         {
             ValidateProfile(profile);
             int steps = StepCount(seconds, tick);
@@ -73,11 +73,22 @@ namespace Thermodynamics.Harness
                 Matrix toGrid = Matrix.Transpose(attitude);
                 Vector3 air = Vector3.TransformNormal(-path * speed, toGrid);
 
-                Vector3 force, torque, damping, centre;
-                profile.Evaluate(air, density, omega, AeroCoefficients.Fitted, Viscosity, out force, out torque, out damping, out centre);
-                CheckForces(force, torque, damping, centre);
-                if (AeroProfile.Guard(ref force, ref damping, air, omega, profile.Mass, inertia, tick)) flight.GuardBound++;
-                torque += damping;
+                Vector3 torque;
+                if (worldAdapter)
+                {
+                    AeroWrench world = AeroForces.Evaluate(profile, attitude, -path * speed,
+                        Vector3.TransformNormal(omega, attitude), density, profile.Mass, tick);
+                    torque = Vector3.TransformNormal(world.Restoring + world.Damping, toGrid);
+                    if (world.Guarded) flight.GuardBound++;
+                }
+                else
+                {
+                    Vector3 force, damping, centre;
+                    profile.Evaluate(air, density, omega, AeroCoefficients.Fitted, Viscosity, out force, out torque, out damping, out centre);
+                    CheckForces(force, torque, damping, centre);
+                    if (AeroProfile.Guard(ref force, ref damping, air, omega, profile.Mass, inertia, tick)) flight.GuardBound++;
+                    torque += damping;
+                }
 
                 Vector3 spin = inertia * omega;
                 Vector3 accel = (torque - Vector3.Cross(omega, spin)) / inertia;
@@ -115,11 +126,9 @@ namespace Thermodynamics.Harness
             Vector3 inertia = profile.Inertia;
             for (int i = 0; i < steps; i++)
             {
-                Vector3 force, torque, damping, centre;
-                profile.Evaluate(Vector3.Zero, density, omega, AeroCoefficients.Fitted, Viscosity, out force, out torque, out damping, out centre);
-                CheckForces(force, torque, damping, centre);
-                if (AeroProfile.Guard(ref force, ref damping, Vector3.Zero, omega, profile.Mass, inertia, tick)) guardBound++;
-                torque += damping;
+                AeroWrench world = AeroForces.Evaluate(profile, Matrix.Identity, Vector3.Zero, omega, density, profile.Mass, tick);
+                if (world.Guarded) guardBound++;
+                Vector3 torque = world.Restoring + world.Damping;
                 omega += (torque / inertia) * tick;
                 if (!Finite(omega)) throw new InvalidOperationException("The spin's angular velocity became nonfinite.");
                 if (Math.Abs(omega.Y) <= Math.Abs(rate) / 2f) return (i + 1) * tick;
@@ -172,15 +181,15 @@ namespace Thermodynamics.Harness
         {
             StringBuilder sb = new StringBuilder();
             AeroProfile profile = AeroProfile.Build(Shuttlecock(), AeroProfile.FineDirections);
-            Flight forward = Fly(profile, Vector3.Backward, 50f, 1.225f, 20f, 60f);
-            Flight backward = Fly(profile, Vector3.Forward, 50f, 1.225f, 20f, 60f);
+            Flight forward = Fly(profile, Vector3.Backward, 50f, 1.225f, 20f, 60f, worldAdapter: true);
+            Flight backward = Fly(profile, Vector3.Forward, 50f, 1.225f, 20f, 60f, worldAdapter: true);
 
             AeroProfile cube = AeroProfile.Build(AeroCalibrationLab.Box(8, 8, 8), AeroProfile.FineDirections);
             int thick, thin;
             float dense = SpinHalfLife(cube, 1f, 1f, 3600f, out thick);
             float sparse = SpinHalfLife(cube, 0.5f, 1f, 3600f, out thin);
 
-            sb.AppendLine("Step 1 moment rigs, 60 Hz, sea-level air, 50 m/s");
+            sb.AppendLine("Step 1 moment rigs through world adapter, 60 Hz, sea-level air, 50 m/s");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "  S5 shuttlecock boom-first, kicked 20°: last outside 5° at {0:0.0} s, worst of the last 10 s {1:0.00}°, after 60 s {2:0.00}°, guard bound {3}",
                 forward.LastOutsideFive, forward.WorstLateError, forward.FinalError, forward.GuardBound));

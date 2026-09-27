@@ -209,6 +209,7 @@ whether a cheaper rung is known to be possible and nobody has built it.
 | Convection | `EnableConvection` | 2 | None known. |
 | Waste heat | `EnableWasteHeat` | 2 | None known: it is a per-block fraction of a wattage the game already reports. |
 | Point heat sources | `EnableHeatSources` | 2 | The inverse square is already cut off by range. A rung that sampled the registry less often is possible and has never been wanted, because the registry is usually empty. |
+| Aerodynamic forces | `EnableAeroForces` | 3 | Off, 26 directions, or the default 98-direction profile; thermal heating is independent. |
 | Aerodynamic friction | `EnableFriction` | 2 + dials | `FrictionScale` and `FrictionAtSpeedsAbove` are balance dials rather than fidelity rungs — they change how much friction there is, not how well it is modelled. |
 | Windward shielding | `EnableWindwardShielding` | 2 | On or off. There is no cheaper form that is still the mechanism — the pass is already sliced and already budgeted — and the rung below it is the unshielded model, which is what off means. |
 | Room air | `EnableRoomAir` | 2 | **A cheaper rung is possible and unbuilt.** Room air is a well-mixed body already; what is expensive is the flood fill that finds the rooms, and a coarser or less frequent map is a rung. `D2` measures the fill at **3,934 ticks — about eleven minutes — on a million blocks** (re-measured 2026-08-28 by `bench scale --max 1000000`; the 7,207 this row carried predates the 2026-08-26 word skip and the 2026-08-27 span flood). **What the rung would buy is latency rather than CPU**: the mapper is budgeted per tick and capped at 4,096 cells, so convergence is the bounding volume divided by that cap and the performance passes moved the milliseconds without moving the wait. A *coarser* map shortens it; a *less frequent* one makes it worse, so only one of the two rungs this row names is the rung. |
@@ -241,6 +242,8 @@ Each switch removes exactly its own mechanism and its own cost.
 | `EnableHeatSources` | `true` | Gain from point sources registered by other mods. |
 | `EnableWasteHeat` | `true` | Heat from power production, power draw and thrust. |
 | `EnablePlanets` | `true` | Planetary climate. Off means ambient is always `VacuumTemperature`. |
+| `EnableAeroForces` | `true` | Per-tick drag, restoring moments and spin damping. Off clears the force profile and stops physics writes; use off with another aerodynamic force mod. |
+| `AeroProfileDirections` | `98` | Direction-table resolution: 98 by default, or 26 for lower construction and evaluation cost. Other values resolve to 98. |
 | `EnableFriction` | `true` | Aerodynamic heating at speed in atmosphere. |
 | `EnableWind` | `true` | The wind field and everything that shapes it: the boundary-layer profile, terrain speed-up and shelter, slope channelling, the diurnal cycle and burial. Off is no wind anywhere rather than the game's wind unmodelled, because the game exposes a ceiling rather than a wind. A grid still feels its own motion through the air. |
 | `EnableDamage` | `true` | Damage above a block's critical temperature. |

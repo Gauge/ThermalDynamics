@@ -36,7 +36,7 @@ into atmosphere and into the air of sealed rooms, arrives from the sun, and — 
 | Underground | Depth blunts the day out over tens of metres, then the rock warms toward the planet's core below the sea-level deadzone. |
 | Point sources | Other mods register heat sources bound to an entity or a position; they radiate like small suns. A **Debug Heat Source** block drives the same path from the terminal, so the mechanism can be seen without writing a second mod. |
 | Aerodynamic friction | Fast atmospheric flight heats leading surfaces with the cube of relative airspeed. |
-| Aerodynamic forces | **Being rebuilt, and off until it is.** The drag and lift this mod used to apply are removed while a flight model with real moments, lift and stall replaces them. A ship's top speed is the game's cap, or [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed)'s if you run that mod. |
+| Aerodynamic forces | **Drag and moments rebuilt; native validation is still open.** The default-on force channel uses cached geometry and current motion each physics tick. Lift and stall remain unfinished; `EnableAeroForces` disables the channel. A ship's top speed is the game's cap, or [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed)'s if you run that mod. |
 | Waste heat | Power producers and consumers convert a configurable share of throughput into heat; thrusters heat with throttle, which is what makes hydrogen thrusters run hot. |
 | Coolant loops | Closed rings of coolant pipe with a pump form a shared fluid mass that pulls heat out of adjacent blocks; radiators shed it to space. |
 | Heat pumps | The one block that moves heat *up* a gradient, for an electrical cost set by Carnot: cheap across a small difference, ruinous across a large one. |

@@ -93,6 +93,10 @@ namespace Thermodynamics
         [ProtoMember(17)] public bool EnablePlanets = true;
         [ProtoMember(18)] public bool EnableFriction = true;
 
+        [ProtoMember(165)] public bool EnableAeroForces = true;
+
+        [ProtoMember(166)] public int AeroProfileDirections = 98;
+
         [ProtoMember(128)] public bool EnableWind = true;
         [ProtoMember(19)] public bool EnableDamage = true;
         [ProtoMember(20)] public bool EnableCoolantLoops = true;
@@ -265,6 +269,7 @@ namespace Thermodynamics
             MigrateLoopCoupling();
 
             if (Frequency < 1) Frequency = 1;
+            if (AeroProfileDirections != 26) AeroProfileDirections = 98;
 
             if (TemperatureSyncInterval < 0.5f) TemperatureSyncInterval = 0.5f;
             if (HeatTimeScale <= 0f) HeatTimeScale = 1f;
@@ -467,7 +472,7 @@ namespace Thermodynamics
                 "EnableEnvironment", "EnableConduction", "EnableRadiation", "EnableConvection",
                 "EnableSolarHeat", "ShadowDetail", "SolarTerrainRange", "SolarOcclusionSamples",
                 "EnableHeatSources", "EnableWasteHeat", "EnablePlanets",
-                "EnableFriction", "EnableWind", "EnableDamage", "EnableCoolantLoops", "EnableRoomAir",
+                "EnableFriction", "EnableAeroForces", "AeroProfileDirections", "EnableWind", "EnableDamage", "EnableCoolantLoops", "EnableRoomAir",
                 "EnableHeatPumps", "WellMixedCoolant",
                 "ClampOvershoot", "DamageIsPerSecond",
                 "Frequency", "HeatTimeScale", "MaxElementVisitsPerStep",
@@ -521,6 +526,8 @@ namespace Thermodynamics
                 case "EnableWasteHeat": return Flag(EnableWasteHeat);
                 case "EnablePlanets": return Flag(EnablePlanets);
                 case "EnableFriction": return Flag(EnableFriction);
+                case "EnableAeroForces": return Flag(EnableAeroForces);
+                case "AeroProfileDirections": return AeroProfileDirections;
                 case "EnableWind": return Flag(EnableWind);
                 case "EnableDamage": return Flag(EnableDamage);
                 case "EnableCoolantLoops": return Flag(EnableCoolantLoops);
@@ -622,6 +629,8 @@ namespace Thermodynamics
                 case "EnableWasteHeat": EnableWasteHeat = Flag(value); return true;
                 case "EnablePlanets": EnablePlanets = Flag(value); return true;
                 case "EnableFriction": EnableFriction = Flag(value); return true;
+                case "EnableAeroForces": EnableAeroForces = Flag(value); return true;
+                case "AeroProfileDirections": AeroProfileDirections = (int)value; return true;
                 case "EnableWind": EnableWind = Flag(value); return true;
                 case "EnableDamage": EnableDamage = Flag(value); return true;
                 case "EnableCoolantLoops": EnableCoolantLoops = Flag(value); return true;

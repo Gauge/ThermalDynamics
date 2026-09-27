@@ -52,6 +52,20 @@ namespace Thermodynamics.Client
         public Vector3 Lift;
     }
 
+    public struct AeroMoments
+    {
+        public Vector3 Restoring;
+        public Vector3 Damping;
+    }
+
+    public struct AeroStatus
+    {
+        public bool Ready;
+        public bool Guarded;
+        public int BuildWork;
+        public int CentreWork;
+    }
+
     public struct CoolantLoopInfo
     {
         public bool Found;
@@ -93,6 +107,8 @@ namespace Thermodynamics.Client
         private Func<IMyCubeGrid, MyTuple<float, float>> getGridHeatBalance;
         private Func<IMyCubeGrid, float> getGridFrictionWatts;
         private Func<IMyCubeGrid, MyTuple<Vector3, Vector3>> getGridAeroForces;
+        private Func<IMyCubeGrid, MyTuple<Vector3, Vector3>> getGridAeroMoments;
+        private Func<IMyCubeGrid, MyTuple<bool, bool, int, int>> getGridAeroStatus;
         private Func<IMySlimBlock, MyTuple<bool, float, float, float, int>> getCoolantLoop;
         private Func<IMySlimBlock, float[], bool> setBlockDragProfile;
         private Func<IMySlimBlock, bool> clearBlockDragProfile;
@@ -140,6 +156,8 @@ namespace Thermodynamics.Client
             getGridHeatBalance = null;
             getGridFrictionWatts = null;
             getGridAeroForces = null;
+            getGridAeroMoments = null;
+            getGridAeroStatus = null;
             getCoolantLoop = null;
             setBlockDragProfile = null;
             clearBlockDragProfile = null;
@@ -192,6 +210,8 @@ namespace Thermodynamics.Client
             getGridHeatBalance = Get<Func<IMyCubeGrid, MyTuple<float, float>>>(table, "GetGridHeatBalance");
             getGridFrictionWatts = Get<Func<IMyCubeGrid, float>>(table, "GetGridFrictionWatts");
             getGridAeroForces = Get<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>(table, "GetGridAeroForces");
+            getGridAeroMoments = Get<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>(table, "GetGridAeroMoments");
+            getGridAeroStatus = Get<Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>>(table, "GetGridAeroStatus");
             getCoolantLoop = Get<Func<IMySlimBlock, MyTuple<bool, float, float, float, int>>>(table, "GetCoolantLoop");
             setBlockDragProfile = Get<Func<IMySlimBlock, float[], bool>>(table, "SetBlockDragProfile");
             clearBlockDragProfile = Get<Func<IMySlimBlock, bool>>(table, "ClearBlockDragProfile");
@@ -307,6 +327,28 @@ namespace Thermodynamics.Client
             return result;
         }
 
+
+        public AeroMoments GetGridAeroMoments(IMyCubeGrid grid)
+        {
+            AeroMoments result = new AeroMoments();
+            if (getGridAeroMoments == null || grid == null) return result;
+            MyTuple<Vector3, Vector3> t = getGridAeroMoments(grid);
+            result.Restoring = t.Item1;
+            result.Damping = t.Item2;
+            return result;
+        }
+
+        public AeroStatus GetGridAeroStatus(IMyCubeGrid grid)
+        {
+            AeroStatus result = new AeroStatus();
+            if (getGridAeroStatus == null || grid == null) return result;
+            MyTuple<bool, bool, int, int> t = getGridAeroStatus(grid);
+            result.Ready = t.Item1;
+            result.Guarded = t.Item2;
+            result.BuildWork = t.Item3;
+            result.CentreWork = t.Item4;
+            return result;
+        }
 
         public CoolantLoopInfo GetCoolantLoop(IMySlimBlock pipeBlock)
         {

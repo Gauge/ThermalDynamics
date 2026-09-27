@@ -181,6 +181,7 @@ namespace Thermodynamics
 
         public override void Close()
         {
+            ResetAerodynamics();
             if (Stats != null)
             {
                 Stats.Close();
