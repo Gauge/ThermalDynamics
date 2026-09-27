@@ -41,6 +41,38 @@ python3 tools/corpus/panel.py out/census-2026-08-25/census.csv \
                              out/census-2026-08-21 out/knobs-2026-08-21   # every dataset, one page
 ```
 
+## Directional aerodynamic thrust inputs
+
+`aerothrust.py` consumes schema-1 JSON from the C# `aero-inputs` command and uses SciPy's HiGHS
+linear-program solver to maximize force along each of the six saved main-grid headings. Every
+answer includes throttle fractions, the force-balance residual, a recomputed dual support bound
+and its gap. An optimizer success without valid numerical certificates fails the command.
+A lone oblique thruster cannot supply pure forward force; positive projections are not summed.
+
+This tool requires NumPy and SciPy; the validated versions are pinned in
+`requirements-aerothrust.txt`. They are optional dependencies of this command, not of the existing
+CSV scorers. The JSON output records both versions, the tool's source hash, input-file hash,
+blueprint hash and harness MVID. Inputs must retain the six opposed orthonormal headings and the
+sea-level convention. Thruster unit vectors are normalized only within the 1e-5 allowance for
+blueprint float roundoff. The solver normalizes force by the largest rating (at least 1 N), then
+requires force residual and absolute dual gap at most 1e-7 of that scale. Boundary results within
+that numerical tolerance must remain unresolved in any later population scorer.
+
+After the solution build, run each command under the memory cap required by `O1`:
+
+```bash
+dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs /path/to/bp.sbc --json > /tmp/aero-inputs.json
+python3 tools/corpus/aerothrust.py /tmp/aero-inputs.json > /tmp/aero-thrust.json
+python3 -m unittest discover -s tools/corpus -p test_aerothrust.py
+```
+
+`test_aerothrust.py` checks hand solutions, rotation/order/splitting/scale invariance, 80 seeded
+nonzero comparisons against independent vertex enumeration, malformed inputs and injected
+primal/dual faults. It also tests the machine-input contract. The C# `AeroPopulationInputTests`
+check the JSON export against installed ratings and the engine's force/exhaust direction.
+These are rated-force diagnostics with unlimited power/fuel and torque compensation. They do not
+reserve simultaneous hovering thrust, establish native control feasibility, or score P1/P2.
+
 ## The core corpus — a walk of the population in eleven minutes
 
 `core.py` draws a **stratified sample with weights**, committed as
@@ -638,6 +670,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added aerothrust.py, its optional pinned numerical dependencies and independent directional-capacity controls. Documented certificates, tolerances and the absence of a population verdict. |
 | 2026-09-24 | **The shape walk is retired with the shape term it measured.** `K25`'s strip removed the Newtonian shape factor from the friction row and the aerodynamic force derived from it, so `CorpusShapeWalk`, `shape.py` and `test_shape.py` are deleted and the census no longer carries `shape_factor` or `lift_over_drag`. The committed [`summary-shape-2026-08-31.csv`](summary-shape-2026-08-31.csv) stays as the record the pages quote. `cruise.py` and `dragfit.py` keep working on a census without the column — every hull reads as shape 1 — and `cruise.py`'s default coefficient is renamed `RETIRED_DRAG_COEFFICIENT`, because no coefficient ships until the rebuilt force does. Separately, `provenance.py` read `Cubes.xml` from its pre-MDK2 path and four of its checks had been failing, and `test_cruise.py` had pinned the coefficient at 0.5 for two weeks after it became 1.54; 205 checks pass. |
 | 2026-08-28 | **`cap.py` reads a sampled walk with weights, and says which halves a sample cannot answer.** `A13`'s last open half is the cap walk, and the core corpus walks it in 78 minutes rather than eleven hours — but it is a *weighted* sample, and this report had no weights: read unweighted it would have printed a complete-looking population whose giants are outnumbered twenty to one. The dataset is recognised by `scoring.is_core_walk` rather than by a flag, every population figure is weighted and named `weighted`, and the identity check deliberately is not — *did the capped arm cap* is an assertion about the walk, and weighting it would hide a broken pair on a ship of weight 1 behind twenty good ones on a ship of weight 20. **Two halves report `?` rather than passing**: a maximum is one observation and cannot be sampled, so the cost prediction's max-under-10-K half is unscoreable on a sampled walk, and an unscorable half never rescues a failing one (`E8`). `--csv` gives the walk a committed source, from the same `provenance.summary_rows` `verdict.py` uses (`P5`, `E5`); the 2026-08-25 summary reproduces byte for byte through it. `core.py --score` now splits a paired walk to the arm that ships, which it had not — a mixture of two configurations has every column one configuration has (`M1`, `P6`). |
 | 2026-08-28 | **`pace.py`'s ratio reads every mark of a resumed walk, not just its first slice.** The morning's fix made a resumed walk's counts cumulative, and cumulative counts do not land on the reference's ten-file grid — so the intersection was empty after the first resume and **21 of 268** marks were in use. The reference is interpolated at the subject's own counts now, bounded to five marks because the corpus is largest-first. The air re-take reads 2.94x over 3,166 files against 3.05x over its first 400. |

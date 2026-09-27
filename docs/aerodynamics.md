@@ -1169,6 +1169,31 @@ the installed engine/SBC sources and two blueprint audits. The full offline suit
 cases; 56 final focused checks pass after strengthening the pose tests. The multi-grid example
 has all six thrusters on its main grid; rotated subgrid force directions are covered synthetically.
 
+## Directional thrust capacity
+
+The population instrument must solve for usable force along a heading, not add positive
+projections of individual thrusters: a lone angled thruster has a forward projection but cannot
+produce pure forward force. For rated vectors F_i and requested unit direction d, solve
+`maximize λ`, subject to `Σ throttle_i F_i = λ d`, `0 ≤ throttle_i ≤ 1`, `λ ≥ 0`.
+This assumes independent throttling, unlimited power/fuel and torque compensation. It does not
+prove a native controller can realize the command, nor does it reserve thrust for hovering while
+travelling. Those are separate flight requirements; the registered P1/P2 comparison is a rated
+force/drag diagnostic.
+
+Acceptance fixed before measurement: aligned axes, a lone oblique thruster, unequal opposed
+oblique pairs and rank-deficient sets must match hand calculations. Permuting, splitting or
+uniformly scaling thrusters and rotating the whole fixture must preserve the corresponding result.
+Seeded small configurations must match an independent enumeration of feasible vertices, with
+nonzero cases counted. Every accepted numerical result must supply bounded throttle settings,
+force-balance residual and a separately recomputed support-function upper bound from the solver's
+dual normal; a fake solver success with invalid primal or dual data must be rejected. The tolerance
+is 1e-7 times the largest thruster rating (minimum scale 1 N), reported in newtons. Results inside
+that tolerance of a later acceptance boundary are unresolved, never silently rounded into a pass.
+
+This solver adds no gravity, torque, drag or population-selection assumptions to the optimization.
+The later P1/P2 runner must state those choices and retain complete corpus coverage and resume
+provenance. No P1/P2 threshold or physical drag coefficient changes here.
+
 ## Change log
 
 | Date | Change |

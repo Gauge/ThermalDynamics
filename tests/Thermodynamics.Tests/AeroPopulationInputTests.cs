@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.Json;
 using System.Xml.Linq;
 using Thermodynamics.Harness;
 using VRageMath;
@@ -133,6 +134,51 @@ namespace Thermodynamics.Tests
                 Assert.Equal(translated.Translation, shifted.Frame.World.Translation);
                 Blueprints.Grid origin = Assert.Single(ships[0].Grids, part => part.Frame.World.Translation == Vector3D.Zero);
                 Near(Vector3D.Forward, origin.Frame.World.Forward);
+            }
+            finally { File.Delete(path); }
+        }
+
+        [Fact]
+        public void JsonExportCarriesForceDirectionsRatingsAndSixReferenceHeadings()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "aero-json-" + Guid.NewGuid().ToString("n") + ".sbc");
+            try
+            {
+                XNamespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
+                XElement grid = new XElement("CubeGrid", new XElement("GridSizeEnum", "Large"), Pose(MatrixD.Identity),
+                    new XElement("CubeBlocks", new XElement("MyObjectBuilder_CubeBlock",
+                        new XAttribute(xsi + "type", "MyObjectBuilder_Thrust"),
+                        new XElement("SubtypeName", "LargeBlockSmallThrust"),
+                        new XElement("Min", new XAttribute("x", 0), new XAttribute("y", 0), new XAttribute("z", 0)))));
+                new XDocument(new XElement("Definitions", new XElement("ShipBlueprints", new XElement("ShipBlueprint",
+                    new XElement("CubeGrids", grid))))).Save(path);
+                using (JsonDocument document = JsonDocument.Parse(AeroPopulationInputs.Json(path)))
+                {
+                    JsonElement root = document.RootElement;
+                    Assert.Equal(1, root.GetProperty("schema").GetInt32());
+                    Assert.Equal("aero-population-inputs", root.GetProperty("kind").GetString());
+                    Assert.Equal(1, root.GetProperty("relative_air_density").GetDouble());
+                    Assert.True(root.GetProperty("atmosphere").GetBoolean());
+                    Assert.Equal(1, root.GetProperty("grids").GetInt32());
+                    Assert.Equal(GameBlocks.BySubtype()["LargeBlockSmallThrust"].Mass, root.GetProperty("mass_kg").GetDouble());
+                    JsonElement thrusters = root.GetProperty("thrusters");
+                    Assert.Equal(1, thrusters.GetArrayLength());
+                    Assert.Equal(345600, thrusters[0].GetProperty("nominal_n").GetDouble());
+                    Assert.InRange(thrusters[0].GetProperty("effective_n").GetDouble(), 69119.9, 69120.1);
+                    JsonElement direction = thrusters[0].GetProperty("direction");
+                    Assert.Equal(0, direction[0].GetDouble());
+                    Assert.Equal(0, direction[1].GetDouble());
+                    Assert.Equal(1, direction[2].GetDouble());
+                    JsonElement headings = root.GetProperty("headings");
+                    Assert.Equal(6, headings.GetArrayLength());
+                    for (int i = 0; i < headings.GetArrayLength(); i++)
+                    {
+                        if (headings[i].GetProperty("name").GetString() != "forward") continue;
+                        Assert.Equal(-1, headings[i].GetProperty("direction")[2].GetDouble());
+                        return;
+                    }
+                    Assert.Fail("The exported reference headings omitted forward.");
+                }
             }
             finally { File.Delete(path); }
         }

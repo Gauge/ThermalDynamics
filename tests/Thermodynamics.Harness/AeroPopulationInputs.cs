@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Security.Cryptography;
 using System.Text;
 using Thermodynamics.Core;
@@ -50,6 +52,38 @@ namespace Thermodynamics.Harness
             }
             return result;
         }
+
+        /// <summary>Machine-readable sea-level inputs for the independent directional-thrust optimizer.</summary>
+        public static string Json(string path)
+        {
+            List<Blueprints.Ship> ships = Blueprints.Read(path);
+            if (ships.Count != 1) throw new InvalidDataException("Expected one readable blueprint: " + path);
+            Blueprints.Ship ship = ships[0];
+            List<Thruster> thrust = Read(ship, 1f, true);
+            string digest;
+            using (SHA256 hash = SHA256.Create())
+            using (Stream stream = File.OpenRead(path))
+                digest = BitConverter.ToString(hash.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+            return JsonSerializer.Serialize(new
+            {
+                schema = 1, kind = "aero-population-inputs", blueprint = Path.GetFullPath(path),
+                blueprint_sha256 = digest, harness_mvid = typeof(AeroPopulationInputs).Assembly.ManifestModule.ModuleVersionId,
+                relative_air_density = 1f, atmosphere = true, grids = ship.Grids.Count,
+                mass_kg = ship.Grids.Sum(g => g.Builder.Grid.Blocks.Sum(b => (double)b.Mass)),
+                headings = Enumerable.Range(0, Face.Count).Select(face => new
+                {
+                    name = ShipLoad.DirectionName(face),
+                    direction = Components(Vector3D.TransformNormal((Vector3D)Face.Offsets[face], ship.Grids[0].Frame.World))
+                }),
+                thrusters = thrust.Select(t => new
+                {
+                    grid = t.Grid, definition = t.Definition, direction = Components(t.Direction),
+                    nominal_n = t.Nominal, effective_n = t.Effective
+                })
+            });
+        }
+
+        private static double[] Components(Vector3D v) { return new[] { v.X, v.Y, v.Z }; }
 
         public static string Report(string path)
         {

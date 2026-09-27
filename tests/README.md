@@ -381,9 +381,10 @@ carries provenance, results and limits; synthetic timing is not population or li
 
 ## Aerodynamic population inputs
 
-Run `dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs <blueprint>` under the
+Run `dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs <blueprint> [--json]` under the
 memory cap after building. It prints each thruster's saved world-space force direction, nominal
-rating and atmospheric rating, plus the blueprint hash and harness MVID. Missing/invalid grid poses
+rating and atmospheric rating, plus the blueprint hash and harness MVID. The `--json` mode also
+exports model mass and six main-grid headings for [aerothrust.py](../tools/corpus/README.md#directional-aerodynamic-thrust-inputs). Missing/invalid grid poses
 or unknown definitions fail the audit. The command does not build aerodynamic profiles or score
 P1/P2. [The population input record](../docs/aerodynamics.md#population-input-validation) states the
 engine source checks, synthetic controls and remaining population requirements.
