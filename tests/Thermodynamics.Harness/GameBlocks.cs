@@ -33,6 +33,27 @@ namespace Thermodynamics.Harness
             public float PowerDrawWatts;
 
             public float ThrustNewtons;
+            public float MinPlanetaryInfluence;
+            public float MaxPlanetaryInfluence = 1f;
+            public float EffectivenessAtMinInfluence = 1f;
+            public float EffectivenessAtMaxInfluence = 1f;
+            public bool NeedsAtmosphereForInfluence;
+
+            /// <summary>Rated force at the engine's relative air density, with unlimited fuel/power and multiplier one.</summary>
+            public float EffectiveThrust(float planetaryInfluence, bool inAtmosphere)
+            {
+                if (float.IsNaN(planetaryInfluence) || float.IsInfinity(planetaryInfluence))
+                    throw new ArgumentException("Planetary influence must be finite.", "planetaryInfluence");
+                float scale = 1f;
+                if (NeedsAtmosphereForInfluence && !inAtmosphere) scale = EffectivenessAtMinInfluence;
+                else if (MaxPlanetaryInfluence != MinPlanetaryInfluence)
+                {
+                    float t = Math.Max(0f, Math.Min(1f, (planetaryInfluence - MinPlanetaryInfluence)
+                        / (MaxPlanetaryInfluence - MinPlanetaryInfluence)));
+                    scale = EffectivenessAtMinInfluence + t * (EffectivenessAtMaxInfluence - EffectivenessAtMinInfluence);
+                }
+                return ThrustNewtons * scale;
+            }
 
 
             public List<BlockComponent> Components = new List<BlockComponent>();
@@ -279,7 +300,15 @@ namespace Thermodynamics.Harness
                 Math.Max(Megawatts(definition, "MaxRequiredPowerInput"),
                     Math.Max(Megawatts(definition, "MaxPowerConsumption"),
                         Megawatts(definition, "OperationalPowerConsumption"))));
-            if (block.TypeId == "Thrust") block.ThrustNewtons = Number(definition, "ForceMagnitude");
+            if (block.TypeId == "Thrust")
+            {
+                block.ThrustNewtons = Number(definition, "ForceMagnitude");
+                block.MinPlanetaryInfluence = FlightNumber(definition, "MinPlanetaryInfluence");
+                block.MaxPlanetaryInfluence = FlightNumber(definition, "MaxPlanetaryInfluence", 1f);
+                block.EffectivenessAtMinInfluence = FlightNumber(definition, "EffectivenessAtMinInfluence", 1f);
+                block.EffectivenessAtMaxInfluence = FlightNumber(definition, "EffectivenessAtMaxInfluence", 1f);
+                block.NeedsAtmosphereForInfluence = (bool?)definition.Element("NeedsAtmosphereForInfluence") ?? false;
+            }
 
 
             block.JumpEnergyJoules = Number(definition, "PowerNeededForJump") * 3600f
@@ -351,6 +380,17 @@ namespace Thermodynamics.Harness
             return Number(definition, name) * ThermalConstants.MegawattsToWatts;
         }
 
+
+        private static float FlightNumber(XElement definition, string name, float fallback = 0f)
+        {
+            XElement element = definition.Element(name);
+            if (element == null) return fallback;
+            float value;
+            if (!float.TryParse(element.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out value)
+                || float.IsNaN(value) || float.IsInfinity(value))
+                throw new FormatException("Nonfinite or malformed thruster field: " + name);
+            return value;
+        }
 
         private static float Number(XElement definition, string name)
         {

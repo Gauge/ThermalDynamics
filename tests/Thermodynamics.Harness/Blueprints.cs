@@ -17,6 +17,8 @@ namespace Thermodynamics.Harness
             public bool Large;
             public int Blocks;
             public GridBuilder Builder;
+            public BlueprintFrame Frame;
+
 
             public readonly Dictionary<long, Vector3I> BlocksById = new Dictionary<long, Vector3I>();
 
@@ -382,6 +384,7 @@ namespace Thermodynamics.Harness
                 Name = (string)grid.Element("DisplayName") ?? "(unnamed)",
                 Large = large,
                 Builder = large ? GridBuilder.Large() : GridBuilder.Small(),
+                Frame = BlueprintFrame.Read(grid.Element("PositionAndOrientation")),
             };
 
             foreach (XElement block in blocks.Elements())

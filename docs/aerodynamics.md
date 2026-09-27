@@ -1142,6 +1142,28 @@ multiplayer or the lift portion of AR19.
 [admits the profile contract](../tests/benchmarks/aerodynamics/profile-api-whitelist-2026-09-27.txt);
 its two earlier instrument failures and the framework-subset correction are retained in that record.
 
+## Population input validation
+
+The old census records nominal installed thrust, and its reader did not retain grid world poses.
+A directional profile comparison must first retain those inputs. The new flight-input reader keeps
+nominal thrust unchanged and adds the engine's effectiveness curve as a separate quantity. Before
+measuring corpus hulls, require: synthetic ion/atmospheric/default curves reproduce hand-computed
+endpoints, midpoint and clamping; equal influence endpoints follow the engine's multiplier-one
+branch; atmosphere-required thrusters use their minimum effectiveness in vacuum. Exhaust-forward
+must produce force backward. A rotated subgrid must rotate that force into the blueprint world
+frame; common rigid rotation must preserve magnitudes and relative directions. Missing, nonfinite
+or degenerate poses must be reported rather than silently replaced by identity. Tests must cover
+both Forward/Up and quaternion forms and their XML assignment order. Installed definition checks
+must pin a nonzero ion, atmospheric and hydrogen example to independently read SBC values.
+
+The inspection command `aero-inputs <blueprint>` reports full-power rated thrust vectors at relative
+air density 1, with atmosphere present. It assumes unlimited power/fuel, functioning blocks and
+thrust multiplier one; it does not infer cargo, current enable/override state or resource sufficiency.
+It is an input audit, not a P1/P2 scorer. The later scorer must address directional thrust feasibility,
+self-lifting population selection, multiple-grid geometry and complete resumable corpus coverage.
+Historical nominal-thrust census results retain their original scope. No drag coefficients or P1/P2
+thresholds change with this input work.
+
 ## Change log
 
 | Date | Change |
