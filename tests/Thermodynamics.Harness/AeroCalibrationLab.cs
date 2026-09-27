@@ -182,7 +182,7 @@ namespace Thermodynamics.Harness
         {
             StringBuilder sb = new StringBuilder();
             AeroCoefficients c = result.Coefficients;
-            sb.AppendLine("Subsonic drag model, round 5: every sourced body, each predicted without itself");
+            sb.AppendLine("Subsonic drag model: every sourced body, each predicted without itself");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "  offset {0:0.00000}  stagnation {1:0.00000}  base attached {2:0.00000}  base separated {3:0.00000}  reattach {4:0.00000}  lab friction {5:0.00000}  residual {6:0.0000}",
                 c.Offset, c.Stagnation, c.BaseAttached, c.BaseSeparated, c.ReattachLength, result.LabFriction, result.Residual));
@@ -200,7 +200,35 @@ namespace Thermodynamics.Harness
             sb.AppendLine();
             sb.AppendLine(string.Format("  W1: {0} of {1} within ±25 % out of sample; W2: {2} of {1} within ±50 %",
                 result.Within(0.25f), result.Scored, result.Within(0.5f)));
+            sb.AppendLine();
+            sb.AppendLine("  X4 resolution invariance, fitted coefficients: C_D at radius 4, 8, 24");
+            foreach (KeyValuePair<string, float[]> row in Invariance(result.Coefficients, result.LabFriction))
+            {
+                float at24 = row.Value[2];
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "    {0,-22} {1:0.000} ({2:+0.0%;-0.0%;0.0%})  {3:0.000} ({4:+0.0%;-0.0%;0.0%})  {5:0.000}",
+                    row.Key, row.Value[0], (row.Value[0] / at24) - 1f, row.Value[1], (row.Value[1] / at24) - 1f, at24));
+            }
             return sb.ToString();
+        }
+
+        /// <summary>X4: four bodies at radius 4, 8 and 24, read with the same coefficients.</summary>
+        public static List<KeyValuePair<string, float[]>> Invariance(AeroCoefficients c, float friction)
+        {
+            List<KeyValuePair<string, float[]>> rows = new List<KeyValuePair<string, float[]>>();
+            int[] radii = { 4, 8, CalibrationRadius };
+            string[] names = { "square plate", "cube face-on", "cone 30°", "hemisphere" };
+            for (int n = 0; n < names.Length; n++)
+            {
+                float[] values = new float[radii.Length];
+                for (int i = 0; i < radii.Length; i++)
+                {
+                    int r = radii[i];
+                    GridModel body = n == 0 ? Box(r, r, 1) : n == 1 ? Box(r, r, r) : n == 2 ? Cone(30f, r) : Hemisphere(r);
+                    values[i] = AeroDrag.Coefficient(AeroGeometry.View(body, Upstream), c, friction);
+                }
+                rows.Add(new KeyValuePair<string, float[]>(names[n], values));
+            }
+            return rows;
         }
 
         private static string Error(Rig rig, float value)
