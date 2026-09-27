@@ -1,3 +1,4 @@
+using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
 using VRageMath;
@@ -24,6 +25,8 @@ namespace Thermodynamics.Tests
             AeroFlightLab.Flight flight = AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, 1.225f, 20f, 60f);
 
             Assert.True(flight.LastOutsideFive <= 30f, "still outside 5° at " + flight.LastOutsideFive + " s");
+            Assert.Equal(3600, flight.Steps);
+            Assert.InRange(flight.FinalError, 0f, 5f);
             Assert.Equal(0, flight.GuardBound);
         }
 
@@ -64,6 +67,107 @@ namespace Thermodynamics.Tests
 
             Assert.True(bound);
             Assert.Equal(-100f * 0.01f / AeroFlightLab.Tick, damping.Y, 2);
+        }
+
+        [Fact]
+        public void EmptyFlightCannotLookLikeAStableHeading()
+        {
+            AeroProfile empty = AeroProfile.Build(new GridModel(2.5f), AeroProfile.CoarseDirections);
+            Assert.Throws<ArgumentException>(() => AeroFlightLab.Fly(empty, Vector3.Backward, 50f, 1f, 20f, 1f));
+        }
+
+        [Theory]
+        [InlineData(0f)]
+        [InlineData(-1f)]
+        [InlineData(float.NaN)]
+        [InlineData(float.PositiveInfinity)]
+        public void AnInvalidFlightDurationIsRejected(float seconds)
+        {
+            Assert.Throws<ArgumentException>(() => AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, 1f, 20f, seconds));
+        }
+
+        [Fact]
+        public void AnOverflowingForceCannotPassAsZeroHeadingError()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+                AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, float.MaxValue, 20f, 1f));
+        }
+
+        [Fact]
+        public void VacuumIsTheControlThatDoesNotRestoreAHeading()
+        {
+            AeroFlightLab.Flight flight = AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, 0f, 20f, 60f);
+            Assert.Equal(3600, flight.Steps);
+            Assert.Equal(20f, flight.FinalError, 3);
+            Assert.Equal(60f, flight.LastOutsideFive, 3);
+        }
+
+        [Fact]
+        public void ASpinHalvesTheSameWayInEitherDirection()
+        {
+            AeroProfile cube = AeroProfile.Build(AeroCalibrationLab.Box(4, 4, 4), AeroProfile.CoarseDirections);
+            int positiveGuard, negativeGuard;
+            float positive = AeroFlightLab.SpinHalfLife(cube, 1f, 1f, 3600f, out positiveGuard);
+            float negative = AeroFlightLab.SpinHalfLife(cube, 1f, -1f, 3600f, out negativeGuard);
+            Assert.True(positive > 0f && positive < 3600f);
+            Assert.Equal(positive, negative);
+            Assert.Equal(0, positiveGuard + negativeGuard);
+        }
+
+        [Fact]
+        public void AFirstTickCrossingIsTimedAfterThatTick()
+        {
+            AeroProfile cube = AeroProfile.Build(AeroCalibrationLab.Box(4, 4, 4), AeroProfile.CoarseDirections);
+            int guard;
+            float time = AeroFlightLab.SpinHalfLife(cube, 1e8f, 1f, 1f, out guard);
+            Assert.Equal(1, guard);
+            Assert.Equal(AeroFlightLab.Tick, time);
+        }
+
+        [Theory]
+        [InlineData(0f)]
+        [InlineData(-1f)]
+        [InlineData(float.NaN)]
+        [InlineData(float.PositiveInfinity)]
+        public void AnInvalidIntegrationTickIsRejected(float tick)
+        {
+            Assert.Throws<ArgumentException>(() => AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, 1f, 20f, 1f, tick));
+        }
+
+        [Fact]
+        public void ASpinThatHasNotHalvedIsReportedAsCensored()
+        {
+            int guard;
+            Assert.Equal(float.PositiveInfinity, AeroFlightLab.SpinHalfLife(Shuttlecock, 0f, 1f, 1f, out guard));
+            Assert.Equal(0, guard);
+        }
+
+        [Theory]
+        [InlineData(120)]
+        [InlineData(240)]
+        public void TheRestoringFlightConvergesAsTheTickIsRefined(int frequency)
+        {
+            AeroFlightLab.Flight baseline = AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, 1.225f, 20f, 60f);
+            AeroFlightLab.Flight fine = AeroFlightLab.Fly(Shuttlecock, Vector3.Backward, 50f, 1.225f, 20f, 60f, 1f / frequency);
+            Assert.Equal(60 * frequency, fine.Steps);
+            Assert.True(fine.LastOutsideFive <= 30f);
+            Assert.InRange(Math.Abs(fine.FinalError - baseline.FinalError), 0f, 0.1f);
+            Assert.InRange(Math.Abs(fine.LastOutsideFive - baseline.LastOutsideFive), 0f, 0.1f);
+            Assert.Equal(0, fine.GuardBound);
+        }
+
+        [Fact]
+        public void TheSpinClockAgreesWithTheQuadraticDragSolution()
+        {
+            AeroProfile cube = AeroProfile.Build(AeroCalibrationLab.Box(4, 4, 4), AeroProfile.CoarseDirections);
+            // The four-cell cube's face-centre quadrature is K = 2*n*A*sum(|z|*(a²+z²)).
+            // I*dω/dt = -ρ*C*K*ω²/2 has half-life I/(ρ*C*K*ω₀/2); see aerodynamics.md.
+            float inertia = 64f * Catalog.HeavyArmor().Mass * 100f / 6f;
+            float expected = inertia / (0.5f * 1.17f * 17968.75f);
+            int guard;
+            float actual = AeroFlightLab.SpinHalfLife(cube, 1f, 1f, 3600f, out guard);
+            Assert.InRange(Math.Abs(actual - expected), 0f, 2f * AeroFlightLab.Tick);
+            Assert.Equal(0, guard);
         }
     }
 }

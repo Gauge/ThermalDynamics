@@ -53,14 +53,20 @@ namespace Thermodynamics.Harness
         /// <paramref name="seconds"/>, and reports the angle between the heading and the flight path.
         /// </summary>
         public static Flight Fly(AeroProfile profile, Vector3 heading, float speed, float density,
-            float kickDegrees, float seconds)
+            float kickDegrees, float seconds, float tick = Tick)
         {
+            ValidateProfile(profile);
+            int steps = StepCount(seconds, tick);
+            if (!Finite(heading) || !Finite(heading.LengthSquared()) || heading.LengthSquared() <= 0f
+                || !Finite(speed) || speed < 0f || !Finite(density) || density < 0f || !Finite(kickDegrees))
+                throw new ArgumentException("Flight inputs must be finite, with a nonzero heading and nonnegative speed and density.");
+
             Flight flight = new Flight();
             Vector3 path = Vector3.Normalize(heading);
             Matrix attitude = Matrix.CreateRotationY(kickDegrees * (float)Math.PI / 180f);
             Vector3 omega = Vector3.Zero;
             Vector3 inertia = profile.Inertia;
-            int steps = (int)Math.Round(seconds / Tick);
+            flight.MaxError = Error(attitude, heading, path);
 
             for (int i = 0; i < steps; i++)
             {
@@ -69,14 +75,16 @@ namespace Thermodynamics.Harness
 
                 Vector3 force, torque, damping, centre;
                 profile.Evaluate(air, density, omega, AeroCoefficients.Fitted, Viscosity, out force, out torque, out damping, out centre);
-                if (AeroProfile.Guard(ref force, ref damping, air, omega, profile.Mass, inertia, Tick)) flight.GuardBound++;
+                CheckForces(force, torque, damping, centre);
+                if (AeroProfile.Guard(ref force, ref damping, air, omega, profile.Mass, inertia, tick)) flight.GuardBound++;
                 torque += damping;
 
                 Vector3 spin = inertia * omega;
                 Vector3 accel = (torque - Vector3.Cross(omega, spin)) / inertia;
-                omega += accel * Tick;
+                omega += accel * tick;
+                if (!Finite(omega)) throw new InvalidOperationException("The flight's angular velocity became nonfinite.");
 
-                float angle = omega.Length() * Tick;
+                float angle = omega.Length() * tick;
                 if (angle > 0f)
                 {
                     Matrix turn = Matrix.CreateFromAxisAngle(Vector3.Normalize(omega), angle);
@@ -84,9 +92,10 @@ namespace Thermodynamics.Harness
                 }
 
                 float error = Error(attitude, heading, path);
+                if (!Finite(error)) throw new InvalidOperationException("The flight's attitude became nonfinite.");
                 if (error > flight.MaxError) flight.MaxError = error;
-                if (error > 5f) flight.LastOutsideFive = (i + 1) * Tick;
-                if (i * Tick >= seconds - 10f && error > flight.WorstLateError) flight.WorstLateError = error;
+                if (error > 5f) flight.LastOutsideFive = (i + 1) * tick;
+                if ((i + 1) * tick >= seconds - 10f && error > flight.WorstLateError) flight.WorstLateError = error;
                 flight.FinalError = error;
                 flight.Steps++;
             }
@@ -94,21 +103,61 @@ namespace Thermodynamics.Harness
         }
 
         /// <summary>Seconds for a hull spun at <paramref name="rate"/> about Y in still air to halve its spin.</summary>
-        public static float SpinHalfLife(AeroProfile profile, float density, float rate, float limit, out int guardBound)
+        public static float SpinHalfLife(AeroProfile profile, float density, float rate, float limit, out int guardBound,
+            float tick = Tick)
         {
+            ValidateProfile(profile);
+            int steps = StepCount(limit, tick);
+            if (!Finite(density) || density < 0f || !Finite(rate) || rate == 0f)
+                throw new ArgumentException("Spin inputs must have finite nonnegative density and a finite nonzero rate.");
             guardBound = 0;
             Vector3 omega = new Vector3(0f, rate, 0f);
             Vector3 inertia = profile.Inertia;
-            for (int i = 0; i * Tick < limit; i++)
+            for (int i = 0; i < steps; i++)
             {
                 Vector3 force, torque, damping, centre;
                 profile.Evaluate(Vector3.Zero, density, omega, AeroCoefficients.Fitted, Viscosity, out force, out torque, out damping, out centre);
-                if (AeroProfile.Guard(ref force, ref damping, Vector3.Zero, omega, profile.Mass, inertia, Tick)) guardBound++;
+                CheckForces(force, torque, damping, centre);
+                if (AeroProfile.Guard(ref force, ref damping, Vector3.Zero, omega, profile.Mass, inertia, tick)) guardBound++;
                 torque += damping;
-                omega += (torque / inertia) * Tick;
-                if (omega.Y <= rate / 2f) return i * Tick;
+                omega += (torque / inertia) * tick;
+                if (!Finite(omega)) throw new InvalidOperationException("The spin's angular velocity became nonfinite.");
+                if (Math.Abs(omega.Y) <= Math.Abs(rate) / 2f) return (i + 1) * tick;
             }
             return float.PositiveInfinity;
+        }
+
+        private static int StepCount(float seconds, float tick)
+        {
+            double count = Math.Round((double)seconds / tick);
+            if (!Finite(seconds) || seconds <= 0f || !Finite(tick) || tick <= 0f || count < 1d || count > int.MaxValue)
+                throw new ArgumentException("The duration must contain at least one finite positive tick and fit the step counter.");
+            return (int)count;
+        }
+
+        private static void ValidateProfile(AeroProfile profile)
+        {
+            if (profile == null) throw new ArgumentNullException("profile");
+            Vector3 inertia = profile.Inertia;
+            if (!Finite(profile.Mass) || profile.Mass <= 0f || !Finite(profile.CentreOfMass)
+                || !Finite(inertia) || inertia.X <= 0f || inertia.Y <= 0f || inertia.Z <= 0f)
+                throw new ArgumentException("The flight rig needs finite positive mass and inertia.", "profile");
+        }
+
+        private static void CheckForces(Vector3 force, Vector3 torque, Vector3 damping, Vector3 centre)
+        {
+            if (!Finite(force) || !Finite(torque) || !Finite(damping) || !Finite(centre))
+                throw new InvalidOperationException("The aerodynamic model returned a nonfinite force, torque or centre.");
+        }
+
+        private static bool Finite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        private static bool Finite(Vector3 value)
+        {
+            return Finite(value.X) && Finite(value.Y) && Finite(value.Z);
         }
 
         private static float Error(Matrix attitude, Vector3 heading, Vector3 path)
@@ -133,8 +182,8 @@ namespace Thermodynamics.Harness
 
             sb.AppendLine("Step 1 moment rigs, 60 Hz, sea-level air, 50 m/s");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                "  S5 shuttlecock boom-first, kicked 20°: last outside 5° at {4:0.0} s, worst of the last 10 s {1:0.00}°, after 60 s {2:0.00}°, guard bound {3}",
-                forward.MaxError, forward.WorstLateError, forward.FinalError, forward.GuardBound, forward.LastOutsideFive));
+                "  S5 shuttlecock boom-first, kicked 20°: last outside 5° at {0:0.0} s, worst of the last 10 s {1:0.00}°, after 60 s {2:0.00}°, guard bound {3}",
+                forward.LastOutsideFive, forward.WorstLateError, forward.FinalError, forward.GuardBound));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "  S6 shuttlecock plate-first, kicked 20°: max {0:0.0}°, after 60 s {1:0.0}°, guard bound {2}",
                 backward.MaxError, backward.FinalError, backward.GuardBound));
