@@ -1,0 +1,3699 @@
+{
+  "scope": "New specimen encountered after coordinate correction was committed; no retuning",
+  "implementation": "82176f95",
+  "input": {
+    "schema": 1,
+    "kind": "aero-population-inputs",
+    "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/853505259/bp.sbc",
+    "blueprint_sha256": "f8f8f0d79488d23fdeda9b65a485cc4c062e2b8587181ea27f12cf17dd8789ea",
+    "harness_mvid": "06e28448-4bc6-4d7d-9daf-2f96d63a50ac",
+    "core_mvid": "19547a8a-7dcb-4d0e-9d5a-de4adfc44c40",
+    "relative_air_density": 1,
+    "atmosphere": true,
+    "grids": 2,
+    "definition_upgrades": 0,
+    "mass_kg": 816409.7962417603,
+    "headings": [
+      {
+        "name": "forward",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ]
+      },
+      {
+        "name": "left",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ]
+      },
+      {
+        "name": "up",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ]
+      },
+      {
+        "name": "down",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ]
+      },
+      {
+        "name": "right",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ]
+      },
+      {
+        "name": "backward",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ]
+      }
+    ],
+    "thrusters": [
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -0.9999999999999964,
+          -5.960462345910072e-08,
+          5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockLargeHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 480000,
+        "effective_n": 480000
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockLargeHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 480000,
+        "effective_n": 480000
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallHydrogenThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 98400,
+        "effective_n": 98400
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          -3.576278722050339e-07,
+          -0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          3.576278722050339e-07,
+          0.9999999999999343
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          5.960464477538671e-08,
+          -0.9999999999999343,
+          3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          0.9999999999999964,
+          5.960462345910072e-08,
+          -5.960466609166507e-08
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      },
+      {
+        "grid": 0,
+        "definition": "SmallBlockSmallThrust",
+        "direction": [
+          -5.960464477538671e-08,
+          0.9999999999999343,
+          -3.5762786865232024e-07
+        ],
+        "nominal_n": 14400,
+        "effective_n": 2879.9998
+      }
+    ]
+  },
+  "result": {
+    "capacity_n": 3302402.923231148,
+    "direction": [
+      -0.034883684701025985,
+      0.6816857005577573,
+      0.730813063783591
+    ],
+    "throttles": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "force_residual_n": 0.0,
+    "dual_normal": [
+      -0.034883684701025985,
+      0.6816857005577573,
+      0.730813063783591
+    ],
+    "dual_upper_n": 3302402.923231148,
+    "duality_gap_n": 0.0,
+    "tolerance_n": 0.096,
+    "vertex_force_n": [
+      -115199.98232974189,
+      2251200.850246811,
+      2413439.1981744426
+    ],
+    "certificate_method": "feasible resultant and support-plane upper bound",
+    "vertex_throttles": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "vertex_norm_n": 3302402.923231148,
+    "retained_points": 8,
+    "heading": "maximum-resultant",
+    "directional_lp": {
+      "capacity_n": 3302402.914173256,
+      "throttles": [
+        0.9999998902870443,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.999995391901554,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "force_residual_n": 0.009704765690987695,
+      "active_condition": 136.47849058021018,
+      "dual_normal": [
+        2.9318166703606803e-09,
+        4.893559889915913e-07,
+        1.368338520576054
+      ],
+      "dual_upper_n": 3302402.923231148,
+      "duality_gap_n": 0.009057892020791769,
+      "tolerance_n": 0.048,
+      "status": "resolved"
+    }
+  }
+}

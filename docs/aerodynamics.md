@@ -1373,6 +1373,11 @@ and passes with the coordinate transform. Forty analytic rotated boxes agree to 
 relative error of 1.50×10⁻¹⁵. The [archived specimen and certificate](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.json)
 are consumed by that regression; the [validation log](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.txt)
 records the before/after check. Population acceptance remains unscored.
+A [later specimen, 853505259](../tests/benchmarks/aerodynamics/population-lp-frame-followup-2026-09-27.json),
+also rejected by the original LP, passes the committed correction without retuning: the
+known-resultant capacity is 3,302,402.92323 N, with zero reported support gap; the independent
+LP gap is 0.00906 N within its unchanged tolerance. This is another specimen check, not a
+population finding.
 
 ### Runtime-authored data provenance
 
