@@ -6,6 +6,7 @@ Does not execute the snippets or alter a running game. See docs/thermal-vision-l
 import argparse
 import hashlib
 import pathlib
+import re
 import shutil
 import struct
 import subprocess
@@ -32,6 +33,29 @@ def replace_once(text, old, new):
     return text.replace(old, new, 1)
 
 
+def verify_aero_contract(source):
+    """Fail if the inspected engine's force/torque units differ from the adapter's contract."""
+    def body(name):
+        match = re.search(r"private void " + name + r"\([^\n]+\)\s*\{(.*?)\n\t\}", source, re.S)
+        if not match:
+            raise RuntimeError("Missing physics implementation: " + name)
+        return re.sub(r"\s+", "", match.group(1))
+
+    force = body("ApplyForceWorld")
+    angular = body("ApplyImplusesWorld")
+    dispatch = body("AddForceInternal")
+    if "rigidBody.ApplyForce(1f/60f,force.Value);" not in force:
+        raise RuntimeError("World force no longer has the expected engine timestep")
+    if "rigidBody.ApplyPointImpulse(force.Value,position.Value-Offset);" not in angular:
+        raise RuntimeError("World linear impulse conversion changed")
+    if "rigidBody.ApplyAngularImpulse(torque.Value*(1f/60f)*MyFakes.SIMULATION_SPEED);" not in angular:
+        raise RuntimeError("World angular argument is no longer the expected torque")
+    world_case = re.search(r"caseMyPhysicsForceType.APPLY_WORLD_FORCE:(.*?)break;", dispatch)
+    if not world_case or "ApplyForceWorld(force,position,RigidBody);" not in world_case.group(1) or "torque" in world_case.group(1):
+        raise RuntimeError("World-force dispatch changed; inspect torque handling")
+    print("Aerodynamic force contract: expected force/torque units verified by static inspection; native execution not tested.", flush=True)
+
+
 # main operation.
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -44,6 +68,10 @@ def main():
     for path in [game_bin / "Sandbox.Game.dll", game_bin / "VRage.Game.dll", game_bin / "SpaceEngineers.Game.dll",
                  pathlib.Path(__file__).resolve(), pathlib.Path(__file__).with_name("Program.cs").resolve()]:
         print("SHA256:", path.name, hashlib.sha256(path.read_bytes()).hexdigest(), flush=True)
+    physics = subprocess.check_output([args.ilspy, "-t", "Sandbox.Engine.Physics.MyPhysicsBody",
+                                       str(game_bin / "Sandbox.Game.dll")], text=True)
+    (work / "PhysicsBody.cs.txt").write_text(physics)
+    verify_aero_contract(physics)
     source = subprocess.check_output([args.ilspy, "-t", "SpaceEngineers.Game.MySpaceGameDefaultIlChecker",
                                       str(game_bin / "SpaceEngineers.Game.dll")], text=True)
     source = replace_once(source, "public class MySpaceGameDefaultIlChecker : MySandboxGame.IGameCustomIlChecker",

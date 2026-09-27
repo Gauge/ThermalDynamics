@@ -41,7 +41,14 @@ and reject direct `HkRigidBody.InertiaTensor` access. The offline bootstrap expl
 `System.Boolean` alongside its other framework primitives; omitting it made a Boolean local fail
 under the .NET 9 host, independently of the physics member. The runner records SHA-256 hashes
 of the inspected game assemblies and both probe sources. This proves whitelist admission only;
-it neither executes native physics nor establishes force units or handling.
+it does not execute native physics. The additional static contract check decompiles
+`MyPhysicsBody` and verifies the timestep and argument conversions used by the adapter:
+world force takes N, while the world-angular path takes N·m despite its enum name. Changed
+semantics fail the run. The decompiled file stays in the temporary work directory.
+
+Run `python3 -m unittest discover -s tools/thermal-api-check -p 'test_*.py'` for
+`test_contract.py`: `AeroContractTests` checks a synthetic contract and rejects changed timestep,
+linear/angular units, dispatch and missing methods. Neither static check proves native handling.
 
 ## Change log
 
