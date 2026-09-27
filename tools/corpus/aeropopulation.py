@@ -72,10 +72,14 @@ def manifest(corpus, binary):
     files.sort(key=lambda r: (-r['bytes'], r['path']))
     if not files:
         raise ValueError('No bp.sbc files in the requested population')
-    content = pathlib.Path(invoke(binary, 'aero-environment')['game_content'])
+    environment = invoke(binary, 'aero-environment')
+    content = pathlib.Path(environment['game_content'])
+    authored = pathlib.Path(environment.get('authored_data', ''))
+    if not authored.is_absolute() or not (authored / 'Cubes.xml').is_file() or not (authored / 'CubeBlocks').is_dir():
+        raise ValueError('Harness must report its existing absolute authored_data root; rebuild older binaries')
     sources = [pathlib.Path(__file__), pathlib.Path(aeroenvelope.__file__), pathlib.Path(aerothrust.__file__), pathlib.Path(scoring.__file__)]
     dependencies = list(binary.parent.glob('*.dll')) + list(binary.parent.glob('*.json'))
-    dependencies += [p for p in (pathlib.Path(__file__).resolve().parents[2] / 'Thermodynamics' / 'Content' / 'Data').rglob('*') if p.is_file()]
+    dependencies += [p for p in authored.rglob('*') if p.is_file()]
     game = [content / 'Components.sbc'] + sorted((content / 'CubeBlocks').glob('*.sbc'))
     fingerprint = {str(p.resolve()): digest(p) for p in sources + dependencies + game}
     identity = {'schema': 1, 'corpus': str(corpus), 'binary': str(binary), 'files': files,

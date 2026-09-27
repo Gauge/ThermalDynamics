@@ -63,6 +63,9 @@ states population exclusions, strongest-heading tie rules, force assumptions, to
 power/fuel and torque compensation, not a claim about native piloting. No coefficients are
 retuned by this walk. Runtime DLLs, authored data, installed SBCs, scripts, package versions
 and every blueprint are fingerprinted; changing them requires a new output directory.
+The binary reports both `game_content` and its actual `authored_data` root through
+`aero-environment`; the runner does not infer runtime data from its own checkout. Rebuild older
+binaries that lack `authored_data`.
 `test_aeroenvelope.py` compares 80 seeded general and 40 nearly parallel/coplanar nonzero force
 sets with exhaustive throttle vertices. Uncertain intermediate hull reductions retain every
 candidate; the selected resultant has its own feasible witness and support-plane force bound.
@@ -707,6 +710,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Required runtime-reported authored-data provenance when fingerprinting a population generation. |
 | 2026-09-27 | Documented target-aligned LP coordinates with original-frame certificates and independent rotation controls. |
 | 2026-09-27 | Documented near-rank candidate retention, known-resultant certification and forty additional exhaustive controls. |
 | 2026-09-27 | Added the resumable aeropopulation.py runner, aeroenvelope.py global thrust selection and independent envelope/receipt/scoring tests. |

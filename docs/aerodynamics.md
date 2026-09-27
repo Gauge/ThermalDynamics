@@ -1374,6 +1374,24 @@ relative error of 1.50×10⁻¹⁵. The [archived specimen and certificate](../t
 are consumed by that regression; the [validation log](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.txt)
 records the before/after check. Population acceptance remains unscored.
 
+### Runtime-authored data provenance
+
+A binary supplied through `--binary` can resolve authored definitions from a different checkout
+than the Python runner. The runner now fingerprints `authored_data` reported by that binary's
+`aero-environment` command, alongside `game_content`; inferring the authored root from Python's
+source path was incorrect in that configuration. Missing, relative or nonexistent authored
+roots fail before a run starts. Older binaries must be rebuilt rather than silently falling
+back to the runner's checkout. The original frozen generation used matching paths and is
+unaffected by this correction.
+
+The regression builds separate temporary runtime and authored-data directories, verifies the
+actual data file is fingerprinted, verifies the unrelated checkout is absent, and detects a
+mutation of the actual data. It fails before the fix and passes after. An actual isolated binary
+launched from the original checkout reports the isolated authored root. The complete Python
+suite runs 231 checks: 230 pass and the unrelated historical-census check is skipped. The isolated
+solution builds with zero warnings/errors and 73 focused C# checks pass. Full-suite validation
+remains deferred until the frozen corpus walk finishes, avoiding timing contention.
+
 ### Instrument validation and end-to-end pilot
 
 [Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at
@@ -1397,6 +1415,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Corrected authored-data provenance for a runtime loaded from a different checkout; absent runtime metadata now fails explicitly. |
 | 2026-09-27 | Registered target-aligned LP coordinates and original-frame certificate checks after a separate numerical-gap rejection. |
 | 2026-09-27 | Added conservative retention for nearly flat thrust sets and an independent certificate for the selected resultant heading. Fixed-heading LP guards stay in place; cross-check uncertainty is explicit. |
 | 2026-09-27 | Documented the native definition-upgrade path exposed by an unresolved corpus hull and the constrained reader correction. Frozen receipts remain tied to their original reader. |
