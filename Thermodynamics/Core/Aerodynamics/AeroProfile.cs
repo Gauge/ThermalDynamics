@@ -30,6 +30,7 @@ namespace Thermodynamics.Core
 
         private Vector3 dampingCentre = new Vector3(float.NaN);
         private readonly float[] damping = new float[6];
+        private bool dampingObserved;
 
         /// <summary>The hull's mass, kg.</summary>
         public float Mass { get; private set; }
@@ -176,7 +177,9 @@ namespace Thermodynamics.Core
         public Vector3 Damping(Vector3 angularVelocity, float density)
         {
             if (!(density > 0f) || faceNormals.Count == 0) return Vector3.Zero;
-            if (Vector3.DistanceSquared(dampingCentre, CentreOfMass) > 1e-6f || float.IsNaN(dampingCentre.X)) MeasureDamping();
+            if ((!dampingObserved && dampingCentre != CentreOfMass)
+                || Vector3.DistanceSquared(dampingCentre, CentreOfMass) > 1e-6f || float.IsNaN(dampingCentre.X)) MeasureDamping();
+            dampingObserved = true;
             float half = 0.5f * density * RotationalDrag;
             Vector3 result = Vector3.Zero;
             for (int axis = 0; axis < 3; axis++)

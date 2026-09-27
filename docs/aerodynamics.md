@@ -959,8 +959,12 @@ and finished results; callers must also supply a monotonic input revision for ma
 grid concurrently inside `Advance`. Changing input cancels the job; a fresh job rebuilds it.
 A cancelled or incomplete job cannot publish a profile.
 
-Damping moments are accumulated alongside the visible skin, so the first force evaluation has
-no deferred surface walk and allocates zero bytes. `SetCentreOfMass` retains its previous lazy
+Damping moments are accumulated alongside the visible skin, so the first force evaluation at
+the built centre has no deferred surface walk and allocates zero bytes. A centre change before
+the first positive-density damping read must still refresh the moments, even below the later
+1 mm cache threshold; the original lazy implementation had not established its cache yet.
+`ASubMillimetreShiftBeforeTheFirstReadKeepsLegacyDamping` guards this distinction, found while
+adding centre-update tests after the budgeted builder merge. `SetCentreOfMass` retains its previous lazy
 refresh and threshold semantics: a later damping evaluation can still cost one pass over exposed
 faces. Its basis vectors are read directly, removing the scratch-array allocation. Budgeting engine mass-centre
 updates remains necessary before integration; no constant-cost centre-change claim is made here.
@@ -1020,6 +1024,7 @@ validation remain open.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Corrected the budgeted builder cache for sub-millimetre centre changes before the first damping read. The legacy implementation measured at that first-read centre; the new preparation had incorrectly reused the initial centre. Added a bit-identity regression and corrected the first-use cost scope in place (E10). |
 | 2026-09-26 | Recorded source-identified maximum-slice measurements and zero evaluation allocations, with list-growth and centre-change costs still explicit. Full offline suite: 2,539 passing cases. |
 | 2026-09-26 | Added resumable profile construction, per-cell ray stepping and stale-result rejection. Registered exact legacy-equivalence checks and maximum-slice timing before measurement. Initial damping is prepared during construction; centre changes still require a surface pass. |
 | 2026-09-26 | Recorded both profile-cost runs with source, binary and runtime provenance. Construction exceeds a frame on a 4,096-block cube in both configurations; settled ticks allocate zero, but first and centre-shifted evaluations allocate 64 bytes. This makes budgeted construction and prepared damping prerequisites for AR19 integration. |
