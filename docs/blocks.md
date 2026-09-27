@@ -356,10 +356,13 @@ record these constraints; callback occurrence alone cannot establish cost, range
 
 ### Cooling energy boundary — implementation protocol
 
-Before a projectile adapter is enabled, the core energy operation must satisfy these controls:
+`ThermalSolver.TryRemovePhysicalHeat` implements the core operation. It is exercised by the
+hand-cooling laboratory tests; the projectile adapter is not yet connected. Its preregistered
+controls are:
 
 * Accept physical-equivalent joules, using `ThermalMass × HeatTimeScale` as the capacity. This
-  retains the solver's capacity floor and held-coolant capacity. For a 100 kg block at
+  retains the node's minimum capacity and held-coolant capacity; it does not treat optional
+  numerical stability mass inflation as additional physical coolant. For a 100 kg block at
   450 J/(kg K), 4,500 J must remove 0.1 K at clocks 1, 90 and 225, within one stored-temperature ULP.
 * Apply only between completed solver steps, under the caller's exclusive access. Reject an
   in-flight step, a foreign/removed block, nonfinite inputs or invalid capacity without mutation.
@@ -373,6 +376,10 @@ Before a projectile adapter is enabled, the core energy operation must satisfy t
   roundoff, invalid inputs and rejection throughout a sliced solve. The operation must allocate
   no memory after warm-up. Native targeting, consumption, permission policy and ammunition balance
   remain separate gates; passing the core controls does not close backlog B32.
+
+Validation: all 69 hand-cooling, clock, sliced-step and documentation cases passed. The complete
+solution built with zero warnings or errors. Both commands ran under a 12 GiB memory cap with
+swap disabled; no timing claim is made while the independent population walk is running.
 
 ## The performance panel
 

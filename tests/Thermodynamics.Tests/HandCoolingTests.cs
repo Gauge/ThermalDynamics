@@ -206,6 +206,183 @@ namespace Thermodynamics.Tests
             Assert.True(fast.OneBottleHolds);
         }
 
+        private static ThermalSimulation CoolingRig(float clock, float temperature = 500f)
+        {
+            BlockModel model = new BlockModel { Mass = 100f };
+            model.Thermal.SpecificHeat = 450f;
+            GridBuilder builder = GridBuilder.Large();
+            builder.Place(model, Vector3I.Zero);
+            return builder.BuildSimulation(new ThermalSettings
+                { HeatTimeScale = clock, EnableEnvironment = false }, temperature);
+        }
+
+        [Theory]
+        [InlineData(1f)]
+        [InlineData(90f)]
+        [InlineData(225f)]
+        public void PhysicalCoolingBudgetPreservesClockIndependentInventory(float clock)
+        {
+            ThermalSimulation rig = CoolingRig(clock);
+            ThermalNode node = rig.Solver.Nodes[0];
+            double removed;
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, 4500d, 300f, out removed));
+            Assert.InRange(node.Temperature, 499.9f, MathF.BitIncrement(499.9f));
+            Assert.Equal((500d - node.Temperature) * 45000d, removed, 6);
+            Assert.InRange(removed, 4498d, 4500d);
+        }
+
+        [Fact]
+        public void CoolingClipsAtItsFloorIncludesHeldCoolantAndReportsActualRemoval()
+        {
+            ThermalSimulation rig = CoolingRig(90f);
+            ThermalNode node = rig.Solver.Nodes[0];
+            node.HeldCoolantCapacity = 45000f;
+            double removed;
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, 18000000d, 400f, out removed));
+            Assert.Equal(400f, node.Temperature);
+            Assert.Equal(9000000d, removed);
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, 1d, 600f, out removed));
+            Assert.Equal(0d, removed);
+            Assert.Equal(400f, node.Temperature);
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, double.MaxValue, -100f, out removed));
+            Assert.Equal(ThermalConstants.MinimumTemperature, node.Temperature);
+            Assert.Equal((400d - ThermalConstants.MinimumTemperature) * 90000d, removed);
+        }
+
+        [Fact]
+        public void InvalidCoolingAndForeignOrRemovedBlocksLeaveStateUntouched()
+        {
+            ThermalSimulation rig = CoolingRig(90f);
+            ThermalNode node = rig.Solver.Nodes[0];
+            double removed;
+            foreach (double request in new[] { -1d, double.NaN, double.PositiveInfinity })
+            {
+                Assert.False(rig.Solver.TryRemovePhysicalHeat(node.Block, request, 300f, out removed));
+                Assert.Equal(0d, removed);
+                Assert.Equal(500f, node.Temperature);
+            }
+            foreach (float floor in new[] { float.NaN, float.PositiveInfinity, float.NegativeInfinity })
+                Assert.False(rig.Solver.TryRemovePhysicalHeat(node.Block, 1d, floor, out removed));
+            Assert.False(rig.Solver.TryRemovePhysicalHeat(null, 1d, 300f, out removed));
+            ThermalSimulation foreign = CoolingRig(90f);
+            Assert.False(rig.Solver.TryRemovePhysicalHeat(foreign.Solver.Nodes[0].Block, 1d, 300f, out removed));
+            node.Temperature = float.NaN;
+            Assert.False(rig.Solver.TryRemovePhysicalHeat(node.Block, 1d, 300f, out removed));
+            node.Temperature = 500f;
+            rig.RemoveBlock(node.Block);
+            Assert.False(rig.Solver.TryRemovePhysicalHeat(node.Block, 1d, 300f, out removed));
+            Assert.Equal(500f, node.Temperature);
+        }
+
+        [Fact]
+        public void CoolingIsRejectedThroughoutASlicedSolveThenPersistsIntoTheNextSolve()
+        {
+            ThermalSimulation rig = CoolingRig(90f);
+            ThermalNode node = rig.Solver.Nodes[0];
+            EnvironmentState state = EnvironmentSolver.Solve(rig.Settings, rig.Planet, Worlds.Shadow());
+            Assert.True(rig.Solver.BeginStep(0.1f, state));
+            int attempts = 0;
+            double removed;
+            do
+            {
+                Assert.False(rig.Solver.TryRemovePhysicalHeat(node.Block, 45000d, 300f, out removed));
+                Assert.Equal(0d, removed);
+                Assert.Equal(500f, node.Temperature);
+                attempts++;
+            } while (!rig.Solver.AdvanceStep(1));
+            Assert.True(attempts > 1);
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, 45000d, 300f, out removed));
+            Assert.Equal(499f, node.Temperature);
+            rig.Solver.Step(0.1f, state);
+            Assert.Equal(499f, node.Temperature);
+        }
+
+        [Fact]
+        public void RoundingNeverRemovesMoreThanTheAvailableEnergy()
+        {
+            ThermalSimulation rig = CoolingRig(1f);
+            ThermalNode node = rig.Solver.Nodes[0];
+            Random random = new Random(32171);
+            for (int i = 0; i < 2000; i++)
+            {
+                float before = (float)(3d + random.NextDouble() * 100000d);
+                node.Temperature = before;
+                double requested = random.NextDouble() * before * 45000d;
+                double removed;
+                Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, requested, 3f, out removed));
+                Assert.InRange(removed, 0d, requested);
+                Assert.Equal(((double)before - node.Temperature) * 45000d, removed);
+                float nearest = (float)Math.Max(3d, before - requested / 45000d);
+                float conservative = ((double)before - nearest) * 45000d > requested
+                    ? MathF.BitIncrement(nearest) : nearest;
+                Assert.Equal(conservative, node.Temperature);
+            }
+            node.Temperature = 512f;
+            double tiny;
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, double.Epsilon, 3f, out tiny));
+            Assert.Equal(0d, tiny);
+            Assert.Equal(512f, node.Temperature);
+        }
+
+        [Theory]
+        [InlineData(4f)]
+        [InlineData(512f)]
+        [InlineData(65536f)]
+        public void RoundingAtPowerOfTwoBoundariesUsesTheNextRepresentableTemperature(float target)
+        {
+            ThermalSimulation rig = CoolingRig(1f, target * 2f);
+            ThermalNode node = rig.Solver.Nodes[0];
+            float next = MathF.BitIncrement(target);
+            double exactTarget = target + ((double)next - target) / 4d;
+            double request = (node.Temperature - exactTarget) * 45000d;
+            double removed;
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(node.Block, request, 3f, out removed));
+            Assert.Equal(next, node.Temperature);
+            Assert.InRange(removed, 0d, request);
+        }
+
+        [Fact]
+        public void CoolingInvalidatesTheCachedHottestNodeAndRejectsInvalidCapacity()
+        {
+            ThermalSimulation rig = CoolingRig(90f);
+            ThermalNode first = rig.Solver.Nodes[0];
+            ThermalNode second = rig.AddBlock(new BlockInstance(new BlockModel(),
+                new Vector3I(10, 0, 0), BlockOrientation.Identity), 490f);
+            rig.RebuildAll();
+            EnvironmentState state = EnvironmentSolver.Solve(rig.Settings, rig.Planet, Worlds.Shadow());
+            rig.Solver.Step(0.1f, state);
+            Assert.Same(first, rig.Solver.HottestNode());
+            double removed;
+            Assert.True(rig.Solver.TryRemovePhysicalHeat(first.Block, 900000d, 300f, out removed));
+            Assert.Equal(480f, first.Temperature);
+            Assert.Same(second, rig.Solver.HottestNode());
+            first.Block.Model.Thermal.SpecificHeat = float.NaN;
+            first.RefreshThermalMass();
+            Assert.False(rig.Solver.TryRemovePhysicalHeat(first.Block, 1d, 300f, out removed));
+            Assert.Equal(480f, first.Temperature);
+            Assert.Equal(0d, removed);
+        }
+
+        [Fact]
+        public void RepeatedCoolingPulsesConserveEnergyWithoutAllocations()
+        {
+            ThermalSimulation rig = CoolingRig(90f);
+            ThermalNode node = rig.Solver.Nodes[0];
+            double removed;
+            rig.Solver.TryRemovePhysicalHeat(node.Block, 0d, 300f, out removed);
+            long allocated = GC.GetAllocatedBytesForCurrentThread();
+            double total = 0d;
+            for (int i = 0; i < 100; i++)
+            {
+                rig.Solver.TryRemovePhysicalHeat(node.Block, 45000d, 300f, out removed);
+                total += removed;
+            }
+            allocated = GC.GetAllocatedBytesForCurrentThread() - allocated;
+            Assert.Equal(0, allocated);
+            Assert.Equal(400f, node.Temperature);
+            Assert.Equal(4500000d, total);
+        }
+
         [Fact]
 
         public void TheReferenceBottleIsFiveKilogramsOfCarbonDioxide()

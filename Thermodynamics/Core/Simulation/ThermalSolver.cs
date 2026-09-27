@@ -515,6 +515,42 @@ namespace Thermodynamics.Core
         }
 
 
+        // Removes a bounded physical-equivalent energy between steps; the caller owns exclusive access.
+        public bool TryRemovePhysicalHeat(BlockInstance block, double joules, float minimumKelvin,
+            out double removedJoules)
+        {
+            removedJoules = 0d;
+            if (StepInFlight || double.IsNaN(joules) || double.IsInfinity(joules) || joules < 0d
+                || float.IsNaN(minimumKelvin) || float.IsInfinity(minimumKelvin)) return false;
+
+            ThermalNode node = GetNode(block);
+            if (node == null) return false;
+            float before = node.Temperature;
+            double capacity = (double)node.ThermalMass * node.HeatTimeScale;
+            if (float.IsNaN(before) || float.IsInfinity(before) || before < ThermalConstants.MinimumTemperature
+                || double.IsNaN(capacity) || double.IsInfinity(capacity) || capacity <= 0d) return false;
+
+            float floor = Math.Max(ThermalConstants.MinimumTemperature, minimumKelvin);
+            if (joules == 0d || before <= floor) return true;
+            float after = (float)Math.Max(floor, before - joules / capacity);
+            double removed = ((double)before - after) * capacity;
+            if (removed > joules)
+            {
+                // Move a positive normal float up exactly one ULP without allocating or reinterpreting bits.
+                float warmer = (float)(after + (double)after / 16777216d);
+                if (warmer == after) warmer = (float)(after + (double)after / 8388608d);
+                after = Math.Min(before, warmer);
+                removed = ((double)before - after) * capacity;
+            }
+            if (removed < 0d || removed > joules) return false;
+
+            node.Temperature = after;
+            if (after != before) hottestNode = -1;
+            removedJoules = removed;
+            return true;
+        }
+
+
         public ThermalNode GetNodeAt(Vector3I cell)
         {
             return GetNode(grid.GetAtCell(cell));
