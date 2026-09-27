@@ -904,6 +904,23 @@ For the four-cell cube used by that check, each cell is 2.5 m across and the hal
 `z = {-3.75, -1.25, 1.25, 3.75} m`. This validates the clock against the model's stated spatial
 quadrature; it does not claim that face-centre quadrature is the exact continuous-surface drag.
 
+### Profile construction and tick cost
+
+`aero-profile` measures synthetic solid cubes of 64, 512 and 4,096 blocks at both profile
+resolutions. Construction starts with occupancy cached, so it excludes the grid's cold occupancy
+build. Four rows separate construction, the first force evaluation, 1,000 settled evaluations,
+and a centre-of-mass shift followed by evaluation. Each reports fastest, median, slowest, spread,
+repeat count, stopping reason and maximum allocated bytes per repeat, alongside host, UTC and
+the core binary's MVID. It is not population or live-frame evidence.
+
+**The question, before measurement:** does the supposedly constant-time tick hide a surface walk
+on its first use or when the centre of mass changes? The source puts `MeasureDamping` behind a
+lazy check, so the prediction is that first and shifted evaluations allocate and grow with surface
+size while settled evaluations allocate nothing. Construction is also synchronous; its measured
+cost determines what must be budgeted before AR19 reaches the game. No coefficient or handling
+criterion is selected from these timings. `AeroProfileLabTests` checks the instrument's sample
+and work counts rather than imposing timing thresholds on a shared test machine.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -922,6 +939,7 @@ quadrature; it does not claim that face-centre quadrature is the exact continuou
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Added the reachable `aero-profile` cost lab to separate profile construction, lazy first evaluation, settled ticks and centre changes before integrating AR19 into the adapter. |
 | 2026-09-26 | Hardened the flight instrument against empty, nonfinite and unbounded runs; corrected signed-spin detection and crossing timestamps. Added vacuum, tick-refinement and analytic quadratic-drag controls without changing S5–S8 acceptance criteria. |
 | 2026-09-26 | Corrected the flight profile's multi-cell inertia against analytic cuboids: five of seven new checks failed first, then all seven passed. Recorded the uniform-density and diagonal-tensor limits; the existing single-cell flight rigs retain their results. |
 | 2026-09-26 | Independently revalidated the inherited round-6 work: full solution build, 32 aerodynamics tests, 2,494 offline cases and the flight lab. Clarified that the profile remains an offline library and recorded the multi-cell inertia check still needed. |
