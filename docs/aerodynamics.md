@@ -40,7 +40,7 @@ In the subsonic regime, real flow has four properties:
 | | What real subsonic flow does | What this mod does | What SEDrag does |
 | --- | --- | --- | --- |
 | **Drag** | Pressure drag from the **frontal silhouette**, set mainly by how the flow *leaves* the body (base, boat-tail), plus skin friction on the wetted area. A cube's Cd is about 1.05, a plate square to the flow about 1.17–1.28, and a streamlined body 0.05–0.3. | Windward exposed area × `sin²θ`, with no wake and no skin friction, derived from the friction watts. | Silhouette area × a per-axis coefficient from block normals, with a fictional speed scaling (below). |
-| **Lift** | Comes from circulation around **lifting surfaces** at an angle of attack. It is linear up to stall, `CL ≈ 2πα·AR/(2+√(AR²+4))`, stalls at 12–15° on a plate, and brings induced drag `CL²/(πeAR)`. | The sideways remainder of the Newtonian sum. It can never exceed drag and cancels on any symmetric hull (median lift-to-drag 0.057). | A flat-plate curve on the whole outline, `(1−cos 2πx)/2`, with a lift constant about 330× its drag constant, plus authored per-block normals. |
+| **Lift** | Comes from circulation around **lifting surfaces** at an angle of attack. The baseline small-angle approximation is `CL ≈ 2πα·AR/(2+√(AR²+4))`; stall depends on geometry and flow, and induced drag is `CL²/(πeAR)` on the same reference area. | The sideways remainder of the Newtonian sum. It can never exceed drag and cancels on any symmetric hull (median lift-to-drag 0.057). | A flat-plate curve on the whole outline, `(1−cos 2πx)/2`, with a lift constant about 330× its drag constant, plus authored per-block normals. |
 | **Moments** | The force acts at the centre of pressure, and a rotating body sees `ω × r` on every surface. The result is weathervaning, plus damping of rotation. | Everything is applied at the centre of mass, so there is **no torque at all**. | Applied at a centre of lift built from the outline, plus a small-grid stabilising couple. |
 | **Heating** | Bounded by the **recovery temperature**, `T_amb + r·v²/(2c_p)` with r ≈ 0.89: +4.4 K at 100 m/s, +8.7 K at 140 m/s, +40 K at 300 m/s. | A `v³` source on the windward faces with nothing bounding it. | Six counters, one per side, driven by the scaled speed. Re-entry starts at 127 m/s. |
 
@@ -215,8 +215,10 @@ other way: it cancels on any symmetric hull, and lift can never exceed drag.
 compares body and wing-body lift slopes with theory and shows why reference area must be stated.
 The paper's discussion of Figure 2 also reports lifting bodies above and below the theoretical
 relationships. Body shape and vortex lift therefore remain limits of this approximation, to be
-checked on independent rigs. Stall comes at 12–15° for a high aspect ratio and
-much later for a low one, and past stall the plate's normal force goes to `CN ≈ 1.2·sin α`. On the
+checked on independent rigs. The former 12–15° stall statement was an unsourced generic
+estimate, not a measured boundary for the plates or block hulls modelled here. Stall must be
+validated over the intended geometry and flow range. The candidate separated-flow plate
+approximation is `CN ≈ 1.2·sin α`, subject to the joint force-accounting check below. On the
 drag side, AR11 then charges for the lift. Requirement: body lift is computed from the planform
 the air sees, with that law, and replaces the Newtonian transverse sum. **`K23`'s four criteria are
 re-registered, not inherited.** Its "p95 lift-to-drag ≤ 2" was written against a model that cannot
@@ -232,6 +234,21 @@ ordinates have yet been digitized. These finite-thickness, low-Reynolds-number p
 establish the accuracy of a ship-scale body-lift law or locate its attached-flow stall boundary.
 The `1.2·sin α` expression above remains an approximation requiring a combined lift-and-drag
 comparison, not an experimentally verified law over every post-stall angle.
+
+A second primary control is [Mizoguchi, Kajikawa and Itoh (2016)](https://doi.org/10.2322/tjsass.59.56):
+rectangular plates, AR 0.5–1.5, Re 52,000, chord 90 mm, thickness 1 mm and turbulence 1.4%.
+The experiment sweeps incidence both ways. It reports peak lift near 20° for AR 1.3–1.5,
+28° at AR 1.2, and stall hysteresis over AR 0.7–1.2. Reported CL/CD uncertainty is ±0.03
+at AR 1.5 and ±0.05 at AR 0.5 (95% intervals). These are scoped observations, not
+ship-scale coefficient assignments; [source and inspection record](../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.txt).
+
+**Consequence for the planned instrument:** a direction-only static profile cannot represent
+both branches of a hysteresis loop. Before promoting lift, the lab must test increasing and
+decreasing incidence separately and retain their discrepancy. A single fitted curve cannot be
+called validated merely because it passes through one branch. A stateful stall mechanism or
+an explicitly measured approximation remains necessary; this evidence does not establish its
+coefficients for the game's Reynolds-number range. No experimental graph coordinates have
+been digitized or used to tune code yet.
 
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
@@ -1425,6 +1442,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Withdrew the generic plate-stall angle and recorded primary bidirectional-incidence evidence; a static lift profile cannot silently claim hysteresis coverage. |
 | 2026-09-27 | Corrected authored-data provenance for a runtime loaded from a different checkout; absent runtime metadata now fails explicitly. |
 | 2026-09-27 | Registered target-aligned LP coordinates and original-frame certificate checks after a separate numerical-gap rejection. |
 | 2026-09-27 | Added conservative retention for nearly flat thrust sets and an independent certificate for the selected resultant heading. Fixed-heading LP guards stay in place; cross-check uncertainty is explicit. |

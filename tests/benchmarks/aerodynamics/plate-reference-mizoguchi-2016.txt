@@ -1,0 +1,9 @@
+Primary lift/stall validation source; no fitted model or population verdict
+Mizoguchi, M.; Kajikawa, Y.; Itoh, H. (2016). Aerodynamic Characteristics of Low-Aspect-Ratio Wings with Various Aspect Ratios in Low Reynolds Number Flows. Transactions of the Japan Society for Aeronautical and Space Sciences 59(2), 56-63.
+DOI: https://doi.org/10.2322/tjsass.59.56
+Publisher PDF: https://www.jstage.jst.go.jp/article/tjsass/59/2/59_T-15-28/_pdf/-char/en
+Retrieved 2026-09-27 UTC from publisher, freely available article.
+PDF retained locally: out/references/mizoguchi-2016.pdf (relative to this benchmark directory in the original checkout).
+SHA256: f90541a83d6fae1ddc62069ccd91855cfe048e303d228635a01248be97a6c78b
+Text extracted with pdftotext -layout. Pages 57-59 (PDF pages 2-4) rendered and visually inspected: experimental setup, uncertainty, primary lift/drag curves and incidence-branch distinction. Quantities summarized in aerodynamics.md were checked against the page text; no plot coordinates were digitized. Comparisons redigitized by the authors from older experiments are not treated as new primary data. The native article's figures and text remain the authority; this file is provenance, not a numerical dataset.
+Reproduction boundary: retrieving the PDF and matching its SHA256 reproduces the source material, not the wind-tunnel experiment. The local analysis implements no new lift/stall law and changes no registered acceptance threshold. The unsourced generic stall-angle statement is corrected separately from model fitting.
