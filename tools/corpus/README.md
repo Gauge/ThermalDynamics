@@ -45,7 +45,7 @@ python3 tools/corpus/panel.py out/census-2026-08-25/census.csv \
 
 `aerothrust.py` consumes schema-1 JSON from the C# `aero-inputs` command and uses SciPy's HiGHS
 linear-program solver to maximize force along each of the six saved main-grid headings. Every
-answer includes throttle fractions, the force-balance residual, a recomputed dual support bound
+answer includes throttle fractions, the force-balance residual, active conditioning, a recomputed dual support bound
 and its gap. An optimizer success without valid numerical certificates fails the command.
 A lone oblique thruster cannot supply pure forward force; positive projections are not summed.
 
@@ -56,7 +56,10 @@ blueprint hash and harness MVID. Inputs must retain the six opposed orthonormal 
 sea-level convention. Thruster unit vectors are normalized only within the 1e-5 allowance for
 blueprint float roundoff. The solver normalizes force by the largest rating (at least 1 N), then
 requires force residual and absolute dual gap at most 1e-7 of that scale. Boundary results within
-that numerical tolerance must remain unresolved in any later population scorer.
+that numerical tolerance must remain unresolved in any later population scorer. A resolvable
+active-contribution condition ratio above 1e7 is also rejected: a tiny sideways residual can hide
+a wholly infeasible pure-force solution near rank deficiency. These are numerical checks, not
+exact-arithmetic certificates. The C# export retains double-precision directions to match its headings.
 
 After the solution build, run each command under the memory cap required by `O1`:
 

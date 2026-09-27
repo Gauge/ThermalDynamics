@@ -60,6 +60,17 @@ def capacity(directions, ratings, direction):
     throttle = np.clip(state[:-1], 0, 1)
     value = max(0, float(state[-1]))
     residual = float(np.linalg.norm(forces.T @ throttle - value * target)) * scale
+    condition = 1.0
+    if value > 0:
+        active = throttle > 0
+        contributions = np.column_stack((forces[active].T * throttle[active], -value * target))
+        singular = np.linalg.svd(contributions, compute_uv=False)
+        floor = np.finfo(float).eps * max(contributions.shape) * singular[0]
+        resolved = singular[singular > floor]
+        if len(resolved):
+            condition = float(resolved[0] / resolved[-1])
+        if condition > 1 / RELATIVE_TOLERANCE:
+            raise RuntimeError("Near-rank-deficient thrust certificate is unresolved at the declared tolerance")
     normal = np.asarray(result.eqlin.marginals, dtype=float)
     if normal.shape != (3,) or not np.isfinite(normal).all():
         raise RuntimeError("Invalid dual normal")
@@ -73,7 +84,7 @@ def capacity(directions, ratings, direction):
     if not np.isfinite([residual, upper, newtons, gap]).all() or residual > tolerance or abs(gap) > tolerance:
         raise RuntimeError("Primal residual or independent dual gap exceeds tolerance")
     return {"capacity_n": newtons, "throttles": throttle.tolist(),
-            "force_residual_n": residual, "dual_normal": normal.tolist(),
+            "force_residual_n": residual, "active_condition": condition, "dual_normal": normal.tolist(),
             "dual_upper_n": upper, "duality_gap_n": gap, "tolerance_n": tolerance}
 
 

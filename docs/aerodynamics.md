@@ -1171,6 +1171,11 @@ has all six thrusters on its main grid; rotated subgrid force directions are cov
 
 ## Directional thrust capacity
 
+The implementation is `tools/corpus/aerothrust.py`, fed by `aero-inputs <blueprint> --json`.
+[Tool usage and dependencies](../tools/corpus/README.md#directional-aerodynamic-thrust-inputs)
+record the pinned NumPy/SciPy environment and output contract. Input mass is the unloaded model
+mass, not a native physics or cargo measurement.
+
 The population instrument must solve for usable force along a heading, not add positive
 projections of individual thrusters: a lone angled thruster has a forward projection but cannot
 produce pure forward force. For rated vectors F_i and requested unit direction d, solve
@@ -1190,14 +1195,41 @@ dual normal; a fake solver success with invalid primal or dual data must be reje
 is 1e-7 times the largest thruster rating (minimum scale 1 N), reported in newtons. Results inside
 that tolerance of a later acceptance boundary are unresolved, never silently rounded into a pass.
 
+The certificates are numerical checks, not exact-arithmetic proofs. Resolvable active-contribution
+singular values must have condition ratio at most 1e7; otherwise the result is explicitly unresolved.
+A nearly aligned lone thruster exposed why this guard is necessary: the initial optimizer returned
+100 N with a 1e-8 N sideways residual even though its exact pure-forward capacity was zero. The
+new regression rejects that result, including when unused orthogonal thrusters make the full input
+matrix appear well conditioned. Ratios below the double-precision rank resolution are not resolved
+by this instrument. Exported thruster directions retain double precision, matching the reference
+headings rather than introducing float-rounding misalignment at the format boundary.
+
+For a normal n with n·d = 1, every feasible throttle vector satisfies
+`λ = n·Σ throttle_i F_i ≤ Σ max(0, n·F_i)`. The right side is the recomputed dual upper bound.
+Force residual, active conditioning and the difference between primal force and this bound are
+checked separately; a small gap alone cannot certify feasibility.
+
 This solver adds no gravity, torque, drag or population-selection assumptions to the optimization.
 The later P1/P2 runner must state those choices and retain complete corpus coverage and resume
 provenance. No P1/P2 threshold or physical drag coefficient changes here.
+
+[Recorded validation](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27.txt): clean game
+build, 2,590 offline C# cases and 208 Python corpus-tool tests pass. All 80 independent nonzero
+LP controls agree within 2.14e-13 N. The two blueprint diagnostics also pass their numerical
+certificates. Their archived [three-grid inputs](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-2232450039-inputs.json)
+and [results](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-2232450039-result.json),
+and [single-grid inputs](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-554650209-inputs.json)
+and [results](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-554650209-result.json)
+retain all six headings and throttle settings. These specimens are the earlier input-audit hulls,
+not a population selection. The three-grid hull supplies about 2.88 kN in each reference direction;
+the atmospheric single-grid hull has no downward rated capacity under this model. Neither finding
+scores drag or P1/P2.
 
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added a directional rated-thrust optimizer and schema-1 machine input export. Hand solutions and 80 nonzero vertex-enumeration controls validate force balance and independently recomputed dual bounds; complete population scoring remains open. |
 | 2026-09-27 | Added retained blueprint world frames and engine-relative-density thrust ratings for the population lab. The aero-inputs command audits rated world-space thrust vectors; nominal census fields are unchanged and no P1/P2 verdict is claimed. |
 | 2026-09-27 | Published drag-profile geometry and damping through a detached snapshot API. External consumers can request bounded preparation with force writes disabled. Six offline cases cover geometry reconstruction, damping signs, snapshot ownership and demand lifecycle; native consumer dispatch and lift data remain open. |
 | 2026-09-27 | Connected bounded profiles to the engine adapter and documented engine force/angular conversion, centre jitter, API face overrides and remaining native limits. Recorded [adapter evidence](../tests/benchmarks/aerodynamics/engine-adapter-2026-09-27.txt): 2,565 offline cases pass; S5 recovers at 29.0 s, S6 diverges, S7 density scaling holds, with no guards in these flight rigs. |

@@ -102,6 +102,12 @@ class DirectionalCapacityTests(unittest.TestCase):
             with self.subTest(args=args), self.assertRaises(ValueError):
                 aerothrust.capacity(*args)
 
+    def test_nearly_aligned_unbalanced_force_is_unresolved_not_certified(self):
+        for axes, ratings in [([[1, 1e-10, 0]], [100]),
+                              ([[1, 1e-10, 0], [0, 1, 0], [0, 0, 1]], [100, 100, 100])]:
+            with self.subTest(axes=axes), self.assertRaisesRegex(RuntimeError, "Near-rank-deficient"):
+                aerothrust.capacity(axes, ratings, [1, 0, 0])
+
     def test_fake_success_cannot_bypass_primal_or_dual_checks(self):
         for state, normal in [([2, 2], [1, 0, 0]), ([1, 0.5], [1, 0, 0]),
                               ([0.5, 0.5], [1, 0, 0]), ([1, 1], [0, 1, 0]),

@@ -19,7 +19,7 @@ namespace Thermodynamics.Harness
             public int Grid;
             public Vector3I Cell;
             public string Definition;
-            public Vector3 Direction;
+            public Vector3D Direction;
             public float Nominal;
             public float Effective;
         }
@@ -44,7 +44,7 @@ namespace Thermodynamics.Harness
                     result.Add(new Thruster
                     {
                         Grid = i, Cell = block.Position, Definition = block.Name,
-                        Direction = (Vector3)Vector3D.TransformNormal(local, grid.Frame.World),
+                        Direction = Vector3D.TransformNormal(local, grid.Frame.World),
                         Nominal = definition.ThrustNewtons,
                         Effective = definition.EffectiveThrust(influence, atmosphere)
                     });

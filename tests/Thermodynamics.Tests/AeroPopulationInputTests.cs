@@ -139,6 +139,16 @@ namespace Thermodynamics.Tests
         }
 
         [Fact]
+        public void ExportedThrusterDirectionsRetainTheReferenceFramesDoublePrecision()
+        {
+            Blueprints.Ship ship = Ship(MatrixD.CreateRotationY(0.123456789) * MatrixD.CreateRotationX(0.321987));
+            Vector3D expected = ship.Grids[0].Frame.World.Backward;
+            Assert.NotEqual(expected, (Vector3D)(Vector3)expected);
+            var thrust = AeroPopulationInputs.Read(ship, 1, true);
+            Assert.Equal(expected, thrust[0].Direction);
+        }
+
+        [Fact]
         public void JsonExportCarriesForceDirectionsRatingsAndSixReferenceHeadings()
         {
             string path = Path.Combine(Path.GetTempPath(), "aero-json-" + Guid.NewGuid().ToString("n") + ".sbc");
