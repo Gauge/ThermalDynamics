@@ -1,0 +1,316 @@
+{
+  "manifest_sha256": "75819331cea94123c72a0456dbfa92e250e4c9d495b22822d6502771758a0a25",
+  "provenance": {
+    "bytes": 33420769661,
+    "dotnet_sdk": "10.0.111",
+    "files": 8144,
+    "host": "Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43",
+    "instrument_source_commit": "abe9c33",
+    "log": "/tmp/k25-population-full-abe9c33.log",
+    "manifest_completed_utc": "2026-09-27T05:34:37.728999+00:00",
+    "manifest_identity_sha256": "fa99db42c41edc4e463cf4260b8b96a17839ba93bef39038c1567641898e8236",
+    "memory_max_bytes": 12884901888,
+    "memory_swap_max_bytes": 0,
+    "python": "3.10.6",
+    "runtime": "../runtime-abe9c33/Thermodynamics.Sim.dll",
+    "scope": "Complete frozen corpus walk; no verdict until resolved coverage is complete.",
+    "source_commit": "f913916724d7b0916ae4b71e8b91cc402f95daae"
+  },
+  "receipt_set_sha256": "e7d085203cd5902b15e7a234a1f9b505cf2776f5c7808f19585e25b596b97cec",
+  "scope": "Frozen first generation; full manifest coverage, unresolved population verdicts. Corrections require a new generation.",
+  "summary": {
+    "bytes_recorded": 33420769661,
+    "bytes_total": 33420769661,
+    "complete_resolved": false,
+    "files_recorded": 8144,
+    "files_total": 8144,
+    "identity_sha256": "fa99db42c41edc4e463cf4260b8b96a17839ba93bef39038c1567641898e8236",
+    "p1": "unresolved",
+    "p1_share_lower_percent": 0.7272727272727273,
+    "p1_share_upper_percent": 0.7272727272727273,
+    "p1_speed_lower_mps": 104.7473828125,
+    "p1_speed_upper_mps": 104.748857421875,
+    "p2": "unresolved",
+    "right_censored": 3683,
+    "schema": 1,
+    "self_lifting_measured": 3850,
+    "statuses": {
+      "excluded_modded": 7,
+      "measured": 3850,
+      "not_self_lifting": 4257,
+      "unresolved": 30
+    }
+  },
+  "unresolved": [
+    {
+      "entry": {
+        "bytes": 895174,
+        "path": "steamapps/workshop/content/244850/3320974027/bp.sbc",
+        "sha256": "ea56a21534550e3634f087f60660753f76cc3567981a7f8a0ba90eae6efce472"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 1\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "84a5d58b9b6e6d29722360b6ae37614ca3eb428d683d0ac9b6128023ad3ad390"
+    },
+    {
+      "entry": {
+        "bytes": 3621681,
+        "path": "steamapps/workshop/content/244850/573772127/bp.sbc",
+        "sha256": "d59d931fe10f528a523488cbf7f424dea5964bf8a5bcb4915cd625117a04f99d"
+      },
+      "error": "RuntimeError: Primal residual or independent dual gap exceeds tolerance",
+      "record_sha256": "1bef35468ec028d44d548694c86f9fedcc75b64533dafa539b8f49b92d756dda"
+    },
+    {
+      "entry": {
+        "bytes": 1029136,
+        "path": "steamapps/workshop/content/244850/2847811876/bp.sbc",
+        "sha256": "bbb5843f64388163da5c036226f3ab381d19917d06e9716b9d9956a10cd0824d"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "20a3ccb8ce69f56cca299d118384e4fa37bcc660e3400aa1de186366493ba3ee"
+    },
+    {
+      "entry": {
+        "bytes": 1737556,
+        "path": "steamapps/workshop/content/244850/925157194/bp.sbc",
+        "sha256": "572b31bef26f61a3a9487e330ecb297538d82e76ef94253956a62a735c9980d9"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "2fb35f13a68b1e2c4d2dc0bb75051b5b461f401b3d9545f4ffdc6131dab88ed8"
+    },
+    {
+      "entry": {
+        "bytes": 488485,
+        "path": "steamapps/workshop/content/244850/1406862242/bp.sbc",
+        "sha256": "17b1d3ab6899cf120c81176491f7290a43b1a9bc180fd9a4b11030058b402b10"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "df2fa957b4cf01fd52f222b6142f6329323a22949df1170a1936e4a2aa8fc2b6"
+    },
+    {
+      "entry": {
+        "bytes": 23129333,
+        "path": "steamapps/workshop/content/244850/3153101248/bp.sbc",
+        "sha256": "f0e98e3c2a986e4098d237999ed857cfb80661b830478883ad7450f5733226f7"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "fbcc22427be350513417f09cacf1966e613a49ee9efbba33ef7d0b42fc2b0606"
+    },
+    {
+      "entry": {
+        "bytes": 28637118,
+        "path": "steamapps/workshop/content/244850/2830864671/bp.sbc",
+        "sha256": "1156ba6cc801135b35a549cdc5f11187ded4efb6796102630c89f3140164072c"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 14\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "1c604a9c01e21d2caf4b711253103ca791dcabc7c26a338b9a189322983164eb"
+    },
+    {
+      "entry": {
+        "bytes": 1259842,
+        "path": "steamapps/workshop/content/244850/2173574068/bp.sbc",
+        "sha256": "f67179c764753f89b9dbf65af409e1975c4c2bda60096b1c2d79647e8b960760"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 2\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "81885980758ed4858d1a44dfa1eba97d795644fe3812304baf5d05588f6b8266"
+    },
+    {
+      "entry": {
+        "bytes": 364510,
+        "path": "steamapps/workshop/content/244850/770016433/bp.sbc",
+        "sha256": "a65bb8052355ebff0f5e7df5dfc8305c528013949fa26549568554dfe4adc94e"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "bc4a0471bdbde35417534460140011cb12169407c4d7f869e8f51757fdfc69f9"
+    },
+    {
+      "entry": {
+        "bytes": 6822727,
+        "path": "steamapps/workshop/content/244850/3371838306/bp.sbc",
+        "sha256": "e8eac9069186cc13a454cbb910093539598352a155cfb3cebdc33388efb9e250"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "948fa62bc57144d385867e452991de477d89cfbd3fb74908a3ddcad10986a3bd"
+    },
+    {
+      "entry": {
+        "bytes": 1810416,
+        "path": "steamapps/workshop/content/244850/3583683221/bp.sbc",
+        "sha256": "e24f5b87799d48a27eae50e468327cbc17d0769dfeb70273f4780f3dd0667d01"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 34\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "e15ac7c44c63caf60b7be1637d417219a17529a8838bfa432e86300504daf8ad"
+    },
+    {
+      "entry": {
+        "bytes": 3687901,
+        "path": "steamapps/workshop/content/244850/3506660765/bp.sbc",
+        "sha256": "85111f0ddfad587ced762886ec019a51082cd2591d214dbf387a7b5583b4ba13"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "4ca032bd0fd603e5801780235a085e11f81973f879a29a675c934de4060daae0"
+    },
+    {
+      "entry": {
+        "bytes": 2160704,
+        "path": "steamapps/workshop/content/244850/3436363889/bp.sbc",
+        "sha256": "df7f2861161c8f35f13ad4691411d2aa73515ce1546f65a4e1876637721eebf3"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "d15d08664d6d58a4734652b0458ee3862d367c9bf1eceaecfe358e89c900d236"
+    },
+    {
+      "entry": {
+        "bytes": 25122425,
+        "path": "steamapps/workshop/content/244850/2573734531/bp.sbc",
+        "sha256": "8ad8a54908a1214d08a12d7f8d0a431d6faa3d59f4bf624e4275a58ed67a79fc"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "d92b0b59f09a6e85b7123b6ea7508938189a98f3c3781799a6a7ecca58fcf106"
+    },
+    {
+      "entry": {
+        "bytes": 5720142,
+        "path": "steamapps/workshop/content/244850/3433923427/bp.sbc",
+        "sha256": "7fcba5ffac2da08180a71124e1eef691b79fc3098b7acaee5278ecfc24cb57eb"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "22dd62a126047f5c1e3e1e02a712d50c6948938074448587f4ca1ef1f7b929cf"
+    },
+    {
+      "entry": {
+        "bytes": 4107085,
+        "path": "steamapps/workshop/content/244850/2791552995/bp.sbc",
+        "sha256": "b1ae282ff0ff93f6ed100ad25c63e7c3f96fa6ff7033bce070d73fb41d4aef6f"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "e48b9186dde54742ba8fa4b003c802b8aaee2d2cfb6bf39c5579e920524df092"
+    },
+    {
+      "entry": {
+        "bytes": 9712714,
+        "path": "steamapps/workshop/content/244850/1639755227/bp.sbc",
+        "sha256": "67dda7d2f01e41295a12cac24f9affd6273cb4430fe04ad0ee5be3b06ab4d250"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "0c4a324f2c9cc33851034aba7a72677aaa42e12bd3d63eb2741463f7f99c82f8"
+    },
+    {
+      "entry": {
+        "bytes": 2191966,
+        "path": "steamapps/workshop/content/244850/3309940125/bp.sbc",
+        "sha256": "5a3052ac010b2947188144527e5e0dd66b9a5fc9e2f8eb32bff1637e3c24a646"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 3\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "eaa17c59cee2c20e9e18296a3ab8f02e15aeb64fce229e9f68723bd829631282"
+    },
+    {
+      "entry": {
+        "bytes": 19862989,
+        "path": "steamapps/workshop/content/244850/1921621403/bp.sbc",
+        "sha256": "1ea4365fb388ac08b8f099b55016729ba3cf753fa987c1098f087961cd960dd5"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "46ca988be4d9b9f8a15a721e22c7004c98cd588e9b617e40d3eaf3bc01429429"
+    },
+    {
+      "entry": {
+        "bytes": 2008472,
+        "path": "steamapps/workshop/content/244850/1189517474/bp.sbc",
+        "sha256": "276250fae323f95b05404213bca60c6e3e743c0f2fb35fd5602a4046605cd4e7"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "0bbffd1074a9444903914673413c5919e2ecc1497fd09ef6b448cc00b417e949"
+    },
+    {
+      "entry": {
+        "bytes": 6128081,
+        "path": "steamapps/workshop/content/244850/2785772845/bp.sbc",
+        "sha256": "7f9fa97a6887803e644a9d0b60f8dc83e2e2087a6d5754a27fbc25cee62ebda9"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 1\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "15b943f181365b4eb15f6c765417b2f163f79fc80c4327449fe5adb61bef8683"
+    },
+    {
+      "entry": {
+        "bytes": 9512140,
+        "path": "steamapps/workshop/content/244850/2103347482/bp.sbc",
+        "sha256": "b9157d65744ea9ab493b3585c5706a124365852d66b7b8573e8ac38c6450a801"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "fe9e81e5e2093c0fef2709f5f65027499cdd98e0d5e10f3966176f3a552f08c9"
+    },
+    {
+      "entry": {
+        "bytes": 1475496,
+        "path": "steamapps/workshop/content/244850/2896646318/bp.sbc",
+        "sha256": "c50472d5db5540c3a84ca5970ce7b1d8e6ca08282f89918284cf94ff57b6ce31"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 2\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "59bf25ffbb6723e6dd3f793e6c87b178c39bd45f9d4de8b190bce945143944a3"
+    },
+    {
+      "entry": {
+        "bytes": 746177,
+        "path": "steamapps/workshop/content/244850/1190858052/bp.sbc",
+        "sha256": "4a82d43c70188c795b42af28e0d3ac3c1c984a7e474f1667fd45c702cc188e48"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "974fceab17e9cd5b9c5e2f414bcfa7e67b68926263519dc5b0bc1df60d0855fd"
+    },
+    {
+      "entry": {
+        "bytes": 24003491,
+        "path": "steamapps/workshop/content/244850/3281995444/bp.sbc",
+        "sha256": "6ed51d77ffd3381ce66384d6ad9b3d3ca98cc5f2a0b2ce7ce4c847df4fd8330e"
+      },
+      "error": "RuntimeError: Unresolved near-rank-deficient thrust polytope",
+      "record_sha256": "51902b6547f95c98d25becfa4215ff07b08d74eec350402cd0a572b1aa14ecd4"
+    },
+    {
+      "entry": {
+        "bytes": 12316312,
+        "path": "steamapps/workshop/content/244850/3431753459/bp.sbc",
+        "sha256": "1e0feafc8cceeffb4f3b254820d11c69a87341d6c2a223fe57d3036fe9a79a54"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 8\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "ae9ce00bd9a71964887a6c677d572de25694d72c668b25a32366ec7ddfc6ad29"
+    },
+    {
+      "entry": {
+        "bytes": 2935694,
+        "path": "steamapps/workshop/content/244850/853505259/bp.sbc",
+        "sha256": "f8f8f0d79488d23fdeda9b65a485cc4c062e2b8587181ea27f12cf17dd8789ea"
+      },
+      "error": "RuntimeError: Primal residual or independent dual gap exceeds tolerance",
+      "record_sha256": "94b78abd5303acb44f80bfb9d5e78555833ccd71d578fc6717637a1554a81660"
+    },
+    {
+      "entry": {
+        "bytes": 10187212,
+        "path": "steamapps/workshop/content/244850/3544869440/bp.sbc",
+        "sha256": "f7c7f29accd47a5e73429bfbe44bf461a536e440d8f0350df9ac4db33e6c95e5"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 4\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "d185502791268a3b98a3383c863cac36e3652afc378edafc3d4c90750935d9b6"
+    },
+    {
+      "entry": {
+        "bytes": 952992,
+        "path": "steamapps/workshop/content/244850/869037076/bp.sbc",
+        "sha256": "6d72d005f25b4522d4719606007e75154670e42bc79e402e9af6edac223cb6fa"
+      },
+      "error": "RuntimeError: Primal residual or independent dual gap exceeds tolerance",
+      "record_sha256": "008f5437098a40b91b1278be7707f02e2a6b411b393d9ece7da8ae2dfe801f02"
+    },
+    {
+      "entry": {
+        "bytes": 18136701,
+        "path": "steamapps/workshop/content/244850/2818106229/bp.sbc",
+        "sha256": "a1e6a9dff208a7233fd3efb0a259c4f33aad8a4436a0ec1fed48840df727665e"
+      },
+      "error": "RuntimeError: Harness exit -6: Unhandled exception. System.IO.InvalidDataException: Ambiguous block definitions: 2\n   at Thermodynamics.Harness.AeroPopulationInputs.Selection(String path) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/AeroPopulationInputs.cs:line 76\n   at Thermodynamics.Sim.Program.Main(String[] args) in /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/Program.cs:line 73\n",
+      "record_sha256": "697aaf64a61c6acbf16fcbe10e49c7fbee404db08abc36951e2c29c95dbf90d8"
+    }
+  ]
+}

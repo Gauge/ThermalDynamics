@@ -1357,6 +1357,28 @@ the complete installed-prefab readability test pass (47 focused reader/documenta
 The failed full run was 2,621 passed and one failed; it is not a clean validation. The corrected
 full suite must pass before merge. These checks do not establish population acceptance.
 
+### Completed first population generation
+
+The [frozen abe9c33 generation](../tests/benchmarks/aerodynamics/population-frozen-abe9c33-2026-09-27.json)
+finished all 8,144 manifest files and 33,420,769,661 input bytes. A separate audit verified every
+receipt checksum, identity, manifest entry and filename, and reproduced the saved summary exactly.
+The archive records the manifest and receipt-set hashes, run provenance and all thirty failures.
+
+| Outcome | Files |
+| --- | ---: |
+| Measured self-lifting | 3,850 |
+| Not self-lifting | 4,257 |
+| Modded exclusions | 7 |
+| Unresolved | 30 |
+
+Both P1 and P2 remain **unresolved** despite complete file coverage. Seventeen failures concern
+near-rank-deficient thrust sets, three fail the original-frame numerical certificate, and ten
+contain ambiguous definitions. The measured subset contains 3,683 terminal-speed right-censored
+cases; subset statistics in the archive are not population acceptance results. No failed case is
+silently excluded and no acceptance threshold changes. The reader, envelope and LP corrections
+were developed separately while this frozen run proceeded. Their fresh full generation must use
+new runtime fingerprints and output; results cannot be spliced into these receipts.
+
 ## Population runner protocol (registered before the walk)
 
 The candidate population uses the existing corpus convention: every recursively discovered
@@ -1512,6 +1534,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Archived the completed first population generation: all 8,144 files, thirty unresolved cases, verified receipts and no P1/P2 acceptance claim. |
 | 2026-09-27 | Corrected the strict reader regression exposed by four shipped legacy prefabs; explicit XML element builder types are accepted without inferring generic missing types. |
 | 2026-09-27 | Corrected AR8 in place after the independent comparison: Helmbold remains a baseline, and agreement with its formula is not physical validation of the complete lift law. |
 | 2026-09-27 | Recorded the unfitted small-angle comparison: 12 of 36 primary plate observations have nonoverlapping intervals; no coefficient was tuned. |
