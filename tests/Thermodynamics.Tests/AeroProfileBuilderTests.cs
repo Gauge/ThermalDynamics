@@ -123,6 +123,23 @@ namespace Thermodynamics.Tests
             Same(Evaluate(warm), damping);
         }
 
+        [Fact]
+        public void ASubMillimetreShiftBeforeTheFirstReadKeepsLegacyDamping()
+        {
+            GridModel grid = MixedHull();
+            AeroProfile profile = AeroProfile.Build(grid, 98);
+            LegacyAeroProfile legacy = LegacyAeroProfile.Build(grid, 98);
+            Vector3 centre = profile.CentreOfMass;
+            for (int i = 1; i <= 4; i++)
+            {
+                Vector3 target = centre + new Vector3(0.0004f * i, 0f, 0f);
+                profile.SetCentreOfMass(target);
+                legacy.SetCentreOfMass(target);
+                Assert.Equal(Vector3.Zero, profile.Damping(Vector3.One, 0f));
+                Same(legacy.Damping(Vector3.One, 1.225f), profile.Damping(Vector3.One, 1.225f));
+            }
+        }
+
         private static Vector3 Evaluate(AeroProfile profile)
         {
             profile.Evaluate(new Vector3(3f, -4f, 50f), 1.225f, new Vector3(0.1f, -0.2f, 0.3f),

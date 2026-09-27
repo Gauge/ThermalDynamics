@@ -80,18 +80,27 @@ namespace Thermodynamics.Harness
             return rows;
         }
 
-        /// <summary>Each repeat records its slowest Advance call, not a pooled average over cheap ray steps.</summary>
+        /// <summary>Each repeat records its slowest construction or centre-update call, without pooling cheap steps.</summary>
         public static StageLab.Row MeasureSlices(int side, int directions, int budget = 256,
-            int minimumRepeats = 7, int maximumRepeats = 40)
+            int minimumRepeats = 7, int maximumRepeats = 40, bool centreUpdate = false)
         {
             if (side < 2 || (directions != AeroProfile.CoarseDirections && directions != AeroProfile.FineDirections)
                 || budget < 1 || minimumRepeats < 2 || maximumRepeats < minimumRepeats)
                 throw new ArgumentException("Use a nonempty cube, 26 or 98 directions, a positive budget and at least two repeats.");
             GridModel grid = AeroCalibrationLab.Box(side, side, side);
-            Evaluate(AeroProfile.Build(grid, directions));
+            AeroProfile warm = AeroProfile.Build(grid, directions);
+            Evaluate(warm);
+            if (centreUpdate)
+            {
+                Vector3 target = warm.CentreOfMass + new Vector3(0.125f, -0.25f, 0.5f);
+                int used;
+                while (!warm.PrepareCentreOfMass(target, budget, out used)) { }
+                Evaluate(warm);
+            }
             StageLab.Row row = new StageLab.Row
             {
-                Stage = "slice-peak-" + directions, Blocks = grid.BlockCount, BestMs = double.MaxValue,
+                Stage = (centreUpdate ? "centre-slice-peak-" : "slice-peak-") + directions,
+                Blocks = grid.BlockCount, BestMs = double.MaxValue,
                 Work = 1, WorkUnit = "maximum-slice"
             };
             Stopwatch clock = new Stopwatch();
@@ -100,33 +109,41 @@ namespace Thermodynamics.Harness
             for (int repeat = 0; repeat < maximumRepeats; repeat++)
             {
                 StageLab.Settle();
-                AeroProfileBuilder job = new AeroProfileBuilder(grid, directions, 0);
+                AeroProfile profile = centreUpdate ? AeroProfile.Build(grid, directions) : null;
+                AeroProfileBuilder job = centreUpdate ? null : new AeroProfileBuilder(grid, directions, 0);
+                Vector3 target = centreUpdate ? profile.CentreOfMass + new Vector3(0.125f, -0.25f, 0.5f) : Vector3.Zero;
                 double peak = 0d;
                 long peakAllocated = 0;
                 int slices = 0;
-                while (!job.Complete)
+                long work = 0;
+                bool complete = false;
+                while (!complete)
                 {
                     long before = StageLab.Allocated();
                     clock.Restart();
-                    int used = job.Advance(budget, 0);
+                    int used;
+                    if (centreUpdate) complete = profile.PrepareCentreOfMass(target, budget, out used);
+                    else used = job.Advance(budget, 0);
                     clock.Stop();
                     long allocated = StageLab.Allocated() - before;
+                    if (!centreUpdate) complete = job.Complete;
+                    work += used;
                     if (used <= 0 || used > budget) throw new InvalidOperationException("Invalid slice work count.");
                     peak = Math.Max(peak, clock.Elapsed.TotalMilliseconds);
                     peakAllocated = Math.Max(peakAllocated, allocated);
                     slices++;
                 }
-                AeroProfile profile;
-                if (!job.TryGetResult(0, out profile)) throw new InvalidOperationException("No complete profile.");
+                if (!centreUpdate && !job.TryGetResult(0, out profile)) throw new InvalidOperationException("No complete profile.");
                 Evaluate(profile);
-                if (repeat == 0) { expectedWork = job.Work; expectedSlices = slices; }
-                if (job.Work != expectedWork || slices != expectedSlices)
+                if (repeat == 0) { expectedWork = work; expectedSlices = slices; }
+                if (work != expectedWork || slices != expectedSlices)
                     throw new InvalidOperationException("The repeated slices did different work.");
                 Record(row, peak, peakAllocated);
                 if (repeat + 1 >= minimumRepeats && row.ConfirmedBest >= StageLab.ConfirmingRepeats) break;
             }
             row.Note = "cube; budget=" + budget + "; work=" + expectedWork + "; slices=" + expectedSlices
-                + "; maximum Advance time per build; constructor excluded";
+                + (centreUpdate ? "; maximum centre-preparation time per update; budget counts exposed faces"
+                    : "; maximum Advance time per build; constructor excluded");
             row.Stop = row.ConfirmedBest >= StageLab.ConfirmingRepeats ? StageLab.Row.Confirmed : StageLab.Row.Capped;
             StageLab.Summarise(row);
             return row;
@@ -157,6 +174,7 @@ namespace Thermodynamics.Harness
                 {
                     rows.AddRange(Measure(side, directions));
                     rows.Add(MeasureSlices(side, directions));
+                    rows.Add(MeasureSlices(side, directions, centreUpdate: true));
                 }
             StringBuilder text = new StringBuilder();
             text.AppendLine("Aerodynamic profile cost; synthetic solid cubes, not a corpus or live-game measurement");
@@ -169,6 +187,7 @@ namespace Thermodynamics.Harness
             text.AppendLine("Spread is (slowest - fastest)/fastest; first and shifted are single-call samples and may be noisy.");
             text.AppendLine("Slice-peak samples are the maximum Advance time within each complete build at 256 work units per call.");
             text.AppendLine("Their allocation count is the maximum per Advance call; constructor allocations are excluded. These are observed peaks, not deadlines.");
+            text.AppendLine("Centre-slice-peak samples are the maximum preparation call in one centre update at 256 exposed faces per call; profile construction is excluded. The preparation path is warmed before measurement.");
             text.AppendLine(StageLab.Table(rows));
             text.AppendLine(StageLab.Csv(rows));
             return text.ToString();
