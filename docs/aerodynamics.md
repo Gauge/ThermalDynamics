@@ -940,8 +940,67 @@ The [initial runtime-default run](../tests/benchmarks/aerodynamics/profile-cost-
 is retained as a different runtime configuration. Its smallest cases have a warmup discontinuity;
 its 4,096-block, 98-direction build reads 21.039/21.496 ms. Neither run licenses an optimization
 ratio against the other. **Both require budgeted construction before game integration.** The
-next implementation must also prepare damping outside force evaluation and verify identical
+implementation below prepares initial damping outside force evaluation and verifies identical
 force and torque results; simply hiding the first-use walk in a cost average is insufficient.
+
+### Budgeted profiles
+
+`AeroProfileBuilder` replaces the synchronous construction internals. It computes block mass and
+bounds, then reads each exposed face and its reconstructed normal once, and streams visibility
+rays into the directional sums. `Advance(budget, revision)` charges each block, cell/face visit,
+ray step and phase transition; even a ray crossing a long empty gap yields between cells. A work
+unit has a bounded amount of geometry work, including a fixed 26/98-direction loop or the fixed
+normal-fitting stencil. It does not request a whole-grid occupancy or bounds rebuild.
+`AeroProfile.Build` remains a synchronous wrapper for offline callers.
+
+A result is private until construction completes. Grid topology version changes reject unfinished
+and finished results; callers must also supply a monotonic input revision for mass changes, which
+`GridModel.Version` does not track. These are single-threaded jobs: the caller must not mutate the
+grid concurrently inside `Advance`. Changing input cancels the job; a fresh job rebuilds it.
+A cancelled or incomplete job cannot publish a profile.
+
+Damping moments are accumulated alongside the visible skin, so the first force evaluation has
+no deferred surface walk and allocates zero bytes. `SetCentreOfMass` retains its previous lazy
+refresh and threshold semantics: a later damping evaluation can still cost one pass over exposed
+faces. Its basis vectors are read directly, removing the scratch-array allocation. Budgeting engine mass-centre
+updates remains necessary before integration; no constant-cost centre-change claim is made here.
+
+**Acceptance fixed before measurement:** all summary fields, force, restoring torque, damping,
+pressure centre and mass properties must equal the previous implementation bit for bit across
+five hulls (cuboid, shuttlecock, translated multi-cell blocks, enclosed cavity and cone), both
+resolutions, and budgets 1/17/4096. `AeroProfileBuilderTests` compares against `LegacyAeroProfile`,
+the pre-change arithmetic from `4abfb6dc`, retained only in tests under D8. It also checks budget
+accounting, cancellation, empty input and zero first-evaluation allocation. `VoxelCursorTests`
+checks 3,000 fixed-seed rays against the unchanged whole-ray walker, with nonzero hit and miss
+counts, and a 999-cell gap that cannot finish in one work unit. Physical calibration and flight
+criteria remain unchanged.
+
+`aero-profile` also reports `slice-peak-26/98`: each sample is the **slowest** `Advance` call in a
+complete build, at 256 units per call. Sample count therefore counts builds, and allocation is
+the maximum of individual calls. Constructor work (fixed-size table allocation) is excluded.
+The report includes work and slice counts and rejects disagreement between repetitions. List
+capacity growth, garbage collection and OS scheduling can still pause a slice: a work budget is
+not a wall-clock deadline. Synthetic observed peaks do not establish population or game-frame
+performance, and are not compared as speed ratios to the earlier runtime/binary measurements.
+
+**Measured after the implementation, 2026-09-27 UTC:** the
+[budgeted profile run](../tests/benchmarks/aerodynamics/profile-cost-budgeted-2026-09-27.txt)
+records source `90c74f0`, host `fedora`, .NET 9.0.19, tiering disabled and the core MVID.
+For the 4,096-block, 98-direction cube, the per-build peak slice takes **0.0770/0.0839 ms**
+fastest/median over 21 builds; the largest observed slice is **0.1184 ms**, a 53.77 % spread.
+Each build consumes **319,078 work units in 1,247 slices**. The corresponding 26-direction
+peaks are 0.0274/0.0302 ms, with a 0.0541 ms maximum and 97.45 % spread; its minimum remains
+unconfirmed at the 40-build cap. Both resolutions allocate up to **147,528 bytes in one slice**,
+so the list-growth caveat is material even though the measured slices are short.
+
+Synchronous 98-direction construction on the largest cube reads **7.3370/7.4429 ms**
+fastest/median, 3.37 % spread over 40 builds, and 541,920 allocated bytes. First, settled and
+centre-shifted evaluations report **zero allocated bytes throughout the ladder**. The largest
+cube's centre-shifted evaluation still takes 0.0349/0.0367 ms fastest/median (15.76 % spread,
+minimum unconfirmed at 40 repeats), consistent with its retained surface pass. None of these
+numbers is a before/after speed ratio. The game-target build and **2,539 offline tests pass**;
+corpus walks were not enabled. Engine scheduling, mass-centre updates and P1/P2 population
+validation remain open.
 
 ## What this changes elsewhere
 
@@ -961,6 +1020,8 @@ force and torque results; simply hiding the first-use walk in a cost average is 
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Recorded source-identified maximum-slice measurements and zero evaluation allocations, with list-growth and centre-change costs still explicit. Full offline suite: 2,539 passing cases. |
+| 2026-09-26 | Added resumable profile construction, per-cell ray stepping and stale-result rejection. Registered exact legacy-equivalence checks and maximum-slice timing before measurement. Initial damping is prepared during construction; centre changes still require a surface pass. |
 | 2026-09-26 | Recorded both profile-cost runs with source, binary and runtime provenance. Construction exceeds a frame on a 4,096-block cube in both configurations; settled ticks allocate zero, but first and centre-shifted evaluations allocate 64 bytes. This makes budgeted construction and prepared damping prerequisites for AR19 integration. |
 | 2026-09-26 | Added the reachable `aero-profile` cost lab to separate profile construction, lazy first evaluation, settled ticks and centre changes before integrating AR19 into the adapter. |
 | 2026-09-26 | Hardened the flight instrument against empty, nonfinite and unbounded runs; corrected signed-spin detection and crossing timestamps. Added vacuum, tick-refinement and analytic quadratic-drag controls without changing S5–S8 acceptance criteria. |

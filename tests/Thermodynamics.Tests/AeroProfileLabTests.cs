@@ -34,9 +34,36 @@ namespace Thermodynamics.Tests
             Assert.Contains("shifted-" + directions, csv);
         }
 
+        [Theory]
+        [InlineData(26, 1)]
+        [InlineData(26, 256)]
+        [InlineData(98, 1)]
+        [InlineData(98, 256)]
+        public void SlicePeaksCountCompleteBuildsWithoutPoolingAwayTheSlowestCall(int directions, int budget)
+        {
+            var row = AeroProfileLab.MeasureSlices(2, directions, budget, 2, 2);
+            Assert.Equal(8, row.Blocks);
+            Assert.Equal(2, row.Repeats);
+            Assert.Equal(2, row.Samples.Count);
+            Assert.Equal(1, row.Work);
+            Assert.Equal("maximum-slice", row.WorkUnit);
+            Assert.Equal(StageLab.Row.Capped, row.Stop);
+            Assert.Contains("budget=" + budget + ";", row.Note);
+            var grid = AeroCalibrationLab.Box(2, 2, 2);
+            var job = new AeroProfileBuilder(grid, directions, 0);
+            int slices = 0;
+            while (!job.Complete) { job.Advance(budget, 0); slices++; }
+            Assert.Contains("work=" + job.Work + ";", row.Note);
+            Assert.Contains("slices=" + slices + ";", row.Note);
+        }
+
         [Fact]
         public void ACostRunCannotReportAnEmptyPopulationOrOneSample()
         {
+            Assert.Throws<ArgumentException>(() => AeroProfileLab.MeasureSlices(2, 26, 0));
+            Assert.Throws<ArgumentException>(() => AeroProfileLab.MeasureSlices(2, 26, 1, 1, 1));
+            Assert.Throws<ArgumentException>(() => AeroProfileLab.MeasureSlices(2, 27));
+            Assert.Throws<ArgumentException>(() => AeroProfileLab.MeasureSlices(1, 26));
             Assert.Throws<ArgumentException>(() => AeroProfileLab.Measure(0, 26));
             Assert.Throws<ArgumentException>(() => AeroProfileLab.Measure(1, 26));
             Assert.Throws<ArgumentException>(() => AeroProfileLab.Measure(2, 27));

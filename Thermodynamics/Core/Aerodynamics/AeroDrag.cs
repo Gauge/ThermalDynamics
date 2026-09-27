@@ -130,26 +130,34 @@ namespace Thermodynamics.Core
 
             for (int i = 0; i < view.Front.Count; i++)
             {
-                AeroElement e = view.Front[i];
-                float squared = e.Incidence * e.Incidence * e.Area;
-                summary.Silhouette += e.Area;
-                summary.SilhouetteMoment += e.Centre * e.Area;
-                summary.Facing += squared;
-                summary.FacingMoment += e.Centre * squared;
+                AddFront(ref summary, view.Front[i]);
             }
 
             for (int i = 0; i < view.Base.Count; i++)
             {
-                AeroElement e = view.Base[i];
-                float separated = e.Area * Separated(e.Incidence);
-                summary.Base += separated;
-                summary.BaseMoment += e.Centre * separated;
+                AddBase(ref summary, view.Base[i]);
             }
 
             summary.Wetted = view.Wetted;
             summary.WettedMoment = view.WettedCentre * view.Wetted;
             summary.Fineness = Fineness(view);
             return summary;
+        }
+
+        internal static void AddFront(ref AeroSummary summary, AeroElement e)
+        {
+            float squared = e.Incidence * e.Incidence * e.Area;
+            summary.Silhouette += e.Area;
+            summary.SilhouetteMoment += e.Centre * e.Area;
+            summary.Facing += squared;
+            summary.FacingMoment += e.Centre * squared;
+        }
+
+        internal static void AddBase(ref AeroSummary summary, AeroElement e)
+        {
+            float separated = e.Area * Separated(e.Incidence);
+            summary.Base += separated;
+            summary.BaseMoment += e.Centre * separated;
         }
 
         /// <summary>

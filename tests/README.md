@@ -370,6 +370,14 @@ The columns match the environment dump's, so a descent flown in game can be laid
 modelled one. It found the wind fault A15 — a buried grid was still in the ground-level wind — and
 it is where the unmodelled rock contact (A16) is visible.
 
+## Aerodynamic profile cost lab
+
+From the repository root, run `DOTNET_TieredCompilation=0 dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-profile`
+after building the solution. It separates synchronous construction, first/settled/centre-shifted
+evaluation and the maximum 256-unit construction slice in each build. Run it under the required
+memory cap without concurrent tests. The [aerodynamics lab record](../docs/aerodynamics.md#profile-construction-and-tick-cost)
+carries provenance, results and limits; synthetic timing is not population or live-frame validation.
+
 ## The balance commands
 
 Five commands, none of them a scenario or a benchmark. Each answers one balance question, each
@@ -672,7 +680,7 @@ hold — `A13` was a change to how *vanilla* blocks are read, and it moved the p
 | **Block geometry and the grid model** | `FaceTests` `FaceSpanTests` `BoxGeometryTests` `GridMathTests` `CellBitsetTests` `BlockOrientationTests` `BlockOrientationCacheTests` `BlockInstanceTests` `BlockInstanceOneCellTests` `GridModelTests` `GridModelAdjacencyTests` `BlockSurfaceBuilderTests` `Se2LatticeTests` `Se2RefineTests` `ShapeTests` |
 | **Surfaces, rooms and air** | `SurfaceMapTests` `SurfaceMapPackingTests` `RoomMapperTests` `DoorSealingTests` `RoomPortalTests` `IncrementalRoomTests` `RoomMapFreezeTests` `RoomMapSnapshotTests` `RoomMapSolidTests` `RoomSpanFloodTests` `RoomMapCompletionTests` `RoomMapRecyclingTests` `GridOccupancyTests` `RoomCellStorageTests` `RoomAuditTests` `UnmappedRoomTests` `RoomAirTests` `RoomAirCanonicalTests` `RoomAirCouplingTests` `RoomPressureTests` `RoomAirPressureTests` `ExposureAuditTests` `ExposureFastPathTests` `CoarseRoomFloodTests` |
 | **Conduction and the integrator** | `ConductionTests` `StabilityTests` `ConductionClampGateTests` `CoupledConductanceCacheTests` `NodeIndexTests` `FacePackingTests` `SubstepDemandTests` `SubstepFloorTests` `SubstepCeilingTests` `SubstepScaleTests` `HeatTimeScaleTests` |
-| **Environment: air, climate, weather** | `EnvironmentSolverTests` `RadiationTests` `ConvectionSolarFrictionTests` `FrictionIsolationTests` `GridFrictionTotalTests` `DragShapeTests` `ShapeNormalGeometryTests` `AerodynamicStripTests` `AeroGeometryTests` `AeroCalibrationTests` `AeroIncidenceTests` `AeroFlightTests` `AeroProfileMassTests` `AeroProfileLabTests` `ShapeNormalOneCellTests` `GridCapacityTests` `SurfaceRebuildScratchTests` `RoomAirPoolTests` `WindShieldingCostTests` `WindShieldingTests` `CentreOfPressureTests` `DragProfileTests` `ClimateModelTests` `GroundRoughnessTests` `DayLengthTests` `WeatherAndDepthTests` `UndergroundContactTests` `PlanetThermalTests` `PlanetReferenceTests` `PlanetPropertyMergeTests` `DescentTests` |
+| **Environment: air, climate, weather** | `EnvironmentSolverTests` `RadiationTests` `ConvectionSolarFrictionTests` `FrictionIsolationTests` `GridFrictionTotalTests` `DragShapeTests` `ShapeNormalGeometryTests` `AerodynamicStripTests` `AeroGeometryTests` `AeroCalibrationTests` `AeroIncidenceTests` `AeroFlightTests` `AeroProfileMassTests` `AeroProfileLabTests` `AeroProfileBuilderTests` `VoxelCursorTests` `ShapeNormalOneCellTests` `GridCapacityTests` `SurfaceRebuildScratchTests` `RoomAirPoolTests` `WindShieldingCostTests` `WindShieldingTests` `CentreOfPressureTests` `DragProfileTests` `ClimateModelTests` `GroundRoughnessTests` `DayLengthTests` `WeatherAndDepthTests` `UndergroundContactTests` `PlanetThermalTests` `PlanetReferenceTests` `PlanetPropertyMergeTests` `DescentTests` |
 | **Sun, shadow and occlusion** | `SunShadowMapTests` `SolarSelfShadowingTests` `SunLitSliceTests` `SolarOcclusionTests` `SolarOcclusionSamplerTests` `OcclusionLadderTests` `OcclusionMathTests` `SolarSymmetryTests` `GridShadowTests` `TerrainHorizonTests` `SelfShadowScenarioTests` `FaceWeightPairingTests` |
 | **Wind** | `WindFieldTests` `WindProfileTests` `GradientHeightTests` `WindSlopeTests` `WindTerrainTests` `WindCompassTests` `StormHeatingTests` `WindScenarioTests` `WindSolverContractTests` `WindLabTests` |
 | **Heat sources, damage and thresholds** | `HeatGenerationTests` `OverheatSpillTests` `DamageTests` `CriticalTemperatureTests` `CriticalTemperatureMirrorTests` `OverheatEventTests` `SuitThermalTests` `IncandescenceTests` `HeatWarningTests` `HeatCueScanTests` `ThresholdTests` `HeatSourceTests` `HeatSourceMathTests` `HeatSourceCommandTests` `HeatSourceBlockTests` `CustomHeatSourceTests` `MultiCellAndDamageTests` `ReactorWasteHeatTests` `GridHeatBalanceTests` `HottestNodeTests` `GlowGeometryTests` `HeatGlowStyleTests` `SessionCleanupTests` `ThermalVisionTests` `ThermalVisionTelemetryTests` `ThermalVisionLabTests` `ThermalVisionRegionOrderTests` `ThermalVisionRegionScanTests` `ThermalVisionCelestialTests` `ThermalVisionHudProjectionTests` `ThermalVisionOcclusionTests` |
@@ -716,6 +724,7 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Added `AeroProfileBuilderTests` and `VoxelCursorTests` for exact legacy equivalence, bounded work and stale-result rejection. Extended `AeroProfileLabTests` to check the per-build maximum-slice instrument. |
 | 2026-09-26 | Registered `AeroFlightTests` in the suite index and reproduced the round-6 calibration and S5–S8 flight claims. Full offline suite: 2,494 cases, no failures; corpus walks were not enabled. |
 | 2026-09-20 | Add teardown fault-injection and session-boundary regression checks. |
 | 2026-09-20 | Index the natural-glow fade and allocation regression tests. |
