@@ -842,12 +842,19 @@ fit, `AeroCoefficients.Fitted`:
 | S7 | spin halves in finite time, sooner in thicker air | **holds** — 324 s at density 1, 649 s at 0.5 |
 | S8 | the guard binds on none of them | **holds** — zero binds |
 
-**What step 1 has now, stated once.** Drag from a hull's own silhouette, forebody and base, calibrated in
+**What step 1 has in the offline library.** Drag from a hull's own silhouette, forebody and base, calibrated in
 the open and held invariant across the scales hulls are built at; a centre of pressure the drag acts
 through, so a hull with its area behind its centre of mass flies straight and one with it ahead turns
 round; damping of a turn in flight and at rest; and a guard that never binds in a resolved case. **What it
 does not have**: lift, so a finned hull is still step 2's rig; and a rounded nose reads up to 67 % too
 draggy, so streamlining is under-rewarded. `AeroCalibrationTests` and `AeroFlightTests` pin all of it.
+
+**This is not yet a game force.** The adapter still applies no aerodynamic force; the settings,
+profile invalidation, per-tick engine hookup and P1/P2 population validation remain open under `K25`.
+The complete solution build and 2,494 offline test cases pass on 2026-09-26, with corpus walks
+not opted in. The flight command reproduces S5–S8; this is synthetic-rig evidence, not a live-game
+handling observation. The profile's inertia approximation for multi-cell blocks still needs an
+independent rectangular-body check before extending the flight evidence to those blocks.
 
 ## What this changes elsewhere
 
@@ -867,6 +874,7 @@ draggy, so streamlining is under-rewarded. `AeroCalibrationTests` and `AeroFligh
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Independently revalidated the inherited round-6 work: full solution build, 32 aerodynamics tests, 2,494 offline cases and the flight lab. Clarified that the profile remains an offline library and recorded the multi-cell inertia check still needed. |
 | 2026-09-25 | **Round 6 and the moment rigs recorded.** The surface-read normal holds X1 and X2; X3 failed on first implementation, was revised, and was re-judged on untuned geometry, all within 0.044 of exact. The drag misses round 5's bars again (15 of 22) and holds resolution invariance (X4) — the 7×7 plate reads 1.04 where it read 0.29. S5 to S8 all hold, S5 by one second. The constants shipped are round 6's. |
 | 2026-09-25 | **Round 6 registered, against round 5's own stopping rule, and the page says why.** The trigger is an instrument defect found at game scale, not a drag result; the new normal is read from the surface around each face and is judged on exact geometry first. Resolution invariance across radius 4 to 24 is a new requirement, because it is the property round 5 lacked and nothing had asked for. |
 | 2026-09-25 | **Step 1b's first flight found two faults and one finding.** The guard was capping the restoring moment; the in-flight damping was missing. And a 7×7 plate reads a drag coefficient of 0.29 against 1.17, because the block normal tilts every rim cell and a game-scale plate is mostly rim: round 5's calibration does not transfer to the scale hulls are built at. |

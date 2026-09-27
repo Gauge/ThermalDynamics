@@ -716,6 +716,7 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Registered `AeroFlightTests` in the suite index and reproduced the round-6 calibration and S5–S8 flight claims. Full offline suite: 2,494 cases, no failures; corpus walks were not enabled. |
 | 2026-09-20 | Add teardown fault-injection and session-boundary regression checks. |
 | 2026-09-20 | Index the natural-glow fade and allocation regression tests. |
 | 2026-09-19 | Separated thermal-vision presentation from the simulation model, with an independent project and assembly isolation checks. |
