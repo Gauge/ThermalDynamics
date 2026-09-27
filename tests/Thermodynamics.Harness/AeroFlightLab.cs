@@ -27,6 +27,9 @@ namespace Thermodynamics.Harness
             public float MaxError;
             public int GuardBound;
             public int Steps;
+
+            /// <summary>The last time, in seconds, the heading was more than 5° off the flight path.</summary>
+            public float LastOutsideFive;
         }
 
         /// <summary>
@@ -82,6 +85,7 @@ namespace Thermodynamics.Harness
 
                 float error = Error(attitude, heading, path);
                 if (error > flight.MaxError) flight.MaxError = error;
+                if (error > 5f) flight.LastOutsideFive = (i + 1) * Tick;
                 if (i * Tick >= seconds - 10f && error > flight.WorstLateError) flight.WorstLateError = error;
                 flight.FinalError = error;
                 flight.Steps++;
@@ -129,8 +133,8 @@ namespace Thermodynamics.Harness
 
             sb.AppendLine("Step 1 moment rigs, 60 Hz, sea-level air, 50 m/s");
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                "  S5 shuttlecock boom-first, kicked 20°: max {0:0.0}°, worst of the last 10 s {1:0.00}°, after 60 s {2:0.00}°, guard bound {3}",
-                forward.MaxError, forward.WorstLateError, forward.FinalError, forward.GuardBound));
+                "  S5 shuttlecock boom-first, kicked 20°: last outside 5° at {4:0.0} s, worst of the last 10 s {1:0.00}°, after 60 s {2:0.00}°, guard bound {3}",
+                forward.MaxError, forward.WorstLateError, forward.FinalError, forward.GuardBound, forward.LastOutsideFive));
             sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
                 "  S6 shuttlecock plate-first, kicked 20°: max {0:0.0}°, after 60 s {1:0.0}°, guard bound {2}",
                 backward.MaxError, backward.FinalError, backward.GuardBound));

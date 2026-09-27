@@ -810,6 +810,45 @@ staircase reads as the slope it is.
 | X5 | round 5's W1 and W2 on the new instrument | as before |
 | S5–S8 | as registered | as registered |
 
+### Round 6, and the moment rigs: what step 1's drag and moments are
+
+**The instrument.** X1 holds — every front face of a 7×7 plate and an 8-cell cube reads cos²φ = 1,
+rims included — and X2 holds, a 45° staircase reading 0.5 within 0.02. **X3 failed on the first
+implementation**: a radius-8 hemisphere read 0.537 against 0.5, because a column whose surface lay
+more than two cells down was skipped as an edge, and a steep shoulder read as flat. The search now looks
+six cells in or out, so a column with no surface that close is an edge and one with a surface further
+down is a steep drop; X3 then holds. **Because that revision was made after X3 was read, it was judged
+again on geometry it was not tuned on** — hemispheres at radius 4, 6, 12 and 16, a sphere, cones at 30°,
+45° and 60° at two radii — and every one reads within 0.044 of exact (`AeroIncidenceTests`). The old
+normal read the 60° cone at radius 8 as 0.503 against 0.75.
+
+**The drag.** Refitted through the new instrument, round 5's bars are missed again — **15 of 22 bodies
+within 25 % out of sample, three past 50 %**, all rounded (the hemisphere curve-first +67 %, the
+ellipsoids at `L/d` 4 −51 % and 8 +70 %). **X4 holds, and it is the property that matters for a game**:
+from radius 4 to 24 the square plate and the cube move by 0.1 %, the hemisphere by 2.9 % and the 30°
+cone by 9.2 % against a 10 % bar. The 7×7 plate that read 0.29 reads 1.04. The shipped constants are this
+fit, `AeroCoefficients.Fitted`:
+
+| `P₀` | `P₂` | `C_att` | `C_sep` | `λ_r` |
+| ---: | ---: | ---: | ---: | ---: |
+| −0.08793 | 0.56124 | 0.35951 | 0.56396 | 1.21170 |
+
+**The moments**, `aero-flight`, 60 Hz, sea-level air, 50 m/s:
+
+| # | Registered | Result |
+| --- | --- | --- |
+| S5 | back within 5° after a 20° kick, and still there after 30 s | **holds** — last outside 5° at 29.0 s, 1.24° after 60 s. By one second: a thin margin, recorded as one |
+| S6 | flown plate-first, diverges past 45° | **holds** — swings round to 180° |
+| S7 | spin halves in finite time, sooner in thicker air | **holds** — 324 s at density 1, 649 s at 0.5 |
+| S8 | the guard binds on none of them | **holds** — zero binds |
+
+**What step 1 has now, stated once.** Drag from a hull's own silhouette, forebody and base, calibrated in
+the open and held invariant across the scales hulls are built at; a centre of pressure the drag acts
+through, so a hull with its area behind its centre of mass flies straight and one with it ahead turns
+round; damping of a turn in flight and at rest; and a guard that never binds in a resolved case. **What it
+does not have**: lift, so a finned hull is still step 2's rig; and a rounded nose reads up to 67 % too
+draggy, so streamlining is under-rewarded. `AeroCalibrationTests` and `AeroFlightTests` pin all of it.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
@@ -828,6 +867,7 @@ staircase reads as the slope it is.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-25 | **Round 6 and the moment rigs recorded.** The surface-read normal holds X1 and X2; X3 failed on first implementation, was revised, and was re-judged on untuned geometry, all within 0.044 of exact. The drag misses round 5's bars again (15 of 22) and holds resolution invariance (X4) — the 7×7 plate reads 1.04 where it read 0.29. S5 to S8 all hold, S5 by one second. The constants shipped are round 6's. |
 | 2026-09-25 | **Round 6 registered, against round 5's own stopping rule, and the page says why.** The trigger is an instrument defect found at game scale, not a drag result; the new normal is read from the surface around each face and is judged on exact geometry first. Resolution invariance across radius 4 to 24 is a new requirement, because it is the property round 5 lacked and nothing had asked for. |
 | 2026-09-25 | **Step 1b's first flight found two faults and one finding.** The guard was capping the restoring moment; the in-flight damping was missing. And a 7×7 plate reads a drag coefficient of 0.29 against 1.17, because the block normal tilts every rim cell and a game-scale plate is mostly rim: round 5's calibration does not transfer to the scale hulls are built at. |
 | 2026-09-25 | **Round 5 recorded: W1 and W2 fail, W3 holds, and the registered fallback is taken.** The in-sample fit ships as `AeroCoefficients.Fitted` with its errors stated beside it: blunt bodies mostly within 15 %, stubby rounded ones up to 72 % too draggy. `AeroCalibrationTests` pins it; `AeroIncidenceTests` pins the geometry's convergence. |

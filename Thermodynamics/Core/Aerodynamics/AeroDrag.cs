@@ -26,8 +26,9 @@ namespace Thermodynamics.Core
         public float ReattachLength;
 
         /// <summary>
-        /// Round 5's in-sample fit to every sourced body, at radius 24. Out of sample it reaches 14 of
-        /// 22 bodies within 25 %, and reads rounded noses too draggy; see aerodynamics.md, Round 5.
+        /// Round 6's in-sample fit to every sourced body, at radius 24, through the surface-read normal.
+        /// Out of sample it reaches 15 of 22 bodies within 25 %, reads rounded noses too draggy, and holds
+        /// within 10 % from radius 4 to 24; see aerodynamics.md, Round 6.
         /// </summary>
         public static AeroCoefficients Fitted
         {
@@ -35,11 +36,11 @@ namespace Thermodynamics.Core
             {
                 return new AeroCoefficients
                 {
-                    Offset = -0.08209f,
-                    Stagnation = 0.54126f,
-                    BaseAttached = 0.33405f,
-                    BaseSeparated = 0.69401f,
-                    ReattachLength = 1.13172f,
+                    Offset = -0.08793f,
+                    Stagnation = 0.56124f,
+                    BaseAttached = 0.35951f,
+                    BaseSeparated = 0.56396f,
+                    ReattachLength = 1.21170f,
                 };
             }
         }
