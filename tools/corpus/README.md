@@ -70,7 +70,7 @@ python3 -m unittest discover -s tools/corpus -p test_aerothrust.py
 ```
 
 `test_aerothrust.py` checks hand solutions, rotation/order/splitting/scale invariance, 80 seeded
-nonzero comparisons against independent vertex enumeration, malformed inputs and injected
+nonzero comparisons against independent vertex enumeration, near-rank rejection, malformed inputs and injected
 primal/dual faults. It also tests the machine-input contract. The C# `AeroPopulationInputTests`
 check the JSON export against installed ratings and the engine's force/exhaust direction.
 These are rated-force diagnostics with unlimited power/fuel and torque compensation. They do not

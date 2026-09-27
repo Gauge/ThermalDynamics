@@ -1,0 +1,87 @@
+K25 directional rated-thrust validation
+Recorded UTC: 2026-09-27T05:06:11.031698+00:00
+Final implementation and measured source: ff4dacc
+Initial implementation source, before conditioning/precision correction: c26021a
+Host: Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43
+Python: 3.10.6 (main, Jul 11 2025, 16:49:32) [GCC 15.1.1 20250521 (Red Hat 15.1.1-2)]
+Memory cap for each build, test and blueprint command: MemoryMax=12G; MemorySwapMax=0.
+Scope: numerical optimizer controls and two blueprint diagnostics. No population verdict, native flight, fuel/power, torque or simultaneous hovering feasibility.
+Criteria were registered in docs/aerodynamics.md before optimizer tests.
+The independent small-fixture oracle enumerates feasible box vertices rather than calling another LP solver.
+The initial prototype used the opposite sign for SciPy equality marginals; controls rejected it before c26021a and before blueprint measurements.
+After c26021a, an additional near-rank check exposed a false pure-force result. It is recorded below; ff4dacc rejects that case as unresolved.
+Export directions now retain double precision, matching reference headings. The prior single-grid specimen had a 0.0002041939637376089 N maximum residual; the corrected specimen has 1.9779127186745812e-10 N. These are numerical residuals, not measured native force error.
+Blueprints are the same two input-audit specimens from population-inputs-2026-09-27.txt, not a representative sample.
+Input/output JSON files contain all six headings, throttle solutions, residuals, active conditioning, dual bounds and provenance. Input mass is unloaded model mass.
+
+SHA256 tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-2232450039-inputs.json: 1afa01da01ca897d54fdca84555be2a02297703f9263661bcb1cca8bf7bd0d07
+SHA256 tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-2232450039-result.json: bd336b90438af152e59de7ce8858d5a8774595cac1a545255885b3541b480c0d
+SHA256 tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-554650209-inputs.json: a3972178c695e397c96429a1ef03299cce8b5f5b283001832f62991390d1f91d
+SHA256 tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-554650209-result.json: f72a2b3691d48f86f1bb518c05a02cbd1df12eb7b8e8060c841351b1d6ef747e
+SHA256 tools/corpus/aerothrust.py: 01c16773902e5b5bcc2162187866c4968f1c1899dc5cca57ec38def21a9dfebf
+SHA256 tools/corpus/test_aerothrust.py: 8864a2f1276ec585cb8f08dff4c8f97bf5c6f20be4a39ced32b5b07c00d32061
+SHA256 tools/corpus/requirements-aerothrust.txt: 5e5f954b66692e72aa2606b6de845f768f9cbfcfd18a521fa259e5b0bb8dc1ed
+SHA256 tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll: e703dd96430df534905f2570973cb13e595aaf8d79ba8784ee98b227cefcb61c
+SHA256 tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll: 3ff8abb816b0c2fe14e58d82ea38526fab17deda75dfe8a44edd1bc908ffb322
+
+Initial near-rank counterexample (subsequently rejected by test_nearly_aligned_unbalanced_force_is_unresolved_not_certified):
+Lone thruster has unavoidable nonzero transverse force; exact directional capacity is zero.
+{'capacity_n': 100.0, 'throttles': [1.0], 'force_residual_n': 1e-08, 'dual_normal': [1.0, -0.0, -0.0], 'dual_upper_n': 100.0, 'duality_gap_n': 0.0, 'tolerance_n': 9.999999999999999e-06}
+
+
+dotnet build tests/Thermodynamics.slnx --no-restore
+  Found ini file: /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/mdk.ini
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Modkit -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/modkit/bin/Debug/netframework48/Modkit.dll
+  Thermodynamics.Presentation -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Presentation/bin/Debug/net9.0/Thermodynamics.Presentation.dll
+  Thermodynamics.Core -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Core/bin/Debug/net9.0/Thermodynamics.Core.dll
+  Thermodynamics.Harness -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll
+  Thermodynamics -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/bin/Debug/netframework48/Thermodynamics.dll
+  Thermodynamics.Sim -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll
+  Thermodynamics.Tests -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll
+  Your mod "Thermodynamics" has been successfully built.
+  The project was successfully packed.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.23
+
+
+dotnet test tests/Thermodynamics.Tests --no-build
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2591, Skipped:     0, Total:  2591, Duration: 1 m 25 s - Thermodynamics.Tests.dll (net9.0)
+
+
+python3 -m unittest discover -s tools/corpus -p 'test_*.py'
+Exit 0; summary selected from the full log (other stdout is deliberate fixture scoring):
+..........................................Directional LP oracle: 80/80 nonzero cases; max absolute discrepancy 2.13162821e-13 N
+Ran 209 tests in 2.115s
+OK
+
+dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs /home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/2232450039/bp.sbc --json > INPUT.json
+python3 tools/corpus/aerothrust.py INPUT.json > RESULT.json
+Both commands exited 0; inspect the corresponding archived JSON files.
+
+dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs /home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/554650209/bp.sbc --json > INPUT.json
+python3 tools/corpus/aerothrust.py INPUT.json > RESULT.json
+Both commands exited 0; inspect the corresponding archived JSON files.

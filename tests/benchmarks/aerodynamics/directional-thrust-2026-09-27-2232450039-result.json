@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "kind": "aero-directional-thrust",
+  "scope": "rated thrust only; no P1/P2 verdict",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "source_sha256": "01c16773902e5b5bcc2162187866c4968f1c1899dc5cca57ec38def21a9dfebf",
+  "input_provenance": {
+    "blueprint_sha256": "e9e43c75c6ef5b13b52b5fe0d0f6ab982df9b555685480eb9bfe6a71b27b2b39",
+    "harness_mvid": "5f138c5c-941d-4a8c-a56b-11a702669335",
+    "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/2232450039/bp.sbc",
+    "grids": 3,
+    "mass_kg": 3427.99995803833
+  },
+  "headings": [
+    {
+      "capacity_n": 2879.9998,
+      "throttles": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        -0.0,
+        -0.0
+      ],
+      "force_residual_n": 0.0,
+      "active_condition": 1.0,
+      "dual_normal": [
+        -0.5797672937447096,
+        0.753530392165416,
+        0.309938434510743
+      ],
+      "dual_upper_n": 2879.9998,
+      "duality_gap_n": 0.0,
+      "tolerance_n": 0.00028799998,
+      "heading": "forward",
+      "direction": [
+        -0.5797672937447097,
+        0.7535303921654158,
+        0.30993843451074304
+      ]
+    },
+    {
+      "capacity_n": 2879.9998,
+      "throttles": [
+        0.0,
+        0.0,
+        1.0,
+        -0.0,
+        -0.0,
+        0.0
+      ],
+      "force_residual_n": 0.0,
+      "active_condition": 1.0,
+      "dual_normal": [
+        -0.3683146455171371,
+        -0.5816871589069718,
+        0.7252477997624819
+      ],
+      "dual_upper_n": 2879.9998000000014,
+      "duality_gap_n": 1.3642420526593924e-12,
+      "tolerance_n": 0.00028799998,
+      "heading": "left",
+      "direction": [
+        -0.3683146455171372,
+        -0.5816871589069719,
+        0.7252477997624819
+      ]
+    },
+    {
+      "capacity_n": 2879.9998,
+      "throttles": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        1.0,
+        -0.0
+      ],
+      "force_residual_n": 0.0,
+      "active_condition": 1.0,
+      "dual_normal": [
+        0.7267834663787563,
+        0.3063200895236383,
+        0.6147794692023385
+      ],
+      "dual_upper_n": 2879.9998000000005,
+      "duality_gap_n": 4.547473508864641e-13,
+      "tolerance_n": 0.00028799998,
+      "heading": "up",
+      "direction": [
+        0.7267834663787567,
+        0.30632008952363843,
+        0.6147794692023385
+      ]
+    },
+    {
+      "capacity_n": 2879.9998,
+      "throttles": [
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "force_residual_n": 0.0,
+      "active_condition": 1.0,
+      "dual_normal": [
+        -0.7267834663787563,
+        -0.3063200895236383,
+        -0.6147794692023385
+      ],
+      "dual_upper_n": 2879.9998000000005,
+      "duality_gap_n": 4.547473508864641e-13,
+      "tolerance_n": 0.00028799998,
+      "heading": "down",
+      "direction": [
+        -0.7267834663787567,
+        -0.30632008952363843,
+        -0.6147794692023385
+      ]
+    },
+    {
+      "capacity_n": 2879.9998,
+      "throttles": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.0,
+        1.0
+      ],
+      "force_residual_n": 0.0,
+      "active_condition": 1.0,
+      "dual_normal": [
+        0.3683146455171371,
+        0.5816871589069718,
+        -0.7252477997624819
+      ],
+      "dual_upper_n": 2879.9998000000005,
+      "duality_gap_n": 4.547473508864641e-13,
+      "tolerance_n": 0.00028799998,
+      "heading": "right",
+      "direction": [
+        0.3683146455171372,
+        0.5816871589069719,
+        -0.7252477997624819
+      ]
+    },
+    {
+      "capacity_n": 2879.9998,
+      "throttles": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.0
+      ],
+      "force_residual_n": 0.0,
+      "active_condition": 1.0,
+      "dual_normal": [
+        0.5797672937447096,
+        -0.753530392165416,
+        -0.309938434510743
+      ],
+      "dual_upper_n": 2879.9998,
+      "duality_gap_n": 0.0,
+      "tolerance_n": 0.00028799998,
+      "heading": "backward",
+      "direction": [
+        0.5797672937447097,
+        -0.7535303921654158,
+        -0.30993843451074304
+      ]
+    }
+  ],
+  "input_sha256": "1afa01da01ca897d54fdca84555be2a02297703f9263661bcb1cca8bf7bd0d07"
+}

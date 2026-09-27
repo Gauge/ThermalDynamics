@@ -1214,7 +1214,7 @@ The later P1/P2 runner must state those choices and retain complete corpus cover
 provenance. No P1/P2 threshold or physical drag coefficient changes here.
 
 [Recorded validation](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27.txt): clean game
-build, 2,590 offline C# cases and 208 Python corpus-tool tests pass. All 80 independent nonzero
+build, 2,591 offline C# cases and 209 Python corpus-tool tests pass. All 80 independent nonzero
 LP controls agree within 2.14e-13 N. The two blueprint diagnostics also pass their numerical
 certificates. Their archived [three-grid inputs](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-2232450039-inputs.json)
 and [results](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27-2232450039-result.json),
