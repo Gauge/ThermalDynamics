@@ -56,6 +56,24 @@ def verify_aero_contract(source):
     print("Aerodynamic force contract: expected force/torque units verified by static inspection; native execution not tested.", flush=True)
 
 
+def profile_framework_bootstrap(source):
+    """Preserve only the inspected game's explicit permissions needed by profile snapshots."""
+    match = re.search(r"private static void AllowDefaultNamespaces\([^\n]+\).*?\n\t}", source, re.S)
+    if not match:
+        raise RuntimeError("Missing default framework whitelist")
+    body = match.group(0)
+    declarations = " ".join(re.findall(r"handle.AllowTypes\(MyWhitelistTarget.Both,.*?;", body, re.S))
+    needed = ["object", "string", "bool", "byte", "int", "long", "float", "double", "Array", "Func<, >", "Func<, , , >"]
+    for name in needed:
+        if "typeof(" + name + ")" not in declarations:
+            raise RuntimeError("Game no longer explicitly admits framework type: " + name)
+    delegate = re.search(r'handle.AllowMembers\(MyWhitelistTarget.Both, \(from m in AllDeclaredMembers\(typeof\(Delegate\)\)\s+where m.Name != "CreateDelegate"\s+select m\).ToArray\(\)\);', body)
+    if not delegate:
+        raise RuntimeError("Game delegate permission changed; inspect before adapting")
+    return ("handle.AllowTypes(MyWhitelistTarget.Both, " + ", ".join("typeof(" + t + ")" for t in needed)
+            + ");\nhandle.AllowMembers(MyWhitelistTarget.Both, typeof(Delegate).GetMethod(\"GetInvocationList\"));")
+
+
 # main operation.
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -79,7 +97,8 @@ def main():
     source = replace_once(source, "MyVRage.Platform.Scripting.OpenWhitelistBatch()",
                           "MyScriptCompiler.Static.Whitelist.OpenBatch()")
     source = replace_once(source, "AllowDefaultNamespaces(handle);",
-                          "handle.AllowTypes(MyWhitelistTarget.Both, typeof(object), typeof(string), typeof(bool), typeof(byte), typeof(int), typeof(float), typeof(double), typeof(System.IO.BinaryReader), typeof(System.IO.Stream));\n"
+                          profile_framework_bootstrap(source) + "\n"
+                          "handle.AllowTypes(MyWhitelistTarget.Both, typeof(System.IO.BinaryReader), typeof(System.IO.Stream));\n"
                           "CompatibleNamespaces(handle, MyWhitelistTarget.Both, typeof(Dictionary<,>));")
     source = source.replace("typeof(Task)", "typeof(ParallelTasks.Task)")
     source = source.replace("handle.AllowNamespaceOfTypes(", "CompatibleNamespaces(handle, ")

@@ -1,6 +1,6 @@
 """The static engine-contract check must reject changed units, dispatch and missing methods."""
 import unittest
-from run import verify_aero_contract
+from run import verify_aero_contract, profile_framework_bootstrap
 
 
 class AeroContractTests(unittest.TestCase):
@@ -36,6 +36,32 @@ private void AddForceInternal(object force)
         for old, new in changes:
             with self.subTest(old=old), self.assertRaises(RuntimeError):
                 verify_aero_contract(self.SOURCE.replace(old, new))
+
+
+class ProfileFrameworkTests(unittest.TestCase):
+    SOURCE = """private static void AllowDefaultNamespaces(object handle)
+    {
+        handle.AllowTypes(MyWhitelistTarget.Both, typeof(object), typeof(string), typeof(bool), typeof(byte), typeof(int), typeof(long), typeof(float), typeof(double), typeof(Array), typeof(Func<, >), typeof(Func<, , , >));
+        handle.AllowMembers(MyWhitelistTarget.Both, (from m in AllDeclaredMembers(typeof(Delegate))
+            where m.Name != "CreateDelegate"
+            select m).ToArray());
+\t}
+"""
+
+    def test_permissions_come_from_game_declarations(self):
+        result = profile_framework_bootstrap(self.SOURCE)
+        self.assertIn("typeof(Array)", result)
+        self.assertIn('GetMethod("GetInvocationList")', result)
+        self.assertNotIn("CreateDelegate", result)
+        self.assertNotIn("typeof(System.Reflection", result)
+
+    def test_missing_or_changed_permissions_are_rejected(self):
+        for before, after in [("typeof(Array)", "typeof(Removed)"),
+                              ("typeof(Func<, >)", "typeof(Func<>)"),
+                              ('m.Name != "CreateDelegate"', 'm.Name == "CreateDelegate"'),
+                              ("AllowDefaultNamespaces", "Removed")]:
+            with self.subTest(before=before), self.assertRaises(RuntimeError):
+                profile_framework_bootstrap(self.SOURCE.replace(before, after))
 
 
 if __name__ == "__main__":

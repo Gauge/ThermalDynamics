@@ -27,7 +27,7 @@ the first line of output, holding the generated bootstrap, the project and `repo
 One line per snippet, `compiler=N, whitelist=M`, then each diagnostic. **The exit code is the
 verdict**: it is non-zero if any snippet fails to compile, raises a diagnostic other than
 `ProhibitedMemberRule`, or gets the whitelist verdict it is not expected to get. Six snippets are
-*expected* to be refused (`occlusion-concrete-rejected`, `grid-render-data`, `model-materials`,
+*expected* to be refused (`aero-physics-inertia`, `occlusion-concrete-rejected`, `grid-render-data`, `model-materials`,
 `voxel-direct` and `voxel-builder`): they record routes the thermal-vision work tried and the game
 refuses, so a game update that admits one of them fails the run, and so does one that starts refusing
 a route the mod relies on.
@@ -37,9 +37,16 @@ The snippets cover thermal vision and the aerodynamic engine boundary; see
 `cases` in `Program.cs`, and to the `rejected` list if the expected answer is no.
 
 The aerodynamic checks admit the public physics inputs, world-force and world-angular calls,
-and reject direct `HkRigidBody.InertiaTensor` access. The offline bootstrap explicitly registers
-`System.Boolean` alongside its other framework primitives; omitting it made a Boolean local fail
-under the .NET 9 host, independently of the physics member. The runner records SHA-256 hashes
+the detached dictionary/array snapshot delegates and their synchronization lock,
+and reject direct `HkRigidBody.InertiaTensor` access. The offline bootstrap uses a subset of framework permissions because the game's .NET Framework
+reflection setup cannot run unchanged on .NET 9. `profile_framework_bootstrap` checks the installed
+game's explicit declarations before admitting the array, primitive and Func types needed here.
+It preserves the game's restriction on Delegate creation and admits only GetInvocationList from
+its allowed members: enumerating .NET 9's additional span overloads breaks the old analyzer.
+The first profile probe falsely refused arrays and delegates because that subset omitted them;
+[the recorded rerun](../../tests/benchmarks/aerodynamics/profile-api-whitelist-2026-09-27.txt)
+includes both instrument failures and the corrected result. This is a targeted probe, not a claim
+that every .NET 9 framework member matches the game's framework. The runner records SHA-256 hashes
 of the inspected game assemblies and both probe sources. This proves whitelist admission only;
 it does not execute native physics. The additional static contract check decompiles
 `MyPhysicsBody` and verifies the timestep and argument conversions used by the adapter:
@@ -48,11 +55,13 @@ semantics fail the run. The decompiled file stays in the temporary work director
 
 Run `python3 -m unittest discover -s tools/thermal-api-check -p 'test_*.py'` for
 `test_contract.py`: `AeroContractTests` checks a synthetic contract and rejects changed timestep,
-linear/angular units, dispatch and missing methods. Neither static check proves native handling.
+linear/angular units, dispatch and missing methods. Neither static check proves native handling. `ProfileFrameworkTests` also rejects missing or changed
+framework permissions before a compatibility bootstrap can grant them.
 
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added the profile API probe and corrected omitted framework permissions against installed-game declarations. Recorded two instrument failures and the successful rerun; added four mutation cases that reject changed permissions. |
 | 2026-09-26 | Added aerodynamic physics-input and write-path checks, the rejected inertia accessor, binary/source fingerprints, and the missing Boolean primitive in the offline bootstrap. |
 | 2026-09-24 | Page written. The tool had no README, which `EveryToolIsNamedByItsReadme` reports. Run against the installed game the same day: all fourteen snippets get their expected verdict and the exit code is 0. |

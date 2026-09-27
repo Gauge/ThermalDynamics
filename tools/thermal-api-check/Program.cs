@@ -22,6 +22,8 @@ var type = typeof(MyScriptCompiler).Assembly.GetType("VRage.Scripting.Analyzers.
 var analyzer = (DiagnosticAnalyzer)Activator.CreateInstance(type, BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic,
     null, new object[]{compiler.Whitelist, MyWhitelistTarget.ModApi}, null);
 var cases = new Dictionary<string,string> {
+ ["aero-profile-snapshot"] = "public class Probe { private object gate=new object(); public System.Collections.Generic.Dictionary<string,object> Read(VRageMath.Vector3[] directions,float[] damping) { lock(gate) { return new System.Collections.Generic.Dictionary<string,object> { { \"Schema\",1 }, { \"Directions\",(VRageMath.Vector3[])directions.Clone() }, { \"DampingMoments\",(float[])damping.Clone() } }; } } public void Bind(System.Collections.Generic.Dictionary<string,System.Delegate> api) { var read=api[\"GetGridAeroProfile\"] as System.Func<VRage.Game.ModAPI.IMyCubeGrid,System.Collections.Generic.Dictionary<string,object>>; var register=api[\"SetGridAeroProfileConsumer\"] as System.Func<VRage.Game.ModAPI.IMyCubeGrid,long,bool,bool>; } }",
+
 
  ["aero-grid-inputs"] = "public class Probe { public void Read(Sandbox.Game.Entities.MyCubeGrid g, Sandbox.Game.Entities.MyPlanet p) { var centre=g.Physics.CenterOfMassWorld; var local=VRageMath.Vector3D.Transform(centre,g.PositionComp.WorldMatrixNormalizedInv); var orientation=g.WorldMatrix.GetOrientation(); var density=p.GetAirDensity(centre); g.Physics.AddForce(VRage.Game.Components.MyPhysicsForceType.APPLY_WORLD_FORCE, VRageMath.Vector3.Zero, null, null); g.Physics.AddForce(VRage.Game.Components.MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, null, null, VRageMath.Vector3.Zero); } }",
 
