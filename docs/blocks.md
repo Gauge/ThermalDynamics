@@ -340,6 +340,15 @@ equipped, a 15 m camera raycast finds the block you are looking at, prints its t
 thermal neighbours using the `GaugeThermalTexture` transparent material
 ([TransparentMaterials.sbc](../Thermodynamics/Content/Data/TransparentMaterials.sbc)).
 
+The proposed cooling integration now has an [installed-game API probe](../tools/thermal-api-check/README.md#extinguisher-projectile-boundary).
+A hit interceptor can read projectile/ammo identity and target geometry, with a server-only gate;
+its compiler/whitelist admission is recorded. Native static inspection places that callback before
+the positive-damage branch, so the ammo can retain zero damage. This is not a working extinguisher:
+the shipped trajectory is still zero, and cooling, crafting, discharge accounting and native-session
+validation remain open. The next implementation must derive heat removal from server-observed
+ammunition use, preserve missed-shot costs, and synchronize with any outstanding thermal solve.
+No client-supplied target temperature or removed-energy value is an authority.
+
 ## The performance panel
 
 `ThermalHud.DrawGridHud` draws a compact readout of what the simulation is doing across **every live
@@ -469,6 +478,7 @@ all, so it is the readout that works in any world.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Recorded the admitted native projectile boundary for future extinguisher cooling; scanner-only behavior and remaining accounting/session work stay explicit. |
 | 2026-09-08 | **Added the debug heat source** ([backlog.md](backlog.md) `B11`), which is a block with two sliders that registers through `ThermalHeatSources` and nothing else — so what a session sees it do is what every consumer of that path gets. Its dials are saved with the world, which the coolant pump's speed and the heat pump's throttle are not. Its output dial runs from zero to a gigawatt over its own six-decade curve rather than the game's logarithmic slider, which cannot have a floor of zero — and zero **removes the registration** rather than emptying it, so a source turned down costs nothing rather than costing what a gigawatt costs. It draws no power by decision, and says so in three places, because a heat term that is not conserved against anything is the sort of thing that reads as a defect to whoever finds it next. |
 | 2026-08-26 | **The build advice on ring length was written against a model that has changed twice**, and every number in it was wrong. It said the fluid mass does not grow with the ring and that a 32-pipe and an 8-pipe ring carry the same 500 kg — true when the charge was per loop and false since it became per pipe — and it quoted 32,000 W/K against 8,000, which predates `C42`'s 6.25× on the pickup. It also cited `LongerRingsCoupleHarderAndCarryTheSameFluid`, a test that no longer exists. Re-measured: 56,250 W/K at 8 pipes and 181,250 at 28, taking a 500 kW block from **722.7 K to 577.5 K**, and the reason is the coupling rather than the mass. Pinned by `LongerRingsDeliverColderBlocks`, which is what actually asserts it. |
 | 2026-08-24 | **Re-quoted every measured figure on this page at `C24`'s pair**, which moved the ones a bolt joint is in. A radiator bolted to a source is worth 228.6 K where it was 42.9 K and 26× armour per tonne where it was 48×, because solid conduction runs four times faster: the stack now keeps paying to the eighth panel instead of saturating at the second. *Plumb it, do not bolt it* holds on **reach** rather than on rate — plumbing a panel is worth 73.5 K over bolting it, while the joint itself now carries 1,168 W/K against a sink face's 1,000 ([backlog.md](backlog.md) `C25`). Ring, layout and air-conditioning figures re-read from their own scenarios. |
