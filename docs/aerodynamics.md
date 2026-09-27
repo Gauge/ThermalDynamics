@@ -853,8 +853,30 @@ draggy, so streamlining is under-rewarded. `AeroCalibrationTests` and `AeroFligh
 profile invalidation, per-tick engine hookup and P1/P2 population validation remain open under `K25`.
 The complete solution build and 2,494 offline test cases pass on 2026-09-26, with corpus walks
 not opted in. The flight command reproduces S5–S8; this is synthetic-rig evidence, not a live-game
-handling observation. The profile's inertia approximation for multi-cell blocks still needs an
-independent rectangular-body check before extending the flight evidence to those blocks.
+handling observation. Multi-cell diagonal inertia is independently checked below; the flight
+results above still concern the named synthetic rigs only.
+
+### Flight-profile mass properties
+
+`AeroProfile` treats each block as a uniform cuboid with its mass spread across its oriented
+bounding box. Its centre of mass is the mass-weighted mean of the block centres. The diagonal
+inertia about that centre adds each cuboid's central inertia and its parallel-axis contribution:
+`I_x = Σ m ((size_y² + size_z²)/12 + r_y² + r_z²)`, with cyclic permutations for Y and Z.
+Dimensions and offsets are in metres, so inertia is in kg·m². Changing the lattice or splitting
+one uniform cuboid into equal-density cells preserves these mass properties.
+
+**The independent check found a defect.** The previous implementation used a one-cell cube's
+central inertia for every block. A 12,000 kg block occupying 1×2×3 cells at 2.5 m pitch read
+12,500 kg·m² on all axes instead of **81,250, 62,500 and 31,250**. Five of seven analytic,
+rotation and decomposition checks failed before the correction; all seven pass afterward.
+`AeroProfileMassTests` also checks a small-grid cuboid, unequal masses and translation. The
+existing S5–S8 rigs use single-cell blocks and their acceptance results are unchanged.
+
+**Limits of this instrument.** Mass is uniform inside each block's bounding box; internal machinery
+and inventory distribution are not resolved. Only the diagonal is stored, so the free-flight lab
+is suitable for bodies whose principal inertia axes coincide with the grid axes, including its
+cube and shuttlecock. Arbitrary asymmetric hulls need the products of inertia before their
+coupled rotations can be claimed accurate. This is not a replacement for the game's mass tensor.
 
 ## What this changes elsewhere
 
@@ -874,6 +896,7 @@ independent rectangular-body check before extending the flight evidence to those
 
 | Date | Change |
 | --- | --- |
+| 2026-09-26 | Corrected the flight profile's multi-cell inertia against analytic cuboids: five of seven new checks failed first, then all seven passed. Recorded the uniform-density and diagonal-tensor limits; the existing single-cell flight rigs retain their results. |
 | 2026-09-26 | Independently revalidated the inherited round-6 work: full solution build, 32 aerodynamics tests, 2,494 offline cases and the flight lab. Clarified that the profile remains an offline library and recorded the multi-cell inertia check still needed. |
 | 2026-09-25 | **Round 6 and the moment rigs recorded.** The surface-read normal holds X1 and X2; X3 failed on first implementation, was revised, and was re-judged on untuned geometry, all within 0.044 of exact. The drag misses round 5's bars again (15 of 22) and holds resolution invariance (X4) — the 7×7 plate reads 1.04 where it read 0.29. S5 to S8 all hold, S5 by one second. The constants shipped are round 6's. |
 | 2026-09-25 | **Round 6 registered, against round 5's own stopping rule, and the page says why.** The trigger is an instrument defect found at game scale, not a drag result; the new normal is read from the surface around each face and is judged on exact geometry first. Resolution invariance across radius 4 to 24 is a new requirement, because it is the property round 5 lacked and nothing had asked for. |
