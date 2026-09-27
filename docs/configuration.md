@@ -1388,6 +1388,7 @@ one with a migration risk — is late rather than first.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added EnableAeroForces and the 26/98 AeroProfileDirections choices with new serialization identifiers 165/166. |
 | 2026-09-24 | **The aerodynamic force and the top-speed port are retired** (`K25` step 0; [aerodynamics.md](aerodynamics.md#strip-and-rebuild)). Twenty-four settings are gone: `EnableDrag`, `DragCoefficient`, `EnableShapeDrag`, `EnableLift`, `LiftCoefficient`, and the Top speed page's nineteen — `EnableTopSpeed`, `SpeedLimit`, `EnableSpeedBoost`, the twelve cruise-curve points, both boost ceilings and both resistances. Their `ProtoMember` numbers — 135, 136, 138 to 140 and 145 to 163 — are retired and never reissued (`W2`), so a saved world's value is ignored rather than read into something else, and `/thermal get` answers a retired name with nothing rather than a number. **What a world notices**: no aerodynamic force on any ship; the engine's own speed cap in place of 140 m/s unless RelativeTopSpeed is installed; and, because the Newtonian shape factor left the friction row with the force it was fitted for, friction heating at the projected area again — 1.71× on a four-cube brick and 2.10× on a wedge, and a median 4.56 K at re-entry by `K22`'s population measurement. `EnableWindwardShielding` stays and moves to the Friction heating page. |
 | 2026-09-20 | Add HDR glow emission and runtime glow counters to `/thermal status`. |
 | 2026-09-20 | Document the soft glow and rendering caps; correct the sound cue description. |

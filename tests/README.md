@@ -725,6 +725,7 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added AeroRuntimeTests for lifecycle, centre jitter, zero allocation, world covariance, guards, face overrides and independent flight controls. Full offline suite: 2,565 passing cases; native and corpus checks remain outside this run. |
 | 2026-09-26 | Added `AeroCentreUpdateTests` for bounded atomic centre changes, cancellation and zero allocation. Added the first-read cache regression and centre-slice instrument checks. Full offline suite: 2,553 passing cases. |
 | 2026-09-26 | Added `AeroProfileBuilderTests` and `VoxelCursorTests` for exact legacy equivalence, bounded work and stale-result rejection. Extended `AeroProfileLabTests` to check the per-build maximum-slice instrument. |
 | 2026-09-26 | Registered `AeroFlightTests` in the suite index and reproduced the round-6 calibration and S5–S8 flight claims. Full offline suite: 2,494 cases, no failures; corpus walks were not enabled. |

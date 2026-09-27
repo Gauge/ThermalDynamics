@@ -1526,6 +1526,7 @@ as a *second* change rather than as a substitute. [backlog](backlog.md) `D19`.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Updated the current aerodynamic composition and implementation status for the rebuilt engine adapter; preserved the superseded design as historical context. |
 | 2026-09-24 | *Not authoritative over the game's own systems* says the mod writes nothing to a ship's physics again: `K25`'s first step stripped the aerodynamic force, and the owner's decisions recorded the same day (aerodynamics.md) are what brings it back. The reasoning around it is unchanged. |
 | 2026-09-20 | Describe soft heat patches, bounded lights and explicit visual verification limits. |
 | 2026-08-28 | *Basic environmental information should be on screen as a matter of course* is built, and the page says which half of it is judged: what the readout **says** is a decision in `Core` and pinned by tests; whether it reads as the game's own HUD is the half only a session can settle. |

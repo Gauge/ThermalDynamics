@@ -89,6 +89,7 @@ repository is built and laid out.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Connected rebuilt aerodynamic drag and moments to the game adapter, with an off switch, resolution settings and API readouts. Native handling and population validation remain open. |
 | 2026-09-24 | The aerodynamic forces and the top-speed curve are gone while the flight model is rebuilt; a ship flies as the game flies it, and RelativeTopSpeed is the mod for per-mass top speeds. |
 | 2026-08-23 | Added multiplayer to **What it does**: temperatures now replicate, and a client that used to guess is told. |
 | 2026-08-22 | Moved the repository layout tree, the build-and-test section and the documentation index off this page. The stated audience is a workshop reader, with one section for modders, and all three were written for somebody who has cloned the repository ([docs/backlog.md](docs/backlog.md) `H5`). The layout and the build are now in [docs/development.md](docs/development.md); the index is [docs/README.md](docs/README.md). |

@@ -242,6 +242,7 @@ server, and `K21` a debugging convenience.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Recorded the K25 engine adapter, switches and lifecycle implementation. Native handling, multiplayer, edit latency, profile-table API and P1/P2 remain open. |
 | 2026-09-26 | Recorded K25 step 1 as partly built: the offline profile and moment rigs are validated, while integration and population validation remain open. |
 | 2026-09-24 | **`K25` step 0 is built, and six rows retire into it.** The aerodynamic force, lift and the top-speed port are stripped ([aerodynamics.md](aerodynamics.md#strip-and-rebuild)); `K10` was the port, and `K6`, `K16`, `K22`, `K23` and `K24` each became a requirement there. The K section's introduction described the drag-shape-speed arc those rows made and is rewritten. |
 | 2026-09-05 | **API audit: every shipped system now has a read accessor.** Added `GetGridAeroForces` (drag and lift vectors, where only friction watts were exposed) and `GetCoolantLoop` (a loop's mean/hottest/coldest pipe temperatures and count, where only the loop count was), both additions so the major stays 1. The one considered non-exposure — the per-block mechanism-watt split, gated behind `CollectDiagnostics` — is recorded as `B45` rather than left to be re-found. The integration guide is [api-guide.md](api-guide.md). |

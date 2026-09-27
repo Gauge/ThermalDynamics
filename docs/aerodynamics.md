@@ -1117,6 +1117,7 @@ profile-table access remain open. These checks establish offline behavior, not n
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Connected bounded profiles to the engine adapter and documented engine force/angular conversion, centre jitter, API face overrides and remaining native limits. Recorded [adapter evidence](../tests/benchmarks/aerodynamics/engine-adapter-2026-09-27.txt): 2,565 offline cases pass; S5 recovers at 29.0 s, S6 diverges, S7 density scaling holds, with no guards in these flight rigs. |
 | 2026-09-26 | Added bounded centre preparation with atomic publication, exact legacy-equivalence checks and zero allocation. Recorded initial and warmed timing runs, including the warmup correction, repeat caps and observed maxima. |
 | 2026-09-26 | Corrected the budgeted builder cache for sub-millimetre centre changes before the first damping read. The legacy implementation measured at that first-read centre; the new preparation had incorrectly reused the initial centre. Added a bit-identity regression and corrected the first-use cost scope in place (E10). |
 | 2026-09-26 | Recorded source-identified maximum-slice measurements and zero evaluation allocations, with list-growth and centre-change costs still explicit. Full offline suite: 2,539 passing cases. |
