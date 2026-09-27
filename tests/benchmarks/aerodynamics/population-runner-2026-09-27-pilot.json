@@ -1,0 +1,829 @@
+{
+  "scope": "End-to-end and resume pilot only; the two previously audited specimens are not a population sample.",
+  "source_commit": "abe9c33545f89027d8fb337d685d658c8e3ee1a2",
+  "selection": "Reuse the two directional-thrust input audit specimens, one atmospheric self-lifting hull and one three-grid ion hull.",
+  "manifest": {
+    "binary": "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll",
+    "corpus": "/tmp/k25-population-pilot-abe9c33/corpus",
+    "files": [
+      {
+        "bytes": 355435,
+        "path": "554650209/bp.sbc",
+        "sha256": "1c667edfdcdb9dccbafe3397422060b18eb28e4ed2c6b1f86dc6854b169e97c5"
+      },
+      {
+        "bytes": 249276,
+        "path": "2232450039/bp.sbc",
+        "sha256": "e9e43c75c6ef5b13b52b5fe0d0f6ab982df9b555685480eb9bfe6a71b27b2b39"
+      }
+    ],
+    "fingerprint": {
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/BlockVarientGroups.sbc": "e1bf34accdc33823daeacd0fce652786cc02593026ac7c362eefaaf3cfb6d87f",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPipe_Corner.sbc": "8d9d7bd2a1f460323c1d4b9ae07c5575a14e51aa2cd749980e2ac4036e68aee9",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPipe_Corner_DoubleSink.sbc": "5d082d757faf0634494cdb1f4bad4b45ccfc83c314edaac162ffc28b1aa5e6f6",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPipe_Corner_SingleSink.sbc": "6ed3f3fc9815288d811c11409c3f5942737797c3ac963c626c08d0427caee0ae",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPipe_Straight.sbc": "0e0c3b96499b5ce12c3b00697dd71b9de9b46c8750bd870aa2d21a6fbfe1c3a5",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPipe_Straight_DoubleSink.sbc": "7a4751478eff705bcb1a9a057d14d5ae677cef186956bb84c00897d49d71acd9",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPipe_Straight_SingleSink.sbc": "ac687fe3894b229dc8331519c75055f20f8c184d3b3f9f81acb4478d2d80dc43",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_CoolantPump.sbc": "0eba5166334e71d680e59b1501e9159c440c5c1bf018ae07e9a670353af81e47",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_HeatPump.sbc": "2fd5fd7d3a45d1599a6c8187191f85de0048f24e157218693d9cefaa80a6c063",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_HeatSource.sbc": "3bcef0c0ec77759f875ed1e73a6d954938ff8f58b493635167460d426b448983",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_LG_Radiator.sbc": "a522222ef9005488eec6aee15ebc55a422332f4af84c9fab19c9bf2bddf1255b",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPipe_Corner.sbc": "60228dd98b55868bbf1a20610e598306bfdc872ba1ecce61673ee357fabcac55",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPipe_Corner_DoubleSink.sbc": "e91e848813f1576bdfbb0c46f63db98daac061d0410cfcdfb595f31b1fb8d556",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPipe_Corner_SingleSink.sbc": "84b3d6f5e90e55f80c9738a7adcea4e172a2d8440b82ac9023b15f01056be1de",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPipe_Straight.sbc": "866eb839bf046945f9dadafd176b0b8d8882094f1e441caa9924d28659a69d73",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPipe_Straight_DoubleSink.sbc": "95fb3d9ef6366ae9950a9d32108754ef120d412da98a5e402bb7afc603fa3178",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPipe_Straight_SingleSink.sbc": "20ff3384a384100cdb7cbee14d155aefe2352b917484953140da1c59b06ad487",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_CoolantPump.sbc": "10ab49c9a092c48543f085557c06ea1973f8f323b6b0930ba25c80007c852e9c",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_HeatPump.sbc": "af905f31dcff1116e80ab58255fd003d571a2155d90ff71ad67abe738d2b0766",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_HeatSource.sbc": "d7ed7bc8b72c1a45787f2b35b255bc2def995b792a8d38e1354601f934ba19f4",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/CubeBlocks/Gauge_SG_Radiator.sbc": "54657ec8a0acf710f5a30b905a41fda9c6135d2b6507b39c728151c1325d896e",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Cubes.xml": "ef670602bed7463ec194dfa9e14f0fddd5294ca89bcded3d2f8058dea45dd090",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/EntityComponents.sbc": "380f82180c45eace7f282167693513a00cf759a53c7ad0aa816f2ae8ac24d213",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/AC_Astronaut.sbc": "f685f422d7e770f569059a882bf19c24ce0a2b00f16a89bae84f331f6d77b1d2",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/AmmoMagazines.sbc": "9270b484ab48988107eadd881804280d432b1aac7e0a5b44406d589986378d2f",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/Ammos.sbc": "b7c59d00dd272184da470c2fbbefb7bd39ac8f30ffe0a0060b34564693393a86",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/Audio.sbc": "56b99b6b66651eafeab87e8d488147b1cbdad4f025cef8d8109e640abb65bacb",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/Extinguisher.sbc": "47c8d8afc09bbb3b9bcef7bfb006d3408d8680c0c83222d076e90b297db626a6",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/HandItems.sbc": "6d84fc9c798abf33f4c7d598203513102ee5e0157c2ee47ba496a303eb2c9422",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/PhysicalItems.sbc": "da498480de7e9a13cb82e22f75066a7f5f77b75f52e907bea322303f9db8e694",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Extinguisher/Weapons.sbc": "ef1dd7f3cc2c4c97451bee3906865ed55aa657bcf0ee999f7b5de50d674d0fb0",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Localization/MyTexts.resx": "d15f89a9ea73a07b0043cc81b8b8c371fde45b0c9663844ab23a046f93a58157",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Localization/MyTexts.sbl": "fd498f9b7c41db0a0de13c16a730ed736a644864e645132f6049e8f7aa7477a6",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Loops.xml": "ea59e1f282c2ba29a0221297ee9609a62ebf798a200358eefb93182cf298f0b5",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/Planets.xml": "da93b8fdd826e7cf7080760600935d4b28b1a81c732144e4408bea7681c67f78",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/TransparentMaterials.sbc": "835144c77a81ac4612602379e8746b17a9b0e620892aff4fed66adbe142b4e62",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/Content/Data/definitionextensions.txt": "234a50103469256836c94ecee4c469ad77ac8133068305aee3f24f6d00b0e3ba",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/CppNet.dll": "896d10a3ca3597f08938399452f0a809105953210f0f55eb2e8bad3834ca092e",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/EmptyKeys.UserInterface.Core.dll": "f0699f6cc3fe04f34254fae5162aa789617f5d4da783c1393b1edfae11528201",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/EmptyKeys.UserInterface.dll": "c6d36cdfb422aa575df6d5820eb87c8547a71c57cdf851fbedcbe233a6e35f12",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/HavokWrapper.dll": "10fe39ac65933db3b0c34d05c018b4ac4f906dbbbb3dca2db5f05e6daba4d184",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Microsoft.Build.Framework.dll": "6a222e46c6dc471ae47a1c7570083600422db8cbac195be2c7c7f32147969730",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Microsoft.Build.Utilities.Core.dll": "e3649183808d1f39956e69ac784859985cbe54eb453cdc226df908185bd912f3",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Microsoft.CodeAnalysis.CSharp.dll": "a8da63084e18d227a88f66af443541dbb1805b02dc9c11adb632662665850bd1",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Microsoft.CodeAnalysis.dll": "0192c7052cc2fb93e2c8696675e6dc3a43c96a2205148e94382c0dd5a77bd982",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Microsoft.NET.StringTools.dll": "c88bf5f4efb7b865f7884641b3e6e8594d2249cfbd57862f5e3fbf20d1b6af90",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/ProtoBuf.Net.Core.dll": "f54552e20ebc7255fa5605277ec5ab38c4c6e3788fdd7ca5f72b5de9c7296e47",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/RecastDetourWrapper.dll": "b784ce8f43ee9f081ce4343597d0c4c473375aca4fcf7604c6256de6b332c432",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Sandbox.Common.dll": "eac978813c906c4c055ef8a9bf86bd71065ece91fd3da8866a3d810d81bd4d24",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Sandbox.Game.XmlSerializers.dll": "b1f76405097e1ed2a906d5d9046a6bcef3429273bb22062a9e13959f974ad8a5",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Sandbox.Game.dll": "de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Sandbox.Graphics.dll": "7c63fdceb6f800d1cf4b9023bc35e2c835390dd47be721a49acffe8b4e0b1fea",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Sandbox.RenderDirect.dll": "9de65d2056672e67b3a98e6277cb83336c0dd628adeafa4bf7c566bd6f1a4383",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SharpDX.D3DCompiler.dll": "ead35928381ba4c1d81b025330810d343c449d306ce79e32807794872aaac2db",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SharpDX.DXGI.dll": "77fc858906a20ddbd48a615f8579eb521f57008353a59cc8a8ee9d228b8bb560",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SharpDX.Direct3D11.dll": "4c17156e9c60396d488fa57fbced8638365774045e3d85540028c9094f318fd5",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SharpDX.XAudio2.dll": "21d1c75d36cb94d9f38dd7d70af3c15c08f5a981cdec64232ee4cf88682c8987",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SharpDX.dll": "2cc4dbd944fac81a683e35683c4c2085c997d0f7b712703aa829d81878c6fd83",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SixLabors.Core.dll": "e15a3ab28cced122dcc60422e231503b0ada0056f3868f67cbca3150604d6e2c",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SixLabors.ImageSharp.dll": "7c9cfcff8461a1f39244da29549ea55adc8a71d5a10a0a05df779e7dcc32231f",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SpaceEngineers.Game.dll": "6cefea4a73a5b806af4e565be5b41ed0b4199af2fc5031c575c4be7eb644c0c8",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SpaceEngineers.ObjectBuilders.XmlSerializers.dll": "ff470b92e2598f2223e355df5a9671075cb59ae40f42463f0abef44364917fbf",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/SpaceEngineers.ObjectBuilders.dll": "a67d1e8d6309020234c082ea4288d5c6db6682d9b3952ebb7b1316ead46b40f4",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/System.Configuration.ConfigurationManager.dll": "df795025f207b4940ec9a48deddaedab3333b031b15303fda4f148b09c456d6d",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/System.Diagnostics.EventLog.dll": "803ba4a0bd41b63b64248fee8c96ccfcecde72a16dc538d00fe1fd1db7517295",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/System.Security.Cryptography.ProtectedData.dll": "b761c998813562ba9edeb4ac492d9e9bd79a2ebd88078684181694a62627015f",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Core.dll": "6364f29b2989607102462095f745c7e1b21192404206433b88e7db0d0334d61b",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Harness.dll": "a937205f0d1448e8fc51a486cca722e557bb3d6937013d218e60ddeaffd44e10",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Presentation.dll": "c2b024c2b053418321c5ad4171cf5187c38676250994603b34492cd322d1eb63",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.deps.json": "e3281a694f007359c3072f219f51c02f03324d08d1168112a67eb75e85b6f5d9",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll": "0821de374d53ba54fa05c936e90579f59ee537362a768eba6d8b1aa11ca463ce",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.runtimeconfig.json": "835c31aec681878dd8fb4c098016c9c44798ac39224e5a4b1c456349ba4ee1b9",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Audio.dll": "258fdcc45183ae76657669a555de65a5357d6786fce0764b4a01688017f4eedb",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Game.XmlSerializers.dll": "987f6acd49876e949961183c356de95ddea54510fa1032cab800ccb4a3b95b15",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Game.dll": "f0970c2b60335f7690e158a485cd528703717c8c5002f2713556e04f09c508e1",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Input.dll": "4475fe4364e22a6346f7ebc28d8d98b789528981e53d91a5122e54a088e88154",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Library.dll": "2757d7f23d41d90cd6aee9e8bf966172916352d5ff2df86acab0767e0a7c766d",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Math.XmlSerializers.dll": "f2d7cbb2d6a731ce234470bd329c6cd742976f951044e08e40e9d13890dbaf0b",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Math.dll": "953ed575327ffec5a72baf13c893843c26f7d248cd1ece1372ec34d650618f1c",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.NativeWrapper.dll": "bbb60016fd28f3ae0fea76c3aa3cf130ec302ff3446b79f2d9e75a12ea9cba06",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Network.dll": "49967b84eb5ee08f87f8d940d2d4091e4f831c9a4bb5ca1219054a5def4ab4c4",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Render.dll": "df174fa5e34b35b9d3afcf3229eac0c509e626c4d7f6573bd25cb8edad4ac229",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Render11.dll": "b4a6502f913b70e53c8f715bfc6dfebef2ae9e87be52a95c84eb7c5fedcdde3b",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.Scripting.dll": "57579dcd5742e85dadc67d8fb890260daa0f90d82062a8f971341dcf236abf97",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.UserInterface.dll": "7058d7002fab87b6a2c23a312d24209edd085ec038a3e23fc3f0a81aa21376da",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.XmlSerializers.dll": "06d030477cff955810b041dc69d2c9d48d116f373f6d2c9844a22291d5c3bfdc",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/VRage.dll": "ec2410b3d916adbd7404c3082ccc25a70c8baec89bacb57001c67597068e24ca",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/corpus/aeroenvelope.py": "45095042641eaac1c276e6329afaf259256057b252567113ace72828a282cb26",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/corpus/aeropopulation.py": "02bd49d4766f56a1459c6e87ae76fba2006cbeb4e65113db1226b5aaa59a4862",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/corpus/aerothrust.py": "e1141c3a668fdaf19443b977841ee9d6e1a75525b943f43ddf0d44d0cee54272",
+      "/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/corpus/scoring.py": "016cd06ad6e2a09407a201145c743d3b3ee5fe99deaeb5d510d8dceb7db52027",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/Components.sbc": "0b6fc6d3639b002a2996124aaf996ac72b3049a4eadf0f729d6074d696d8edf4",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/BlockPositions.sbc": "b151a392b12043f3e7a2fe72d8260c8b5c80e6d86ab334b6fb95865e473a510f",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_ApexSurvivalPack.sbc": "a232f7efae6f5f37d52ca86de22fbc7c71302bcc27274130f7dea3de59e29674",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Armor.sbc": "f36c38b497fb532da9996f25bc38449a00e3fe2fdc8ed3a42e15ee7a2c0f3d66",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_ArmorPanels.sbc": "eaeab6d28e8fea3904585ec7025a37fd651975de4d29793be995536eb9e94721",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Armor_2.sbc": "57912b81008ce011cdecb25856e337f13464090fdd6eafdadf3128702a88dec1",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Armor_3.sbc": "811e5aed6ffec4e2b3a23bae699effe93315ad46736a8297f97240886add0b82",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Automation.sbc": "62a6ed56207dedffe2c751a58e87ffe35fd38257db9dc29482ea5c3bc05b5e64",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Communications.sbc": "e844fd0e3da4acf8aa6e2dcd61ffded3dd3397bf2df97d6a6fd30f05a18b7b96",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_ContactPack.sbc": "e056beced0ec7b55ab4014b2c98d5c3ae2e174b9f888f99809148f97044e1566",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Control.sbc": "8d66279aa31fe8f5a34fe1edc57ef3b72c72b9e7025896b55e1d4e982e472b40",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_CoreSystemsPack.sbc": "5ccfc473414674a94d0d846372af8b8fbbc5ea763e747e7ccabfb13bf771e20c",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_DecorativePack.sbc": "21faf82784033bf90df0211152fe99775a12494bafe21e21a25e13a61df19e54",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_DecorativePack2.sbc": "53688911643837b436c825d5ce6603fb84369449e77c0b3894a9cc73f25e5512",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_DecorativePack3.sbc": "28676617553831a8978b595d27ea955479f2e03d6958ff529a9853bea77d98e9",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Doors.sbc": "80a41d1b97d50242652f3a7d10f86ad9f466bcae87336b052bc60b99d409213d",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Economy.sbc": "2ead3a2b0cf62746c56a462fc551c586d8e6818981f2de8a4567c3b78a4cfde2",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Economy2Pack.sbc": "48f7544a47e28b03f6907d84a84741363677b7b42891ccd71827f96d3081793e",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_EconomyDeluxe.sbc": "a985052de77d34b858f99445716eb92995cb6d21f07720a76290be2580119cf6",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Energy.sbc": "db10705933db5ba7b1080fb567a5ac60611715e056c62a86b59b92679b53e3c6",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Extras.sbc": "714502db3068c93a30387e29228fa4b13a111db430199bde1d6e64329f9b7763",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Fieldwork.sbc": "9c29712807c5f502e36c1d2340a3c5dbffeb411893384e60e7ef0831e452634c",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Frostbite.sbc": "cc2b1e16b4e5675e834c759600b2f39d5bd030fa056548b0793ff709e123b444",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Gravity.sbc": "2c3442651607492a61d104f93b3b5f220ebe3ef048a989107652f31c0dac5699",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_GridAIPack.sbc": "64ded369d1c7c119e671c14211e257d425aea4777f9a936d4ac659cb69ba7e6e",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_IndustrialPack.sbc": "49205043d0bb0e01b6f4ad753fda24e44a89073bfdc59159d1d0ace8463fa0b0",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Interiors.sbc": "ac494b31e392e5b62ed14308f581b81e503c67c165c7fcc7c02cb8e01c4ca753",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_LCDPanels.sbc": "15ab6af899a5525320b5db5d0c64b661c4b8273995ff6cacf665e8557d9f4364",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Lights.sbc": "927207018f69685e3e251606d8d4a04090cbe15302372c9258ab0ffd796ee8d2",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Logistics.sbc": "565c4a448ba309df7c8491ae7c67e744308c70c850cb1d4cfda4ea0a651a0327",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Mechanical.sbc": "45eecab865c03974c1796860e7caf249c2df7bd9ca16a3b1ec92d6cce35ab656",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Medical.sbc": "63a1c11e5a9f8309ed7894e3c68d880700ecf15ba9b68a052ccbd67c1b791f38",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Production.sbc": "26d908d04f6c059f6f1b6b65cd702a267544e9ef4cf88bc326689b6f6965724a",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_ProsperityPack.sbc": "a051de1730148e9348dc5b7385df197e2b3dba9eb2828c7734e96df36e0abab0",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Prototech.sbc": "537ed9be7df099532b1ef24fec283b32837bf36cf148ed80f6b6c55f3bb3f3c6",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_ScrapRacePack.sbc": "1bf91252e69965efb3b54cb04ba9057be58f7e03ca7eb31f5b4810d937c35998",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_SignalsPack.sbc": "b334693de50de768e0cb268cca646c84f2c3c103102facca8a6d9a99cd9ea2bf",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_SparksOfTheFuturePack.sbc": "8c1b726ccd43486863fc1dc501902c34eddf4fb870c298d190b08bf7d43bc3c7",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Structural.sbc": "0c277a38f72aaa777d9e3db2a06c30f64f09e51302f4e7c78455961aa2ffd2cf",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Symbols.sbc": "a80279a1fec2ead443cdfc1cdeca4cd21b4e666da16ecbbe3b2895ee636d8322",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Thrusters.sbc": "32b6c37c7a3eec70d1bc6f380d81faaee3ddc33c89969a24bc448bf5465f7031",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Tools.sbc": "1a2fa06919388499f0e6d6939f69ee45e12a7c7702ec38675858aec6e4c1d5f0",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Utility.sbc": "f0cb0fb846dcab775ce704bdafb4a23cf0e7c9750fb69b048a5f15be98a18d81",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Warfare1.sbc": "01f67e38eef504137c7276a6622584f578fc7743d58aaacc3d43f626956e77b6",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Warfare2.sbc": "8ab6305f481005fb9eca48ce4006f7b8546cb5cd292ee065c8515d068f0b042f",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Weapons.sbc": "110a4cbec2726e55f769b6f6db8a2c83f7af3d4e6b307eeebdbda6bdc6198317",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Wheels.sbc": "3c84aadd40cb146722f62cfecb20f4d613046161479a21fd9207aea37b751246",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/CubeBlocks_Windows.sbc": "cd2d734f1dc7abcf77a5162deb1f444903d2f9942f9602d2cf35295e44e4ccd3",
+      "/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data/CubeBlocks/Testing.sbc": "8bec11a256c3001ee07b66096565bd149ca79479ba90d7573dbe16e229b6c6c7"
+    },
+    "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658",
+    "numpy": "2.2.6",
+    "python": "3.10.6 (main, Jul 11 2025, 16:49:32) [GCC 15.1.1 20250521 (Red Hat 15.1.1-2)]",
+    "schema": 1,
+    "scipy": "1.15.3",
+    "vertex_limit": 200000
+  },
+  "partial_summary": {
+    "bytes_recorded": 355435,
+    "bytes_total": 604711,
+    "complete_resolved": false,
+    "files_recorded": 1,
+    "files_total": 2,
+    "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658",
+    "p1": "unresolved",
+    "p1_share_lower_percent": 0.0,
+    "p1_share_upper_percent": 0.0,
+    "p1_speed_lower_mps": 128,
+    "p1_speed_upper_mps": null,
+    "p2": "unresolved",
+    "right_censored": 1,
+    "schema": 1,
+    "self_lifting_measured": 1,
+    "statuses": {
+      "measured": 1
+    }
+  },
+  "resumed_summary": {
+    "bytes_recorded": 604711,
+    "bytes_total": 604711,
+    "complete_resolved": true,
+    "files_recorded": 2,
+    "files_total": 2,
+    "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658",
+    "p1": "unresolved",
+    "p1_share_lower_percent": 0.0,
+    "p1_share_upper_percent": 0.0,
+    "p1_speed_lower_mps": 128,
+    "p1_speed_upper_mps": null,
+    "p2": "unresolved",
+    "right_censored": 1,
+    "schema": 1,
+    "self_lifting_measured": 1,
+    "statuses": {
+      "measured": 1,
+      "not_self_lifting": 1
+    }
+  },
+  "retained_receipt_sha256_before": {
+    "a59e406a35087fae1dfc082d3d0b6e71d4963a771d940e9125870ee4152038a1.json": "fb25c044cb6324ba8bc5d2fecf14868ad6b0454d3a64c895d09e0a9eeaab2b51"
+  },
+  "retained_receipt_sha256_after": {
+    "a59e406a35087fae1dfc082d3d0b6e71d4963a771d940e9125870ee4152038a1.json": "fb25c044cb6324ba8bc5d2fecf14868ad6b0454d3a64c895d09e0a9eeaab2b51"
+  },
+  "receipts": [
+    {
+      "entry": {
+        "bytes": 249276,
+        "path": "2232450039/bp.sbc",
+        "sha256": "e9e43c75c6ef5b13b52b5fe0d0f6ab982df9b555685480eb9bfe6a71b27b2b39"
+      },
+      "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658",
+      "input": {
+        "atmosphere": true,
+        "blueprint": "/tmp/k25-population-pilot-abe9c33/corpus/2232450039/bp.sbc",
+        "blueprint_sha256": "e9e43c75c6ef5b13b52b5fe0d0f6ab982df9b555685480eb9bfe6a71b27b2b39",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "grids": 3,
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "headings": [
+          {
+            "direction": [
+              -0.5797672937447097,
+              0.7535303921654158,
+              0.30993843451074304
+            ],
+            "name": "forward"
+          },
+          {
+            "direction": [
+              -0.3683146455171372,
+              -0.5816871589069719,
+              0.7252477997624819
+            ],
+            "name": "left"
+          },
+          {
+            "direction": [
+              0.7267834663787567,
+              0.30632008952363843,
+              0.6147794692023385
+            ],
+            "name": "up"
+          },
+          {
+            "direction": [
+              -0.7267834663787567,
+              -0.30632008952363843,
+              -0.6147794692023385
+            ],
+            "name": "down"
+          },
+          {
+            "direction": [
+              0.3683146455171372,
+              0.5816871589069719,
+              -0.7252477997624819
+            ],
+            "name": "right"
+          },
+          {
+            "direction": [
+              0.5797672937447097,
+              -0.7535303921654158,
+              -0.30993843451074304
+            ],
+            "name": "backward"
+          }
+        ],
+        "kind": "aero-population-inputs",
+        "mass_kg": 3427.99995803833,
+        "relative_air_density": 1,
+        "schema": 1,
+        "thrusters": [
+          {
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.7267834663787567,
+              -0.30632008952363843,
+              -0.6147794692023385
+            ],
+            "effective_n": 2879.9998,
+            "grid": 0,
+            "nominal_n": 14400
+          },
+          {
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.5797672937447097,
+              -0.7535303921654158,
+              -0.30993843451074304
+            ],
+            "effective_n": 2879.9998,
+            "grid": 0,
+            "nominal_n": 14400
+          },
+          {
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.3683146455171372,
+              -0.5816871589069719,
+              0.7252477997624819
+            ],
+            "effective_n": 2879.9998,
+            "grid": 0,
+            "nominal_n": 14400
+          },
+          {
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.5797672937447097,
+              0.7535303921654158,
+              0.30993843451074304
+            ],
+            "effective_n": 2879.9998,
+            "grid": 0,
+            "nominal_n": 14400
+          },
+          {
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.7267834663787567,
+              0.30632008952363843,
+              0.6147794692023385
+            ],
+            "effective_n": 2879.9998,
+            "grid": 0,
+            "nominal_n": 14400
+          },
+          {
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.3683146455171372,
+              0.5816871589069719,
+              -0.7252477997624819
+            ],
+            "effective_n": 2879.9998,
+            "grid": 0,
+            "nominal_n": 14400
+          }
+        ]
+      },
+      "record_sha256": "a35f5d3c910fac15457f9257e16ee5b7f53a2fcc6ecc91317c971a0d36c36ca7",
+      "status": "not_self_lifting",
+      "strongest": {
+        "active_condition": 2.0000000000000004,
+        "blueprint_sha256": "e9e43c75c6ef5b13b52b5fe0d0f6ab982df9b555685480eb9bfe6a71b27b2b39",
+        "capacity_n": 4988.305979388206,
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "direction": [
+          -0.9669839928029942,
+          -0.07764024916448459,
+          0.242721958982816
+        ],
+        "dual_normal": [
+          -1.0341432820426555,
+          -0.0,
+          -0.0
+        ],
+        "dual_upper_n": 4988.305979388205,
+        "duality_gap_n": -9.094947017729282e-13,
+        "force_residual_n": 6.591695732115342e-13,
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "heading": "maximum-resultant",
+        "schema": 1,
+        "throttles": [
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "tolerance_n": 0.00057599996,
+        "vertex_force_n": [
+          -4823.612033271857,
+          -387.2933191483886,
+          1210.7713993227999
+        ],
+        "vertex_norm_n": 4988.305979388206,
+        "vertex_throttles": [
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "vertices": 8
+      },
+      "utc": "2026-09-27T05:32:03.266370+00:00"
+    },
+    {
+      "drag": {
+        "blueprint_sha256": "1c667edfdcdb9dccbafe3397422060b18eb28e4ed2c6b1f86dc6854b169e97c5",
+        "ceiling_lower_mps": 128,
+        "ceiling_upper_mps": null,
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "drag_100_n": 451190.3125,
+        "drag_60_n": 162625.28125,
+        "force_tolerance_n": 1.017580625,
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "kind": "aero-population-drag",
+        "p1": "holds",
+        "profiles": 1,
+        "right_censored": true,
+        "schema": 1,
+        "thrust_n": 1861509.0652478703
+      },
+      "entry": {
+        "bytes": 355435,
+        "path": "554650209/bp.sbc",
+        "sha256": "1c667edfdcdb9dccbafe3397422060b18eb28e4ed2c6b1f86dc6854b169e97c5"
+      },
+      "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658",
+      "input": {
+        "atmosphere": true,
+        "blueprint": "/tmp/k25-population-pilot-abe9c33/corpus/554650209/bp.sbc",
+        "blueprint_sha256": "1c667edfdcdb9dccbafe3397422060b18eb28e4ed2c6b1f86dc6854b169e97c5",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "grids": 1,
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "headings": [
+          {
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "name": "forward"
+          },
+          {
+            "direction": [
+              -0.0256399982385154,
+              0.04325995392640523,
+              0.9987347830513434
+            ],
+            "name": "left"
+          },
+          {
+            "direction": [
+              -0.9582055167213962,
+              0.28369260408035774,
+              -0.03688758754360576
+            ],
+            "name": "up"
+          },
+          {
+            "direction": [
+              0.9582055167213962,
+              -0.28369260408035774,
+              0.03688758754360576
+            ],
+            "name": "down"
+          },
+          {
+            "direction": [
+              0.0256399982385154,
+              -0.04325995392640523,
+              -0.9987347830513434
+            ],
+            "name": "right"
+          },
+          {
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "name": "backward"
+          }
+        ],
+        "kind": "aero-population-inputs",
+        "mass_kg": 56428.59992980957,
+        "relative_air_density": 1,
+        "schema": 1,
+        "thrusters": [
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockLargeAtmosphericThrust",
+            "direction": [
+              -0.9582055167213962,
+              0.28369260408035774,
+              -0.03688758754360576
+            ],
+            "effective_n": 576000,
+            "grid": 0,
+            "nominal_n": 576000
+          },
+          {
+            "definition": "SmallBlockLargeAtmosphericThrust",
+            "direction": [
+              -0.9582055167213962,
+              0.28369260408035774,
+              -0.03688758754360576
+            ],
+            "effective_n": 576000,
+            "grid": 0,
+            "nominal_n": 576000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.0256399982385154,
+              0.04325995392640523,
+              0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2849294267270594,
+              0.9579389765409854,
+              -0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.0256399982385154,
+              -0.04325995392640523,
+              -0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.0256399982385154,
+              -0.04325995392640523,
+              -0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.2849294267270594,
+              -0.9579389765409854,
+              0.0341780486364947
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.0256399982385154,
+              -0.04325995392640523,
+              -0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.0256399982385154,
+              0.04325995392640523,
+              0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockLargeAtmosphericThrust",
+            "direction": [
+              -0.9582055167213962,
+              0.28369260408035774,
+              -0.03688758754360576
+            ],
+            "effective_n": 576000,
+            "grid": 0,
+            "nominal_n": 576000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              0.0256399982385154,
+              -0.04325995392640523,
+              -0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.0256399982385154,
+              0.04325995392640523,
+              0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          },
+          {
+            "definition": "SmallBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.0256399982385154,
+              0.04325995392640523,
+              0.9987347830513434
+            ],
+            "effective_n": 96000,
+            "grid": 0,
+            "nominal_n": 96000
+          }
+        ]
+      },
+      "record_sha256": "1b4981feafc810518c07a6016b685b61e88fd214c311905c289e1305e6a5c3ef",
+      "status": "measured",
+      "strongest": {
+        "active_condition": 10.189238231219793,
+        "blueprint_sha256": "1c667edfdcdb9dccbafe3397422060b18eb28e4ed2c6b1f86dc6854b169e97c5",
+        "capacity_n": 1861509.0652478703,
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "direction": [
+          -0.9829359825165871,
+          -0.024141815459290162,
+          0.18235686721503305
+        ],
+        "dual_normal": [
+          -1.0173602531466235,
+          -0.0,
+          -0.0
+        ],
+        "dual_upper_n": 1861509.0652478703,
+        "duality_gap_n": 0.0,
+        "force_residual_n": 9.043732562018545e-11,
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "heading": "maximum-resultant",
+        "schema": 1,
+        "throttles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "tolerance_n": 0.1152,
+        "vertex_force_n": [
+          -1829744.2420129487,
+          -44940.20832900981,
+          339458.9614309861
+        ],
+        "vertex_norm_n": 1861509.06524787,
+        "vertex_throttles": [
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "vertices": 8
+      },
+      "utc": "2026-09-27T05:31:39.847176+00:00"
+    }
+  ]
+}

@@ -1271,11 +1271,30 @@ rotation and rank-deficiency controls, an analytic quadratic-drag root, comparis
 profile evaluator on rotated multiple grids, and runner tests for partial coverage, duplicate/missing
 receipts, changed provenance, interrupted writes, exclusions and threshold/quantile boundaries.
 
+### Instrument validation and end-to-end pilot
+
+[Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at
+source `abe9c33`: the game build is clean, all 2,603 offline C# cases and 224 Python corpus-tool
+checks pass. The global-thrust oracle independently enumerates every binary-throttle combination
+on 80 seeded nonzero fixtures; maximum discrepancy is 2.51e-12 N. Analytic quadratic roots,
+rotated two-grid legacy comparisons, selection faults, receipt corruption, interrupted replacement,
+coverage, uncertainty and quantile boundaries are covered.
+
+The [archived pilot](../tests/benchmarks/aerodynamics/population-runner-2026-09-27-pilot.json)
+reuses the two earlier input-audit hulls to exercise the complete pipeline and resume. It is not
+population evidence. The 47-block three-grid ion craft has 4.988 kN maximum resultant thrust
+against 3,428 kg unloaded mass and is not self-lifting. The atmospheric craft has 1.862 MN
+maximum resultant thrust against 56,429 kg; along that heading, drag at 100 m/s is 451.2 kN.
+Its ceiling is above the 128 m/s bracket and remains right-censored. Stopping after one receipt
+withholds population verdicts; resuming completes the second file without changing the first
+receipt's bytes. With just one self-lifting hull, P1 and P2 correctly remain unresolved even when
+pilot coverage is complete. The full corpus walk remains outstanding.
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
-| 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Independent validation and corpus findings are recorded below as they complete. |
+| 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Recorded independent controls and a two-specimen pipeline/resume pilot; full corpus scoring remains outstanding. |
 | 2026-09-27 | Added a directional rated-thrust optimizer and schema-1 machine input export. Hand solutions and 80 nonzero vertex-enumeration controls validate force balance and independently recomputed dual bounds; complete population scoring remains open. |
 | 2026-09-27 | Added retained blueprint world frames and engine-relative-density thrust ratings for the population lab. The aero-inputs command audits rated world-space thrust vectors; nominal census fields are unchanged and no P1/P2 verdict is claimed. |
 | 2026-09-27 | Published drag-profile geometry and damping through a detached snapshot API. External consumers can request bounded preparation with force writes disabled. Six offline cases cover geometry reconstruction, damping signs, snapshot ownership and demand lifecycle; native consumer dispatch and lift data remain open. |

@@ -1,0 +1,117 @@
+Population instrument validation; no full-corpus verdict
+Source: abe9c33545f89027d8fb337d685d658c8e3ee1a2
+Platform: Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43
+Python: 3.10.6
+.NET SDK: 10.0.111
+Caps: MemoryMax=12G, MemorySwapMax=0 on builds, tests and pilot.
+Observed full-test process RSS: 541108 KiB (sample, not peak).
+
+Build
+  Found ini file: /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/mdk.ini
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Thermodynamics -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/bin/Debug/netframework48/Thermodynamics.dll
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Modkit -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/modkit/bin/Debug/netframework48/Modkit.dll
+  Thermodynamics.Presentation -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Presentation/bin/Debug/net9.0/Thermodynamics.Presentation.dll
+  Thermodynamics.Core -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Core/bin/Debug/net9.0/Thermodynamics.Core.dll
+  Thermodynamics.Harness -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll
+  Thermodynamics.Sim -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll
+  Thermodynamics.Tests -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll
+  Your mod "Thermodynamics" has been successfully built.
+  The project was successfully packed.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.25
+
+Focused C#
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    59, Skipped:     0, Total:    59, Duration: 1 s - Thermodynamics.Tests.dll (net9.0)
+
+Full C#
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2603, Skipped:     0, Total:  2603, Duration: 1 m 24 s - Thermodynamics.Tests.dll (net9.0)
+
+Python corpus tools: Ran 224 tests in 2.022s; OK
+Independent controls: global thrust 80/80 nonzero, max discrepancy 2.50111043e-12 N; directional LP 80/80 nonzero, 2.13162821e-13 N.
+Analytic terminal roots at 0, 0.125, 60, 100 and 128 m/s; right censor at a 200 m/s root.
+Rotated two-grid drag agrees with the legacy evaluator within the declared float allowance.
+
+First invocation (--limit 1)
+{"phase": "manifest", "files": 2, "total_files": 2, "bytes": 604711, "total_bytes": 604711}
+{"bytes": 355435, "files": 1, "path": "554650209/bp.sbc", "status": "measured", "total_bytes": 604711, "total_files": 2}
+{
+  "schema": 1,
+  "complete_resolved": false,
+  "files_total": 2,
+  "files_recorded": 1,
+  "bytes_total": 604711,
+  "bytes_recorded": 355435,
+  "statuses": {
+    "measured": 1
+  },
+  "self_lifting_measured": 1,
+  "p1_share_lower_percent": 0.0,
+  "p1_share_upper_percent": 0.0,
+  "p1": "unresolved",
+  "p1_speed_lower_mps": 128,
+  "p1_speed_upper_mps": null,
+  "p2": "unresolved",
+  "right_censored": 1,
+  "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658"
+}
+
+Resume
+{"phase": "manifest", "files": 2, "total_files": 2, "bytes": 604711, "total_bytes": 604711}
+{"bytes": 604711, "files": 2, "path": "2232450039/bp.sbc", "status": "not_self_lifting", "total_bytes": 604711, "total_files": 2}
+{
+  "schema": 1,
+  "complete_resolved": true,
+  "files_total": 2,
+  "files_recorded": 2,
+  "bytes_total": 604711,
+  "bytes_recorded": 604711,
+  "statuses": {
+    "measured": 1,
+    "not_self_lifting": 1
+  },
+  "self_lifting_measured": 1,
+  "p1_share_lower_percent": 0.0,
+  "p1_share_upper_percent": 0.0,
+  "p1": "unresolved",
+  "p1_speed_lower_mps": 128,
+  "p1_speed_upper_mps": null,
+  "p2": "unresolved",
+  "right_censored": 1,
+  "identity_sha256": "f343930184ab0e0bafc95dfc8b88380ad1ff62b4d48d7779f1109dfdb60e0658"
+}
+
+The first completed receipt was byte-identical after resume (SHA256 values in pilot JSON).
+Both population verdicts stay unresolved: only one self-lifting pilot hull.
+Unknown-only blueprint tests first exposed a reader omission; selection now probes those files to count modded exclusions. Ambiguous definitions and invalid frames stay unresolved.
+No model coefficient, physical constant or acceptance threshold was fitted to pilot outcomes.
+Native flight, multiplayer and full-population acceptance remain unverified.
