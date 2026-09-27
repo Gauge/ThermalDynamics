@@ -1,0 +1,62 @@
+Source commit: cb86e7d55ada3dd78100f9dc7f05ff15b2404bfc
+Command: dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-profile
+Memory cap: 6 GiB, swap disabled; no concurrent validation run.
+
+Aerodynamic profile cost; synthetic solid cubes, not a corpus or live-game measurement
+Host: fedora; UTC: 2026-09-27T03:09:14Z
+Core binary MVID: 84b202a2-8cd7-42c1-a215-67a996f772a3
+Times are per row's work count; settled rows contain 1000 evaluations. Allocations are maximum bytes per repeat.
+Spread is (slowest - fastest)/fastest; first and shifted are single-call samples and may be noisy.
+  stage        blocks       best ms    median ms   best/med      worst ms   spread  repeats  stopped          work  unit              ns/unit      alloc KB  note
+  build-26          64         2.034        2.111      0.96         2.674      31%       40  capped                1  profiles          2,034,200.0            91  cube; warm occupancy; 26 directions
+  first-26          64         0.012        0.013      0.95         0.016      31%       40  capped                1  evaluations       12,400.0             0  cube; warm occupancy; 26 directions
+  settled-26        64         1.746        1.798      0.97         3.890     123%       40  capped            1,000  evaluations        1,745.8             0  cube; warm occupancy; 26 directions
+  shifted-26        64         0.012        0.013      0.95         0.036     193%       40  confirmed             1  evaluations       12,200.0             0  cube; warm occupancy; 26 directions
+  build-98          64         1.009        1.770      0.57         9.487     841%       40  confirmed             1  profiles          1,008,600.0           413  cube; warm occupancy; 98 directions
+  first-98          64         0.002        0.014      0.17         0.022     821%       40  capped                1  evaluations        2,400.0             0  cube; warm occupancy; 98 directions
+  settled-98        64         1.243        1.267      0.98         4.495     262%       40  capped            1,000  evaluations        1,242.9             0  cube; warm occupancy; 98 directions
+  shifted-98        64         0.002        0.013      0.16         0.019     824%       40  capped                1  evaluations        2,100.0             0  cube; warm occupancy; 98 directions
+  build-26         512         1.065        1.079      0.99         3.477     227%       40  confirmed             1  profiles          1,064,900.0           344  cube; warm occupancy; 26 directions
+  first-26         512         0.004        0.004      0.91         0.008     108%       40  capped                1  evaluations        4,000.0             0  cube; warm occupancy; 26 directions
+  settled-26       512         0.452        0.457      0.99         0.507      12%       40  confirmed         1,000  evaluations          451.7             0  cube; warm occupancy; 26 directions
+  shifted-26       512         0.004        0.004      0.95         0.007      74%       40  confirmed             1  evaluations        3,800.0             0  cube; warm occupancy; 26 directions
+  build-98         512         4.089        4.231      0.97         4.359       7%       40  confirmed             1  profiles          4,088,900.0         1,572  cube; warm occupancy; 98 directions
+  first-98         512         0.006        0.008      0.76         0.011      88%       40  capped                1  evaluations        6,000.0             0  cube; warm occupancy; 98 directions
+  settled-98       512         1.244        1.259      0.99         1.375      11%       40  confirmed         1,000  evaluations        1,244.1             0  cube; warm occupancy; 98 directions
+  shifted-98       512         0.005        0.005      0.91         0.008      61%       40  capped                1  evaluations        4,900.0             0  cube; warm occupancy; 98 directions
+  build-26       4,096         5.448        5.560      0.98         5.869       8%       40  capped                1  profiles          5,448,300.0         1,348  cube; warm occupancy; 26 directions
+  first-26       4,096         0.016        0.019      0.88         0.022      33%       40  capped                1  evaluations       16,400.0             0  cube; warm occupancy; 26 directions
+  settled-26     4,096         0.453        0.459      0.99         0.533      18%       40  confirmed         1,000  evaluations          452.9             0  cube; warm occupancy; 26 directions
+  shifted-26     4,096         0.014        0.015      0.93         0.020      48%       40  capped                1  evaluations       13,700.0             0  cube; warm occupancy; 26 directions
+  build-98       4,096        21.039       21.496      0.98        22.714       8%       40  confirmed             1  profiles          21,039,300.0         6,184  cube; warm occupancy; 98 directions
+  first-98       4,096         0.020        0.024      0.86         0.036      75%       40  capped                1  evaluations       20,300.0             0  cube; warm occupancy; 98 directions
+  settled-98     4,096         1.246        1.264      0.99         1.304       5%       40  confirmed         1,000  evaluations        1,245.5             0  cube; warm occupancy; 98 directions
+  shifted-98     4,096         0.015        0.016      0.96         0.022      51%       40  capped                1  evaluations       14,900.0             0  cube; warm occupancy; 98 directions
+
+stage,blocks,best_ms,median_ms,fast_mode_share,worst_ms,spread_percent,repeats,confirmed_best,stopped,work,work_unit,ns_per_unit,allocated_bytes,taken_utc,host
+build-26,64,2.0342,2.1106,0.9638017625319815,2.674,31.45216792842396,40,4,capped,1,profiles,2034199.9999999998,93352,2026-09-27T03:09:14Z,fedora
+first-26,64,0.0124,0.0131,0.9465648854961831,0.0162,30.645161290322577,40,4,capped,1,evaluations,12400,64,2026-09-27T03:09:14Z,fedora
+settled-26,64,1.7458,1.7981,0.9709137422835215,3.8901,122.82621147897811,40,3,capped,1000,evaluations,1745.8,0,2026-09-27T03:09:14Z,fedora
+shifted-26,64,0.0122,0.0129,0.9457364341085271,0.0358,193.4426229508196,40,8,confirmed,1,evaluations,12200,64,2026-09-27T03:09:14Z,fedora
+build-98,64,1.0086,1.7703,0.5697339433994238,9.4872,840.6305770374778,40,10,confirmed,1,profiles,1008599.9999999999,423064,2026-09-27T03:09:14Z,fedora
+first-98,64,0.0024,0.0139,0.17266187050359713,0.0221,820.8333333333335,40,2,capped,1,evaluations,2400,64,2026-09-27T03:09:14Z,fedora
+settled-98,64,1.2429,1.2673,0.9807464688708276,4.4952,261.6702872314748,40,1,capped,1000,evaluations,1242.9,0,2026-09-27T03:09:14Z,fedora
+shifted-98,64,0.0021,0.0132,0.1590909090909091,0.0194,823.8095238095239,40,4,capped,1,evaluations,2100,64,2026-09-27T03:09:14Z,fedora
+build-26,512,1.0649,1.0788,0.9871153133110864,3.4771,226.51892196450373,40,5,confirmed,1,profiles,1064900,352456,2026-09-27T03:09:14Z,fedora
+first-26,512,0.004,0.0044,0.9090909090909091,0.0083,107.5,40,3,capped,1,evaluations,4000,64,2026-09-27T03:09:14Z,fedora
+settled-26,512,0.4517,0.4568,0.9888353765323993,0.5073,12.309054682311267,40,25,confirmed,1000,evaluations,451.7,0,2026-09-27T03:09:14Z,fedora
+shifted-26,512,0.0038,0.004,0.95,0.0066,73.68421052631578,40,5,confirmed,1,evaluations,3800,64,2026-09-27T03:09:14Z,fedora
+build-98,512,4.0889,4.2306,0.9665059329645913,4.3587,6.598351634914037,40,6,confirmed,1,profiles,4088899.9999999995,1610680,2026-09-27T03:09:14Z,fedora
+first-98,512,0.006,0.0079,0.7594936708860759,0.0113,88.33333333333331,40,1,capped,1,evaluations,6000,64,2026-09-27T03:09:14Z,fedora
+settled-98,512,1.2441,1.2589,0.9882437048216698,1.3753,10.54577606301744,40,25,confirmed,1000,evaluations,1244.1,0,2026-09-27T03:09:14Z,fedora
+shifted-98,512,0.0049,0.0054,0.9074074074074073,0.0079,61.22448979591839,40,2,capped,1,evaluations,4900,64,2026-09-27T03:09:14Z,fedora
+build-26,4096,5.4483,5.56,0.9799100719424461,5.8692,7.72534552062112,40,2,capped,1,profiles,5448300,1381096,2026-09-27T03:09:14Z,fedora
+first-26,4096,0.0164,0.0186,0.881720430107527,0.0218,32.92682926829267,40,2,capped,1,evaluations,16400,64,2026-09-27T03:09:14Z,fedora
+settled-26,4096,0.4529,0.4587,0.9873555700893831,0.533,17.686023404725102,40,6,confirmed,1000,evaluations,452.9,0,2026-09-27T03:09:14Z,fedora
+shifted-26,4096,0.0137,0.0147,0.9319727891156463,0.0203,48.17518248175181,40,3,capped,1,evaluations,13700,64,2026-09-27T03:09:14Z,fedora
+build-98,4096,21.0393,21.4964,0.9787359743957127,22.7138,7.958914982912921,40,17,confirmed,1,profiles,21039300,6332632,2026-09-27T03:09:14Z,fedora
+first-98,4096,0.0203,0.0235,0.8638297872340425,0.0356,75.36945812807882,40,1,capped,1,evaluations,20300,64,2026-09-27T03:09:14Z,fedora
+settled-98,4096,1.2455,1.2642,0.9852080367030533,1.3038,4.680851063829788,40,26,confirmed,1000,evaluations,1245.5,0,2026-09-27T03:09:14Z,fedora
+shifted-98,4096,0.0149,0.0156,0.9551282051282052,0.0225,51.00671140939597,40,2,capped,1,evaluations,14900,64,2026-09-27T03:09:14Z,fedora
+
+
