@@ -133,6 +133,17 @@ namespace Thermodynamics.Core
         /// </summary>
         public static Vector3 SurfaceNormal(CellBitset occupancy, Vector3I cell, int face)
         {
+            return SurfaceNormal(null, occupancy, cell, face);
+        }
+
+        /// <summary>Reads the same local surface without constructing a whole-grid occupancy bitset.</summary>
+        public static Vector3 SurfaceNormal(GridModel grid, Vector3I cell, int face)
+        {
+            return SurfaceNormal(grid, null, cell, face);
+        }
+
+        private static Vector3 SurfaceNormal(GridModel grid, CellBitset occupancy, Vector3I cell, int face)
+        {
             Vector3I n = Face.Offsets[face];
             Vector3I uAxis, vAxis;
             if (n.X != 0) { uAxis = new Vector3I(0, 1, 0); vAxis = new Vector3I(0, 0, 1); }
@@ -145,7 +156,7 @@ namespace Thermodynamics.Core
                 for (int dv = -1; dv <= 1; dv++)
                 {
                     int h;
-                    if (!Height(occupancy, cell + (uAxis * du) + (vAxis * dv), n, out h)) continue;
+                    if (!Height(grid, occupancy, cell + (uAxis * du) + (vAxis * dv), n, out h)) continue;
                     suu += du * du; svv += dv * dv; suv += du * dv;
                     su += du; sv += dv; s1 += 1;
                     shu += h * du; shv += h * dv; sh += h;
@@ -159,14 +170,19 @@ namespace Thermodynamics.Core
             return Vector3.Normalize(normal);
         }
 
-        private static bool Height(CellBitset occupancy, Vector3I column, Vector3I n, out int height)
+        private static bool Contains(GridModel grid, CellBitset occupancy, Vector3I cell)
+        {
+            return occupancy != null ? occupancy.Contains(cell) : grid.IsOccupied(cell);
+        }
+
+        private static bool Height(GridModel grid, CellBitset occupancy, Vector3I column, Vector3I n, out int height)
         {
             height = 0;
-            if (occupancy.Contains(column))
+            if (Contains(grid, occupancy, column))
             {
                 for (int k = 0; k <= SurfaceReach; k++)
                 {
-                    if (!occupancy.Contains(column + (n * (k + 1))))
+                    if (!Contains(grid, occupancy, column + (n * (k + 1))))
                     {
                         height = k;
                         return true;
@@ -177,7 +193,7 @@ namespace Thermodynamics.Core
 
             for (int k = 1; k <= SurfaceReach; k++)
             {
-                if (occupancy.Contains(column - (n * k)))
+                if (Contains(grid, occupancy, column - (n * k)))
                 {
                     height = -k;
                     return true;

@@ -50,19 +50,16 @@ namespace Thermodynamics.Core
             sharpness = directions.Length > CoarseDirections ? 24f : 10f;
         }
 
-        /// <summary>Builds the profile of <paramref name="grid"/> over 26 or 98 directions.</summary>
+        internal AeroProfile(int directionCount)
+            : this(Shell(directionCount > CoarseDirections ? 2 : 1)) { }
+
+        /// <summary>Builds synchronously; tick callers should instead advance an AeroProfileBuilder.</summary>
         public static AeroProfile Build(GridModel grid, int directionCount)
         {
-            AeroProfile profile = new AeroProfile(Shell(directionCount > CoarseDirections ? 2 : 1));
-            if (grid == null || grid.BlockCount == 0) return profile;
-
-            for (int i = 0; i < profile.directions.Length; i++)
-            {
-                profile.summaries[i] = AeroDrag.Summarise(AeroGeometry.View(grid, profile.directions[i]));
-            }
-
-            profile.MeasureMass(grid);
-            profile.CollectSkin(grid);
+            AeroProfileBuilder builder = new AeroProfileBuilder(grid, directionCount, 0);
+            while (!builder.Complete && !builder.Invalidated) builder.Advance(4096, 0);
+            AeroProfile profile;
+            if (!builder.TryGetResult(0, out profile)) throw new InvalidOperationException("Hull changed during profile construction.");
             return profile;
         }
 
@@ -179,11 +176,7 @@ namespace Thermodynamics.Core
         public Vector3 Damping(Vector3 angularVelocity, float density)
         {
             if (!(density > 0f) || faceNormals.Count == 0) return Vector3.Zero;
-            if (Vector3.DistanceSquared(dampingCentre, CentreOfMass) > 1e-6f || float.IsNaN(dampingCentre.X))
-            {
-                MeasureDamping();
-            }
-
+            if (Vector3.DistanceSquared(dampingCentre, CentreOfMass) > 1e-6f || float.IsNaN(dampingCentre.X)) MeasureDamping();
             float half = 0.5f * density * RotationalDrag;
             Vector3 result = Vector3.Zero;
             for (int axis = 0; axis < 3; axis++)
@@ -235,84 +228,50 @@ namespace Thermodynamics.Core
             return true;
         }
 
-        /// <summary>Moves the centre of mass the profile turns about, as the game reports it.</summary>
+        /// <summary>Moves the centre; the next damping read refreshes moments in one pass over exposed faces.</summary>
         public void SetCentreOfMass(Vector3 centre)
         {
             CentreOfMass = centre;
         }
 
-        private void MeasureMass(GridModel grid)
+        internal void SetMassProperties(float mass, Vector3 centre, Vector3 inertia, float area)
         {
-            float mass = 0f;
-            Vector3 moment = Vector3.Zero;
-            IList<BlockInstance> blocks = grid.Blocks;
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                BlockInstance b = blocks[i];
-                Vector3 centre = (((Vector3)b.Min + (Vector3)b.MaxExclusive) * 0.5f - new Vector3(0.5f)) * grid.GridSize;
-                mass += b.Mass;
-                moment += centre * b.Mass;
-            }
-
             Mass = mass;
-            CentreOfMass = mass > 0f ? moment / mass : Vector3.Zero;
-
-            Vector3 inertia = Vector3.Zero;
-            for (int i = 0; i < blocks.Count; i++)
-            {
-                BlockInstance b = blocks[i];
-                Vector3 r = (((Vector3)b.Min + (Vector3)b.MaxExclusive) * 0.5f - new Vector3(0.5f)) * grid.GridSize - CentreOfMass;
-                Vector3 size = (Vector3)(b.MaxExclusive - b.Min) * grid.GridSize;
-                Vector3 squared = size * size;
-                inertia.X += b.Mass * ((r.Y * r.Y) + (r.Z * r.Z) + ((squared.Y + squared.Z) / 12f));
-                inertia.Y += b.Mass * ((r.X * r.X) + (r.Z * r.Z) + ((squared.X + squared.Z) / 12f));
-                inertia.Z += b.Mass * ((r.X * r.X) + (r.Y * r.Y) + ((squared.X + squared.Y) / 12f));
-            }
+            CentreOfMass = centre;
             Inertia = inertia;
+            faceArea = area;
+            dampingCentre = centre;
         }
 
-        private void CollectSkin(GridModel grid)
+        internal void SetSummary(int index, AeroSummary summary) { summaries[index] = summary; }
+
+        internal void AddSkin(Vector3 centre, Vector3 normal)
         {
-            faceArea = grid.CellFaceArea;
-            IList<BlockInstance> blocks = grid.Blocks;
-            for (int b = 0; b < blocks.Count; b++)
-            {
-                Vector3I[] cells = blocks[b].Cells;
-                for (int c = 0; c < cells.Length; c++)
-                {
-                    for (int f = 0; f < Face.Count; f++)
-                    {
-                        Vector3I outside = cells[c] + Face.Offsets[f];
-                        if (grid.IsOccupied(outside)) continue;
-                        Vector3 normal = Face.Normals[f];
-                        if (VoxelWalk.Blocked(grid, new Vector3D(outside.X, outside.Y, outside.Z), normal)) continue;
-                        faceCentres.Add((new Vector3(cells[c].X, cells[c].Y, cells[c].Z) + (normal * 0.5f)) * grid.GridSize);
-                        faceNormals.Add(normal);
-                    }
-                }
-            }
+            faceCentres.Add(centre);
+            faceNormals.Add(normal);
+            AccumulateDamping(centre - CentreOfMass, normal);
         }
 
         private void MeasureDamping()
         {
             Array.Clear(damping, 0, damping.Length);
-            Vector3[] axes = { Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ };
-            for (int i = 0; i < faceCentres.Count; i++)
-            {
-                Vector3 r = faceCentres[i] - CentreOfMass;
-                Vector3 n = faceNormals[i];
-                for (int axis = 0; axis < 3; axis++)
-                {
-                    Vector3 motion = Vector3.Cross(axes[axis], r);
-                    float arm = motion.Length();
-                    if (arm < 1e-4f) continue;
-                    float facing = Vector3.Dot(n, motion) / arm;
-                    float term = faceArea * Math.Abs(facing) * arm * arm * arm;
-                    if (facing > 0f) damping[axis * 2] += term;
-                    else if (facing < 0f) damping[(axis * 2) + 1] += term;
-                }
-            }
+            for (int i = 0; i < faceCentres.Count; i++) AccumulateDamping(faceCentres[i] - CentreOfMass, faceNormals[i]);
             dampingCentre = CentreOfMass;
+        }
+
+        private void AccumulateDamping(Vector3 r, Vector3 n)
+        {
+            for (int axis = 0; axis < 3; axis++)
+            {
+                Vector3 basis = axis == 0 ? Vector3.UnitX : axis == 1 ? Vector3.UnitY : Vector3.UnitZ;
+                Vector3 motion = Vector3.Cross(basis, r);
+                float arm = motion.Length();
+                if (arm < 1e-4f) continue;
+                float facing = Vector3.Dot(n, motion) / arm;
+                float term = faceArea * Math.Abs(facing) * arm * arm * arm;
+                if (facing > 0f) damping[axis * 2] += term;
+                else if (facing < 0f) damping[(axis * 2) + 1] += term;
+            }
         }
     }
 }

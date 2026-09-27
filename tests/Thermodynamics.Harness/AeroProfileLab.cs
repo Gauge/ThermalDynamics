@@ -80,6 +80,58 @@ namespace Thermodynamics.Harness
             return rows;
         }
 
+        /// <summary>Each repeat records its slowest Advance call, not a pooled average over cheap ray steps.</summary>
+        public static StageLab.Row MeasureSlices(int side, int directions, int budget = 256,
+            int minimumRepeats = 7, int maximumRepeats = 40)
+        {
+            if (side < 2 || (directions != AeroProfile.CoarseDirections && directions != AeroProfile.FineDirections)
+                || budget < 1 || minimumRepeats < 2 || maximumRepeats < minimumRepeats)
+                throw new ArgumentException("Use a nonempty cube, 26 or 98 directions, a positive budget and at least two repeats.");
+            GridModel grid = AeroCalibrationLab.Box(side, side, side);
+            Evaluate(AeroProfile.Build(grid, directions));
+            StageLab.Row row = new StageLab.Row
+            {
+                Stage = "slice-peak-" + directions, Blocks = grid.BlockCount, BestMs = double.MaxValue,
+                Work = 1, WorkUnit = "maximum-slice"
+            };
+            Stopwatch clock = new Stopwatch();
+            long expectedWork = 0;
+            int expectedSlices = 0;
+            for (int repeat = 0; repeat < maximumRepeats; repeat++)
+            {
+                StageLab.Settle();
+                AeroProfileBuilder job = new AeroProfileBuilder(grid, directions, 0);
+                double peak = 0d;
+                long peakAllocated = 0;
+                int slices = 0;
+                while (!job.Complete)
+                {
+                    long before = StageLab.Allocated();
+                    clock.Restart();
+                    int used = job.Advance(budget, 0);
+                    clock.Stop();
+                    long allocated = StageLab.Allocated() - before;
+                    if (used <= 0 || used > budget) throw new InvalidOperationException("Invalid slice work count.");
+                    peak = Math.Max(peak, clock.Elapsed.TotalMilliseconds);
+                    peakAllocated = Math.Max(peakAllocated, allocated);
+                    slices++;
+                }
+                AeroProfile profile;
+                if (!job.TryGetResult(0, out profile)) throw new InvalidOperationException("No complete profile.");
+                Evaluate(profile);
+                if (repeat == 0) { expectedWork = job.Work; expectedSlices = slices; }
+                if (job.Work != expectedWork || slices != expectedSlices)
+                    throw new InvalidOperationException("The repeated slices did different work.");
+                Record(row, peak, peakAllocated);
+                if (repeat + 1 >= minimumRepeats && row.ConfirmedBest >= StageLab.ConfirmingRepeats) break;
+            }
+            row.Note = "cube; budget=" + budget + "; work=" + expectedWork + "; slices=" + expectedSlices
+                + "; maximum Advance time per build; constructor excluded";
+            row.Stop = row.ConfirmedBest >= StageLab.ConfirmingRepeats ? StageLab.Row.Confirmed : StageLab.Row.Capped;
+            StageLab.Summarise(row);
+            return row;
+        }
+
         private static void Record(StageLab.Row row, double milliseconds, long allocated)
         {
             StageLab.Take(row, milliseconds);
@@ -102,7 +154,10 @@ namespace Thermodynamics.Harness
             List<StageLab.Row> rows = new List<StageLab.Row>();
             foreach (int side in new[] { 4, 8, 16 })
                 foreach (int directions in new[] { AeroProfile.CoarseDirections, AeroProfile.FineDirections })
+                {
                     rows.AddRange(Measure(side, directions));
+                    rows.Add(MeasureSlices(side, directions));
+                }
             StringBuilder text = new StringBuilder();
             text.AppendLine("Aerodynamic profile cost; synthetic solid cubes, not a corpus or live-game measurement");
             text.AppendLine("Host: " + StageLab.Host + "; UTC: " + StageLab.TakenUtc);
@@ -112,6 +167,8 @@ namespace Thermodynamics.Harness
             text.AppendLine("Times are per row's work count; settled rows contain "
                 + EvaluationsPerRepeat.ToString(CultureInfo.InvariantCulture) + " evaluations. Allocations are maximum bytes per repeat.");
             text.AppendLine("Spread is (slowest - fastest)/fastest; first and shifted are single-call samples and may be noisy.");
+            text.AppendLine("Slice-peak samples are the maximum Advance time within each complete build at 256 work units per call.");
+            text.AppendLine("Their allocation count is the maximum per Advance call; constructor allocations are excluded. These are observed peaks, not deadlines.");
             text.AppendLine(StageLab.Table(rows));
             text.AppendLine(StageLab.Csv(rows));
             return text.ToString();
