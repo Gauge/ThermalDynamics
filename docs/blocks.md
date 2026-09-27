@@ -347,7 +347,11 @@ the positive-damage branch, so the ammo can retain zero damage. This is not a wo
 the shipped trajectory is still zero, and cooling, crafting, discharge accounting and native-session
 validation remain open. The next implementation must derive heat removal from server-observed
 ammunition use, preserve missed-shot costs, and synchronize with any outstanding thermal solve.
-No client-supplied target temperature or removed-energy value is an authority.
+No client-supplied target temperature or removed-energy value is an authority. Static native
+inspection finds server-side ammo accounting with special-mode exceptions, reversed origin/position
+arguments in the installed hit dispatcher, and callbacks even when ordinary safe-zone damage is
+denied. The [boundary notes](../tools/thermal-api-check/README.md#extinguisher-projectile-boundary)
+record these constraints; callback occurrence alone cannot establish cost, range or permission.
 
 ## The performance panel
 

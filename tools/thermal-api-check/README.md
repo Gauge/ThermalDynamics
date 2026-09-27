@@ -70,13 +70,22 @@ The runner fingerprints Sandbox.Common.dll as well as the other relevant game as
 The [recorded probe](../../tests/benchmarks/hand-cooling-projectile-api-2026-09-27.txt)
 retains the failed and corrected runs. Static inspection of native `MyProjectile.OnHit` puts the
 interceptor before the positive-damage branch, so zero-damage ammo is not excluded by that branch.
-This proves API admission and the inspected dispatch order, not ammo consumption, callback thread
+Follow-up static inspection traces ammunition decrement to `MyGunBase.ConsumeAmmo`'s server
+branch, with simplified-simulation and infinite-ammo exceptions. It also exposes two integration
+hazards: the installed `MyProjectiles` dispatch passes origin and position in reverse order to
+`MyProjectileInfo`, and hit callbacks still run when the engine denies ordinary safe-zone damage.
+Neither the public `Origin` label nor the occurrence of a hit is sufficient authority for a cooling
+range or permission decision. Projectile array indices also change during removal.
+
+The artifact records reproduction types, source hashes and the exact scope of these observations.
+This proves API admission and inspected control flow, not executed ammo consumption, callback thread
 ownership, native cooling behavior or multiplayer correctness. The extinguisher still only scans.
 
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Traced server ammunition accounting and recorded reversed projectile coordinate arguments, unstable indices and safe-zone callback behavior; none is treated as a runtime validation. |
 | 2026-09-27 | Added the extinguisher projectile-hit probe, a source-verified ulong permission and Sandbox.Common fingerprinting. Native cooling remains unimplemented. |
 | 2026-09-27 | Added the profile API probe and corrected omitted framework permissions against installed-game declarations. Recorded two instrument failures and the successful rerun; added four mutation cases that reject changed permissions. |
 | 2026-09-26 | Added aerodynamic physics-input and write-path checks, the rejected inertia accessor, binary/source fingerprints, and the missing Boolean primitive in the offline bootstrap. |
