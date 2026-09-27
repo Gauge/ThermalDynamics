@@ -1264,6 +1264,12 @@ to contain. Upgraded blocks are counted separately and exported with population 
 The already running frozen corpus generation is unchanged; it cannot mix receipts from the
 corrected reader into its older manifest.
 
+[Recorded investigation](../tests/benchmarks/aerodynamics/population-definition-upgrade-2026-09-27.txt)
+retains engine and harness hashes, the failing regression before correction and 73 passing
+functional/documentation checks afterward. The [corrected specimen export](../tests/benchmarks/aerodynamics/population-definition-upgrade-2026-09-27-inputs.json)
+counts all fourteen upgrades across twenty grids. The complete suite must run after the frozen
+walk finishes; these focused checks do not establish population acceptance.
+
 ## Population runner protocol (registered before the walk)
 
 The candidate population uses the existing corpus convention: every recursively discovered
