@@ -1349,6 +1349,24 @@ exhaustive controls and all six diagnosed specimens passed; the largest new-cont
 was 9.10×10⁻¹³ N. One specimen retains an unresolved fixed-heading LP cross-check explicitly.
 These are instrument checks, not a population acceptance verdict.
 
+### Directional LP coordinate conditioning investigation
+
+The continuing frozen walk rejected workshop hull `573772127` because its independently
+recomputed duality gap was 2.3873 N, above the unchanged 0.72 N internal tolerance. Tightening
+HiGHS feasibility settings or disabling presolve did not resolve it. Rotating the same problem
+into the main-grid, target-aligned QR or force-SVD frame did resolve it in diagnostic trials.
+These trials informed the correction and are not independent validation. The independently
+constructed resultant/support certificate gives 182,603,998.36925 N with a 2.98×10⁻⁸ N gap.
+
+Before implementation, register a target-aligned orthonormal QR change of coordinates for the
+LP only. Transform the returned dual normal back and recompute every primal residual, support
+bound and conditioning check in the original force coordinates. Keep all acceptance tolerances
+and rejection paths. Require the existing independent LP/global oracles, forty fresh seeded
+rotations of analytically solved six-axis force boxes spanning rating scales 10⁻³ through 10⁹,
+original-coordinate certificate reconstruction, the diagnosed specimen, and the near-aligned
+unbalanced-force rejection. Any failing case remains unresolved; no subset yields a population
+verdict.
+
 ### Instrument validation and end-to-end pilot
 
 [Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at
@@ -1372,6 +1390,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Registered target-aligned LP coordinates and original-frame certificate checks after a separate numerical-gap rejection. |
 | 2026-09-27 | Added conservative retention for nearly flat thrust sets and an independent certificate for the selected resultant heading. Fixed-heading LP guards stay in place; cross-check uncertainty is explicit. |
 | 2026-09-27 | Documented the native definition-upgrade path exposed by an unresolved corpus hull and the constrained reader correction. Frozen receipts remain tied to their original reader. |
 | 2026-09-27 | Archived all eight primary flat-plate normal-incidence reference rows, including residuals and measurement basis, for independent lift/drag validation. No model fit or acceptance verdict is claimed. |
