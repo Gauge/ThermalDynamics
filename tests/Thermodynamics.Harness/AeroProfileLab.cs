@@ -88,7 +88,15 @@ namespace Thermodynamics.Harness
                 || budget < 1 || minimumRepeats < 2 || maximumRepeats < minimumRepeats)
                 throw new ArgumentException("Use a nonempty cube, 26 or 98 directions, a positive budget and at least two repeats.");
             GridModel grid = AeroCalibrationLab.Box(side, side, side);
-            Evaluate(AeroProfile.Build(grid, directions));
+            AeroProfile warm = AeroProfile.Build(grid, directions);
+            Evaluate(warm);
+            if (centreUpdate)
+            {
+                Vector3 target = warm.CentreOfMass + new Vector3(0.125f, -0.25f, 0.5f);
+                int used;
+                while (!warm.PrepareCentreOfMass(target, budget, out used)) { }
+                Evaluate(warm);
+            }
             StageLab.Row row = new StageLab.Row
             {
                 Stage = (centreUpdate ? "centre-slice-peak-" : "slice-peak-") + directions,
@@ -179,7 +187,7 @@ namespace Thermodynamics.Harness
             text.AppendLine("Spread is (slowest - fastest)/fastest; first and shifted are single-call samples and may be noisy.");
             text.AppendLine("Slice-peak samples are the maximum Advance time within each complete build at 256 work units per call.");
             text.AppendLine("Their allocation count is the maximum per Advance call; constructor allocations are excluded. These are observed peaks, not deadlines.");
-            text.AppendLine("Centre-slice-peak samples are the maximum preparation call in one centre update at 256 exposed faces per call; profile construction is excluded.");
+            text.AppendLine("Centre-slice-peak samples are the maximum preparation call in one centre update at 256 exposed faces per call; profile construction is excluded. The preparation path is warmed before measurement.");
             text.AppendLine(StageLab.Table(rows));
             text.AppendLine(StageLab.Csv(rows));
             return text.ToString();

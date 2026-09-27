@@ -1026,6 +1026,13 @@ faces per call. Profile construction is outside those samples; face/slice counts
 between repeats. `AeroProfileLabTests` checks those counts on a cube with 54 exterior faces.
 Engine integration remains open.
 
+The [initial centre-cost run](../tests/benchmarks/aerodynamics/centre-cost-initial-2026-09-27.txt)
+from `1b4a704` is retained with an instrument limitation: construction and evaluation were warmed,
+but centre preparation was first invoked inside a timed sample. The first 64-block/26-direction
+case has a 0.692 ms maximum against 0.0021/0.0022 ms fastest/median (32,852 % spread, 13 repeats).
+It cannot isolate warmed geometry work from first-invocation cost. The instrument now exercises
+centre preparation before collecting samples; this corrects the setup, not an acceptance threshold.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and
