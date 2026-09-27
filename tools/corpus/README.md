@@ -1,6 +1,6 @@
 # Corpus tools
 
-What to do with the CSVs a corpus sweep leaves behind. Everything here reads a data directory; the
+Tools for corpus CSVs and aerodynamic reference data. Most scripts read a data directory; the
 run of 2026-08-21 is in `out/corpus-2026-08-21`, its census in `out/census-2026-08-21` and its dial
 sweep in `out/knobs-2026-08-21`. None of those directories is committed — they are gigabytes — so
 each of these prints what it found and renders without the parts that are absent.
@@ -40,6 +40,26 @@ python3 tools/corpus/panel.py out/census-2026-08-25/census.csv \
 ./tools/corpus/build-bench.sh out/corpus-2026-08-21 \
                              out/census-2026-08-21 out/knobs-2026-08-21   # every dataset, one page
 ```
+
+## Primary plate reference extraction
+
+`plate_reference.py` extracts the primary circle/square symbols and their error bars from
+Mizoguchi (2016), Figures 3 and 4. Install the optional pinned parser from
+[requirements-plate-reference.txt](requirements-plate-reference.txt), then run:
+
+```
+python3 tools/corpus/plate_reference.py /path/to/mizoguchi-2016.pdf /tmp/plate-reference.csv
+```
+
+The source hash, page/plot geometry and expected primary marker counts are checked. The
+[committed reference](../../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.csv)
+retains plotted coordinates, confidence intervals and a separate extraction bound; no raw
+measurement precision or sweep-branch assignment is invented. The
+[protocol](../../docs/aerodynamics.md#plate-figure-extraction-protocol) and
+[source record](../../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.txt)
+state the scope and reproduction command. This is reference preparation, not a fitted lift law.
+`test_plate_reference.py` checks analytic coordinates, legend exclusion, ambiguous/missing bars,
+changed sources and preservation of the multivalued near-stall region.
 
 ## Resumable aerodynamic population walk
 
@@ -711,6 +731,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added hash-bound primary plate-figure extraction and independent coordinate/failure controls. |
 | 2026-09-27 | Required runtime-reported authored-data provenance when fingerprinting a population generation. |
 | 2026-09-27 | Documented target-aligned LP coordinates with original-frame certificates and independent rotation controls. |
 | 2026-09-27 | Documented near-rank candidate retention, known-resultant certification and forty additional exhaustive controls. |

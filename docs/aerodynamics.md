@@ -247,8 +247,8 @@ both branches of a hysteresis loop. Before promoting lift, the lab must test inc
 decreasing incidence separately and retain their discrepancy. A single fitted curve cannot be
 called validated merely because it passes through one branch. A stateful stall mechanism or
 an explicitly measured approximation remains necessary; this evidence does not establish its
-coefficients for the game's Reynolds-number range. No experimental graph coordinates have
-been digitized or used to tune code yet.
+coefficients for the game's Reynolds-number range. The primary Figure 3/4 symbols have now
+been digitized under the protocol below; no lift code has been tuned to them.
 
 #### Plate-figure extraction protocol
 
@@ -267,6 +267,16 @@ retained points, and inspection of the source figure's scale and legend. Use a c
 0.5 PDF-point extraction bound in each coordinate, reported separately from the figure's 95%
 measurement interval. This is graph digitization, not access to the experiment's raw samples;
 no model acceptance criterion or tuning follows from producing the dataset.
+
+The [retained reference CSV](../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.csv)
+contains 246 observations: 63 AR=1 and 60 AR=0.5 points for each coefficient. The
+[source-bound extractor](../tools/corpus/plate_reference.py) and its analytical/fault controls
+are reproducible from the publisher PDF. A full-page overlay was visually checked: every retained
+marker lies on a primary symbol; neither legend markers nor the older comparison curves are
+selected. The 0.5-point bounds correspond to about 0.184° and 0.00790 CL or 0.00615 CD,
+separate from measurement confidence intervals. Printed digits preserve the coordinate conversion,
+not experimental precision. All 235 Python checks pass, with one unrelated historical-data
+integration check skipped. This validates extraction, not an aerodynamic model.
 
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
@@ -1460,6 +1470,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added reproducible primary-symbol digitization of plate CL/CD with separate measurement intervals and extraction bounds; no model fitting or acceptance verdict. |
 | 2026-09-27 | Withdrew the generic plate-stall angle and recorded primary bidirectional-incidence evidence; a static lift profile cannot silently claim hysteresis coverage. |
 | 2026-09-27 | Corrected authored-data provenance for a runtime loaded from a different checkout; absent runtime metadata now fails explicitly. |
 | 2026-09-27 | Registered target-aligned LP coordinates and original-frame certificate checks after a separate numerical-gap rejection. |
