@@ -738,6 +738,7 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added blueprint regression controls for native subtype upgrades, exact identity priority, competing targets, missing/unknown types and grid-size rejection. Corrected a frame fixture to declare its block type explicitly. |
 | 2026-09-27 | Added AeroPopulationDragTests for analytic terminal-speed brackets, censoring, rejected invalid curves and rotated multigrid comparison with the legacy evaluator. Added the population selection and drag CLI stages. Full offline suite: 2,603 passing cases; Python corpus tools: 224 passing checks. |
 | 2026-09-27 | Added a machine-export contract check to AeroPopulationInputTests. The directional Python tool has ten tests, including 80 nonzero independent LP controls and injected certificate faults. |
 | 2026-09-27 | Added AeroPopulationInputTests for engine thrust curves, installed SBC ratings, rotated grid frames, XML quaternion assignment and invalid-pose reporting. Full offline suite: 2,589 passing cases; two blueprint input audits do not establish population acceptance. |

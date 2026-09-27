@@ -1,0 +1,17 @@
+Runtime-authored data provenance correction
+Root correction source: 853f498; added-file inventory guard accompanies this record.
+All build and test commands used MemoryMax=12G and MemorySwapMax=0.
+Python: python3 -m unittest discover -s tools/corpus -p 'test_*.py'
+231 tests run: 230 passed, one historical census-column check skipped because its external dataset was absent in the isolated worktree.
+Regression uses separate temporary runner/runtime data locations. It asserts the runtime data is fingerprinted, unrelated runner data is not, and mutation plus added authored SBC, game SBC and runtime DLL each stop verification. Missing/relative/nonexistent runtime metadata fails rather than selecting an inferred data root.
+Before the root fix, test_manifest_fingerprints_the_runtime_authored_data_root failed because other-checkout-data/Cubes.xml was absent from the manifest. After the fix, the full Python suite passes.
+
+Actual isolated runtime launched from original repository cwd:
+dotnet /tmp/k25-envelope-worktree/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll aero-environment
+{"game_content":"/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Content/Data","authored_data":"/tmp/k25-envelope-worktree/Thermodynamics/Content/Data"}
+
+Build: dotnet build tests/Thermodynamics.slnx --ignore-failed-sources
+Build succeeded, zero warnings/errors. Includes native assembly references and mod compilation checks.
+Focused checks: dotnet test tests/Thermodynamics.Tests --no-build --filter 'FullyQualifiedName~DocumentationTests|FullyQualifiedName~BlueprintTests|FullyQualifiedName~AeroPopulationInputTests|FullyQualifiedName~AeroPopulationDragTests'
+73 passed, zero failed/skipped. Documentation-only rerun after recording the correction: 23 passed.
+Full timing-sensitive C# suite deferred until the unchanged frozen corpus generation ends. This provenance fix changes no aerodynamic equations or population acceptance thresholds.

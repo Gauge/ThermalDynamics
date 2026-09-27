@@ -158,6 +158,40 @@ class PopulationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'changed'):
                 population.measure(plan, entry, root)
 
+    def test_manifest_fingerprints_the_runtime_authored_data_root(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            corpus, content, authored, runtime = [root / name for name in ['corpus', 'game', 'other-checkout-data', 'runtime']]
+            for path in [corpus, content / 'CubeBlocks', authored / 'CubeBlocks', runtime]:
+                path.mkdir(parents=True)
+            (corpus / 'bp.sbc').write_text('blueprint')
+            (content / 'Components.sbc').write_text('components')
+            (content / 'CubeBlocks' / 'game.sbc').write_text('game definitions')
+            data = authored / 'Cubes.xml'
+            data.write_text('runtime authored properties')
+            binary = runtime / 'test.dll'
+            binary.write_text('runtime')
+            environment = dict(game_content=str(content), authored_data=str(authored))
+            with patch.object(population, 'invoke', return_value=environment):
+                plan = population.manifest(corpus, binary)
+            self.assertIn(str(data), plan['fingerprint'])
+            self.assertEqual(population.digest(data), plan['fingerprint'][str(data)])
+            local = pathlib.Path(population.__file__).resolve().parents[2] / 'Thermodynamics/Content/Data/Cubes.xml'
+            self.assertNotIn(str(local), plan['fingerprint'])
+            for added in [authored / 'CubeBlocks' / 'added.sbc', content / 'CubeBlocks' / 'added.sbc', runtime / 'added.dll']:
+                added.write_text('new definition or assembly')
+                with self.assertRaisesRegex(ValueError, 'added'):
+                    population.verify_fingerprint(plan, {})
+                added.unlink()
+            population.verify_fingerprint(plan, {})
+            data.write_text('changed runtime authored properties')
+            with self.assertRaisesRegex(ValueError, 'changed'):
+                population.verify_fingerprint(plan, {})
+            for invalid in [dict(game_content=str(content)), dict(environment, authored_data=str(root / 'missing'))]:
+                with patch.object(population, 'invoke', return_value=invalid):
+                    with self.assertRaisesRegex(ValueError, 'authored'):
+                        population.manifest(corpus, binary)
+
     def test_runtime_changes_are_detected_even_with_equal_size(self):
         with tempfile.TemporaryDirectory() as folder:
             path = pathlib.Path(folder) / 'runtime'

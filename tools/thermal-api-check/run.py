@@ -57,13 +57,13 @@ def verify_aero_contract(source):
 
 
 def profile_framework_bootstrap(source):
-    """Preserve only the inspected game's explicit permissions needed by profile snapshots."""
+    """Preserve only the inspected game's explicit permissions needed by the profile and projectile probes."""
     match = re.search(r"private static void AllowDefaultNamespaces\([^\n]+\).*?\n\t}", source, re.S)
     if not match:
         raise RuntimeError("Missing default framework whitelist")
     body = match.group(0)
     declarations = " ".join(re.findall(r"handle.AllowTypes\(MyWhitelistTarget.Both,.*?;", body, re.S))
-    needed = ["object", "string", "bool", "byte", "int", "long", "float", "double", "Array", "Func<, >", "Func<, , , >"]
+    needed = ["object", "string", "bool", "byte", "int", "long", "ulong", "float", "double", "Array", "Func<, >", "Func<, , , >"]
     for name in needed:
         if "typeof(" + name + ")" not in declarations:
             raise RuntimeError("Game no longer explicitly admits framework type: " + name)
@@ -83,7 +83,7 @@ def main():
     game_bin = (args.game / "Bin64").resolve(strict=True)
     work = pathlib.Path(tempfile.mkdtemp(prefix="thermal-api-check-"))
     print("Artifacts:", work, flush=True)
-    for path in [game_bin / "Sandbox.Game.dll", game_bin / "VRage.Game.dll", game_bin / "SpaceEngineers.Game.dll",
+    for path in [game_bin / "Sandbox.Common.dll", game_bin / "Sandbox.Game.dll", game_bin / "VRage.Game.dll", game_bin / "SpaceEngineers.Game.dll",
                  pathlib.Path(__file__).resolve(), pathlib.Path(__file__).with_name("Program.cs").resolve()]:
         print("SHA256:", path.name, hashlib.sha256(path.read_bytes()).hexdigest(), flush=True)
     physics = subprocess.check_output([args.ilspy, "-t", "Sandbox.Engine.Physics.MyPhysicsBody",

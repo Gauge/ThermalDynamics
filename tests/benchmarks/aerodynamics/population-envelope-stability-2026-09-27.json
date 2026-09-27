@@ -1,0 +1,3534 @@
+{
+  "source": "060c101",
+  "utc": "2026-09-27T06:05:30.160866+00:00",
+  "scope": "Six diagnosed specimens, not held-out validation or a population verdict",
+  "platform": "Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43",
+  "python": "3.10.6",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "caps": {
+    "MemoryMax": "12G",
+    "MemorySwapMax": 0
+  },
+  "specimens": [
+    {
+      "specimen": "1639755227",
+      "input_sha256": "93c5533143be9a1fd2c3b73d37145d17d63bbd08b60073c70e7b5c6090de803a",
+      "input": {
+        "schema": 1,
+        "kind": "aero-population-inputs",
+        "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/1639755227/bp.sbc",
+        "blueprint_sha256": "67dda7d2f01e41295a12cac24f9affd6273cb4430fe04ad0ee5be3b06ab4d250",
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "relative_air_density": 1,
+        "atmosphere": true,
+        "grids": 102,
+        "mass_kg": 11527256.208717346,
+        "headings": [
+          {
+            "name": "forward",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ]
+          },
+          {
+            "name": "left",
+            "direction": [
+              0.41814790510989297,
+              -0.9001019674935503,
+              0.1223469556893331
+            ]
+          },
+          {
+            "name": "up",
+            "direction": [
+              -0.009153027648019452,
+              -0.1388552531759659,
+              -0.9902703876973769
+            ]
+          },
+          {
+            "name": "down",
+            "direction": [
+              0.009153027648019452,
+              0.1388552531759659,
+              0.9902703876973769
+            ]
+          },
+          {
+            "name": "right",
+            "direction": [
+              -0.41814790510989297,
+              0.9001019674935503,
+              -0.1223469556893331
+            ]
+          },
+          {
+            "name": "backward",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ]
+          }
+        ],
+        "thrusters": [
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.9083328418245609,
+              0.4129596430399442,
+              -0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              -0.9083328418245609,
+              -0.4129596430399442,
+              0.06630069142353912
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              0.41814790510989297,
+              -0.9001019674935503,
+              0.1223469556893331
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              0.418164765976238,
+              -0.9000940057951751,
+              0.12234790242433106
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              0.418164765976238,
+              -0.9000940057951751,
+              0.12234790242433106
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          }
+        ]
+      },
+      "result": {
+        "capacity_n": 11017954.012683969,
+        "direction": [
+          0.9160415846558532,
+          0.3959464167625381,
+          -0.06398632849367021
+        ],
+        "throttles": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "force_residual_n": 1.1641532182693481e-10,
+        "dual_normal": [
+          0.9160415846558532,
+          0.3959464167625381,
+          -0.06398632849367021
+        ],
+        "dual_upper_n": 11017954.012683967,
+        "duality_gap_n": -1.862645149230957e-09,
+        "tolerance_n": 0.1296,
+        "vertex_force_n": [
+          10092904.053444339,
+          4362519.411376646,
+          -704998.4247837483
+        ],
+        "certificate_method": "feasible resultant and support-plane upper bound",
+        "vertex_throttles": [
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "vertex_norm_n": 11017954.012683969,
+        "retained_points": 8,
+        "heading": "maximum-resultant",
+        "directional_lp": {
+          "status": "unresolved-near-rank",
+          "error": "Near-rank-deficient thrust certificate is unresolved at the declared tolerance"
+        }
+      }
+    },
+    {
+      "specimen": "1921621403",
+      "input_sha256": "ec7e1f287c74072cc30c1f24ae7fb686773e2f8e646ebe2c98ba2cfd7236d365",
+      "input": {
+        "schema": 1,
+        "kind": "aero-population-inputs",
+        "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/1921621403/bp.sbc",
+        "blueprint_sha256": "1ea4365fb388ac08b8f099b55016729ba3cf753fa987c1098f087961cd960dd5",
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "relative_air_density": 1,
+        "atmosphere": true,
+        "grids": 51,
+        "mass_kg": 26639284.40083313,
+        "headings": [
+          {
+            "name": "forward",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ]
+          },
+          {
+            "name": "left",
+            "direction": [
+              0.39254088517125546,
+              -0.5253328305023306,
+              -0.754941766406772
+            ]
+          },
+          {
+            "name": "up",
+            "direction": [
+              0.3129179464099165,
+              0.8481406679304428,
+              -0.4274807202870128
+            ]
+          },
+          {
+            "name": "down",
+            "direction": [
+              -0.3129179464099165,
+              -0.8481406679304428,
+              0.4274807202870128
+            ]
+          },
+          {
+            "name": "right",
+            "direction": [
+              -0.39254088517125546,
+              0.5253328305023306,
+              0.754941766406772
+            ]
+          },
+          {
+            "name": "backward",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ]
+          }
+        ],
+        "thrusters": [
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.3129179464099165,
+              0.8481406679304428,
+              -0.4274807202870128
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.3129179464099165,
+              0.8481406679304428,
+              -0.4274807202870128
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.3129179464099165,
+              0.8481406679304428,
+              -0.4274807202870128
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.3129179464099165,
+              0.8481406679304428,
+              -0.4274807202870128
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8648664707823792,
+              -0.06843116686797211,
+              0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8648664707823792,
+              0.06843116686797211,
+              -0.49731595904165377
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.3129179464099165,
+              -0.8481406679304428,
+              0.4274807202870128
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.3129179464099165,
+              -0.8481406679304428,
+              0.4274807202870128
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 3,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              -0.3129395388296863,
+              -0.8481391103806797,
+              0.4274680040420946
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          },
+          {
+            "grid": 3,
+            "definition": "LargeBlockSmallThrust",
+            "direction": [
+              -0.3129395388296863,
+              -0.8481391103806797,
+              0.4274680040420946
+            ],
+            "nominal_n": 345600,
+            "effective_n": 69119.99
+          }
+        ]
+      },
+      "result": {
+        "capacity_n": 13661039.491927398,
+        "direction": [
+          0.9194377190149203,
+          0.20328612361391984,
+          0.3366140710051595
+        ],
+        "throttles": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "force_residual_n": 0.0,
+        "dual_normal": [
+          0.9194377190149203,
+          0.20328612361391984,
+          0.3366140710051595
+        ],
+        "dual_upper_n": 13661039.4919274,
+        "duality_gap_n": 1.862645149230957e-09,
+        "tolerance_n": 0.216,
+        "vertex_force_n": [
+          12560474.989830473,
+          2777099.762850594,
+          4598498.117539938
+        ],
+        "certificate_method": "feasible resultant and support-plane upper bound",
+        "vertex_throttles": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "vertex_norm_n": 13661039.491927398,
+        "retained_points": 8,
+        "heading": "maximum-resultant",
+        "directional_lp": {
+          "capacity_n": 13661039.491927402,
+          "throttles": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "force_residual_n": 9.592326932761353e-10,
+          "active_condition": 5.994410288505764,
+          "dual_normal": [
+            1.087621248638128,
+            -0.0,
+            -0.0
+          ],
+          "dual_upper_n": 13661039.491927398,
+          "duality_gap_n": -3.725290298461914e-09,
+          "tolerance_n": 0.108,
+          "status": "resolved"
+        }
+      }
+    },
+    {
+      "specimen": "2103347482",
+      "input_sha256": "93fd161be69db2169b1adeabb1c603d63f8608053aa0e590a41876c513ba5830",
+      "input": {
+        "schema": 1,
+        "kind": "aero-population-inputs",
+        "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/2103347482/bp.sbc",
+        "blueprint_sha256": "b9157d65744ea9ab493b3585c5706a124365852d66b7b8573e8ac38c6450a801",
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "relative_air_density": 1,
+        "atmosphere": true,
+        "grids": 14,
+        "mass_kg": 594954.4002761841,
+        "headings": [
+          {
+            "name": "forward",
+            "direction": [
+              -0.9719883955383392,
+              0.09389981778005732,
+              0.21545622098161235
+            ]
+          },
+          {
+            "name": "left",
+            "direction": [
+              0.14852752379818837,
+              0.9558739455423072,
+              0.2534651354876273
+            ]
+          },
+          {
+            "name": "up",
+            "direction": [
+              -0.18214865800544328,
+              0.27836634935684074,
+              -0.943045090084542
+            ]
+          },
+          {
+            "name": "down",
+            "direction": [
+              0.18214865800544328,
+              -0.27836634935684074,
+              0.943045090084542
+            ]
+          },
+          {
+            "name": "right",
+            "direction": [
+              -0.14852752379818837,
+              -0.9558739455423072,
+              -0.2534651354876273
+            ]
+          },
+          {
+            "name": "backward",
+            "direction": [
+              0.9719883955383392,
+              -0.09389981778005732,
+              -0.21545622098161235
+            ]
+          }
+        ],
+        "thrusters": [
+          {
+            "grid": 1,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 1,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.18180471045267507,
+              0.2783323942865114,
+              -0.9431214797405246
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.18180990629311386,
+              0.2783334028633875,
+              -0.9431201804776401
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.18180990629311386,
+              0.2783334028633875,
+              -0.9431201804776401
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.18180990629311386,
+              0.2783334028633875,
+              -0.9431201804776401
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.18180990629311386,
+              0.2783334028633875,
+              -0.9431201804776401
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.14858382213703095,
+              -0.9558685550561141,
+              -0.25345246744525407
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.9720432118855828,
+              0.09405223179395406,
+              0.2151422132491344
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.14858382213703095,
+              0.9558685550561141,
+              0.25345246744525407
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.9720432118855828,
+              -0.09405223179395406,
+              -0.2151422132491344
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.9720432118855828,
+              0.09405223179395406,
+              0.2151422132491344
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.14858382213703095,
+              -0.9558685550561141,
+              -0.25345246744525407
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.18180990629311386,
+              -0.2783334028633875,
+              0.9431201804776401
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.14858382213703095,
+              0.9558685550561141,
+              0.25345246744525407
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.9720432118855828,
+              -0.09405223179395406,
+              -0.2151422132491344
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.18180990629311386,
+              -0.2783334028633875,
+              0.9431201804776401
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.9720432118855828,
+              0.09405223179395406,
+              0.2151422132491344
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.9720432118855828,
+              -0.09405223179395406,
+              -0.2151422132491344
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.14858382213703095,
+              -0.9558685550561141,
+              -0.25345246744525407
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.14858382213703095,
+              0.9558685550561141,
+              0.25345246744525407
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 5,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.19116422033009411,
+              0.27843582087795976,
+              -0.9412384047188068
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 6,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.18253976530598884,
+              0.27147981826011125,
+              -0.9449751014494991
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 7,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.18191262590431212,
+              0.2841238774831917,
+              -0.9413720936911791
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 8,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.1746588630652513,
+              0.27846925276384954,
+              -0.9444305992596265
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockLargeHydrogenThrust",
+            "direction": [
+              -0.1818082788863035,
+              0.27833436278726803,
+              -0.9431202109064386
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.9720417604732516,
+              -0.09406373784017692,
+              -0.21514374060054764
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.14859530821819836,
+              -0.9558671433391461,
+              -0.2534510577216017
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.14859530821819836,
+              0.9558671433391461,
+              0.2534510577216017
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.9720417604732516,
+              0.09406373784017692,
+              0.21514374060054764
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.1818082788863035,
+              -0.27833436278726803,
+              0.9431202109064386
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.1818082788863035,
+              -0.27833436278726803,
+              0.9431202109064386
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.1818082788863035,
+              -0.27833436278726803,
+              0.9431202109064386
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              0.1818082788863035,
+              -0.27833436278726803,
+              0.9431202109064386
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          }
+        ]
+      },
+      "result": {
+        "capacity_n": 3961903.9312429763,
+        "direction": [
+          -0.18543466447501777,
+          0.27572843282668236,
+          -0.9431796311106275
+        ],
+        "throttles": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "force_residual_n": 0.0,
+        "dual_normal": [
+          -0.18543466447501775,
+          0.2757284328266823,
+          -0.9431796311106273
+        ],
+        "dual_upper_n": 3961903.931242976,
+        "duality_gap_n": -4.656612873077393e-10,
+        "tolerance_n": 0.096,
+        "vertex_force_n": [
+          -734674.3261722953,
+          1092409.5619714977,
+          -3736787.088365495
+        ],
+        "certificate_method": "feasible resultant and support-plane upper bound",
+        "vertex_throttles": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "vertex_norm_n": 3961903.9312429763,
+        "retained_points": 112,
+        "heading": "maximum-resultant",
+        "directional_lp": {
+          "capacity_n": 3961903.9312429763,
+          "throttles": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.9999999999999558,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "force_residual_n": 4.884173806682497e-10,
+          "active_condition": 551.0861091533416,
+          "dual_normal": [
+            -0.22487989392524632,
+            -0.0,
+            -1.0160307121925043
+          ],
+          "dual_upper_n": 3961903.9312429763,
+          "duality_gap_n": 0.0,
+          "tolerance_n": 0.048,
+          "status": "resolved"
+        }
+      }
+    },
+    {
+      "specimen": "2573734531",
+      "input_sha256": "a461cc1fc9ce3cb7ace14b8d017f395c17977da4b6545352aa86276826b2b761",
+      "input": {
+        "schema": 1,
+        "kind": "aero-population-inputs",
+        "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/2573734531/bp.sbc",
+        "blueprint_sha256": "8ad8a54908a1214d08a12d7f8d0a431d6faa3d59f4bf624e4275a58ed67a79fc",
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "relative_air_density": 1,
+        "atmosphere": true,
+        "grids": 187,
+        "mass_kg": 11975723.402137756,
+        "headings": [
+          {
+            "name": "forward",
+            "direction": [
+              -0.44563094180257085,
+              0.6040498072319928,
+              -0.6607093870160661
+            ]
+          },
+          {
+            "name": "left",
+            "direction": [
+              -0.2527594387559918,
+              -0.7929136193124323,
+              -0.5544372448064931
+            ]
+          },
+          {
+            "name": "up",
+            "direction": [
+              -0.8587931822202068,
+              -0.08007385773054382,
+              0.5060261331989079
+            ]
+          },
+          {
+            "name": "down",
+            "direction": [
+              0.8587931822202068,
+              0.08007385773054382,
+              -0.5060261331989079
+            ]
+          },
+          {
+            "name": "right",
+            "direction": [
+              0.2527594387559918,
+              0.7929136193124323,
+              0.5544372448064931
+            ]
+          },
+          {
+            "name": "backward",
+            "direction": [
+              0.44563094180257085,
+              -0.6040498072319928,
+              0.6607093870160661
+            ]
+          }
+        ],
+        "thrusters": [
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2527594387559918,
+              0.7929136193124323,
+              0.5544372448064931
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2527594387559918,
+              0.7929136193124323,
+              0.5544372448064931
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 0,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.2527594387559918,
+              0.7929136193124323,
+              0.5544372448064931
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 6,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.25276110161209064,
+              0.792912831062719,
+              0.5544376140269942
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 6,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.25276110161209064,
+              0.792912831062719,
+              0.5544376140269942
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 6,
+            "definition": "LargeBlockSmallAtmosphericThrust",
+            "direction": [
+              0.25276110161209064,
+              0.792912831062719,
+              0.5544376140269942
+            ],
+            "nominal_n": 648000,
+            "effective_n": 648000
+          },
+          {
+            "grid": 22,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.25276033004819476,
+              -0.7929136758232327,
+              -0.5544367576616983
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 22,
+            "definition": "SmallBlockSmallThrust",
+            "direction": [
+              -0.25276033004819476,
+              -0.7929136758232327,
+              -0.5544367576616983
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 29,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.24798619279065173,
+              -0.791873127785346,
+              -0.5580679149320904
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          }
+        ]
+      },
+      "result": {
+        "capacity_n": 3887999.999998288,
+        "direction": [
+          0.25276027018415254,
+          0.7929132251879248,
+          0.5544374294169878
+        ],
+        "throttles": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "force_residual_n": 1.1641532182693481e-10,
+        "dual_normal": [
+          0.2527602701841526,
+          0.792913225187925,
+          0.5544374294169879
+        ],
+        "dual_upper_n": 3887999.9999982887,
+        "duality_gap_n": 4.656612873077393e-10,
+        "tolerance_n": 0.1296,
+        "vertex_force_n": [
+          982731.9304755524,
+          3082846.6195292943,
+          2155652.7255722997
+        ],
+        "certificate_method": "feasible resultant and support-plane upper bound",
+        "vertex_throttles": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "vertex_norm_n": 3887999.999998288,
+        "retained_points": 14,
+        "heading": "maximum-resultant",
+        "directional_lp": {
+          "capacity_n": 3887999.9999982873,
+          "throttles": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "force_residual_n": 2.877698079828406e-10,
+          "active_condition": 2819278.590089778,
+          "dual_normal": [
+            -0.0,
+            -0.0,
+            1.803630034594775
+          ],
+          "dual_upper_n": 3887999.9999982873,
+          "duality_gap_n": 0.0,
+          "tolerance_n": 0.0648,
+          "status": "resolved"
+        }
+      }
+    },
+    {
+      "specimen": "3153101248",
+      "input_sha256": "4c7846a53875d47818141c069837bc05210ee57cb053b01dd65e2a54083fc431",
+      "input": {
+        "schema": 1,
+        "kind": "aero-population-inputs",
+        "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/3153101248/bp.sbc",
+        "blueprint_sha256": "f0e98e3c2a986e4098d237999ed857cfb80661b830478883ad7450f5733226f7",
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "relative_air_density": 1,
+        "atmosphere": true,
+        "grids": 60,
+        "mass_kg": 2263002.600933075,
+        "headings": [
+          {
+            "name": "forward",
+            "direction": [
+              -0.1641605267120711,
+              -0.05932404762421824,
+              0.9846481497687867
+            ]
+          },
+          {
+            "name": "left",
+            "direction": [
+              0.024727630929879247,
+              0.9976287973214251,
+              0.06422870871816394
+            ]
+          },
+          {
+            "name": "up",
+            "direction": [
+              -0.9861236564134395,
+              0.03489183469648101,
+              -0.1623043256764969
+            ]
+          },
+          {
+            "name": "down",
+            "direction": [
+              0.9861236564134395,
+              -0.03489183469648101,
+              0.1623043256764969
+            ]
+          },
+          {
+            "name": "right",
+            "direction": [
+              -0.024727630929879247,
+              -0.9976287973214251,
+              -0.06422870871816394
+            ]
+          },
+          {
+            "name": "backward",
+            "direction": [
+              0.1641605267120711,
+              0.05932404762421824,
+              -0.9846481497687867
+            ]
+          }
+        ],
+        "thrusters": [
+          {
+            "grid": 0,
+            "definition": "SmallBlockLargeFlatAtmosphericThrust",
+            "direction": [
+              0.024727630929879247,
+              0.9976287973214251,
+              0.06422870871816394
+            ],
+            "nominal_n": 230000,
+            "effective_n": 230000
+          },
+          {
+            "grid": 0,
+            "definition": "SmallBlockLargeFlatAtmosphericThrust",
+            "direction": [
+              -0.024727630929879247,
+              -0.9976287973214251,
+              -0.06422870871816394
+            ],
+            "nominal_n": 230000,
+            "effective_n": 230000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.15077858540222833,
+              -0.22072695666139117,
+              -0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.15077858540222833,
+              -0.22072695666139117,
+              -0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.15077858540222833,
+              0.22072695666139117,
+              0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.15077858540222833,
+              0.22072695666139117,
+              0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.06944153429238553,
+              -0.9747114418644163,
+              0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.06944153429238553,
+              0.9747114418644163,
+              -0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.06944153429238553,
+              0.9747114418644163,
+              -0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.06944153429238553,
+              -0.9747114418644163,
+              0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.15077858540222833,
+              -0.22072695666139117,
+              -0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.06944153429238553,
+              0.9747114418644163,
+              -0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.06944153429238553,
+              -0.9747114418644163,
+              0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.15077858540222833,
+              -0.22072695666139117,
+              -0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.15077858540222833,
+              0.22072695666139117,
+              0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.15077858540222833,
+              0.22072695666139117,
+              0.9636106209393416
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.06944153429238553,
+              0.9747114418644163,
+              -0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.06944153429238553,
+              -0.9747114418644163,
+              0.21240404519149336
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockSmallFlatAtmosphericThrust",
+            "direction": [
+              0.986125596209338,
+              -0.03488861851078186,
+              0.16229323090993888
+            ],
+            "nominal_n": 200000,
+            "effective_n": 200000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              0.986125596209338,
+              -0.03488861851078186,
+              0.16229323090993888
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              0.986125596209338,
+              -0.03488861851078186,
+              0.16229323090993888
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              -0.986125596209338,
+              0.03488861851078186,
+              -0.16229323090993888
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 1,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              -0.986125596209338,
+              0.03488861851078186,
+              -0.16229323090993888
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          }
+        ]
+      },
+      "result": {
+        "capacity_n": 15905959.353919653,
+        "direction": [
+          0.8834264369921806,
+          0.3070782821756904,
+          0.35392182616974555
+        ],
+        "throttles": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "force_residual_n": 0.0,
+        "dual_normal": [
+          0.8834264369921808,
+          0.30707828217569044,
+          0.3539218261697456
+        ],
+        "dual_upper_n": 15905959.353919653,
+        "duality_gap_n": 0.0,
+        "tolerance_n": 1.44,
+        "vertex_force_n": [
+          14051744.998975687,
+          4884374.674758001,
+          5629466.18152099
+        ],
+        "certificate_method": "feasible resultant and support-plane upper bound",
+        "vertex_throttles": [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "vertex_norm_n": 15905959.353919653,
+        "retained_points": 14,
+        "heading": "maximum-resultant",
+        "directional_lp": {
+          "capacity_n": 15905959.353919653,
+          "throttles": [
+            1.0,
+            0.0,
+            -0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "force_residual_n": 2.769066268392332e-09,
+          "active_condition": 8.59022953481356,
+          "dual_normal": [
+            1.0651833880528458,
+            -0.0,
+            0.16667193257791105
+          ],
+          "dual_upper_n": 15905959.353919653,
+          "duality_gap_n": 0.0,
+          "tolerance_n": 0.72,
+          "status": "resolved"
+        }
+      }
+    },
+    {
+      "specimen": "3281995444",
+      "input_sha256": "90252a3678629d65f761c7dae6f6f19c0dc0bc2d67adcf196bae5173917c60ca",
+      "input": {
+        "schema": 1,
+        "kind": "aero-population-inputs",
+        "blueprint": "/home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/3281995444/bp.sbc",
+        "blueprint_sha256": "6ed51d77ffd3381ce66384d6ad9b3d3ca98cc5f2a0b2ce7ce4c847df4fd8330e",
+        "harness_mvid": "72f4a842-a972-4cde-b05f-72af7c42c529",
+        "core_mvid": "e6084e2b-7588-4522-b720-1cd2687381c6",
+        "relative_air_density": 1,
+        "atmosphere": true,
+        "grids": 50,
+        "mass_kg": 9317837.207427979,
+        "headings": [
+          {
+            "name": "forward",
+            "direction": [
+              0.35099792227021653,
+              -0.38050344311620055,
+              -0.8555802641124368
+            ]
+          },
+          {
+            "name": "left",
+            "direction": [
+              -0.3726984107989094,
+              -0.8949894626044812,
+              0.2451321203247535
+            ]
+          },
+          {
+            "name": "up",
+            "direction": [
+              -0.8590089365949334,
+              0.23283253982993518,
+              -0.4559524703808317
+            ]
+          },
+          {
+            "name": "down",
+            "direction": [
+              0.8590089365949334,
+              -0.23283253982993518,
+              0.4559524703808317
+            ]
+          },
+          {
+            "name": "right",
+            "direction": [
+              0.3726984107989094,
+              0.8949894626044812,
+              -0.2451321203247535
+            ]
+          },
+          {
+            "name": "backward",
+            "direction": [
+              -0.35099792227021653,
+              0.38050344311620055,
+              0.8555802641124368
+            ]
+          }
+        ],
+        "thrusters": [
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.1587082652073665,
+              -0.9086995202419872,
+              0.38610473769024195
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 2,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.1587082652073665,
+              -0.9086995202419872,
+              0.38610473769024195
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 3,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.1584997334023733,
+              0.9086898821177674,
+              -0.3862130663871619
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 3,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.1584997334023733,
+              0.9086898821177674,
+              -0.3862130663871619
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 4,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.5893621127332721,
+              -0.7923301346248047,
+              0.15768721520786874
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 4,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.5893621127332721,
+              -0.7923301346248047,
+              0.15768721520786874
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 5,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.5927286523812668,
+              0.7902802053728987,
+              -0.155338152564193
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 5,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.5927286523812668,
+              0.7902802053728987,
+              -0.155338152564193
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.8590032968562659,
+              -0.23283025389838957,
+              0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              -0.3351936547182999,
+              0.4174248763475352,
+              0.8446310948827509
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              -0.3351936547182999,
+              0.4174248763475352,
+              0.8446310948827509
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8590032968562659,
+              0.23283025389838957,
+              -0.4559642627001347
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 7200000,
+            "effective_n": 7200000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrustIndustrial",
+            "direction": [
+              0.3351936547182999,
+              -0.4174248763475352,
+              -0.8446310948827509
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              0.38698649824852444,
+              0.8783772227669936,
+              -0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 8,
+            "definition": "LargeBlockSmallHydrogenThrust",
+            "direction": [
+              -0.38698649824852444,
+              -0.8783772227669936,
+              0.280526121239161
+            ],
+            "nominal_n": 1080000,
+            "effective_n": 1080000
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.1702899030930286,
+              -0.9085710683846314,
+              0.38144457342971333
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 9,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.1702899030930286,
+              -0.9085710683846314,
+              0.38144457342971333
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 10,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.5798746721660091,
+              0.7979782667310117,
+              -0.16424387478787217
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 10,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.5798746721660091,
+              0.7979782667310117,
+              -0.16424387478787217
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 11,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.5817036024258047,
+              -0.7969043056306423,
+              0.16298603189287617
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 11,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              -0.5817036024258047,
+              -0.7969043056306423,
+              0.16298603189287617
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 12,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.17057629154458362,
+              0.9085660815382234,
+              -0.3813284728959742
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 12,
+            "definition": "SmallBlockSmallThrustSciFi",
+            "direction": [
+              0.17057629154458362,
+              0.9085660815382234,
+              -0.3813284728959742
+            ],
+            "nominal_n": 14400,
+            "effective_n": 2879.9998
+          },
+          {
+            "grid": 29,
+            "definition": "SmallBlockLargeHydrogenThrustIndustrial",
+            "direction": [
+              0.8589941875685282,
+              -0.23281785890314707,
+              0.45598775235661587
+            ],
+            "nominal_n": 480000,
+            "effective_n": 480000
+          },
+          {
+            "grid": 29,
+            "definition": "SmallBlockSmallAtmosphericThrustSciFi",
+            "direction": [
+              0.8589941875685282,
+              -0.23281785890314707,
+              0.45598775235661587
+            ],
+            "nominal_n": 96000,
+            "effective_n": 96000
+          },
+          {
+            "grid": 29,
+            "definition": "SmallBlockSmallHydrogenThrust",
+            "direction": [
+              -0.8589941875685282,
+              0.23281785890314707,
+              -0.45598775235661587
+            ],
+            "nominal_n": 98400,
+            "effective_n": 98400
+          },
+          {
+            "grid": 29,
+            "definition": "SmallBlockSmallAtmosphericThrustSciFi",
+            "direction": [
+              0.8589941875685282,
+              -0.23281785890314707,
+              0.45598775235661587
+            ],
+            "nominal_n": 96000,
+            "effective_n": 96000
+          }
+        ]
+      },
+      "result": {
+        "capacity_n": 31589822.016919587,
+        "direction": [
+          0.3759915731670312,
+          -0.7626723477474822,
+          -0.5262710583803034
+        ],
+        "throttles": [
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "force_residual_n": 1.862645149230957e-09,
+        "dual_normal": [
+          0.3759915731670312,
+          -0.7626723477474822,
+          -0.5262710583803034
+        ],
+        "dual_upper_n": 31589822.01691959,
+        "duality_gap_n": 3.725290298461914e-09,
+        "tolerance_n": 1.44,
+        "vertex_force_n": [
+          11877506.876208114,
+          -24092683.722569164,
+          -16624809.06688968
+        ],
+        "certificate_method": "feasible resultant and support-plane upper bound",
+        "vertex_throttles": [
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          1.0
+        ],
+        "vertex_norm_n": 31589822.016919587,
+        "retained_points": 134,
+        "heading": "maximum-resultant",
+        "directional_lp": {
+          "capacity_n": 31589822.01691958,
+          "throttles": [
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0
+          ],
+          "force_residual_n": 3.197442310920451e-09,
+          "active_condition": 10.790927692935561,
+          "dual_normal": [
+            -0.0,
+            -1.3111790442559694,
+            -0.0
+          ],
+          "dual_upper_n": 31589822.016919598,
+          "duality_gap_n": 1.862645149230957e-08,
+          "tolerance_n": 0.72,
+          "status": "resolved"
+        }
+      }
+    }
+  ]
+}

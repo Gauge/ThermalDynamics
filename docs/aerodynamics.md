@@ -40,7 +40,7 @@ In the subsonic regime, real flow has four properties:
 | | What real subsonic flow does | What this mod does | What SEDrag does |
 | --- | --- | --- | --- |
 | **Drag** | Pressure drag from the **frontal silhouette**, set mainly by how the flow *leaves* the body (base, boat-tail), plus skin friction on the wetted area. A cube's Cd is about 1.05, a plate square to the flow about 1.17–1.28, and a streamlined body 0.05–0.3. | Windward exposed area × `sin²θ`, with no wake and no skin friction, derived from the friction watts. | Silhouette area × a per-axis coefficient from block normals, with a fictional speed scaling (below). |
-| **Lift** | Comes from circulation around **lifting surfaces** at an angle of attack. It is linear up to stall, `CL ≈ 2πα·AR/(2+√(AR²+4))`, stalls at 12–15° on a plate, and brings induced drag `CL²/(πeAR)`. | The sideways remainder of the Newtonian sum. It can never exceed drag and cancels on any symmetric hull (median lift-to-drag 0.057). | A flat-plate curve on the whole outline, `(1−cos 2πx)/2`, with a lift constant about 330× its drag constant, plus authored per-block normals. |
+| **Lift** | Comes from circulation around **lifting surfaces** at an angle of attack. The baseline small-angle approximation is `CL ≈ 2πα·AR/(2+√(AR²+4))`; stall depends on geometry and flow, and induced drag is `CL²/(πeAR)` on the same reference area. | The sideways remainder of the Newtonian sum. It can never exceed drag and cancels on any symmetric hull (median lift-to-drag 0.057). | A flat-plate curve on the whole outline, `(1−cos 2πx)/2`, with a lift constant about 330× its drag constant, plus authored per-block normals. |
 | **Moments** | The force acts at the centre of pressure, and a rotating body sees `ω × r` on every surface. The result is weathervaning, plus damping of rotation. | Everything is applied at the centre of mass, so there is **no torque at all**. | Applied at a centre of lift built from the outline, plus a small-grid stabilising couple. |
 | **Heating** | Bounded by the **recovery temperature**, `T_amb + r·v²/(2c_p)` with r ≈ 0.89: +4.4 K at 100 m/s, +8.7 K at 140 m/s, +40 K at 300 m/s. | A `v³` source on the windward faces with nothing bounding it. | Six counters, one per side, driven by the scaled speed. Re-entry starts at 127 m/s. |
 
@@ -215,13 +215,19 @@ other way: it cancels on any symmetric hull, and lift can never exceed drag.
 compares body and wing-body lift slopes with theory and shows why reference area must be stated.
 The paper's discussion of Figure 2 also reports lifting bodies above and below the theoretical
 relationships. Body shape and vortex lift therefore remain limits of this approximation, to be
-checked on independent rigs. Stall comes at 12–15° for a high aspect ratio and
-much later for a low one, and past stall the plate's normal force goes to `CN ≈ 1.2·sin α`. On the
+checked on independent rigs. The former 12–15° stall statement was an unsourced generic
+estimate, not a measured boundary for the plates or block hulls modelled here. Stall must be
+validated over the intended geometry and flow range. The candidate separated-flow plate
+approximation is `CN ≈ 1.2·sin α`, subject to the joint force-accounting check below. On the
 drag side, AR11 then charges for the lift. Requirement: body lift is computed from the planform
-the air sees, with that law, and replaces the Newtonian transverse sum. **`K23`'s four criteria are
+the air sees and replaces the Newtonian transverse sum. Helmbold supplies a proposed small-angle
+baseline; it is not sufficient evidence for the complete body/surface force law. The independent
+plate diagnostic below now demonstrates that limitation even before stall. **`K23`'s four criteria are
 re-registered, not inherited.** Its "p95 lift-to-drag ≤ 2" was written against a model that cannot
 make lift. Real aircraft reach 10–20, so the bound becomes a rig check against the formula
-(a flat plate at 10° gives `CN` within 10 % of the textbook value). The population criterion that
+(a flat plate at 10° gives `CN` within 10 % of the textbook value). That formula check verifies
+implementation only; it cannot replace the independent CL/CD observations or establish stall
+behavior. The population criterion that
 keeps bricks from flying without thrust stays.
 
 The primary [Ortiz, Rival and Wood plate experiment](https://www.mdpi.com/1996-1073/8/4/2438)
@@ -232,6 +238,81 @@ ordinates have yet been digitized. These finite-thickness, low-Reynolds-number p
 establish the accuracy of a ship-scale body-lift law or locate its attached-flow stall boundary.
 The `1.2·sin α` expression above remains an approximation requiring a combined lift-and-drag
 comparison, not an experimentally verified law over every post-stall angle.
+
+A second primary control is [Mizoguchi, Kajikawa and Itoh (2016)](https://doi.org/10.2322/tjsass.59.56):
+rectangular plates, AR 0.5–1.5, Re 52,000, chord 90 mm, thickness 1 mm and turbulence 1.4%.
+The experiment sweeps incidence both ways. It reports peak lift near 20° for AR 1.3–1.5,
+28° at AR 1.2, and stall hysteresis over AR 0.7–1.2. Reported CL/CD uncertainty is ±0.03
+at AR 1.5 and ±0.05 at AR 0.5 (95% intervals). These are scoped observations, not
+ship-scale coefficient assignments; [source and inspection record](../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.txt).
+
+**Consequence for the planned instrument:** a direction-only static profile cannot represent
+both branches of a hysteresis loop. Before promoting lift, the lab must test increasing and
+decreasing incidence separately and retain their discrepancy. A single fitted curve cannot be
+called validated merely because it passes through one branch. A stateful stall mechanism or
+an explicitly measured approximation remains necessary; this evidence does not establish its
+coefficients for the game's Reynolds-number range. The primary Figure 3/4 symbols have now
+been digitized under the protocol below; no lift code has been tuned to them.
+
+#### Plate-figure extraction protocol
+
+The primary circles and squares in Mizoguchi Figures 3 and 4 are vector objects, distinct from
+the older comparison curves. Exploratory inspection identified their geometry and the legend
+objects; it did not fit a force law. The extraction will be bound to the publisher PDF hash,
+retain marker centres and error-bar endpoints in page coordinates, calibrate against the plot
+frame, and exclude legends and comparison lines explicitly. Report the plotted angle rather
+than snapping to integer incidence: the plotted centres do not lie exactly on integer degrees.
+Retain every primary marker, including repeated near-stall angles, without inferring an
+incidence-sweep branch not labelled by its symbol. Store CL and CD as separate observations.
+
+Before using these observations for a model comparison, require analytical coordinate-transform
+controls, rejection of changed source/layout or ambiguous error bars, visual overlay of all
+retained points, and inspection of the source figure's scale and legend. Use a conservative
+0.5 PDF-point extraction bound in each coordinate, reported separately from the figure's 95%
+measurement interval. This is graph digitization, not access to the experiment's raw samples;
+no model acceptance criterion or tuning follows from producing the dataset.
+
+The [retained reference CSV](../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.csv)
+contains 246 observations: 63 AR=1 and 60 AR=0.5 points for each coefficient. The
+[source-bound extractor](../tools/corpus/plate_reference.py) and its analytical/fault controls
+are reproducible from the publisher PDF. A full-page overlay was visually checked: every retained
+marker lies on a primary symbol; neither legend markers nor the older comparison curves are
+selected. The 0.5-point bounds correspond to about 0.184° and 0.00790 CL or 0.00615 CD,
+separate from measurement confidence intervals. Printed digits preserve the coordinate conversion,
+not experimental precision. All 235 Python checks pass, with one unrelated historical-data
+integration check skipped. This validates extraction, not an aerodynamic model.
+
+#### Small-angle compatibility lab, registered before computation
+
+Evaluate the already proposed unfitted Helmbold law `CL = CL_α·α` against every retained CL
+observation whose plotted incidence centre satisfies `1° ≤ |α| ≤ 10°`, for both available
+aspect ratios. Use radians in the law. Propagate the recorded incidence extraction bound
+through the linear slope, and expand each measured 95% interval by its separate coefficient
+extraction bound. Report interval overlap and signed centre residual for every selected row;
+do not fit a slope, offset, vortex term or stall angle, average away a branch, or extrapolate
+outside this subset. Missing/nonfinite inputs, empty coverage or absent aspect/sign strata
+invalidate the diagnostic.
+
+This is a pointwise compatibility check of a pre-existing proposal, not a new population or
+flight-model acceptance threshold and not a confidence statement about simultaneous coverage.
+The source plots were already inspected during extraction; this is not a blinded experiment.
+An implementation matching its own formula still needs this independent physical comparison.
+An incompatible observation is retained as evidence of model scope, not deleted or reclassified
+as a bad measurement. Drag and hysteresis remain separate required validation work.
+
+The [complete pointwise diagnostic](../tests/benchmarks/aerodynamics/plate-small-angle-2026-09-27.json)
+retains all 36 selected observations. At AR=0.5, 3 of 18 intervals do not overlap; at AR=1,
+9 of 18 do not overlap. Maximum absolute centre residuals are 0.08480 and 0.08817 CL,
+respectively. These counts describe this experiment and its stated pointwise intervals; they
+are not a statistical significance test or an estimate of a ship population. The unfitted
+linear law therefore does not cover every observation even in this small-angle subset.
+No slope, offset or vortex coefficient was adjusted to remove the discrepancy.
+
+[plate_lift_check.py](../tools/corpus/plate_lift_check.py) reproduces the diagnostic from the
+committed reference. Analytic slope/uncertainty, invalid-input and complete-stratum controls
+pass; the full Python suite runs 240 checks, with 239 passing and the unrelated historical-data
+check skipped. The model expression and selection rule were committed in `57b102b` before
+computation. Physical lift validation remains open.
 
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
@@ -1248,6 +1329,58 @@ not a population selection. The three-grid hull supplies about 2.88 kN in each r
 the atmospheric single-grid hull has no downward rated capacity under this model. Neither finding
 scores drag or P1/P2.
 
+### Blueprint definition upgrades found by the population walk
+
+The frozen walk found a blueprint with fourteen `LargeMissileTurret/AutoCannonTurret` blocks.
+The installed definition is `LargeGatlingTurret/AutoCannonTurret`. Inspection of the installed
+engine's `MyCubeGrid.UpgradeCubeBlock` and `FindDefinitionUpgrade` shows a subtype-based
+upgrade when the original type/subtype pair is absent. The offline reader previously selected
+its first subtype match but still marked the block ambiguous, so the population gate withheld it.
+
+The correction resolves a unique installed subtype when the saved type is itself represented
+in installed definitions. Exact type/subtype matches retain priority. Missing or unknown saved
+types and competing subtype matches stay unresolved; a replacement cannot change grid size.
+Ambiguous matches no longer build geometry from whichever definition the dictionary happened
+to contain. Upgraded blocks are counted separately and exported with population inputs.
+The already running frozen corpus generation is unchanged; it cannot mix receipts from the
+corrected reader into its older manifest.
+
+[Recorded investigation](../tests/benchmarks/aerodynamics/population-definition-upgrade-2026-09-27.txt)
+retains engine and harness hashes, the failing regression before correction and 73 passing
+functional/documentation checks afterward. The [corrected specimen export](../tests/benchmarks/aerodynamics/population-definition-upgrade-2026-09-27-inputs.json)
+counts all fourteen upgrades across twenty grids. The first full-suite run after the frozen walk
+finished exposed a regression: four installed legacy prefabs encode the explicit builder type in
+an unnamespaced `MyObjectBuilder_CubeBlock` element without `xsi:type`. The reader now accepts that
+explicit element type when the attribute is absent. Generic names, foreign namespaces and unknown
+builders remain unresolved; an explicit `xsi:type` retains priority. Five new synthetic cases and
+the complete installed-prefab readability test pass (47 focused reader/documentation cases total).
+The failed full run was 2,621 passed and one failed; it is not a clean validation. A second full run found one stale negative fixture that still treated the now-supported legacy
+element as missing type; it now uses an explicitly unknown builder. The [final integration run](../tests/benchmarks/aerodynamics/backlog-integration-validation-2026-09-27.txt)
+passes all 2,627 C# cases, with 239 Python passes and one missing historical-data skip.
+These checks establish integration readiness, not population acceptance.
+
+### Completed first population generation
+
+The [frozen abe9c33 generation](../tests/benchmarks/aerodynamics/population-frozen-abe9c33-2026-09-27.json)
+finished all 8,144 manifest files and 33,420,769,661 input bytes. A separate audit verified every
+receipt checksum, identity, manifest entry and filename, and reproduced the saved summary exactly.
+The archive records the manifest and receipt-set hashes, run provenance and all thirty failures.
+
+| Outcome | Files |
+| --- | ---: |
+| Measured self-lifting | 3,850 |
+| Not self-lifting | 4,257 |
+| Modded exclusions | 7 |
+| Unresolved | 30 |
+
+Both P1 and P2 remain **unresolved** despite complete file coverage. Seventeen failures concern
+near-rank-deficient thrust sets, three fail the original-frame numerical certificate, and ten
+contain ambiguous definitions. The measured subset contains 3,683 terminal-speed right-censored
+cases; subset statistics in the archive are not population acceptance results. No failed case is
+silently excluded and no acceptance threshold changes. The reader, envelope and LP corrections
+were developed separately while this frozen run proceeded. Their fresh full generation must use
+new runtime fingerprints and output; results cannot be spliced into these receipts.
+
 ## Population runner protocol (registered before the walk)
 
 The candidate population uses the existing corpus convention: every recursively discovered
@@ -1265,8 +1398,9 @@ The six reference headings cannot establish this: two perpendicular thrusters ma
 even when neither axis alone does. The force set is the Minkowski sum of each throttle segment
 `[0,F_i]`; its maximum Euclidean norm lies at a vertex. Build that convex polytope in at most three
 dimensions and retain vertex throttle witnesses. Check each hull reduction's containment numerically,
-and stop unresolved if the hull exceeds 200,000 vertices or its resolved span has condition
-number above 10⁷. Cross-check the selected ray through the existing independently checked directional LP. Ties
+and stop unresolved if the retained set exceeds 200,000 points. The first generation also
+stopped when its resolved span had condition number above 10⁷; the correction below preserves
+those candidates instead. Cross-check the selected ray through the existing independently checked directional LP. Ties
 within the force tolerance use lexicographically smallest normalized main-grid coordinates rounded
 to nine decimal places. This is a deterministic benchmark convention, not a drag-favouring choice.
 
@@ -1294,6 +1428,91 @@ rotation and rank-deficiency controls, an analytic quadratic-drag root, comparis
 profile evaluator on rotated multiple grids, and runner tests for partial coverage, duplicate/missing
 receipts, changed provenance, interrupted writes, exclusions and threshold/quantile boundaries.
 
+### Near-degenerate thrust sets: conservative retention and a known-resultant certificate
+
+The first frozen corpus generation exposed failures on nearly parallel subgrid thrust axes.
+An intermediate Minkowski sum can be nearly flat even when later generators span three
+well-resolved dimensions. Rejecting that intermediate set needlessly prevents a result. The
+correction retains **all** its candidate points, without projecting or discarding any, until a
+well-resolved hull reduction is possible. The 200,000-point budget remains enforced. The new
+auxiliary count is `retained_points`, since the retained set can include non-extreme force points;
+historical `vertices` fields keep their original meaning in the first-generation receipts.
+
+For the selected binary-throttle witness, compute its resultant `v` by compensated summation
+and define the test heading as `d = v/|v|`. This heading is feasible by construction. The support
+bound `Σ max(0, d·F_i)` independently bounds force on that ray. Require its gap from `|v|` and
+the reconstructed force residual to fit the existing force tolerance. This is not a certificate
+for an arbitrary requested heading. The fixed-heading LP retains its conditioning guard; its
+near-rank rejection is recorded as an unresolved cross-check when the known-resultant proof
+succeeds. Other solver errors and any disagreement remain fatal.
+
+Before promoting the change, require exhaustive binary-throttle agreement on forty additional
+seeded nearly parallel/coplanar fixtures, exact point retention, support-bound and LP fault
+injection, the original independent controls, and reproduction of the six diagnosed hulls.
+Those hulls informed this correction and are not held-out validation. No thrust or drag
+coefficient, force tolerance, acceptance threshold or population exclusion changes.
+
+[Validation record](../tests/benchmarks/aerodynamics/population-envelope-stability-2026-09-27.txt)
+and [six complete input/certificate pairs](../tests/benchmarks/aerodynamics/population-envelope-stability-2026-09-27.json)
+record source `060c101`: 227 Python checks passed and one unrelated historical-census check
+was skipped because its external dataset was absent in the isolated checkout. All forty new
+exhaustive controls and all six diagnosed specimens passed; the largest new-control discrepancy
+was 9.10×10⁻¹³ N. One specimen retains an unresolved fixed-heading LP cross-check explicitly.
+These are instrument checks, not a population acceptance verdict.
+
+### Directional LP coordinate conditioning investigation
+
+The continuing frozen walk rejected workshop hull `573772127` because its independently
+recomputed duality gap was 2.3873 N, above the unchanged 0.72 N internal tolerance. Tightening
+HiGHS feasibility settings or disabling presolve did not resolve it. Rotating the same problem
+into the main-grid, target-aligned QR or force-SVD frame did resolve it in diagnostic trials.
+These trials informed the correction and are not independent validation. The independently
+constructed resultant/support certificate gives 182,603,998.36925 N with a 2.98×10⁻⁸ N gap.
+
+Before implementation, register a target-aligned orthonormal QR change of coordinates for the
+LP only. Transform the returned dual normal back and recompute every primal residual, support
+bound and conditioning check in the original force coordinates. Keep all acceptance tolerances
+and rejection paths. Require the existing independent LP/global oracles, forty fresh seeded
+rotations of analytically solved six-axis force boxes spanning rating scales 10⁻³ through 10⁹,
+original-coordinate certificate reconstruction, the diagnosed specimen, and the near-aligned
+unbalanced-force rejection. Any failing case remains unresolved; no subset yields a population
+verdict.
+
+The implementation passes 229 Python checks, with the same unrelated historical-census
+integration check skipped. The new specimen regression fails against the previous implementation
+and passes with the coordinate transform. Forty analytic rotated boxes agree to a maximum
+relative error of 1.50×10⁻¹⁵. The [archived specimen and certificate](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.json)
+are consumed by that regression; the [validation log](../tests/benchmarks/aerodynamics/population-lp-frame-2026-09-27.txt)
+records the before/after check. Population acceptance remains unscored.
+A [later specimen, 853505259](../tests/benchmarks/aerodynamics/population-lp-frame-followup-2026-09-27.json),
+also rejected by the original LP, passes the committed correction without retuning: the
+known-resultant capacity is 3,302,402.92323 N, with zero reported support gap; the independent
+LP gap is 0.00906 N within its unchanged tolerance. This is another specimen check, not a
+population finding.
+
+### Runtime-authored data provenance
+
+A binary supplied through `--binary` can resolve authored definitions from a different checkout
+than the Python runner. The runner now fingerprints `authored_data` reported by that binary's
+`aero-environment` command, alongside `game_content`; inferring the authored root from Python's
+source path was incorrect in that configuration. Missing, relative or nonexistent authored
+roots fail before a run starts. Older binaries must be rebuilt rather than silently falling
+back to the runner's checkout. The original frozen generation used matching paths and is
+unaffected by this correction. Runtime and definition search paths are also re-enumerated
+before and after each blueprint: newly added files stop the run just as modified or deleted
+files do. Hashing only the original inventory would miss additions.
+
+The regression builds separate temporary runtime and authored-data directories, verifies the
+actual data file is fingerprinted, verifies the unrelated checkout is absent, and detects a
+mutation of the actual data, plus added authored definitions, game definitions and runtime
+assemblies. The wrong-root check fails before the fix and passes after. An actual isolated binary
+launched from the original checkout reports the isolated authored root. The complete Python
+suite runs 231 checks: 230 pass and the unrelated historical-census check is skipped. The isolated
+solution builds with zero warnings/errors and 73 focused C# checks pass. Full-suite validation
+remains deferred until the frozen corpus walk finishes, avoiding timing contention.
+The [validation record](../tests/benchmarks/aerodynamics/population-runtime-provenance-2026-09-27.txt)
+retains the concrete command and environment output.
+
 ### Instrument validation and end-to-end pilot
 
 [Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at
@@ -1317,6 +1536,16 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Archived the completed first population generation: all 8,144 files, thirty unresolved cases, verified receipts and no P1/P2 acceptance claim. |
+| 2026-09-27 | Corrected the strict reader regression exposed by four shipped legacy prefabs; explicit XML element builder types are accepted without inferring generic missing types. |
+| 2026-09-27 | Corrected AR8 in place after the independent comparison: Helmbold remains a baseline, and agreement with its formula is not physical validation of the complete lift law. |
+| 2026-09-27 | Recorded the unfitted small-angle comparison: 12 of 36 primary plate observations have nonoverlapping intervals; no coefficient was tuned. |
+| 2026-09-27 | Added reproducible primary-symbol digitization of plate CL/CD with separate measurement intervals and extraction bounds; no model fitting or acceptance verdict. |
+| 2026-09-27 | Withdrew the generic plate-stall angle and recorded primary bidirectional-incidence evidence; a static lift profile cannot silently claim hysteresis coverage. |
+| 2026-09-27 | Corrected authored-data provenance for a runtime loaded from a different checkout; absent runtime metadata now fails explicitly. |
+| 2026-09-27 | Registered target-aligned LP coordinates and original-frame certificate checks after a separate numerical-gap rejection. |
+| 2026-09-27 | Added conservative retention for nearly flat thrust sets and an independent certificate for the selected resultant heading. Fixed-heading LP guards stay in place; cross-check uncertainty is explicit. |
+| 2026-09-27 | Documented the native definition-upgrade path exposed by an unresolved corpus hull and the constrained reader correction. Frozen receipts remain tied to their original reader. |
 | 2026-09-27 | Archived all eight primary flat-plate normal-incidence reference rows, including residuals and measurement basis, for independent lift/drag validation. No model fit or acceptance verdict is claimed. |
 | 2026-09-27 | Corrected AR8's claim that Helmbold is a universal body-lift law, citing NASA flight comparisons. Clarified AR11's common reference area and zero-lift drag basis before lift is implemented; no coefficients or acceptance thresholds changed. |
 | 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Recorded independent controls and a two-specimen pipeline/resume pilot; full corpus scoring remains outstanding. |

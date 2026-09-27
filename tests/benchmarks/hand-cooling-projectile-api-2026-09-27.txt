@@ -1,0 +1,118 @@
+Extinguisher projectile API capability investigation, 2026-09-27 UTC
+All decompilation, compiler, whitelist and regression processes used MemoryMax=12G, MemorySwapMax=0.
+Command: python3 tools/thermal-api-check/run.py /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers
+Final exit code: 0. Every snippet receives its expected verdict, including the six intentionally rejected routes.
+Scope: admission of projectile hit registration/removal, server gate, ammo/weapon identities, owner/player fields, origin/range, hit geometry and grid-cell lookup. No cooling, ammo consumption or multiplayer runtime was executed.
+Native static inspection: Sandbox.Game.Weapons.MyProjectile.OnHit creates MyProjectileHitInfo and calls MyProjectiles.Static.InvokeOnHit before checking hitInfo2.Damage > 0. The caller returns false after OnHit. This inspected order does not prove actual extinguisher collisions or threading behavior. Existing Bottle ammo has MaxTrajectory=0, so current shipped behavior remains scanner-only.
+The first probe falsely rejected ulong: the offline compatibility subset omitted it even though the game's AllowDefaultNamespaces explicitly lists typeof(ulong) for Both targets. The corrected bootstrap checks that declaration before admitting it. The mutation suite rejects a removed ulong declaration rather than granting a permission blindly.
+Framework/contract controls: four tests passed (including the new missing-ulong mutation).
+SHA256 of inspected decompilation: 371c6c71b5aa15b8abe3a3780c0e7b015eedefeaaf982eb4428bb7a365991d57
+
+Initial probe, expected to fail while diagnosing the instrument omission:
+Artifacts: /tmp/thermal-api-check-d406wt6k
+SHA256: Sandbox.Game.dll de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf
+SHA256: VRage.Game.dll f0970c2b60335f7690e158a485cd528703717c8c5002f2713556e04f09c508e1
+SHA256: SpaceEngineers.Game.dll 6cefea4a73a5b806af4e565be5b41ed0b4199af2fc5031c575c4be7eb644c0c8
+SHA256: run.py 40079296150c91f73e8ca2aa8d05f1503d27c5b1de7e4798649425ad1ecc8eba
+SHA256: Program.cs 4f9a2fd47b0955a98046fb5cd67d55b12de25575ff32c0815c3615816615c37b
+You are not using the latest version of the tool, please update.
+Latest version is '11.1.0.9782' (yours is '11.0.0.9375')
+Aerodynamic force contract: expected force/torque units verified by static inspection; native execution not tested.
+You are not using the latest version of the tool, please update.
+Latest version is '11.1.0.9782' (yours is '11.0.0.9375')
+/tmp/thermal-api-check-d406wt6k/Bootstrap.cs(187,55): warning CS0618: 'MyPhysicsHelper' is obsolete: 'Use IMyPhysics instead' [/tmp/thermal-api-check-d406wt6k/check.csproj]
+extinguisher-projectile-hit: compiler=0, whitelist=1
+(1,507): error ProhibitedMemberRule: The type or member 'ulong' is prohibited
+aero-profile-snapshot: compiler=0, whitelist=0
+aero-grid-inputs: compiler=0, whitelist=0
+aero-physics-interface: compiler=0, whitelist=0
+aero-physics-inertia: compiler=0, whitelist=1
+(1,120): error ProhibitedMemberRule: The type or member 'Matrix HkRigidBody.InertiaTensor' is prohibited
+thermal-celestial: compiler=0, whitelist=0
+thermal-local-frustum: compiler=0, whitelist=0
+occlusion-interface: compiler=0, whitelist=0
+occlusion-concrete-rejected: compiler=0, whitelist=4
+(1,109): error ProhibitedMemberRule: The type or member 'MySlimBlock' is prohibited
+(1,176): error ProhibitedMemberRule: The type or member 'bool MySlimBlock.IsFullIntegrity' is prohibited
+(1,201): error ProhibitedMemberRule: The type or member 'float MySlimBlock.BuildLevelRatio' is prohibited
+(1,230): error ProhibitedMemberRule: The type or member 'bool MySlimBlock.HasDeformation' is prohibited
+voxel-base-builder: compiler=0, whitelist=0
+voxel-xml-base: compiler=0, whitelist=0
+model-binary-reader: compiler=0, whitelist=0
+grid-render-data: compiler=0, whitelist=1
+(1,80): error ProhibitedMemberRule: The type or member 'MyCubeGridRenderData' is prohibited
+model-materials: compiler=0, whitelist=2
+(1,39): error ProhibitedMemberRule: The type or member 'MyModel' is prohibited
+(1,93): error ProhibitedMemberRule: The type or member 'List<MyMesh> MyModel.GetMeshList()' is prohibited
+voxel-enumeration: compiler=0, whitelist=0
+voxel-copy: compiler=0, whitelist=0
+voxel-direct: compiler=0, whitelist=2
+(1,102): error ProhibitedMemberRule: The type or member 'TextureSet[] MyRenderVoxelMaterialData.TextureSets' is prohibited
+(1,117): error ProhibitedMemberRule: The type or member 'string TextureSet.ColorMetalY' is prohibited
+entity-override: compiler=0, whitelist=0
+voxel-builder: compiler=0, whitelist=1
+(1,116): error ProhibitedMemberRule: The type or member 'MyObjectBuilder_Dx11VoxelMaterialDefinition' is prohibited
+
+
+Corrected final probe with Sandbox.Common.dll fingerprint:
+Artifacts: /tmp/thermal-api-check-6lmlfzay
+SHA256: Sandbox.Common.dll eac978813c906c4c055ef8a9bf86bd71065ece91fd3da8866a3d810d81bd4d24
+SHA256: Sandbox.Game.dll de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf
+SHA256: VRage.Game.dll f0970c2b60335f7690e158a485cd528703717c8c5002f2713556e04f09c508e1
+SHA256: SpaceEngineers.Game.dll 6cefea4a73a5b806af4e565be5b41ed0b4199af2fc5031c575c4be7eb644c0c8
+SHA256: run.py 88488119bc1f5d12daa77d758de57a05eaae163bcee6ed873cf6e0a9295a7ead
+SHA256: Program.cs 4f9a2fd47b0955a98046fb5cd67d55b12de25575ff32c0815c3615816615c37b
+You are not using the latest version of the tool, please update.
+Latest version is '11.1.0.9782' (yours is '11.0.0.9375')
+Aerodynamic force contract: expected force/torque units verified by static inspection; native execution not tested.
+You are not using the latest version of the tool, please update.
+Latest version is '11.1.0.9782' (yours is '11.0.0.9375')
+/tmp/thermal-api-check-6lmlfzay/Bootstrap.cs(187,55): warning CS0618: 'MyPhysicsHelper' is obsolete: 'Use IMyPhysics instead' [/tmp/thermal-api-check-6lmlfzay/check.csproj]
+extinguisher-projectile-hit: compiler=0, whitelist=0
+aero-profile-snapshot: compiler=0, whitelist=0
+aero-grid-inputs: compiler=0, whitelist=0
+aero-physics-interface: compiler=0, whitelist=0
+aero-physics-inertia: compiler=0, whitelist=1
+(1,120): error ProhibitedMemberRule: The type or member 'Matrix HkRigidBody.InertiaTensor' is prohibited
+thermal-celestial: compiler=0, whitelist=0
+thermal-local-frustum: compiler=0, whitelist=0
+occlusion-interface: compiler=0, whitelist=0
+occlusion-concrete-rejected: compiler=0, whitelist=4
+(1,109): error ProhibitedMemberRule: The type or member 'MySlimBlock' is prohibited
+(1,176): error ProhibitedMemberRule: The type or member 'bool MySlimBlock.IsFullIntegrity' is prohibited
+(1,201): error ProhibitedMemberRule: The type or member 'float MySlimBlock.BuildLevelRatio' is prohibited
+(1,230): error ProhibitedMemberRule: The type or member 'bool MySlimBlock.HasDeformation' is prohibited
+voxel-base-builder: compiler=0, whitelist=0
+voxel-xml-base: compiler=0, whitelist=0
+model-binary-reader: compiler=0, whitelist=0
+grid-render-data: compiler=0, whitelist=1
+(1,80): error ProhibitedMemberRule: The type or member 'MyCubeGridRenderData' is prohibited
+model-materials: compiler=0, whitelist=2
+(1,39): error ProhibitedMemberRule: The type or member 'MyModel' is prohibited
+(1,93): error ProhibitedMemberRule: The type or member 'List<MyMesh> MyModel.GetMeshList()' is prohibited
+voxel-enumeration: compiler=0, whitelist=0
+voxel-copy: compiler=0, whitelist=0
+voxel-direct: compiler=0, whitelist=2
+(1,102): error ProhibitedMemberRule: The type or member 'TextureSet[] MyRenderVoxelMaterialData.TextureSets' is prohibited
+(1,117): error ProhibitedMemberRule: The type or member 'string TextureSet.ColorMetalY' is prohibited
+entity-override: compiler=0, whitelist=0
+voxel-builder: compiler=0, whitelist=1
+(1,116): error ProhibitedMemberRule: The type or member 'MyObjectBuilder_Dx11VoxelMaterialDefinition' is prohibited
+
+
+Follow-up native source inspection, 2026-09-27 UTC
+SHA256 decompilation extinguisher-native-0.cs: 209a4f90cf1a3ec340830fba8c6fdd7db78a31f5d692a64f2b981c6aebfe5401
+SHA256 decompilation extinguisher-native-1.cs: d3f5469b2ca57b1299c8ee2c9df1e9f9fd35731a0f480b4e2d1da4a47683afd8
+SHA256 decompilation extinguisher-native-gunbase.cs: aa3627b80b97fc307f74e753177b2f1c458fc1a39b44e3aafdc056d65b596db4
+SHA256 decompilation extinguisher-MyProjectileInfo.cs: 0c2917a365923abed59df0714bba3d0cb17e30d81e93bc9f24f33608616a9f5d
+SHA256 decompilation extinguisher-native-projectile.cs: 371c6c71b5aa15b8abe3a3780c0e7b015eedefeaaf982eb4428bb7a365991d57
+Reproduction: ilspycmd 11.0.0.9375 -t TYPE ASSEMBLY, under the same 12 GiB/no-swap scope.
+Types in Sandbox.Game.dll: Sandbox.Game.Weapons.MyAutomaticRifleGun, MyProjectiles, MyGunBase, MyProjectile (all in Sandbox.Game.Weapons).
+Type in Sandbox.Common.dll: Sandbox.ModAPI.MyProjectileInfo. Assembly hashes are recorded above.
+Observed static facts (not a native-session test):
+- MyAutomaticRifleGun.CanShoot checks safe-zone Shooting permission, reload state, shot interval, and (outside CreativeMode) ammunition availability. Its private Shoot spawns the projectile before calling MyGunBase.ConsumeAmmo.
+- MyGunBase.ConsumeAmmo returns immediately in SimplifiedSimulation. Otherwise CurrentAmmo-- and any replacement-magazine removal occur inside Sync.IsServer. HasInfiniteAmmo exempts magazine inventory removal. ConsumeMagazine also has simplified/infinite-ammo branches. Thus one native callback is not proof that one physical magazine was consumed in every game mode.
+- MyProjectiles.UpdateAfterSimulation iterates projectiles serially. Removal swaps the final array element into the vacated slot and changes its Index; projectile indices are not persistent identities. This alone does not establish ordering against the mod's thermal jobs or rule out other callers.
+- MyProjectileInfo constructor parameters are index, position, origin; assignments are Position=position and Origin=origin. MyProjectiles.InvokeOnHit supplies projectile.Index, projectile.Origin, projectile.Position in that order. The public Position therefore receives the native launch origin and public Origin receives the native current position in this inspected dispatch. The same reversal appears in AddInternal, removal and GetProjectile. Native MyProjectile.Origin/Position directly expose m_origin/m_position; OnHit moves m_position to the hit plus 0.01 m along the ray before dispatch. Do not interpret the public Origin as a launch point or silently depend on this build's reversal in a portable adapter.
+- MyProjectile.OnHit checks safe-zone Damage permission and zeroes ordinary damage before invoking the interceptor. It still invokes the interceptor when permission is denied. A zero-damage hit is not evidence of safe-zone permission; a future cooling adapter must define and enforce its own engine-backed permission policy.
+- No cooling or authored ammo definitions were changed. No callback, inventory transition, special game mode or multiplayer execution was exercised. Thread ownership, native collision targeting, conservation, recipes and balance remain unresolved.

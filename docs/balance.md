@@ -1555,16 +1555,23 @@ not priced here; naming it is the whole of what this measurement can say about i
 The same index answers a question that is not about balance at all:
 [document-of-intent.md](document-of-intent.md#acting-on-heat-by-hand--damage-mitigation-and-priced) had
 no position on whether a player should be able to act on heat with their hands, and it could not
-take one without a number. `HandCoolingLab` supplies it, and the comparison is deliberately physical
-— watts of waste against watts of cooling, joules stored against joules absorbed — because
-`HeatTimeScale` makes a kelvin cheaper for both sides by the same factor and so cannot move the
-ratio.
+take one without a number. `HandCoolingLab` supplies a physical-capacity bottle comparison.
+**Corrected 2026-09-27:** this section previously claimed the clock could not move the comparison.
+Only the steady cooling/waste power ratio has that property. `ReturnJoules` restores physical
+capacity by multiplying the index capacity by its clock, but `WindowSeconds` retains the index's
+game-time damage window. Consequently the finite-window power estimate depends on that clock.
+A fixed energy applied directly to the solver uses capacity `mass × specific heat / HeatTimeScale`;
+it causes a temperature change larger by `HeatTimeScale` than the physical bottle calculation.
+For an analytic 100 kg block with 450 J/(kg K) capacity, 4,500 J changes temperature by 0.1 K at
+clock 1, 9 K at 90 and 22.5 K at 225. `HandCoolingTests` checks this distinction and the window
+term against independently calculated examples. These figures do not select a shipped ammunition
+energy, discharge duration or transfer efficiency.
 
 The reference tool is a five-kilogram CO2 extinguisher: **3.3 MJ** and **165 kW** while it
 discharges, assuming every gram of it lands on the block, which is not how an extinguisher works.
 Against the 72 vanilla block types that reach their own critical temperature under their own waste:
 
-| | bottles to return the block to ambient | bottles at once to do it inside its own window |
+| | physical-capacity bottles to return the block to ambient | physical return energy / game-time window, in bottle power units |
 | --- | ---: | ---: |
 | easiest block in the game | 1.6 | 2.8 |
 | median | **26** | **20** |
@@ -1572,7 +1579,9 @@ Against the 72 vanilla block types that reach their own critical temperature und
 
 The window is the median **32 s** between the crossing and the loss, from
 [How long a block has after it crosses](#how-long-a-block-has-after-it-crosses). Twenty bottles at
-once is 3.3 MW; a tool that moves three megawatts is a large radiator with a trigger.
+once is 3.3 MW under that mixed-basis estimate; it is not a clock-independent requirement for
+the unimplemented tool. The historic table is retained with its basis rather than repurposed as
+a prediction of direct solver-energy injection.
 
 **And 71 of the 72 have no surplus at all in the best case.** With every face radiating to deep
 space and every face bolted to armour held at ambient, all but the prototech reactor shed everything
@@ -2301,6 +2310,7 @@ instrument can say and a days-long one would say better.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Corrected the hand-cooling clock-independence claim and labelled the physical-energy/game-time window estimate. Analytic controls distinguish fixed joules, physical inventory and steady power; all 32 targeted hand-cooling and documentation cases passed under a 12 GiB/no-swap cap. |
 | 2026-08-26 | *Coolant rings* re-measured after `C43`: the coupling column is **identical**, because mass is not in a conductance, and the settled column moved 4.4 K to 10.8 K. Corrected the sentence under it, which said the fluid mass does not grow with the ring — true when the charge was per loop, false since it became per pipe — and dropped a citation to `LongerRingsCoupleHarderAndCarryTheSameFluid`, a test that no longer exists. |
 | 2026-08-26 | Noted on *What it did: the exploit was priced out by a fix aimed at something else* that every figure in it is at the flat 50 kg a pipe carried when it was measured, and that `C43` multiplied that by **10.31**: the grind is 243,490 W rather than 23,611 W, 8.15 % of the largest reactor rather than 0.79 %. **Left as measured** (`E10`) — the section is a record of registered predictions against outcomes, and the conclusion does not depend on the size, because `B44`'s vent takes the whole ring and a refill at the break-even excess is neutral at any charge. |
 | 2026-08-26 | **The coolant density is applied** (`C43`). `CoolantKilogramsPerCubicMetre` is 33 kg/m³ — 515.6 kg a pipe on a large grid, 4.1 kg on a small one — and `CoolantMassPerPipe` stays as a flat-mass override defaulting to zero, so nothing that states a per-pipe mass is reinterpreted (`P15`). It moves a settled ring's mean by 6.9 K and 0.8 K, costs no substeps, and rights the swing between the sink face and the far side of the loop. `LoopCandidate` becomes `LoopBefore`: all three of its dials have shipped, and a candidate identical to the default is a lab arm that reports its own package as worthless. |
@@ -2317,7 +2327,7 @@ instrument can say and a days-long one would say better.
 | 2026-08-25 | **Registered the criterion for `C21`'s last open invention before measuring it**, in [Oxygen generator waste heat](#oxygen-generator-waste-heat-written-before-it-is-measured) (`E1`, `E11`). An oxygen generator wastes 0.6 of what it draws where electrolysis sources 0.20-0.40, which is the largest gap in `Cubes.xml`. The rule settles both halves — whether to move and where to — against the two precedents that point opposite ways, `C21`'s computer third that moved and `C28`'s reactor that did not, and four predictions carry the numbers that falsify them. Nothing has been run. |
 | 2026-08-25 | `G6`'s cost half was rescored on a walk that carries the link count rather than the joint count, over all 8,144 blueprints: step work p99 **7,293,904** against the 4,000,000 granted, **1.82× over**, with 733 of 32,575 runs past it. The demand half passes at p99 34.8 of 64 and reproduces `F11` exactly. A per-block cap of 6 would take the cost half to 0.55× and is not being shipped, for the reason in [backlog.md](backlog.md) `C3`. |
 | 2026-08-25 | Added [What the mod's blocks cost to build](#what-the-mods-blocks-cost-to-build), closing [backlog.md](backlog.md) `B33`. All eighteen `Cubes.xml` definitions sit inside the range the game prices its own 1,434 blocks over, on three shape-free ratios; PCU per cubic metre was a fourth and is now reported rather than judged, because it flagged only the large radiator and the vanilla blocks beneath it are vivariums and platforms. And a recipe reaches the transient and not the steady state: four times a radiator stack's mass moves the settled source by a hundredth of a kelvin and its settling time from 24 s to 112 s. |
-| 2026-08-25 | Added [What a hand tool would have to be worth](#what-a-hand-tool-would-have-to-be-worth), which the block index could answer all along and nobody had asked: 26 five-kilogram CO2 bottles to return the median cooking block to ambient, 20 at once to do it inside its own window, and 71 of 72 with no surplus at all in the best case. It closes [backlog.md](backlog.md) `B32`, and the comparison is in watts and joules so that `HeatTimeScale` cannot move it. |
+| 2026-08-25 | Added [What a hand tool would have to be worth](#what-a-hand-tool-would-have-to-be-worth), which the block index could answer all along and nobody had asked: 26 five-kilogram CO2 bottles to return the median cooking block to ambient, 20 at once to do it inside its own window, and 71 of 72 with no surplus at all in the best case. It closes [backlog.md](backlog.md) `B32`, the original claim that `HeatTimeScale` cannot move it was corrected on 2026-09-27: physical bottle inventory and game-time window power have different clock dependence. |
 | 2026-08-25 | Scoped the 2026-08-21 vacuum survey's tables to the pair they were taken at. *The shape, in one table* said **shipped settings, `HeatTimeScale` 225** and *How fast a ship crosses critical* said `HeatTimeScale` **is** 225; `C24` moved the pair to 9.6 and 90 on 2026-08-24, so both read as current and were not (`P1`). Nothing was re-measured — no walk has re-read the population in vacuum at the pair that ships — so the figures stand with their scope on them rather than being withdrawn. |
 | 2026-08-24 | **Decided `C28`: the reactor fraction stays at 0.01, and the claim it supported comes down.** Re-measured at the pair that ships, 0.02 still cooks two of the four reactors *bare*, which is the bound this page calls unbuildable — so `C24` did not move which fraction is the only one where both bounds hold, and 0.01 is kept because the alternative was measured rather than for want of one. What did move is what it buys: burying a 300 MW reactor costs **50.7 K** rather than 355 K, about five per cent of the block's headroom, so *where a reactor is installed is a decision rather than a detail, and the first thing that makes a player want a coolant loop* is corrected in place. The population had already said the same and nobody had read it against the claim — `reactor-waste` swept sixteen-fold moves the corpus peak p50 by 3 %. The bite is thrusters and drives. |
 | 2026-08-24 | Corrected this page's own account of `C12`'s choice, from the attempt at shipping it. The conduction route's *three levers* are four named behaviours — a coolant sink stops out-performing surface dials, bolting starts working, the stiffest fitting stops responding to air, and the cooling ladder's control stops losing — so the route is a trade taken deliberately rather than the easy choice the previous entry implied. |

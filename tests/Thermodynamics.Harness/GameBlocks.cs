@@ -539,6 +539,34 @@ namespace Thermodynamics.Harness
         }
 
 
+        /// <summary>Mirror a native subtype upgrade only when one installed target exists and the saved type is recognized.</summary>
+        public static Definition UniqueSubtypeUpgrade(string typeId, string subtypeId)
+        {
+            if (string.IsNullOrEmpty(typeId) || string.IsNullOrEmpty(subtypeId)) return null;
+            if (typeId.StartsWith("MyObjectBuilder_", StringComparison.Ordinal)) typeId = typeId.Substring("MyObjectBuilder_".Length);
+            lock (CacheLock)
+            {
+                if (_upgradeBySubtype == null)
+                {
+                    _upgradeBySubtype = new Dictionary<string, Definition>(StringComparer.Ordinal);
+                    _declaredBlockTypes = new HashSet<string>(StringComparer.Ordinal);
+                    foreach (Definition block in ByTypeAndSubtype().Values)
+                    {
+                        _declaredBlockTypes.Add(block.TypeId);
+                        if (string.IsNullOrEmpty(block.SubtypeId)) continue;
+                        if (_upgradeBySubtype.ContainsKey(block.SubtypeId)) _upgradeBySubtype[block.SubtypeId] = null;
+                        else _upgradeBySubtype.Add(block.SubtypeId, block);
+                    }
+                }
+                Definition result;
+                return _declaredBlockTypes.Contains(typeId) && _upgradeBySubtype.TryGetValue(subtypeId, out result) ? result : null;
+            }
+        }
+
+        private static Dictionary<string, Definition> _upgradeBySubtype;
+        private static HashSet<string> _declaredBlockTypes;
+
+
         public static string TypeAndSubtypeKey(string typeId, string subtypeId)
         {
             string type = typeId ?? "";

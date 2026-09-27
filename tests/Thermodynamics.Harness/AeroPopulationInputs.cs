@@ -92,7 +92,7 @@ namespace Thermodynamics.Harness
                 schema = 1, kind = "aero-population-inputs", blueprint = Path.GetFullPath(path),
                 blueprint_sha256 = digest, harness_mvid = typeof(AeroPopulationInputs).Assembly.ManifestModule.ModuleVersionId,
                 core_mvid = typeof(AeroProfile).Assembly.ManifestModule.ModuleVersionId,
-                relative_air_density = 1f, atmosphere = true, grids = ship.Grids.Count,
+                relative_air_density = 1f, atmosphere = true, grids = ship.Grids.Count, definition_upgrades = ship.UpgradedBlocks,
                 mass_kg = ship.Grids.Sum(g => g.Builder.Grid.Blocks.Sum(b => (double)b.Mass)),
                 headings = Enumerable.Range(0, Face.Count).Select(face => new
                 {

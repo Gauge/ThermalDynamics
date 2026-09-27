@@ -32,7 +32,7 @@ verdict**: it is non-zero if any snippet fails to compile, raises a diagnostic o
 refuses, so a game update that admits one of them fails the run, and so does one that starts refusing
 a route the mod relies on.
 
-The snippets cover thermal vision and the aerodynamic engine boundary; see
+The snippets cover thermal vision, the aerodynamic engine boundary and the extinguisher projectile API; see
 [thermal-vision-lab.md](../../docs/thermal-vision-lab.md). To ask a new question, add an entry to
 `cases` in `Program.cs`, and to the `rejected` list if the expected answer is no.
 
@@ -58,10 +58,35 @@ Run `python3 -m unittest discover -s tools/thermal-api-check -p 'test_*.py'` for
 linear/angular units, dispatch and missing methods. Neither static check proves native handling. `ProfileFrameworkTests` also rejects missing or changed
 framework permissions before a compatibility bootstrap can grant them.
 
+## Extinguisher projectile boundary
+
+`extinguisher-projectile-hit` checks registration/removal of a hit interceptor, the server gate,
+projectile ammo/weapon identities, owner and player fields, origin/range, hit position/normal,
+and grid-cell lookup. The installed compiler and whitelist admit these members. An initial
+failure was a missing `ulong` in the offline compatibility subset; the native whitelist explicitly
+admits it, and a mutation control rejects a missing declaration before the bootstrap can grant it.
+The runner fingerprints Sandbox.Common.dll as well as the other relevant game assemblies.
+
+The [recorded probe](../../tests/benchmarks/hand-cooling-projectile-api-2026-09-27.txt)
+retains the failed and corrected runs. Static inspection of native `MyProjectile.OnHit` puts the
+interceptor before the positive-damage branch, so zero-damage ammo is not excluded by that branch.
+Follow-up static inspection traces ammunition decrement to `MyGunBase.ConsumeAmmo`'s server
+branch, with simplified-simulation and infinite-ammo exceptions. It also exposes two integration
+hazards: the installed `MyProjectiles` dispatch passes origin and position in reverse order to
+`MyProjectileInfo`, and hit callbacks still run when the engine denies ordinary safe-zone damage.
+Neither the public `Origin` label nor the occurrence of a hit is sufficient authority for a cooling
+range or permission decision. Projectile array indices also change during removal.
+
+The artifact records reproduction types, source hashes and the exact scope of these observations.
+This proves API admission and inspected control flow, not executed ammo consumption, callback thread
+ownership, native cooling behavior or multiplayer correctness. The extinguisher still only scans.
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Traced server ammunition accounting and recorded reversed projectile coordinate arguments, unstable indices and safe-zone callback behavior; none is treated as a runtime validation. |
+| 2026-09-27 | Added the extinguisher projectile-hit probe, a source-verified ulong permission and Sandbox.Common fingerprinting. Native cooling remains unimplemented. |
 | 2026-09-27 | Added the profile API probe and corrected omitted framework permissions against installed-game declarations. Recorded two instrument failures and the successful rerun; added four mutation cases that reject changed permissions. |
 | 2026-09-26 | Added aerodynamic physics-input and write-path checks, the rejected inertia accessor, binary/source fingerprints, and the missing Boolean primitive in the offline bootstrap. |
 | 2026-09-24 | Page written. The tool had no README, which `EveryToolIsNamedByItsReadme` reports. Run against the installed game the same day: all fourteen snippets get their expected verdict and the exit code is 0. |

@@ -41,7 +41,7 @@ private void AddForceInternal(object force)
 class ProfileFrameworkTests(unittest.TestCase):
     SOURCE = """private static void AllowDefaultNamespaces(object handle)
     {
-        handle.AllowTypes(MyWhitelistTarget.Both, typeof(object), typeof(string), typeof(bool), typeof(byte), typeof(int), typeof(long), typeof(float), typeof(double), typeof(Array), typeof(Func<, >), typeof(Func<, , , >));
+        handle.AllowTypes(MyWhitelistTarget.Both, typeof(object), typeof(string), typeof(bool), typeof(byte), typeof(int), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(Array), typeof(Func<, >), typeof(Func<, , , >));
         handle.AllowMembers(MyWhitelistTarget.Both, (from m in AllDeclaredMembers(typeof(Delegate))
             where m.Name != "CreateDelegate"
             select m).ToArray());
@@ -51,12 +51,14 @@ class ProfileFrameworkTests(unittest.TestCase):
     def test_permissions_come_from_game_declarations(self):
         result = profile_framework_bootstrap(self.SOURCE)
         self.assertIn("typeof(Array)", result)
+        self.assertIn("typeof(ulong)", result)
         self.assertIn('GetMethod("GetInvocationList")', result)
         self.assertNotIn("CreateDelegate", result)
         self.assertNotIn("typeof(System.Reflection", result)
 
     def test_missing_or_changed_permissions_are_rejected(self):
         for before, after in [("typeof(Array)", "typeof(Removed)"),
+                              ("typeof(ulong)", "typeof(Removed)"),
                               ("typeof(Func<, >)", "typeof(Func<>)"),
                               ('m.Name != "CreateDelegate"', 'm.Name == "CreateDelegate"'),
                               ("AllowDefaultNamespaces", "Removed")]:

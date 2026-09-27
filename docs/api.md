@@ -200,6 +200,16 @@ unless an administrator saves them with `/thermal save`. The names are listed in
 
 ## In-process extension
 
+The core `ThermalSolver.TryRemovePhysicalHeat(block, joules, minimumKelvin, out removedJoules)`
+operation removes a bounded physical-equivalent energy between steps. It requires exclusive caller
+access and returns false without mutation for an in-flight step, invalid inputs or a block outside
+that solver. Successful zero removal is possible at the floor or below temperature resolution.
+The returned joules use the actual stored temperature change and `ThermalMass × HeatTimeScale`;
+they never exceed the request. See the [cooling protocol](blocks.md#cooling-energy-boundary--implementation-protocol).
+This is a core method, not a new public message/delegate endpoint. It does not alter the existing
+`AddBlockHeat` API's solver-joule convention or validate game-side authority.
+
+
 A mod that wants more than the message API can go further, at the cost of coupling to this one's
 source. The simulation core in
 [Thermodynamics/Core](../Thermodynamics/Core) has no dependency on the
@@ -243,6 +253,7 @@ than *not within a major*.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Documented bounded physical-energy extraction and its exclusive-access, completed-step contract. |
 | 2026-09-27 | Added detached schema-1 drag-profile snapshots and explicit per-grid consumer registration. Documented all fields, units, lifetime, copy cost and force-off behavior; added matching drop-in client bindings. |
 | 2026-09-27 | Added current applied drag, separate restoring/damping moments and preparation status to the grid API and drop-in client; registered face overrides now reach profile construction. |
 | 2026-09-24 | `GetGridAeroForces` returns zero vectors: the aerodynamic force it reports was stripped (`K25` step 0), and the key's meaning — the force this mod applies — is unchanged, so the major stays 1. `SetBlockDragProfile` touches friction heating and convection until the force returns. |

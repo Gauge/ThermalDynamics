@@ -1,0 +1,32 @@
+Integration validation, 2026-09-27 UTC
+Scope: stacked branches from master f333ac0f through the frozen-population archive and legacy-reader fixture correction.
+All validation used systemd scopes with MemoryMax=12G and MemorySwapMax=0.
+Full C# runs occurred after the corpus process terminated; no concurrent population sweep.
+Initial full run: 2621 passed, 1 failed (four legacy prefabs lost explicit element-name builder types).
+Second full run: 2626 passed, 1 failed (negative fixture still treated a valid legacy element as missing type).
+Final full run: dotnet test tests/Thermodynamics.Tests --no-restore
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Thermodynamics.Presentation -> /tmp/k25-envelope-worktree/tests/Thermodynamics.Presentation/bin/Debug/net9.0/Thermodynamics.Presentation.dll
+  Thermodynamics.Core -> /tmp/k25-envelope-worktree/tests/Thermodynamics.Core/bin/Debug/net9.0/Thermodynamics.Core.dll
+  Thermodynamics.Harness -> /tmp/k25-envelope-worktree/tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll
+  Thermodynamics.Tests -> /tmp/k25-envelope-worktree/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll
+Test run for /tmp/k25-envelope-worktree/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2627, Skipped:     0, Total:  2627, Duration: 1 m 22 s - Thermodynamics.Tests.dll (net9.0)
+
+Python: python3 -m unittest discover -s tools/corpus -p test_*.py
+240 run, 239 passed, 1 skipped: historical census-column fixture CSV absent in this isolated checkout. Exit 0.
+Complete solution build before legacy reader follow-up: 0 warnings, 0 errors. The final dotnet test rebuilt all referenced projects after the follow-up.
+Receipt audit: every frozen-generation checksum/manifest identity/entry/filename verified; summary reproduced exactly. P1 and P2 remain unresolved.
+No native cooling, ammunition balance or multiplayer execution is claimed. No performance comparison is inferred from these durations.

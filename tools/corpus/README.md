@@ -1,6 +1,6 @@
 # Corpus tools
 
-What to do with the CSVs a corpus sweep leaves behind. Everything here reads a data directory; the
+Tools for corpus CSVs and aerodynamic reference data. Most scripts read a data directory; the
 run of 2026-08-21 is in `out/corpus-2026-08-21`, its census in `out/census-2026-08-21` and its dial
 sweep in `out/knobs-2026-08-21`. None of those directories is committed — they are gigabytes — so
 each of these prints what it found and renders without the parts that are absent.
@@ -41,6 +41,40 @@ python3 tools/corpus/panel.py out/census-2026-08-25/census.csv \
                              out/census-2026-08-21 out/knobs-2026-08-21   # every dataset, one page
 ```
 
+## Primary plate reference extraction
+
+`plate_reference.py` extracts the primary circle/square symbols and their error bars from
+Mizoguchi (2016), Figures 3 and 4. Install the optional pinned parser from
+[requirements-plate-reference.txt](requirements-plate-reference.txt), then run:
+
+```
+python3 tools/corpus/plate_reference.py /path/to/mizoguchi-2016.pdf /tmp/plate-reference.csv
+```
+
+The source hash, page/plot geometry and expected primary marker counts are checked. The
+[committed reference](../../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.csv)
+retains plotted coordinates, confidence intervals and a separate extraction bound; no raw
+measurement precision or sweep-branch assignment is invented. The
+[protocol](../../docs/aerodynamics.md#plate-figure-extraction-protocol) and
+[source record](../../tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.txt)
+state the scope and reproduction command. This is reference preparation, not a fitted lift law.
+`test_plate_reference.py` checks analytic coordinates, legend exclusion, ambiguous/missing bars,
+changed sources and preservation of the multivalued near-stall region.
+
+`plate_lift_check.py` compares the unfitted Helmbold small-angle proposal with every primary CL
+observation at `1° ≤ |α| ≤ 10°`. It propagates incidence extraction bounds and keeps measurement
+and coefficient-extraction bounds separate. This pointwise diagnostic does not fit a model or
+score flight/population acceptance:
+
+```
+python3 tools/corpus/plate_lift_check.py tests/benchmarks/aerodynamics/plate-reference-mizoguchi-2016.csv /tmp/plate-small-angle.json
+```
+
+The [recorded result](../../tests/benchmarks/aerodynamics/plate-small-angle-2026-09-27.json)
+includes every selected observation and input/source hashes. Missing aspect/sign strata,
+duplicate observations and invalid intervals fail explicitly. `test_plate_lift_check.py` holds
+the analytical and coverage controls.
+
 ## Resumable aerodynamic population walk
 
 `aeropopulation.py` connects blueprint eligibility, `aeroenvelope.py` global maximum resultant
@@ -63,7 +97,19 @@ states population exclusions, strongest-heading tie rules, force assumptions, to
 power/fuel and torque compensation, not a claim about native piloting. No coefficients are
 retuned by this walk. Runtime DLLs, authored data, installed SBCs, scripts, package versions
 and every blueprint are fingerprinted; changing them requires a new output directory.
-`test_aeroenvelope.py` compares 80 seeded nonzero force sets with exhaustive throttle vertices.
+The binary reports both `game_content` and its actual `authored_data` root through
+`aero-environment`; the runner does not infer runtime data from its own checkout. Rebuild older
+binaries that lack `authored_data`. Search paths are re-enumerated around each measurement,
+so adding a definition or runtime file also stops the generation.
+`test_aeroenvelope.py` compares 80 seeded general and 40 nearly parallel/coplanar nonzero force
+sets with exhaustive throttle vertices. Uncertain intermediate hull reductions retain every
+candidate; the selected resultant has its own feasible witness and support-plane force bound.
+A near-rank fixed-heading LP is retained as an unresolved cross-check, without discarding that
+independent proof. The `retained_points` diagnostic counts candidates, which need not all be
+extreme in force space.
+Directional LPs use target-aligned orthonormal coordinates internally; returned dual normals
+and every force certificate are checked in the original frame. Forty independent rotated
+force boxes and the archived gap-rejection specimen cover that numerical change.
 `test_aeropopulation.py` tests incomplete coverage, exclusions, quantiles, uncertainty,
 provenance changes and interrupted receipt replacement.
 
@@ -699,6 +745,11 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added the unfitted small-angle plate compatibility diagnostic with pointwise uncertainty and complete-stratum controls. |
+| 2026-09-27 | Added hash-bound primary plate-figure extraction and independent coordinate/failure controls. |
+| 2026-09-27 | Required runtime-reported authored-data provenance when fingerprinting a population generation. |
+| 2026-09-27 | Documented target-aligned LP coordinates with original-frame certificates and independent rotation controls. |
+| 2026-09-27 | Documented near-rank candidate retention, known-resultant certification and forty additional exhaustive controls. |
 | 2026-09-27 | Added the resumable aeropopulation.py runner, aeroenvelope.py global thrust selection and independent envelope/receipt/scoring tests. |
 | 2026-09-27 | Added aerothrust.py, its optional pinned numerical dependencies and independent directional-capacity controls. Documented certificates, tolerances and the absence of a population verdict. |
 | 2026-09-24 | **The shape walk is retired with the shape term it measured.** `K25`'s strip removed the Newtonian shape factor from the friction row and the aerodynamic force derived from it, so `CorpusShapeWalk`, `shape.py` and `test_shape.py` are deleted and the census no longer carries `shape_factor` or `lift_over_drag`. The committed [`summary-shape-2026-08-31.csv`](summary-shape-2026-08-31.csv) stays as the record the pages quote. `cruise.py` and `dragfit.py` keep working on a census without the column — every hull reads as shape 1 — and `cruise.py`'s default coefficient is renamed `RETIRED_DRAG_COEFFICIENT`, because no coefficient ships until the rebuilt force does. Separately, `provenance.py` read `Cubes.xml` from its pre-MDK2 path and four of its checks had been failing, and `test_cruise.py` had pinned the coefficient at 0.5 for two weeks after it became 1.54; 205 checks pass. |

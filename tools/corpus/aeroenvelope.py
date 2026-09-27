@@ -1,4 +1,5 @@
 """Maximum resultant rated thrust over all directions, with retained feasible vertex witnesses."""
+import math
 import numpy as np
 from scipy.spatial import ConvexHull
 import aerothrust
@@ -8,7 +9,7 @@ VERTEX_LIMIT = 200000
 
 
 def reduce_vertices(points, masks):
-    """Keep extreme points in the numerically resolved affine span; reject uncertain reductions."""
+    """Reduce a resolved affine span; retain all candidates when reduction would be uncertain."""
     points, unique = np.unique(points, axis=0, return_index=True)
     masks = [masks[i] for i in unique]
     if len(points) <= 1:
@@ -17,7 +18,7 @@ def reduce_vertices(points, masks):
     floor = np.finfo(float).eps * max(points.shape) * singular[0]
     rank = int(np.count_nonzero(singular > floor))
     if rank and singular[rank - 1] / singular[0] < 1e-7:
-        raise RuntimeError("Unresolved near-rank-deficient thrust polytope")
+        return points, masks
     if rank == 0:
         keep = [0]
     else:
@@ -37,8 +38,31 @@ def reduce_vertices(points, masks):
     return points[keep], [masks[i] for i in keep]
 
 
+def resultant_certificate(axes, ratings, throttle, fallback):
+    """Certify the ray defined by a known feasible resultant, rather than solve a prescribed ray."""
+    if not np.isfinite(throttle).all() or ((throttle != 0) & (throttle != 1)).any():
+        raise ValueError('Expected a binary-throttle vertex witness')
+    forces = axes * ratings[:, None]
+    vector = np.array([math.fsum(float(f) for f in forces[:, i] * throttle) for i in range(3)])
+    norm = float(np.linalg.norm(vector))
+    if not np.isfinite(norm):
+        raise RuntimeError('Nonfinite resultant thrust')
+    direction = vector / norm if norm else fallback / np.linalg.norm(fallback)
+    normal = direction / float(direction @ direction)
+    upper = math.fsum(max(0, float(f @ normal)) for f in forces)
+    gap = upper - norm
+    residual = float(np.linalg.norm(vector - norm * direction))
+    tolerance = aerothrust.RELATIVE_TOLERANCE * max(1, float(np.max(ratings, initial=0)))
+    if not np.isfinite([upper, gap, residual]).all() or abs(gap) > tolerance or residual > tolerance:
+        raise RuntimeError('Resultant witness or support-plane gap exceeds tolerance')
+    return dict(capacity_n=norm, direction=direction.tolist(), throttles=throttle.tolist(),
+                force_residual_n=residual, dual_normal=normal.tolist(), dual_upper_n=upper,
+                duality_gap_n=gap, tolerance_n=2 * tolerance, vertex_force_n=vector.tolist(),
+                certificate_method='feasible resultant and support-plane upper bound')
+
+
 def maximum(data):
-    """Find the strongest heading in a frame-invariant main-grid convention; verify its ray by LP."""
+    """Find the strongest heading with a feasible-resultant certificate and an additional LP cross-check."""
     headings = {h['name']: h['direction'] for h in data['headings']}
     frame = np.asarray([headings[n] for n in ['right', 'up', 'backward']], dtype=float)
     axes = np.asarray([t['direction'] for t in data['thrusters']], dtype=float).reshape((-1, 3))
@@ -80,12 +104,15 @@ def maximum(data):
     for group, indices in enumerate(members):
         if masks[chosen] & (1 << group):
             throttle[indices] = 1
-    vector = (axes * ratings[:, None]).T @ throttle
-    norm = float(np.linalg.norm(vector))
-    direction = vector / norm if norm else frame[2]
-    certificate = aerothrust.capacity(axes, ratings, direction)
-    if abs(certificate['capacity_n'] - norm) > certificate['tolerance_n'] * 2:
-        raise RuntimeError('Global thrust vertex disagrees with directional LP')
-    return dict(certificate, direction=direction.tolist(), vertex_throttles=throttle.tolist(),
-                vertex_force_n=vector.tolist(), vertex_norm_n=norm, vertices=len(points),
-                heading='maximum-resultant', tolerance_n=certificate['tolerance_n'] * 2)
+    certificate = resultant_certificate(axes, ratings, throttle, frame[2])
+    try:
+        directional = aerothrust.capacity(axes, ratings, certificate['direction'])
+    except aerothrust.NearRankDeficient as error:
+        directional = dict(status='unresolved-near-rank', error=str(error))
+    else:
+        if abs(directional['capacity_n'] - certificate['capacity_n']) > certificate['tolerance_n']:
+            raise RuntimeError('Global thrust vertex disagrees with directional LP')
+        directional['status'] = 'resolved'
+    return dict(certificate, vertex_throttles=throttle.tolist(),
+                vertex_norm_n=certificate['capacity_n'], retained_points=len(points),
+                heading='maximum-resultant', directional_lp=directional)

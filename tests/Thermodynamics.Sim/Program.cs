@@ -65,7 +65,7 @@ namespace Thermodynamics.Sim
 
                 case "aero-environment":
                     if (args.Length != 1) { Console.Error.WriteLine("aero-environment takes no arguments"); return 1; }
-                    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { game_content = GameBlocks.ContentPath() }));
+                    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { game_content = GameBlocks.ContentPath(), authored_data = ShippedBlocks.DataRoot() }));
                     return 0;
 
                 case "aero-corpus-inputs":

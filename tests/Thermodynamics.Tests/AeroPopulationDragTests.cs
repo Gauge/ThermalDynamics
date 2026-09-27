@@ -57,7 +57,8 @@ namespace Thermodynamics.Tests
             try
             {
                 var xml = XDocument.Load(path);
-                foreach (var block in xml.Descendants("MyObjectBuilder_CubeBlock")) block.RemoveAttributes();
+                foreach (var block in xml.Descendants("MyObjectBuilder_CubeBlock"))
+                    block.SetAttributeValue(XName.Get("type", "http://www.w3.org/2001/XMLSchema-instance"), "MyObjectBuilder_NoSuchBuilder");
                 xml.Save(path);
                 Assert.Throws<InvalidDataException>(() => AeroPopulationInputs.Selection(path));
                 foreach (var block in xml.Descendants("MyObjectBuilder_CubeBlock"))

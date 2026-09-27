@@ -53,6 +53,14 @@ def invoke(binary, *args):
     return json.loads(result.stdout)
 
 
+def runtime_artifacts(roots):
+    """Enumerate every file in the runtime and definition search paths fingerprinted by the walk."""
+    binary, content, authored = [pathlib.Path(roots[k]) for k in ['binary_directory', 'game_content', 'authored_data']]
+    return (list(binary.glob('*.dll')) + list(binary.glob('*.json'))
+            + [p for p in authored.rglob('*') if p.is_file()]
+            + [content / 'Components.sbc'] + sorted((content / 'CubeBlocks').glob('*.sbc')))
+
+
 def manifest(corpus, binary):
     corpus, binary = pathlib.Path(corpus).resolve(), pathlib.Path(binary).resolve()
     paths = [p for p in corpus.rglob('bp.sbc') if p.is_file()]
@@ -72,20 +80,26 @@ def manifest(corpus, binary):
     files.sort(key=lambda r: (-r['bytes'], r['path']))
     if not files:
         raise ValueError('No bp.sbc files in the requested population')
-    content = pathlib.Path(invoke(binary, 'aero-environment')['game_content'])
+    environment = invoke(binary, 'aero-environment')
+    content = pathlib.Path(environment['game_content'])
+    authored = pathlib.Path(environment.get('authored_data', ''))
+    if not authored.is_absolute() or not (authored / 'Cubes.xml').is_file() or not (authored / 'CubeBlocks').is_dir():
+        raise ValueError('Harness must report its existing absolute authored_data root; rebuild older binaries')
     sources = [pathlib.Path(__file__), pathlib.Path(aeroenvelope.__file__), pathlib.Path(aerothrust.__file__), pathlib.Path(scoring.__file__)]
-    dependencies = list(binary.parent.glob('*.dll')) + list(binary.parent.glob('*.json'))
-    dependencies += [p for p in (pathlib.Path(__file__).resolve().parents[2] / 'Thermodynamics' / 'Content' / 'Data').rglob('*') if p.is_file()]
-    game = [content / 'Components.sbc'] + sorted((content / 'CubeBlocks').glob('*.sbc'))
-    fingerprint = {str(p.resolve()): digest(p) for p in sources + dependencies + game}
+    roots = dict(binary_directory=str(binary.parent), game_content=str(content.resolve()), authored_data=str(authored.resolve()))
+    fingerprint = {str(p.resolve()): digest(p) for p in sources + runtime_artifacts(roots)}
     identity = {'schema': 1, 'corpus': str(corpus), 'binary': str(binary), 'files': files,
-                'fingerprint': fingerprint, 'python': sys.version, 'numpy': np.__version__, 'scipy': scipy.__version__,
+                'fingerprint': fingerprint, 'runtime_roots': roots, 'python': sys.version, 'numpy': np.__version__, 'scipy': scipy.__version__,
                 'vertex_limit': aeroenvelope.VERTEX_LIMIT}
     return dict(identity, identity_sha256=hashlib.sha256(canonical(identity)).hexdigest())
 
 
 def verify_fingerprint(plan, stamps):
     """Rehash changed artifacts before and after each blueprint; changed content stops the run."""
+    if 'runtime_roots' in plan:
+        for path in runtime_artifacts(plan['runtime_roots']):
+            if str(path.resolve()) not in plan['fingerprint']:
+                raise ValueError('Runtime/input artifact added during the walk: ' + str(path))
     for name, expected in plan['fingerprint'].items():
         path = pathlib.Path(name)
         stat = path.stat()
