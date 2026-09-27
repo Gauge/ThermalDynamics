@@ -139,7 +139,7 @@ namespace Thermodynamics
             try { TickAerodynamics(); }
             catch (Exception e)
             {
-                aerodynamics = null;
+                lock (aeroLock) { if (aerodynamics != null) aerodynamics.Reset(); }
                 Telemetry.Exception("ThermalGrid.Aerodynamics", e);
             }
             if (stepped <= 0) return;

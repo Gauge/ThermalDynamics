@@ -242,7 +242,7 @@ Each switch removes exactly its own mechanism and its own cost.
 | `EnableHeatSources` | `true` | Gain from point sources registered by other mods. |
 | `EnableWasteHeat` | `true` | Heat from power production, power draw and thrust. |
 | `EnablePlanets` | `true` | Planetary climate. Off means ambient is always `VacuumTemperature`. |
-| `EnableAeroForces` | `true` | Per-tick drag, restoring moments and spin damping. Off clears the force profile and stops physics writes; use off with another aerodynamic force mod. |
+| `EnableAeroForces` | `true` | Per-tick drag, restoring moments and spin damping. Off stops physics writes and clears geometry unless an API consumer explicitly requests profile preparation; use off with another aerodynamic force mod. |
 | `AeroProfileDirections` | `98` | Direction-table resolution: 98 by default, or 26 for lower construction and evaluation cost. Other values resolve to 98. |
 | `EnableFriction` | `true` | Aerodynamic heating at speed in atmosphere. |
 | `EnableWind` | `true` | The wind field and everything that shapes it: the boundary-layer profile, terrain speed-up and shelter, slope channelling, the diurnal cycle and burial. Off is no wind anywhere rather than the game's wind unmodelled, because the game exposes a ceiling rather than a wind. A grid still feels its own motion through the air. |
@@ -1388,6 +1388,7 @@ one with a migration risk — is late rather than first.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Clarified that EnableAeroForces off stops physics writes while explicitly registered API consumers may keep profile preparation running. |
 | 2026-09-27 | Added EnableAeroForces and the 26/98 AeroProfileDirections choices with new serialization identifiers 165/166. |
 | 2026-09-24 | **The aerodynamic force and the top-speed port are retired** (`K25` step 0; [aerodynamics.md](aerodynamics.md#strip-and-rebuild)). Twenty-four settings are gone: `EnableDrag`, `DragCoefficient`, `EnableShapeDrag`, `EnableLift`, `LiftCoefficient`, and the Top speed page's nineteen — `EnableTopSpeed`, `SpeedLimit`, `EnableSpeedBoost`, the twelve cruise-curve points, both boost ceilings and both resistances. Their `ProtoMember` numbers — 135, 136, 138 to 140 and 145 to 163 — are retired and never reissued (`W2`), so a saved world's value is ignored rather than read into something else, and `/thermal get` answers a retired name with nothing rather than a number. **What a world notices**: no aerodynamic force on any ship; the engine's own speed cap in place of 140 m/s unless RelativeTopSpeed is installed; and, because the Newtonian shape factor left the friction row with the force it was fitted for, friction heating at the projected area again — 1.71× on a four-cube brick and 2.10× on a wedge, and a median 4.56 K at re-entry by `K22`'s population measurement. `EnableWindwardShielding` stays and moves to the Friction heating page. |
 | 2026-09-20 | Add HDR glow emission and runtime glow counters to `/thermal status`. |

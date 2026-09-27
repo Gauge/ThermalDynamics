@@ -109,6 +109,8 @@ namespace Thermodynamics.Client
         private Func<IMyCubeGrid, MyTuple<Vector3, Vector3>> getGridAeroForces;
         private Func<IMyCubeGrid, MyTuple<Vector3, Vector3>> getGridAeroMoments;
         private Func<IMyCubeGrid, MyTuple<bool, bool, int, int>> getGridAeroStatus;
+        private Func<IMyCubeGrid, Dictionary<string, object>> getGridAeroProfile;
+        private Func<IMyCubeGrid, long, bool, bool> setGridAeroProfileConsumer;
         private Func<IMySlimBlock, MyTuple<bool, float, float, float, int>> getCoolantLoop;
         private Func<IMySlimBlock, float[], bool> setBlockDragProfile;
         private Func<IMySlimBlock, bool> clearBlockDragProfile;
@@ -158,6 +160,8 @@ namespace Thermodynamics.Client
             getGridAeroForces = null;
             getGridAeroMoments = null;
             getGridAeroStatus = null;
+            getGridAeroProfile = null;
+            setGridAeroProfileConsumer = null;
             getCoolantLoop = null;
             setBlockDragProfile = null;
             clearBlockDragProfile = null;
@@ -211,6 +215,8 @@ namespace Thermodynamics.Client
             getGridFrictionWatts = Get<Func<IMyCubeGrid, float>>(table, "GetGridFrictionWatts");
             getGridAeroForces = Get<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>(table, "GetGridAeroForces");
             getGridAeroMoments = Get<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>(table, "GetGridAeroMoments");
+            getGridAeroProfile = Get<Func<IMyCubeGrid, Dictionary<string, object>>>(table, "GetGridAeroProfile");
+            setGridAeroProfileConsumer = Get<Func<IMyCubeGrid, long, bool, bool>>(table, "SetGridAeroProfileConsumer");
             getGridAeroStatus = Get<Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>>(table, "GetGridAeroStatus");
             getCoolantLoop = Get<Func<IMySlimBlock, MyTuple<bool, float, float, float, int>>>(table, "GetCoolantLoop");
             setBlockDragProfile = Get<Func<IMySlimBlock, float[], bool>>(table, "SetBlockDragProfile");
@@ -336,6 +342,18 @@ namespace Thermodynamics.Client
             result.Restoring = t.Item1;
             result.Damping = t.Item2;
             return result;
+        }
+
+        /// <summary>A detached schema-1 geometry snapshot, or null until ready; see api.md for the fields.</summary>
+        public Dictionary<string, object> GetGridAeroProfile(IMyCubeGrid grid)
+        {
+            return getGridAeroProfile == null || grid == null ? null : getGridAeroProfile(grid);
+        }
+
+        /// <summary>Demand profile preparation even with forces off; release this id on every grid when done.</summary>
+        public bool SetGridAeroProfileConsumer(IMyCubeGrid grid, long consumer, bool enabled)
+        {
+            return setGridAeroProfileConsumer != null && grid != null && setGridAeroProfileConsumer(grid, consumer, enabled);
         }
 
         public AeroStatus GetGridAeroStatus(IMyCubeGrid grid)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using VRageMath;
 
 namespace Thermodynamics.Core
@@ -9,12 +10,28 @@ namespace Thermodynamics.Core
     /// </summary>
     public sealed class AeroRuntime
     {
+        private readonly HashSet<long> consumers = new HashSet<long>();
         private GridModel grid;
         private AeroProfileBuilder builder;
         private int topology, directions;
         private long revision;
         private Vector3 centreAnchor;
         private bool centrePending;
+
+        /// <summary>Explicit external demand survives force-disable and profile invalidation.</summary>
+        public bool Requested { get { return consumers.Count != 0; } }
+
+        public void SetConsumer(long consumer, bool enabled)
+        {
+            if (enabled) consumers.Add(consumer);
+            else consumers.Remove(consumer);
+        }
+
+        /// <summary>Copies the last fully prepared state; callers serialize this with preparation.</summary>
+        public Dictionary<string, object> CopyProfile()
+        {
+            return Ready && Profile != null && grid != null && topology == grid.Version ? Profile.CopySnapshot() : null;
+        }
 
         public AeroProfile Profile { get; private set; }
         public bool Ready { get; private set; }
@@ -39,7 +56,7 @@ namespace Thermodynamics.Core
             BuildWork = 0;
             CentreWork = 0;
             Ready = false;
-            if (!enabled || model == null || model.BlockCount == 0) { Reset(); return false; }
+            if ((!enabled && !Requested) || model == null || model.BlockCount == 0) { Reset(); return false; }
             if (!centre.IsValid()) throw new ArgumentException("The aerodynamic centre must be finite.", "centre");
             int count = directionCount > AeroProfile.CoarseDirections ? AeroProfile.FineDirections : AeroProfile.CoarseDirections;
             if (grid != model || topology != model.Version || directions != count || revision != inputRevision)
