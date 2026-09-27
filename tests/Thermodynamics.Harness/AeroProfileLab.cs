@@ -107,6 +107,8 @@ namespace Thermodynamics.Harness
             text.AppendLine("Aerodynamic profile cost; synthetic solid cubes, not a corpus or live-game measurement");
             text.AppendLine("Host: " + StageLab.Host + "; UTC: " + StageLab.TakenUtc);
             text.AppendLine("Core binary MVID: " + typeof(AeroProfile).Assembly.ManifestModule.ModuleVersionId);
+            text.AppendLine("Runtime: " + Environment.Version + "; DOTNET_TieredCompilation: "
+                + (Environment.GetEnvironmentVariable("DOTNET_TieredCompilation") ?? "runtime default"));
             text.AppendLine("Times are per row's work count; settled rows contain "
                 + EvaluationsPerRepeat.ToString(CultureInfo.InvariantCulture) + " evaluations. Allocations are maximum bytes per repeat.");
             text.AppendLine("Spread is (slowest - fastest)/fastest; first and shifted are single-call samples and may be noisy.");
