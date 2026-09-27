@@ -1287,8 +1287,9 @@ The six reference headings cannot establish this: two perpendicular thrusters ma
 even when neither axis alone does. The force set is the Minkowski sum of each throttle segment
 `[0,F_i]`; its maximum Euclidean norm lies at a vertex. Build that convex polytope in at most three
 dimensions and retain vertex throttle witnesses. Check each hull reduction's containment numerically,
-and stop unresolved if the hull exceeds 200,000 vertices or its resolved span has condition
-number above 10⁷. Cross-check the selected ray through the existing independently checked directional LP. Ties
+and stop unresolved if the retained set exceeds 200,000 points. The first generation also
+stopped when its resolved span had condition number above 10⁷; the correction below preserves
+those candidates instead. Cross-check the selected ray through the existing independently checked directional LP. Ties
 within the force tolerance use lexicographically smallest normalized main-grid coordinates rounded
 to nine decimal places. This is a deterministic benchmark convention, not a drag-favouring choice.
 
@@ -1316,6 +1317,30 @@ rotation and rank-deficiency controls, an analytic quadratic-drag root, comparis
 profile evaluator on rotated multiple grids, and runner tests for partial coverage, duplicate/missing
 receipts, changed provenance, interrupted writes, exclusions and threshold/quantile boundaries.
 
+### Near-degenerate thrust sets: conservative retention and a known-resultant certificate
+
+The first frozen corpus generation exposed failures on nearly parallel subgrid thrust axes.
+An intermediate Minkowski sum can be nearly flat even when later generators span three
+well-resolved dimensions. Rejecting that intermediate set needlessly prevents a result. The
+correction retains **all** its candidate points, without projecting or discarding any, until a
+well-resolved hull reduction is possible. The 200,000-point budget remains enforced. The new
+auxiliary count is `retained_points`, since the retained set can include non-extreme force points;
+historical `vertices` fields keep their original meaning in the first-generation receipts.
+
+For the selected binary-throttle witness, compute its resultant `v` by compensated summation
+and define the test heading as `d = v/|v|`. This heading is feasible by construction. The support
+bound `Σ max(0, d·F_i)` independently bounds force on that ray. Require its gap from `|v|` and
+the reconstructed force residual to fit the existing force tolerance. This is not a certificate
+for an arbitrary requested heading. The fixed-heading LP retains its conditioning guard; its
+near-rank rejection is recorded as an unresolved cross-check when the known-resultant proof
+succeeds. Other solver errors and any disagreement remain fatal.
+
+Before promoting the change, require exhaustive binary-throttle agreement on forty additional
+seeded nearly parallel/coplanar fixtures, exact point retention, support-bound and LP fault
+injection, the original independent controls, and reproduction of the six diagnosed hulls.
+Those hulls informed this correction and are not held-out validation. No thrust or drag
+coefficient, force tolerance, acceptance threshold or population exclusion changes.
+
 ### Instrument validation and end-to-end pilot
 
 [Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at
@@ -1339,6 +1364,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added conservative retention for nearly flat thrust sets and an independent certificate for the selected resultant heading. Fixed-heading LP guards stay in place; cross-check uncertainty is explicit. |
 | 2026-09-27 | Documented the native definition-upgrade path exposed by an unresolved corpus hull and the constrained reader correction. Frozen receipts remain tied to their original reader. |
 | 2026-09-27 | Archived all eight primary flat-plate normal-incidence reference rows, including residuals and measurement basis, for independent lift/drag validation. No model fit or acceptance verdict is claimed. |
 | 2026-09-27 | Corrected AR8's claim that Helmbold is a universal body-lift law, citing NASA flight comparisons. Clarified AR11's common reference area and zero-lift drag basis before lift is implemented; no coefficients or acceptance thresholds changed. |

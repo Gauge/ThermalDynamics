@@ -18,6 +18,11 @@ from scipy.optimize import linprog
 RELATIVE_TOLERANCE = 1e-7
 
 
+class NearRankDeficient(RuntimeError):
+    """A requested fixed ray cannot be certified by this numerical LP."""
+
+
+
 def capacity(directions, ratings, direction):
     """Maximize pure directional force with independent throttles, retaining a checked certificate."""
     axes = np.asarray(directions, dtype=float)
@@ -70,7 +75,7 @@ def capacity(directions, ratings, direction):
         if len(resolved):
             condition = float(resolved[0] / resolved[-1])
         if condition > 1 / RELATIVE_TOLERANCE:
-            raise RuntimeError("Near-rank-deficient thrust certificate is unresolved at the declared tolerance")
+            raise NearRankDeficient("Near-rank-deficient thrust certificate is unresolved at the declared tolerance")
     normal = np.asarray(result.eqlin.marginals, dtype=float)
     if normal.shape != (3,) or not np.isfinite(normal).all():
         raise RuntimeError("Invalid dual normal")

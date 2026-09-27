@@ -63,7 +63,12 @@ states population exclusions, strongest-heading tie rules, force assumptions, to
 power/fuel and torque compensation, not a claim about native piloting. No coefficients are
 retuned by this walk. Runtime DLLs, authored data, installed SBCs, scripts, package versions
 and every blueprint are fingerprinted; changing them requires a new output directory.
-`test_aeroenvelope.py` compares 80 seeded nonzero force sets with exhaustive throttle vertices.
+`test_aeroenvelope.py` compares 80 seeded general and 40 nearly parallel/coplanar nonzero force
+sets with exhaustive throttle vertices. Uncertain intermediate hull reductions retain every
+candidate; the selected resultant has its own feasible witness and support-plane force bound.
+A near-rank fixed-heading LP is retained as an unresolved cross-check, without discarding that
+independent proof. The `retained_points` diagnostic counts candidates, which need not all be
+extreme in force space.
 `test_aeropopulation.py` tests incomplete coverage, exclusions, quantiles, uncertainty,
 provenance changes and interrupted receipt replacement.
 
@@ -699,6 +704,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Documented near-rank candidate retention, known-resultant certification and forty additional exhaustive controls. |
 | 2026-09-27 | Added the resumable aeropopulation.py runner, aeroenvelope.py global thrust selection and independent envelope/receipt/scoring tests. |
 | 2026-09-27 | Added aerothrust.py, its optional pinned numerical dependencies and independent directional-capacity controls. Documented certificates, tolerances and the absence of a population verdict. |
 | 2026-09-24 | **The shape walk is retired with the shape term it measured.** `K25`'s strip removed the Newtonian shape factor from the friction row and the aerodynamic force derived from it, so `CorpusShapeWalk`, `shape.py` and `test_shape.py` are deleted and the census no longer carries `shape_factor` or `lift_over_drag`. The committed [`summary-shape-2026-08-31.csv`](summary-shape-2026-08-31.csv) stays as the record the pages quote. `cruise.py` and `dragfit.py` keep working on a census without the column — every hull reads as shape 1 — and `cruise.py`'s default coefficient is renamed `RETIRED_DRAG_COEFFICIENT`, because no coefficient ships until the rebuilt force does. Separately, `provenance.py` read `Cubes.xml` from its pre-MDK2 path and four of its checks had been failing, and `test_cruise.py` had pinned the coefficient at 0.5 for two weeks after it became 1.54; 205 checks pass. |

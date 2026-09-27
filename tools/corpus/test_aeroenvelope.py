@@ -59,11 +59,58 @@ class EnvelopeTests(unittest.TestCase):
             with self.subTest(axes=axes):
                 self.assertAlmostEqual(expected, aeroenvelope.maximum(fixture(axes, ratings))['capacity_n'])
 
-    def test_uncertain_rank_and_resource_limit_remain_unresolved(self):
-        with self.assertRaisesRegex(RuntimeError, 'near-rank'):
-            aeroenvelope.maximum(fixture([[1, 0, 0], [1, 1e-8, 0]], [100, 100]))
+    def test_near_rank_sets_retain_every_candidate_without_projection(self):
+        points = np.array([[0, 0, 0], [1, 0, 0], [0, 1e-9, 0], [1, 1e-9, 0]])
+        kept, masks = aeroenvelope.reduce_vertices(points, list(range(4)))
+        self.assertEqual(4, len(kept))
+        for point, mask in zip(kept, masks):
+            np.testing.assert_array_equal(point, points[mask])
+
+    def test_resource_limit_still_fails_loudly(self):
         with patch.object(aeroenvelope, 'VERTEX_LIMIT', 2), self.assertRaisesRegex(RuntimeError, 'budget'):
             aeroenvelope.maximum(fixture([[1, 0, 0], [0, 1, 0]], [100, 100]))
+
+    def test_known_resultant_survives_a_near_rank_fixed_ray_lp(self):
+        axes = np.array([[1, 0, 0], [0, 1, 0], [0, 1, 1e-8]], dtype=float)
+        axes /= np.linalg.norm(axes, axis=1)[:, None]
+        result = aeroenvelope.maximum(fixture(axes, [100] * 3))
+        self.assertAlmostEqual(np.linalg.norm(100 * axes.sum(axis=0)), result['capacity_n'])
+        self.assertEqual('unresolved-near-rank', result['directional_lp']['status'])
+        self.assertLessEqual(abs(result['duality_gap_n']), result['tolerance_n'])
+        np.testing.assert_allclose(result['vertex_force_n'], 100 * axes.sum(axis=0), atol=1e-12)
+
+    def test_nearly_parallel_and_coplanar_sets_match_exhaustive_vertices(self):
+        rng = np.random.default_rng(20260929)
+        maximum_error = 0
+        for plane in [False, True]:
+            for _ in range(20):
+                axes = rng.normal(size=(8, 3))
+                axes[:, 2] *= 1e-8
+                if not plane:
+                    axes[:, 1] *= 1e-8
+                axes /= np.linalg.norm(axes, axis=1)[:, None]
+                ratings = rng.uniform(1, 1000, 8)
+                expected = max(np.linalg.norm(np.array(bits) @ (axes * ratings[:, None]))
+                               for bits in itertools.product([0, 1], repeat=8))
+                result = aeroenvelope.maximum(fixture(axes, ratings))
+                error = abs(expected - result['capacity_n'])
+                maximum_error = max(maximum_error, error)
+                self.assertLessEqual(error, result['tolerance_n'])
+                self.assertGreater(expected, 0)
+        print('Near-rank global oracle: 40/40 nonzero cases; max discrepancy %.9g N' % maximum_error)
+
+    def test_support_bound_and_lp_disagreement_cannot_be_ignored(self):
+        with self.assertRaisesRegex(ValueError, 'binary'):
+            aeroenvelope.resultant_certificate(np.array([[1, 0, 0]]), np.array([100]), np.array([0.5]), np.array([0, 0, 1]))
+        with self.assertRaisesRegex(RuntimeError, 'support-plane'):
+            aeroenvelope.resultant_certificate(np.array([[1, 0, 0], [1, 0, 0]]), np.array([100, 100]), np.array([1, 0]), np.array([0, 0, 1]))
+        data = fixture([[1, 0, 0]], [100])
+        with patch.object(aeroenvelope.aerothrust, 'capacity', return_value=dict(capacity_n=120)):
+            with self.assertRaisesRegex(RuntimeError, 'disagrees'):
+                aeroenvelope.maximum(data)
+        with patch.object(aeroenvelope.aerothrust, 'capacity', side_effect=RuntimeError('solver fault')):
+            with self.assertRaisesRegex(RuntimeError, 'solver fault'):
+                aeroenvelope.maximum(data)
 
 
 if __name__ == '__main__':
