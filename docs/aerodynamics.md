@@ -250,6 +250,24 @@ an explicitly measured approximation remains necessary; this evidence does not e
 coefficients for the game's Reynolds-number range. No experimental graph coordinates have
 been digitized or used to tune code yet.
 
+#### Plate-figure extraction protocol
+
+The primary circles and squares in Mizoguchi Figures 3 and 4 are vector objects, distinct from
+the older comparison curves. Exploratory inspection identified their geometry and the legend
+objects; it did not fit a force law. The extraction will be bound to the publisher PDF hash,
+retain marker centres and error-bar endpoints in page coordinates, calibrate against the plot
+frame, and exclude legends and comparison lines explicitly. Report the plotted angle rather
+than snapping to integer incidence: the plotted centres do not lie exactly on integer degrees.
+Retain every primary marker, including repeated near-stall angles, without inferring an
+incidence-sweep branch not labelled by its symbol. Store CL and CD as separate observations.
+
+Before using these observations for a model comparison, require analytical coordinate-transform
+controls, rejection of changed source/layout or ambiguous error bars, visual overlay of all
+retained points, and inspection of the source figure's scale and legend. Use a conservative
+0.5 PDF-point extraction bound in each coordinate, reported separately from the figure's 95%
+measurement interval. This is graph digitization, not access to the experiment's raw samples;
+no model acceptance criterion or tuning follows from producing the dataset.
+
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
 SEDrag knows which blocks are wings because a file says so: `AeroProperties.xml` gives about a
