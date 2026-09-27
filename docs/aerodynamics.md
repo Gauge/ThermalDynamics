@@ -1382,15 +1382,20 @@ than the Python runner. The runner now fingerprints `authored_data` reported by 
 source path was incorrect in that configuration. Missing, relative or nonexistent authored
 roots fail before a run starts. Older binaries must be rebuilt rather than silently falling
 back to the runner's checkout. The original frozen generation used matching paths and is
-unaffected by this correction.
+unaffected by this correction. Runtime and definition search paths are also re-enumerated
+before and after each blueprint: newly added files stop the run just as modified or deleted
+files do. Hashing only the original inventory would miss additions.
 
 The regression builds separate temporary runtime and authored-data directories, verifies the
 actual data file is fingerprinted, verifies the unrelated checkout is absent, and detects a
-mutation of the actual data. It fails before the fix and passes after. An actual isolated binary
+mutation of the actual data, plus added authored definitions, game definitions and runtime
+assemblies. The wrong-root check fails before the fix and passes after. An actual isolated binary
 launched from the original checkout reports the isolated authored root. The complete Python
 suite runs 231 checks: 230 pass and the unrelated historical-census check is skipped. The isolated
 solution builds with zero warnings/errors and 73 focused C# checks pass. Full-suite validation
 remains deferred until the frozen corpus walk finishes, avoiding timing contention.
+The [validation record](../tests/benchmarks/aerodynamics/population-runtime-provenance-2026-09-27.txt)
+retains the concrete command and environment output.
 
 ### Instrument validation and end-to-end pilot
 

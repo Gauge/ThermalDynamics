@@ -65,7 +65,8 @@ retuned by this walk. Runtime DLLs, authored data, installed SBCs, scripts, pack
 and every blueprint are fingerprinted; changing them requires a new output directory.
 The binary reports both `game_content` and its actual `authored_data` root through
 `aero-environment`; the runner does not infer runtime data from its own checkout. Rebuild older
-binaries that lack `authored_data`.
+binaries that lack `authored_data`. Search paths are re-enumerated around each measurement,
+so adding a definition or runtime file also stops the generation.
 `test_aeroenvelope.py` compares 80 seeded general and 40 nearly parallel/coplanar nonzero force
 sets with exhaustive throttle vertices. Uncertain intermediate hull reductions retain every
 candidate; the selected resultant has its own feasible witness and support-plane force bound.

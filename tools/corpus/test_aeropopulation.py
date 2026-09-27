@@ -178,6 +178,12 @@ class PopulationTests(unittest.TestCase):
             self.assertEqual(population.digest(data), plan['fingerprint'][str(data)])
             local = pathlib.Path(population.__file__).resolve().parents[2] / 'Thermodynamics/Content/Data/Cubes.xml'
             self.assertNotIn(str(local), plan['fingerprint'])
+            for added in [authored / 'CubeBlocks' / 'added.sbc', content / 'CubeBlocks' / 'added.sbc', runtime / 'added.dll']:
+                added.write_text('new definition or assembly')
+                with self.assertRaisesRegex(ValueError, 'added'):
+                    population.verify_fingerprint(plan, {})
+                added.unlink()
+            population.verify_fingerprint(plan, {})
             data.write_text('changed runtime authored properties')
             with self.assertRaisesRegex(ValueError, 'changed'):
                 population.verify_fingerprint(plan, {})
