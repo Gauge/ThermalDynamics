@@ -58,7 +58,30 @@ namespace Thermodynamics.Harness
         {
             List<Blueprints.Ship> ships = Blueprints.Read(path);
             if (ships.Count != 1) throw new InvalidDataException("Expected one readable blueprint: " + path);
-            Blueprints.Ship ship = ships[0];
+            return Json(ships[0], path);
+        }
+
+        public static string Selection(string path)
+        {
+            var ships = Blueprints.Read(path);
+            if (ships.Count == 0)
+            {
+                var probe = Blueprints.Probe(path);
+                if (probe.AmbiguousBlocks != 0) throw new InvalidDataException("Ambiguous block definitions: " + probe.AmbiguousBlocks);
+                if (probe.UnknownBlocks > 0)
+                    return JsonSerializer.Serialize(new { status = "excluded_modded", unknown_blocks = probe.UnknownBlocks });
+            }
+            if (ships.Count != 1) throw new InvalidDataException("Expected one readable blueprint: " + path);
+            var ship = ships[0];
+            if (ship.AmbiguousBlocks != 0) throw new InvalidDataException("Ambiguous block definitions: " + ship.AmbiguousBlocks);
+            if (!ship.IsVanilla) return JsonSerializer.Serialize(new { status = "excluded_modded", unknown_blocks = ship.UnknownBlocks });
+            if (ship.Blocks < CorpusLab.MinimumBlocks) return JsonSerializer.Serialize(new { status = "excluded_small", blocks = ship.Blocks });
+            using (var document = JsonDocument.Parse(Json(ship, path)))
+                return JsonSerializer.Serialize(new { status = "candidate", input = document.RootElement });
+        }
+
+        private static string Json(Blueprints.Ship ship, string path)
+        {
             List<Thruster> thrust = Read(ship, 1f, true);
             string digest;
             using (SHA256 hash = SHA256.Create())
@@ -68,6 +91,7 @@ namespace Thermodynamics.Harness
             {
                 schema = 1, kind = "aero-population-inputs", blueprint = Path.GetFullPath(path),
                 blueprint_sha256 = digest, harness_mvid = typeof(AeroPopulationInputs).Assembly.ManifestModule.ModuleVersionId,
+                core_mvid = typeof(AeroProfile).Assembly.ManifestModule.ModuleVersionId,
                 relative_air_density = 1f, atmosphere = true, grids = ship.Grids.Count,
                 mass_kg = ship.Grids.Sum(g => g.Builder.Grid.Blocks.Sum(b => (double)b.Mass)),
                 headings = Enumerable.Range(0, Face.Count).Select(face => new

@@ -1159,8 +1159,8 @@ must pin a nonzero ion, atmospheric and hydrogen example to independently read S
 The inspection command `aero-inputs <blueprint>` reports full-power rated thrust vectors at relative
 air density 1, with atmosphere present. It assumes unlimited power/fuel, functioning blocks and
 thrust multiplier one; it does not infer cargo, current enable/override state or resource sufficiency.
-It is an input audit, not a P1/P2 scorer. The later scorer must address directional thrust feasibility,
-self-lifting population selection, multiple-grid geometry and complete resumable corpus coverage.
+It is an input audit. The population runner below connects directional thrust feasibility,
+self-lifting population selection, multiple-grid geometry and resumable corpus coverage.
 Historical nominal-thrust census results retain their original scope. No drag coefficients or P1/P2
 thresholds change with this input work.
 
@@ -1210,7 +1210,7 @@ Force residual, active conditioning and the difference between primal force and 
 checked separately; a small gap alone cannot certify feasibility.
 
 This solver adds no gravity, torque, drag or population-selection assumptions to the optimization.
-The later P1/P2 runner must state those choices and retain complete corpus coverage and resume
+The P1/P2 runner below states those choices and retains complete corpus coverage and resume
 provenance. No P1/P2 threshold or physical drag coefficient changes here.
 
 [Recorded validation](../tests/benchmarks/aerodynamics/directional-thrust-2026-09-27.txt): clean game
@@ -1225,10 +1225,57 @@ not a population selection. The three-grid hull supplies about 2.88 kN in each r
 the atmospheric single-grid hull has no downward rated capacity under this model. Neither finding
 scores drag or P1/P2.
 
+## Population runner protocol (registered before the walk)
+
+The candidate population uses the existing corpus convention: every recursively discovered
+`bp.sbc`, vanilla/known definitions, at least 25 blocks. Unknown-definition hulls and small hulls
+are counted exclusions. Unreadable files, ambiguous definitions, invalid frames, failed optimization
+and other unresolved numerical cases remain unresolved; they cannot silently shrink the denominator.
+Every file gets a content hash and byte count. Ordering is descending bytes then relative path.
+Receipts are atomic per completed blueprint; resume requires identical inputs, executable/library
+hashes, tool sources, installed SBC data and numerical-package versions. Interrupted work has no
+receipt and is retried. Failed records require an explicit retry option; progress reports bytes as
+well as files. A partial or unresolved population gets no unqualified P1/P2 verdict.
+
+Self-lifting means maximum available resultant rated thrust at least unloaded model mass × 9.81.
+The six reference headings cannot establish this: two perpendicular thrusters may lift together
+even when neither axis alone does. The force set is the Minkowski sum of each throttle segment
+`[0,F_i]`; its maximum Euclidean norm lies at a vertex. Build that convex polytope in at most three
+dimensions and retain vertex throttle witnesses. Check each hull reduction's containment numerically,
+and stop unresolved if the hull exceeds 200,000 vertices or its resolved span has condition
+number above 10⁷. Cross-check the selected ray through the existing independently checked directional LP. Ties
+within the force tolerance use lexicographically smallest normalized main-grid coordinates rounded
+to nine decimal places. This is a deterministic benchmark convention, not a drag-favouring choice.
+
+Drag is measured along that strongest-thrust heading, in each subgrid's saved orientation, with
+zero spin at 1.225 kg/m³, 98-direction profiles and unchanged fitted coefficients. Subgrid drag sums
+match the current adapter's independent-grid model; mutual subgrid shielding is not added. The rig
+assumes rigid relative poses, unlimited power/fuel and torque compensation, and does not reserve
+simultaneous hover thrust or claim native piloting feasibility. Nominal census results remain a
+separate historical scope. This static equilibrium calculation does not apply per-tick impulse
+guards.
+
+P1 counts drag at 100 m/s exceeding available thrust; within numerical tolerance is unresolved.
+P2 uses the existing interpolated p1 definition on terminal-speed brackets. For monotone drag,
+bisect to 0.001 m/s through 128 m/s. A hull still accelerating at 128 m/s is explicitly right-censored,
+not assigned a measured ceiling of 128. Negative pressure-only drag area makes this monotonic
+bracket unjustified and is unresolved. Thrust tolerances and a float-force allowance of
+`2e-6 × max(1 N, force)` widen the speed bracket. At least 20 measured self-lifting hulls are
+required for P1 share resolution (one hull is five percentage points). At least 100
+self-lifting hulls and complete resolved coverage are required to resolve the p1 statistic. Numerical
+uncertainty at self-lifting, P1 or P2 boundaries is retained rather than rounded into a pass.
+A P1/P2 failure is a finding; no coefficient or acceptance threshold is fitted to these results.
+
+Before the corpus run, require independent exhaustive throttle-vertex controls for small force sets,
+rotation and rank-deficiency controls, an analytic quadratic-drag root, comparison with the actual
+profile evaluator on rotated multiple grids, and runner tests for partial coverage, duplicate/missing
+receipts, changed provenance, interrupted writes, exclusions and threshold/quantile boundaries.
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Independent validation and corpus findings are recorded below as they complete. |
 | 2026-09-27 | Added a directional rated-thrust optimizer and schema-1 machine input export. Hand solutions and 80 nonzero vertex-enumeration controls validate force balance and independently recomputed dual bounds; complete population scoring remains open. |
 | 2026-09-27 | Added retained blueprint world frames and engine-relative-density thrust ratings for the population lab. The aero-inputs command audits rated world-space thrust vectors; nominal census fields are unchanged and no P1/P2 verdict is claimed. |
 | 2026-09-27 | Published drag-profile geometry and damping through a detached snapshot API. External consumers can request bounded preparation with force writes disabled. Six offline cases cover geometry reconstruction, damping signs, snapshot ownership and demand lifecycle; native consumer dispatch and lift data remain open. |
