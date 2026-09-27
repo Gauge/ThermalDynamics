@@ -41,6 +41,32 @@ python3 tools/corpus/panel.py out/census-2026-08-25/census.csv \
                              out/census-2026-08-21 out/knobs-2026-08-21   # every dataset, one page
 ```
 
+## Resumable aerodynamic population walk
+
+`aeropopulation.py` connects blueprint eligibility, `aeroenvelope.py` global maximum resultant
+thrust, profile drag and P1/P2 scoring. It uses the pinned numerical dependencies below and a
+built harness. Run it alone under the repository memory cap; its Linux advisory lock prevents
+concurrent writers to the same output. A completed receipt is atomic and bound to the manifest.
+Resume repeats the same command; `--retry-errors` explicitly retries unresolved receipts.
+`--limit N` limits new receipts while retaining the complete population manifest. `--score`
+scores saved receipts; partial or unresolved coverage cannot receive population acceptance.
+
+```bash
+systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0 --quiet \
+  python3 tools/corpus/aeropopulation.py --corpus /path/to/corpus --out /path/to/results
+python3 tools/corpus/aeropopulation.py --out /path/to/results --score
+```
+
+The [registered protocol](../../docs/aerodynamics.md#population-runner-protocol-registered-before-the-walk)
+states population exclusions, strongest-heading tie rules, force assumptions, tolerances and
+128 m/s censoring. This is unloaded rated-force feasibility with rigid subgrids, unlimited
+power/fuel and torque compensation, not a claim about native piloting. No coefficients are
+retuned by this walk. Runtime DLLs, authored data, installed SBCs, scripts, package versions
+and every blueprint are fingerprinted; changing them requires a new output directory.
+`test_aeroenvelope.py` compares 80 seeded nonzero force sets with exhaustive throttle vertices.
+`test_aeropopulation.py` tests incomplete coverage, exclusions, quantiles, uncertainty,
+provenance changes and interrupted receipt replacement.
+
 ## Directional aerodynamic thrust inputs
 
 `aerothrust.py` consumes schema-1 JSON from the C# `aero-inputs` command and uses SciPy's HiGHS
@@ -673,6 +699,7 @@ limit in [known-issues.md](../../docs/known-issues.md).
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added the resumable aeropopulation.py runner, aeroenvelope.py global thrust selection and independent envelope/receipt/scoring tests. |
 | 2026-09-27 | Added aerothrust.py, its optional pinned numerical dependencies and independent directional-capacity controls. Documented certificates, tolerances and the absence of a population verdict. |
 | 2026-09-24 | **The shape walk is retired with the shape term it measured.** `K25`'s strip removed the Newtonian shape factor from the friction row and the aerodynamic force derived from it, so `CorpusShapeWalk`, `shape.py` and `test_shape.py` are deleted and the census no longer carries `shape_factor` or `lift_over_drag`. The committed [`summary-shape-2026-08-31.csv`](summary-shape-2026-08-31.csv) stays as the record the pages quote. `cruise.py` and `dragfit.py` keep working on a census without the column — every hull reads as shape 1 — and `cruise.py`'s default coefficient is renamed `RETIRED_DRAG_COEFFICIENT`, because no coefficient ships until the rebuilt force does. Separately, `provenance.py` read `Cubes.xml` from its pre-MDK2 path and four of its checks had been failing, and `test_cruise.py` had pinned the coefficient at 0.5 for two weeks after it became 1.54; 205 checks pass. |
 | 2026-08-28 | **`cap.py` reads a sampled walk with weights, and says which halves a sample cannot answer.** `A13`'s last open half is the cap walk, and the core corpus walks it in 78 minutes rather than eleven hours — but it is a *weighted* sample, and this report had no weights: read unweighted it would have printed a complete-looking population whose giants are outnumbered twenty to one. The dataset is recognised by `scoring.is_core_walk` rather than by a flag, every population figure is weighted and named `weighted`, and the identity check deliberately is not — *did the capped arm cap* is an assertion about the walk, and weighting it would hide a broken pair on a ship of weight 1 behind twenty good ones on a ship of weight 20. **Two halves report `?` rather than passing**: a maximum is one observation and cannot be sampled, so the cost prediction's max-under-10-K half is unscoreable on a sampled walk, and an unscorable half never rescues a failing one (`E8`). `--csv` gives the walk a committed source, from the same `provenance.summary_rows` `verdict.py` uses (`P5`, `E5`); the 2026-08-25 summary reproduces byte for byte through it. `core.py --score` now splits a paired walk to the arm that ships, which it had not — a mixture of two configurations has every column one configuration has (`M1`, `P6`). |

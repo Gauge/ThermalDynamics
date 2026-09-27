@@ -88,8 +88,8 @@ def capacity(directions, ratings, direction):
             "dual_upper_n": upper, "duality_gap_n": gap, "tolerance_n": tolerance}
 
 
-def audit(data):
-    """Evaluate each saved main-grid heading; preserve the input's provenance and assumptions."""
+def validate(data):
+    """Validate the shared machine-input contract without choosing headings to optimize."""
     if data.get("schema") != 1 or data.get("kind") != "aero-population-inputs":
         raise ValueError("Expected schema-1 aerodynamic population inputs")
     if data.get("relative_air_density") != 1 or data.get("atmosphere") is not True:
@@ -118,6 +118,12 @@ def audit(data):
         other = by_name[negative]
         if other.shape != (3,) or not np.isfinite(other).all() or not np.allclose(by_name[positive], -other, atol=1e-5, rtol=0):
             raise ValueError("Reference heading pairs are not opposed")
+    return directions, ratings, headings
+
+
+def audit(data):
+    """Evaluate each saved main-grid heading; preserve the input's provenance and assumptions."""
+    directions, ratings, headings = validate(data)
     results = []
     for heading in headings:
         result = capacity(directions, ratings, heading["direction"])

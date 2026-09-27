@@ -537,7 +537,7 @@ The core speaks no game type, so it builds and runs outside the session in secon
 makes it testable, profilable, drivable by another mod, and portable to another engine — the four
 are one property, not four.
 
-**Checked by** `C5` (`CoreIsolationTests`). The suite is 2,335 tests, 33 deterministic scenarios and
+**Checked by** `C5` (`CoreIsolationTests`). The suite is 2,603 tests, 33 deterministic scenarios and
 a load benchmark that reaches a million blocks in one grid.
 
 ### Open — the API is part of the contract
@@ -1526,6 +1526,7 @@ as a *second* change rather than as a substitute. [backlog](backlog.md) `D19`.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Refreshed the offline suite count to 2,603 cases after adding aerodynamic population controls. |
 | 2026-09-27 | Updated the current aerodynamic composition and implementation status for the rebuilt engine adapter; preserved the superseded design as historical context. |
 | 2026-09-24 | *Not authoritative over the game's own systems* says the mod writes nothing to a ship's physics again: `K25`'s first step stripped the aerodynamic force, and the owner's decisions recorded the same day (aerodynamics.md) are what brings it back. The reasoning around it is unchanged. |
 | 2026-09-20 | Describe soft heat patches, bounded lights and explicit visual verification limits. |

@@ -63,6 +63,21 @@ namespace Thermodynamics.Sim
 
                     return PrefabCommand(args);
 
+                case "aero-environment":
+                    if (args.Length != 1) { Console.Error.WriteLine("aero-environment takes no arguments"); return 1; }
+                    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { game_content = GameBlocks.ContentPath() }));
+                    return 0;
+
+                case "aero-corpus-inputs":
+                    if (args.Length != 2) { Console.Error.WriteLine("aero-corpus-inputs requires a blueprint"); return 1; }
+                    Console.WriteLine(AeroPopulationInputs.Selection(args[1]));
+                    return 0;
+
+                case "aero-population-drag":
+                    if (args.Length != 3) { Console.Error.WriteLine("aero-population-drag requires blueprint and thrust JSON"); return 1; }
+                    Console.WriteLine(AeroPopulationDrag.Report(args[1], args[2]));
+                    return 0;
+
                 case "aero-inputs":
                     if (args.Length < 2 || args.Length > 3 || (args.Length == 3 && args[2] != "--json"))
                     { Console.Error.WriteLine("aero-inputs requires one blueprint path and optional --json"); return 1; }
@@ -2040,6 +2055,9 @@ namespace Thermodynamics.Sim
             Console.WriteLine("    --load                    full load instead of idle: the control, not G7");
             Console.WriteLine("  drift                   how long a client that joined stale stays wrong");
             Console.WriteLine("  inputs                  each input a client drives its sim from, degraded");
+            Console.WriteLine("  aero-environment                report installed game content for input fingerprinting");
+            Console.WriteLine("  aero-corpus-inputs <blueprint>   select a population candidate and export its inputs");
+            Console.WriteLine("  aero-population-drag <blueprint> <thrust.json>   compare profile drag with certified thrust");
             Console.WriteLine("  aero-inputs <blueprint> [--json]   audit saved grid frames and atmosphere-adjusted rated thruster vectors");
             Console.WriteLine("  aero-flight             the step 1 moment rigs: a shuttlecock both ways round, and a spin decaying");
             Console.WriteLine("  aero-profile            profile build, first-tick, settled-tick and centre-change cost on synthetic cubes");
