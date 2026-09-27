@@ -79,6 +79,27 @@ namespace Thermodynamics.Tests
                 "</MyObjectBuilder_CubeBlock>";
         }
 
+        [Theory]
+        [InlineData("MyObjectBuilder_CubeBlock", "", 2)]
+        [InlineData("CubeBlock", "", 1)]
+        [InlineData("MyObjectBuilder_NoSuchBuilder", "", 1)]
+        [InlineData("MyObjectBuilder_CubeBlock", " xsi:type=\"MyObjectBuilder_NoSuchBuilder\"", 1)]
+        [InlineData("MyObjectBuilder_CubeBlock", " xmlns=\"urn:unknown\"", 1)]
+        public void LegacyElementTypesAreExplicitAndDoNotOverrideAnXsiType(string element, string attributes, int expected)
+        {
+            string xml = "<" + element + attributes + "><SubtypeName>LargeBlockArmorBlock</SubtypeName>"
+                + "<Min x=\"1\" y=\"0\" z=\"0\" /></" + element + ">";
+            string path = WriteBlueprint(Block("LargeBlockArmorBlock", 0, 0, 0) + xml);
+            try
+            {
+                var ship = Assert.Single(Blueprints.Read(path));
+                Assert.Equal(expected, ship.Blocks);
+                Assert.Equal(2 - expected, ship.UnknownBlocks);
+                Assert.Equal(0, ship.UpgradedBlocks);
+            }
+            finally { Directory.Delete(Path.GetDirectoryName(path), true); }
+        }
+
         [Fact]
         public void UpgradeLookupRejectsMissingUnknownAndCompetingIdentities()
         {

@@ -515,9 +515,9 @@ namespace Thermodynamics.Harness
         {
             XAttribute type = block.Attribute(
                 XName.Get("type", "http://www.w3.org/2001/XMLSchema-instance"));
-            if (type == null) return null;
-
-            string value = type.Value ?? "";
+            string value = type == null ? block.Name.LocalName : type.Value;
+            if (type == null && (block.Name.NamespaceName.Length != 0
+                || !value.StartsWith("MyObjectBuilder_", StringComparison.Ordinal))) return null;
             return value.StartsWith("MyObjectBuilder_")
                 ? value.Substring("MyObjectBuilder_".Length) : value;
         }

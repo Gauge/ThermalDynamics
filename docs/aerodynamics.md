@@ -1348,8 +1348,14 @@ corrected reader into its older manifest.
 [Recorded investigation](../tests/benchmarks/aerodynamics/population-definition-upgrade-2026-09-27.txt)
 retains engine and harness hashes, the failing regression before correction and 73 passing
 functional/documentation checks afterward. The [corrected specimen export](../tests/benchmarks/aerodynamics/population-definition-upgrade-2026-09-27-inputs.json)
-counts all fourteen upgrades across twenty grids. The complete suite must run after the frozen
-walk finishes; these focused checks do not establish population acceptance.
+counts all fourteen upgrades across twenty grids. The first full-suite run after the frozen walk
+finished exposed a regression: four installed legacy prefabs encode the explicit builder type in
+an unnamespaced `MyObjectBuilder_CubeBlock` element without `xsi:type`. The reader now accepts that
+explicit element type when the attribute is absent. Generic names, foreign namespaces and unknown
+builders remain unresolved; an explicit `xsi:type` retains priority. Five new synthetic cases and
+the complete installed-prefab readability test pass (47 focused reader/documentation cases total).
+The failed full run was 2,621 passed and one failed; it is not a clean validation. The corrected
+full suite must pass before merge. These checks do not establish population acceptance.
 
 ## Population runner protocol (registered before the walk)
 
@@ -1506,6 +1512,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Corrected the strict reader regression exposed by four shipped legacy prefabs; explicit XML element builder types are accepted without inferring generic missing types. |
 | 2026-09-27 | Corrected AR8 in place after the independent comparison: Helmbold remains a baseline, and agreement with its formula is not physical validation of the complete lift law. |
 | 2026-09-27 | Recorded the unfitted small-angle comparison: 12 of 36 primary plate observations have nonoverlapping intervals; no coefficient was tuned. |
 | 2026-09-27 | Added reproducible primary-symbol digitization of plate CL/CD with separate measurement intervals and extraction bounds; no model fitting or acceptance verdict. |
