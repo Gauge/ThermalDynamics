@@ -109,6 +109,8 @@ namespace Thermodynamics
             methods["GetGridFrictionWatts"] = Guard(new Func<IMyCubeGrid, float>(GetGridFrictionWatts), "GetGridFrictionWatts");
             methods["GetGridAeroForces"] = Guard(new Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>(GetGridAeroForces), "GetGridAeroForces");
             methods["GetGridAeroMoments"] = Guard(new Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>(GetGridAeroMoments), "GetGridAeroMoments");
+            methods["GetGridAeroProfile"] = Guard(new Func<IMyCubeGrid, Dictionary<string, object>>(GetGridAeroProfile), "GetGridAeroProfile");
+            methods["SetGridAeroProfileConsumer"] = Guard(new Func<IMyCubeGrid, long, bool, bool>(SetGridAeroProfileConsumer), "SetGridAeroProfileConsumer");
             methods["GetGridAeroStatus"] = Guard(new Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>(GetGridAeroStatus), "GetGridAeroStatus");
             methods["GetCoolantLoop"] = Guard(new Func<IMySlimBlock, MyTuple<bool, float, float, float, int>>(GetCoolantLoop), "GetCoolantLoop");
             methods["SetBlockDragProfile"] = Guard(new Func<IMySlimBlock, float[], bool>(SetBlockDragProfile), "SetBlockDragProfile");
@@ -254,6 +256,18 @@ namespace Thermodynamics
             return thermals == null ? new MyTuple<bool, bool, int, int>(false, false, 0, 0)
                 : new MyTuple<bool, bool, int, int>(thermals.AeroReady, thermals.AeroGuarded,
                     thermals.AeroBuildWork, thermals.AeroCentreWork);
+        }
+
+        private static Dictionary<string, object> GetGridAeroProfile(IMyCubeGrid grid)
+        {
+            ThermalGrid thermals = GridOf(grid);
+            return thermals == null ? null : thermals.CopyAeroProfile();
+        }
+
+        private static bool SetGridAeroProfileConsumer(IMyCubeGrid grid, long consumer, bool enabled)
+        {
+            ThermalGrid thermals = GridOf(grid);
+            return thermals != null && thermals.SetAeroProfileConsumer(consumer, enabled);
         }
 
         private static MyTuple<bool, float, float, float, int> GetCoolantLoop(IMySlimBlock block)

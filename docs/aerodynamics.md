@@ -1049,8 +1049,8 @@ and 2,553 offline tests pass; the corrected timing setup also has focused instru
 ### Engine boundary and lifecycle
 
 `EnableAeroForces` defaults on; `AeroProfileDirections` selects 98 directions by default or 26.
-They own new protocol slots 165/166. Off clears the per-grid runtime and suppresses all geometry,
-centre preparation and physics writes on the next tick. The force path runs on server and client
+They own new protocol slots 165/166. Off suppresses physics writes on the next tick. Without
+explicit API consumers it also clears geometry and suppresses centre/profile preparation. The force path runs on server and client
 in the main-thread publish phase, before the thermal-step early return. Aerodynamic exceptions
 are logged separately so they do not suppress thermal damage and post-step publication. It reads current world
 velocity, angular velocity and atmospheric density. Air density is the engine's relative value
@@ -1066,7 +1066,7 @@ then publishes the latest centre after preparation. Alternating ±0.01 mm input 
 completion before this policy; its regression now completes the 54-face rig in eight seven-face
 slices. Material changes still restart preparation. An unprepared grid submits
 zero force; construction or frequent changes can therefore create a force gap. Cold-start and
-edit-under-flight latency must be checked in game before closing AR19. Close and disable release
+edit-under-flight latency must be checked in game before closing AR19. Close and disable without external consumers release
 the retained state. Current engine mass guards translation; rotational guarding still uses the
 profile's cuboid diagonal inertia. This is an approximation, particularly for cargo, off-diagonal
 mass distributions and welded bodies; native spin and attachment cases remain unverified.
@@ -1096,8 +1096,8 @@ centre readiness, rotational covariance, linear density dependence, impulse unit
 registration/clearing. The world-coordinate adapter is also flown against the independent
 body-coordinate control at 60/120 Hz: the S5 threshold remains unchanged, and final angle and
 recovery time must agree within 0.1°/0.1 s. The `aero-flight` command uses the world adapter for
-its moment rigs; its native counterpart, multiplayer prediction, population P1/P2 and public
-profile-table access remain open. These checks establish offline behavior, not native acceptance.
+its moment rigs; its native counterpart, multiplayer prediction, population P1/P2 and the lift portion of the
+profile table remain open. These checks establish offline behavior, not native acceptance.
 
 ## What this changes elsewhere
 
@@ -1113,10 +1113,35 @@ profile-table access remain open. These checks establish offline behavior, not n
   control, and links a `docs/thermal-dynamics.md` that is not in that repository. Both go stale
   when the strip ships. That repository is not edited from here.
 
+## Public profile access
+
+`GetGridAeroProfile` exports the prepared drag geometry as a detached schema-1 dictionary; field
+layout, units and interpolation are specified in [api.md](api.md#aerodynamic-profile-snapshot-schema-1).
+It does not force synchronous preparation. Explicit `SetGridAeroProfileConsumer` registrations
+keep the normal bounded preparation running for another force mod while `EnableAeroForces` is off.
+Without external consumers, off still discards geometry and does no profile work. Each consumer
+releases its own stable id; grid close drops all registrations. Preparation and copies use the same
+per-grid lock so centre publication cannot interleave with an API copy. Native dispatch and
+multiplayer consumer lifecycle remain session checks; this does not claim those have run.
+
+### Profile API verification criteria
+
+Before running the snapshot tests: both 26- and 98-direction exports must reconstruct all nine
+interpolated summary fields for non-axis winds, and signed damping must reproduce the evaluator
+within float-rounding tolerance. Mutating every exported array must leave the live profile and a
+second export unchanged. A retained snapshot must survive topology and centre changes unchanged.
+A getter during partial preparation must return null and do no work. Repeated registration of one
+consumer must not accumulate demand; two consumers must release independently. External demand
+with force writes disabled must still finish within the same work budgets, and releasing all demand
+must restore zero-work, zero-allocation disabled frames. Native API availability is checked by the
+installed whitelist probe; a build alone is insufficient. These checks do not close native flight,
+multiplayer or the lift portion of AR19.
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Published drag-profile geometry and damping through a detached snapshot API. External consumers can request bounded preparation with force writes disabled. Six offline cases cover geometry reconstruction, damping signs, snapshot ownership and demand lifecycle; native consumer dispatch and lift data remain open. |
 | 2026-09-27 | Connected bounded profiles to the engine adapter and documented engine force/angular conversion, centre jitter, API face overrides and remaining native limits. Recorded [adapter evidence](../tests/benchmarks/aerodynamics/engine-adapter-2026-09-27.txt): 2,565 offline cases pass; S5 recovers at 29.0 s, S6 diverges, S7 density scaling holds, with no guards in these flight rigs. |
 | 2026-09-26 | Added bounded centre preparation with atomic publication, exact legacy-equivalence checks and zero allocation. Recorded initial and warmed timing runs, including the warmup correction, repeat caps and observed maxima. |
 | 2026-09-26 | Corrected the budgeted builder cache for sub-millimetre centre changes before the first damping read. The legacy implementation measured at that first-read centre; the new preparation had incorrectly reused the initial centre. Added a bit-identity regression and corrected the first-use cost scope in place (E10). |

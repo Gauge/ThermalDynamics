@@ -62,6 +62,8 @@ Unregister the handler in `UnloadData`.
 | `GetGridFrictionWatts` | `Func<IMyCubeGrid, float>` | Watts the grid is taking from the air by aerodynamic friction. **One term of the second figure above, not a third one** — adding them counts it twice. |
 | `GetGridAeroForces` | `Func<IMyCubeGrid, MyTuple<Vector3,Vector3>>` | The aerodynamic forces this mod applies to the grid, in **world newtons**: drag first, then lift. Drag is the force applied in the latest physics tick; lift remains zero until its separate model is implemented. Disabled, static and unprepared grids report zero. Its meaning and the major are unchanged ([aerodynamics.md](aerodynamics.md#strip-and-rebuild)). |
 | `GetGridAeroMoments` | `Func<IMyCubeGrid, MyTuple<Vector3,Vector3>>` | Latest restoring and rotational-damping moments in **world N·m**, separately. |
+| `GetGridAeroProfile` | `Func<IMyCubeGrid, Dictionary<string,object>>` | Detached snapshot of the last fully prepared drag profile, schema below. Null while unavailable, rebuilding or preparing a new centre. Allocates copies only when called; never builds geometry in the getter. |
+| `SetGridAeroProfileConsumer` | `Func<IMyCubeGrid, long, bool, bool>` | Registers/releases a consumer id on a simulated grid; returns false if unavailable. Repeating an id is idempotent. Each add-on uses its own stable id (e.g. workshop id) and releases every registered grid when finished. Any remaining consumer keeps bounded profile preparation running even with forces off (including static grids with physics), without enabling force writes. Registrations are session-local and removed on grid close; client and server register independently. |
 | `GetGridAeroStatus` | `Func<IMyCubeGrid, MyTuple<bool,bool,int,int>>` | Latest profile readiness, numerical-guard binding, construction work units and centre-update face count. Readiness does not certify native or population validation. |
 | `GetCoolantLoop` | `Func<IMySlimBlock, MyTuple<bool,float,float,float,int>>` | The coolant loop a pipe block belongs to: found, mean temperature K, hottest pipe K, coldest pipe K, pipe count. `GetGridSummary` gives the loop *count*; this reads a loop. Keyed on a pipe block, not a loop index, because a rebuild reorders the list but the block a player placed is stable. Hottest and coldest are given beside the mean because a working loop has a gradient the mean hides. Found is false for a block that is not a pipe, is on no loop, or is not simulated. |
 | `SetBlockDragProfile` | `Func<IMySlimBlock, float[], bool>` | Six multipliers in face order, each 0..1, telling the aerodynamic terms this block is more slippery on some faces than its area says — a nacelle is slippery nose-on and blunt side-on, and an axis-aligned face count cannot tell. **A profile may only reduce**: anything over 1, under 0, or not a number is clamped to 1, which is *no change*. Touches friction heating and the wind's convection and **not** the sun; the rebuilt force reads it too. |
@@ -84,6 +86,35 @@ if (loop.Item1)                       // this block is on a loop
     int pipes = loop.Item5;
 }
 ```
+
+### Aerodynamic profile snapshot, schema 1
+
+Every dictionary and array belongs to the caller. Editing or retaining it cannot alter the live
+profile, and it remains unchanged across later hull/centre updates. Copying is serialized with the
+adapter's preparation; callers need not select an update phase. Read occasionally and cache it:
+this getter allocates O(direction count) storage on every successful call. Registration schedules
+work on subsequent physics ticks; it does not make the profile ready synchronously. Poll the getter
+for availability. With forces disabled and no registered consumers, no profile work runs.
+
+| Key | Runtime type | Meaning |
+| --- | --- | --- |
+| `Schema` | `int` | 1. Consumers must reject versions they do not understand. |
+| `Directions` | `Vector3[]` | N upstream unit vectors in grid axes, N = 26 or 98. |
+| `Areas` | `float[]` | N consecutive rows of five values: silhouette, cosine-squared facing area, separated base area, wetted area (m²), then dimensionless fineness. Includes registered face multipliers. |
+| `FirstMoments` | `Vector3[]` | N rows of four first moments matching the four areas above, in m³ about the grid origin. These are weighted sums, not pressure-centre positions. |
+| `InterpolationExponent` | `float` | Exponent p for weights max(0, upstream·direction)^p; discard weights below 1e-6 and normalize the remaining sum. Interpolate each area, moment and fineness independently. |
+| `Mass` | `float` | Model mass in kg, which may differ from native welded-body mass. |
+| `CentreOfMass` | `Vector3` | Latest prepared centre in grid-local metres. |
+| `Inertia` | `Vector3` | Model diagonal inertia, kg·m², with the approximations in aerodynamics.md. |
+| `DampingCentre` | `Vector3` | Centre used for the cached damping integrals; it can differ from CentreOfMass within the existing 1 mm cache tolerance. |
+| `DampingMoments` | `float[]` | Six nonnegative surface integrals (m⁵), in +X, −X, +Y, −Y, +Z, −Z spin order. Per-axis moment is −0.5·density·RotationalDrag·integral·ω·abs(ω). |
+| `RotationalDrag` | `float` | Dimensionless coefficient for those damping integrals. |
+
+Schema 1 contains the implemented drag geometry only. It contains no lift planform/span,
+compressibility, native inertia tensor or force-ownership agreement. A separate force mod can
+register demand, turn `EnableAeroForces` off through the settings API, and read this geometry while
+owning its own forces. Releasing a consumer does not change the world's force setting. Turning off
+forces and releasing the final consumer clears the prepared geometry on the next physics tick.
 
 ## Writing
 
@@ -212,6 +243,7 @@ than *not within a major*.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added detached schema-1 drag-profile snapshots and explicit per-grid consumer registration. Documented all fields, units, lifetime, copy cost and force-off behavior; added matching drop-in client bindings. |
 | 2026-09-27 | Added current applied drag, separate restoring/damping moments and preparation status to the grid API and drop-in client; registered face overrides now reach profile construction. |
 | 2026-09-24 | `GetGridAeroForces` returns zero vectors: the aerodynamic force it reports was stripped (`K25` step 0), and the key's meaning — the force this mod applies — is unchanged, so the major stays 1. `SetBlockDragProfile` touches friction heating and convection until the force returns. |
 | 2026-09-05 | **Two shipped systems gained the read accessors an audit found missing** (additions, so the major stays 1). `GetGridAeroForces` returns the drag and lift force *vectors* in world newtons, where only the scalar friction watts had been exposed — a flight mod could read the heat and not the force. `GetCoolantLoop` reads a coolant loop's mean, hottest and coldest pipe temperatures and its pipe count off any pipe block, where `GetGridSummary` had given only the loop count — the cooling feature the mod is named for was write-only-invisible to a consumer. |

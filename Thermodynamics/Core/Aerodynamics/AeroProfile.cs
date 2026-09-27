@@ -85,6 +85,30 @@ namespace Thermodynamics.Core
             return list.ToArray();
         }
 
+        /// <summary>Detached schema-1 geometry. Called only after bounded centre preparation completes.</summary>
+        internal Dictionary<string, object> CopySnapshot()
+        {
+            float[] areas = new float[directions.Length * 5];
+            Vector3[] moments = new Vector3[directions.Length * 4];
+            for (int i = 0; i < directions.Length; i++)
+            {
+                AeroSummary s = summaries[i];
+                int a = i * 5, m = i * 4;
+                areas[a] = s.Silhouette; areas[a + 1] = s.Facing; areas[a + 2] = s.Base;
+                areas[a + 3] = s.Wetted; areas[a + 4] = s.Fineness;
+                moments[m] = s.SilhouetteMoment; moments[m + 1] = s.FacingMoment;
+                moments[m + 2] = s.BaseMoment; moments[m + 3] = s.WettedMoment;
+            }
+            return new Dictionary<string, object>
+            {
+                { "Schema", 1 }, { "Directions", (Vector3[])directions.Clone() },
+                { "Areas", areas }, { "FirstMoments", moments }, { "InterpolationExponent", sharpness },
+                { "Mass", Mass }, { "CentreOfMass", CentreOfMass }, { "Inertia", Inertia },
+                { "DampingCentre", dampingCentre }, { "DampingMoments", (float[])damping.Clone() },
+                { "RotationalDrag", RotationalDrag }
+            };
+        }
+
         /// <summary>The drag model's sums for air arriving from <paramref name="upstream"/>, interpolated from the table.</summary>
         public AeroSummary Summary(Vector3 upstream)
         {
