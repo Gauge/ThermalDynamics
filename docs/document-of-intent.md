@@ -340,7 +340,10 @@ cooling**: the thing you reach for when a block is about to go, not a way to run
 
 **The two questions differ by an order of magnitude, which is what makes the design work.** Against
 a five-kilogram CO2 bottle — 3.3 MJ if every gram lands, which is not how an extinguisher works —
-over the 72 vanilla block types that reach their own critical temperature:
+over the 72 vanilla block types that reach their own critical temperature, using their physical
+heat capacity. These are reference inventory costs, not the effect of injecting 3.3 MJ into the
+accelerated solver; the [clock-basis correction](balance.md#what-a-hand-tool-would-have-to-be-worth)
+explains the distinction:
 
 | | median block | ninetieth percentile | worst |
 | --- | ---: | ---: | ---: |
@@ -352,13 +355,15 @@ The solver damages an overheating block at `(T − critical) × OverheatDamagePe
 what stops the damage is removing the *overshoot* rather than the heat — and an overshoot is tens of
 kelvin where the rise from ambient is hundreds.
 
-**So the tool saves ordinary blocks and cannot save the big ones**, which is the mechanic rather than
-a limitation of it: half a bottle pulls a median block back from the brink, and ninety do nothing for
-a capital reactor. A player who wants their reactor to survive still has to build for it.
+**The intended mechanic is to save ordinary blocks while preserving the need to build for heat.**
+The physical reference supports that distinction, but a working tool must still demonstrate it with
+its chosen ammunition energy, transfer efficiency and clock conversion. The scanner-only tool has
+not yet demonstrated either outcome.
 
-**What it does not become is a cooling system.** Twenty bottles discharging at once is 3.3 MW, which
-is a large radiator with a trigger; the numbers above are what keeps the extinguisher an emergency
-measure instead. `HandCoolingTests` holds both halves.
+**What it must not become is a cooling system.** The earlier argument that twenty simultaneous
+bottles proves this used physical return energy divided by a game-time damage window; it does not
+establish the delivered power required by a future implementation. `HandCoolingTests` preserves
+the reference calculations and distinguishes their clock bases. Ammunition balance remains open.
 
 ### Thermal vision — wanted, method unknown
 
@@ -1526,6 +1531,7 @@ as a *second* change rather than as a substitute. [backlog](backlog.md) `D19`.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Scoped hand-cooling figures to physical reference inventory and withdrew the untested claim that those figures establish the implemented tool balance. |
 | 2026-09-27 | Refreshed the offline suite count to 2,603 cases after adding aerodynamic population controls. |
 | 2026-09-27 | Updated the current aerodynamic composition and implementation status for the rebuilt engine adapter; preserved the superseded design as historical context. |
 | 2026-09-24 | *Not authoritative over the game's own systems* says the mod writes nothing to a ship's physics again: `K25`'s first step stripped the aerodynamic force, and the owner's decisions recorded the same day (aerodynamics.md) are what brings it back. The reasoning around it is unchanged. |

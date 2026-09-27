@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Harness;
+using Thermodynamics.Core;
+using VRageMath;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,10 +21,9 @@ namespace Thermodynamics.Tests
     /// </para>
     ///
     /// <para>
-    /// **The comparison is physical and the clock cannot move it.** `HeatTimeScale` divides every
-    /// heat capacity, which makes a kelvin cheaper for a block's waste heat and for a tool's
-    /// cooling by exactly the same factor. So every figure here is in watts and joules, and the
-    /// answer holds at any value of the dial.
+    /// **The bottle inventory comparison uses physical capacity.** The steady cooling/waste
+    /// power ratio is independent of HeatTimeScale; finite-energy temperature changes and
+    /// game-time survival windows are not. These controls keep the two bases distinct.
     /// </para>
     /// </summary>
     public class HandCoolingTests
@@ -172,6 +173,37 @@ namespace Thermodynamics.Tests
                     + HandCoolingLab.Quantile(bottles, 0.5d).ToString("n1")
                     + " bottles, which is not a hand tool");
             }
+        }
+
+        [Theory]
+        [InlineData(1f, 0.1f)]
+        [InlineData(90f, 9f)]
+        [InlineData(225f, 22.5f)]
+        public void FixedJoulesHaveAClockDependentTemperatureEffect(float scale, float expectedKelvin)
+        {
+            BlockModel model = new BlockModel { Mass = 100f };
+            model.Thermal.SpecificHeat = 450f;
+            ThermalNode node = new ThermalNode(new BlockInstance(model, Vector3I.Zero,
+                BlockOrientation.Identity), 2.5f, 500f, scale);
+
+            Assert.Equal(expectedKelvin, 4500f / node.ThermalMass, 4);
+            Assert.Equal(45000f, node.ThermalMass * scale, 1);
+        }
+
+        [Fact]
+        public void PhysicalInventoryAndWindowPowerHaveDifferentClockDependence()
+        {
+            HandCoolingLab.Price slow = new HandCoolingLab.Price
+                { ReturnJoules = 3300000f, HoldWatts = 165000f, WindowSeconds = 20f };
+            HandCoolingLab.Price fast = new HandCoolingLab.Price
+                { ReturnJoules = 3300000f, HoldWatts = 165000f, WindowSeconds = 10f };
+
+            Assert.Equal(1f, slow.BottlesToReturn);
+            Assert.Equal(1f, fast.BottlesToReturn);
+            Assert.Equal(2f, slow.BottlesAtOnce);
+            Assert.Equal(3f, fast.BottlesAtOnce);
+            Assert.True(slow.OneBottleHolds);
+            Assert.True(fast.OneBottleHolds);
         }
 
         [Fact]
