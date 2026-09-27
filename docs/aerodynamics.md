@@ -1006,6 +1006,26 @@ numbers is a before/after speed ratio. The game-target build and **2,539 offline
 corpus walks were not enabled. Engine scheduling, mass-centre updates and P1/P2 population
 validation remain open.
 
+### Budgeted centre updates
+
+`PrepareCentreOfMass(centre, faceBudget, out used)` prepares at most the requested number of
+exposed faces per call. The old centre and damping remain visible until every face is ready;
+completion publishes both together. Changing the requested centre restarts partial preparation,
+and the legacy synchronous setter cancels it. The existing cumulative 1 mm cache threshold is
+preserved. The caller must wait for success before using the requested centre for physics; rapid
+mass changes can postpone completion. This is preparation, not a new model of inertia.
+
+Acceptance before timing: `AeroCentreUpdateTests` requires bit-identical force, pressure centre,
+restoring torque and damping against the legacy implementation for both resolutions and face
+budgets 1/7/100000; the cube must visit exactly its 54 exterior faces. Partial work must leave
+all four live outputs unchanged. Additional checks cover target replacement, legacy cancellation,
+the cumulative threshold, invalid input, zero budget and zero allocation through interrupted
+preparation followed by its first evaluation. `aero-profile` adds `centre-slice-peak-26/98`,
+whose samples each record the slowest preparation call for a completed shift at 256 exposed
+faces per call. Profile construction is outside those samples; face/slice counts must agree
+between repeats. `AeroProfileLabTests` checks those counts on a cube with 54 exterior faces.
+Engine integration remains open.
+
 ## What this changes elsewhere
 
 - [document-of-intent.md](document-of-intent.md): *Not a flight model* is reversed as a whole and

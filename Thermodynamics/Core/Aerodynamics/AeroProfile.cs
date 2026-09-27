@@ -31,6 +31,10 @@ namespace Thermodynamics.Core
         private Vector3 dampingCentre = new Vector3(float.NaN);
         private readonly float[] damping = new float[6];
         private bool dampingObserved;
+        private readonly float[] pendingDamping = new float[6];
+        private Vector3 pendingCentre;
+        private int pendingFace;
+        private bool centrePending;
 
         /// <summary>The hull's mass, kg.</summary>
         public float Mass { get; private set; }
@@ -235,6 +239,51 @@ namespace Thermodynamics.Core
         public void SetCentreOfMass(Vector3 centre)
         {
             CentreOfMass = centre;
+            centrePending = false;
+        }
+
+        /// <summary>
+        /// Prepares at most faceBudget exposed faces and atomically publishes centre and damping when
+        /// complete. A different target discards partial work; until completion the previous centre stays live.
+        /// </summary>
+        public bool PrepareCentreOfMass(Vector3 centre, int faceBudget, out int used)
+        {
+            used = 0;
+            for (int axis = 0; axis < 3; axis++)
+            {
+                float component = axis == 0 ? centre.X : axis == 1 ? centre.Y : centre.Z;
+                if (float.IsNaN(component) || float.IsInfinity(component))
+                    throw new ArgumentException("The aerodynamic centre must be finite.", "centre");
+            }
+            if (faceCentres.Count == 0 || ((dampingObserved || dampingCentre == centre)
+                && Vector3.DistanceSquared(dampingCentre, centre) <= 1e-6f))
+            {
+                CentreOfMass = centre;
+                dampingObserved = true;
+                centrePending = false;
+                return true;
+            }
+            if (faceBudget <= 0) return false;
+            if (!centrePending || pendingCentre != centre)
+            {
+                pendingCentre = centre;
+                pendingFace = 0;
+                Array.Clear(pendingDamping, 0, pendingDamping.Length);
+                centrePending = true;
+            }
+            while (used < faceBudget && pendingFace < faceCentres.Count)
+            {
+                AccumulateDamping(faceCentres[pendingFace] - centre, faceNormals[pendingFace], pendingDamping);
+                pendingFace++;
+                used++;
+            }
+            if (pendingFace < faceCentres.Count) return false;
+            Array.Copy(pendingDamping, damping, damping.Length);
+            CentreOfMass = centre;
+            dampingCentre = centre;
+            dampingObserved = true;
+            centrePending = false;
+            return true;
         }
 
         internal void SetMassProperties(float mass, Vector3 centre, Vector3 inertia, float area)
@@ -252,17 +301,17 @@ namespace Thermodynamics.Core
         {
             faceCentres.Add(centre);
             faceNormals.Add(normal);
-            AccumulateDamping(centre - CentreOfMass, normal);
+            AccumulateDamping(centre - CentreOfMass, normal, damping);
         }
 
         private void MeasureDamping()
         {
             Array.Clear(damping, 0, damping.Length);
-            for (int i = 0; i < faceCentres.Count; i++) AccumulateDamping(faceCentres[i] - CentreOfMass, faceNormals[i]);
+            for (int i = 0; i < faceCentres.Count; i++) AccumulateDamping(faceCentres[i] - CentreOfMass, faceNormals[i], damping);
             dampingCentre = CentreOfMass;
         }
 
-        private void AccumulateDamping(Vector3 r, Vector3 n)
+        private void AccumulateDamping(Vector3 r, Vector3 n, float[] moments)
         {
             for (int axis = 0; axis < 3; axis++)
             {
@@ -272,8 +321,8 @@ namespace Thermodynamics.Core
                 if (arm < 1e-4f) continue;
                 float facing = Vector3.Dot(n, motion) / arm;
                 float term = faceArea * Math.Abs(facing) * arm * arm * arm;
-                if (facing > 0f) damping[axis * 2] += term;
-                else if (facing < 0f) damping[(axis * 2) + 1] += term;
+                if (facing > 0f) moments[axis * 2] += term;
+                else if (facing < 0f) moments[(axis * 2) + 1] += term;
             }
         }
     }

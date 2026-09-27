@@ -57,6 +57,20 @@ namespace Thermodynamics.Tests
             Assert.Contains("slices=" + slices + ";", row.Note);
         }
 
+        [Theory]
+        [InlineData(26)]
+        [InlineData(98)]
+        public void CentreSlicesReportEveryExposedFaceAndItsLargestCall(int directions)
+        {
+            var row = AeroProfileLab.MeasureSlices(3, directions, 7, 2, 2, true);
+            Assert.Equal("centre-slice-peak-" + directions, row.Stage);
+            Assert.Equal(2, row.Repeats);
+            Assert.Equal(2, row.Samples.Count);
+            Assert.Equal(0, row.AllocatedBytes);
+            Assert.Contains("work=54; slices=8;", row.Note);
+            Assert.Equal("maximum-slice", row.WorkUnit);
+        }
+
         [Fact]
         public void ACostRunCannotReportAnEmptyPopulationOrOneSample()
         {
