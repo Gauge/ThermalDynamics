@@ -1341,6 +1341,14 @@ injection, the original independent controls, and reproduction of the six diagno
 Those hulls informed this correction and are not held-out validation. No thrust or drag
 coefficient, force tolerance, acceptance threshold or population exclusion changes.
 
+[Validation record](../tests/benchmarks/aerodynamics/population-envelope-stability-2026-09-27.txt)
+and [six complete input/certificate pairs](../tests/benchmarks/aerodynamics/population-envelope-stability-2026-09-27.json)
+record source `060c101`: 227 Python checks passed and one unrelated historical-census check
+was skipped because its external dataset was absent in the isolated checkout. All forty new
+exhaustive controls and all six diagnosed specimens passed; the largest new-control discrepancy
+was 9.10×10⁻¹³ N. One specimen retains an unresolved fixed-heading LP cross-check explicitly.
+These are instrument checks, not a population acceptance verdict.
+
 ### Instrument validation and end-to-end pilot
 
 [Recorded validation](../tests/benchmarks/aerodynamics/population-runner-2026-09-27.txt) at

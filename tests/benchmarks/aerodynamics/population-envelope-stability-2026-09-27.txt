@@ -1,0 +1,18 @@
+Thrust-envelope numerical correction validation
+Implementation source: 060c101 (parent db320bb3)
+Command: python3 -m unittest discover -s tools/corpus -p 'test_*.py'
+Resource scope: MemoryMax=12G, MemorySwapMax=0.
+228 tests run: 227 passed, 1 skipped. The skipped historical census-column integration check requires out/census-2026-08-25/census.csv, absent from the isolated checkout. No new envelope or population test was skipped.
+Independent exhaustive controls: 80 general nonzero cases, maximum discrepancy 4.54747351e-13 N; 40 additional nearly parallel/coplanar nonzero cases, maximum discrepancy 9.09494702e-13 N. Directional LP independent oracle: 80 nonzero cases, maximum discrepancy 2.13162821e-13 N.
+Fault controls retain fixed-ray conditioning rejection, reject invalid binary witnesses, reject support-bound gaps, reject LP disagreement and propagate other solver faults. The point budget remains enforced.
+Six diagnosed workshop specimens are archived with their original frozen-reader inputs, blueprint SHA256 and harness/core MVID, and corrected full certificates in the adjacent JSON. These specimens informed implementation and are not held-out controls. Five retain resolved directional LP cross-checks; 1639755227 records its near-rank LP rejection explicitly while the known-resultant witness and support bound certify the selected ray.
+No population verdict follows from these six specimens. The first complete corpus generation continues unchanged with its original instrument; a corrected generation must use a fresh fingerprinted output directory. No force coefficient or acceptance threshold changed.
+Reproduction: import tools/corpus/aeroenvelope.py with tools/corpus on sys.path, read each specimens[].input in the adjacent JSON, and call aeroenvelope.maximum(input). Compare capacity, residual, duality gap and directional_lp status within the recorded tolerance. The stored input_sha256 hashes the original extraction wrapper bytes, while blueprint_sha256 in input identifies the source blueprint.
+
+Six-specimen console output:
+1639755227 11017954.012683969 -1.862645149230957e-09 8 unresolved-near-rank
+1921621403 13661039.491927398 1.862645149230957e-09 8 resolved
+2103347482 3961903.9312429763 -4.656612873077393e-10 112 resolved
+2573734531 3887999.999998288 4.656612873077393e-10 14 resolved
+3153101248 15905959.353919653 0.0 14 resolved
+3281995444 31589822.016919587 3.725290298461914e-09 134 resolved
