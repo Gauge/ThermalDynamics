@@ -242,6 +242,7 @@ server, and `K21` a debugging convenience.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added and validated K25 population-input prerequisites: saved subgrid frames, force/exhaust sign and atmospheric thrust effectiveness. The complete directional population scorer and P1/P2 walk remain open. |
 | 2026-09-27 | Recorded public drag-profile access and external consumer demand within K25; native handling, population validation and the later flight-model steps remain open. |
 | 2026-09-27 | Recorded the K25 engine adapter, switches and lifecycle implementation. Native handling, multiplayer, edit latency, profile-table API and P1/P2 remain open. |
 | 2026-09-26 | Recorded K25 step 1 as partly built: the offline profile and moment rigs are validated, while integration and population validation remain open. |

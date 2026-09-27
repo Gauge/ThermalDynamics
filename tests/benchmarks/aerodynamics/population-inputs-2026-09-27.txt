@@ -1,0 +1,189 @@
+K25 population input validation
+Recorded UTC: 2026-09-27T04:44:28.774281+00:00
+Input implementation/full-suite/audit source: 41ec7ff
+Current source before final test/documentation commit: 96e522899f44e2b3a601eab31937d613d22858b5
+Host: Linux-7.2.5-200.fc44.x86_64-x86_64-with-glibc2.43
+All dotnet and ilspy commands were run under systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0 --quiet.
+Scope: synthetic controls plus two blueprint input audits. No complete population walk or native physics execution.
+Full suite ran on 41ec7ff. The final focused rerun additionally strengthens quaternion-only and distinct-grid-pose assertions; harness/product code is unchanged.
+
+Installed engine source inspection:
+ilspycmd 11.0.0.9375 -t TYPE ASSEMBLY (outputs retained in /tmp for this investigation).
+Sandbox.Game.Entities.MyThrust: ThrustForce is negative ThrustForwardVector times nominal magnitude and multiplier; forward is block Orientation.Forward.
+Sandbox.Game.EntityComponents.MyThrusterBlockThrustComponent: CalculateForceMultiplier clamps normalized influence between declared endpoints, interpolates declared effectiveness, uses minimum effectiveness without required atmosphere, and uses one when endpoints coincide.
+Sandbox.Game.GameSystems.MyEntityThrustComponent: RecalculatePlanetaryInfluence obtains relative density from closestPlanet.GetAirDensity and HasAtmosphere separately.
+Sandbox.Definitions.MyThrustDefinition: copies influence/effectiveness from the object builder.
+VRage.Game.MyObjectBuilder_ThrustDefinition: default influence [0,1], default effectiveness [1,1], NeedsAtmosphereForInfluence false.
+VRage.MyPositionAndOrientation: Orientation setter writes Forward/Up from Matrix.CreateFromQuaternion; GetMatrix uses MatrixD.CreateWorld(Position,Forward,Up).
+The offline reader processes assignments in XML order and reports missing/degenerate/nonfinite poses; it does not silently substitute identity as usable flight data.
+
+Native assemblies and decompiled-source digests:
+SHA256 /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/Sandbox.Game.dll: de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf
+SHA256 /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/VRage.Game.dll: f0970c2b60335f7690e158a485cd528703717c8c5002f2713556e04f09c508e1
+SHA256 /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/VRage.dll: ec2410b3d916adbd7404c3082ccc25a70c8baec89bacb57001c67597068e24ca
+SHA256 /tmp/aero-native-thrust.cs: 8d520c30024ae86d1c6b1c434c6bde732adea405499ed6113caa2d694ee911eb
+SHA256 /tmp/aero-native-thrust-component.cs: 575b28d05989b5184db115dcf1b2bd658a9316ccfe23752676e62f0c4cb15bce
+SHA256 /tmp/aero-native-entity-thrust.cs: e5df7ffbdc6b451b3da99572080da2ea74362e8edc82a250256a8c16ea05bbc9
+SHA256 /tmp/aero-native-thrust-definition.cs: e301fb19497620efe5013d57a6641df9ec9dd3180dbfdbb418c8181d9cfeafad
+SHA256 /tmp/aero-native-thrust-builder.cs: 171efcdcfea80f116e966efded14e26d18a83c9c9bd436794372113da7de1a2d
+SHA256 /tmp/aero-native-position.cs: d7fa32df18558a1dcde2ce8ed4463feea23f95d5ffc8ac55e9783ddde72e0f80
+
+GameBlocks input manifest (all directly enumerated CubeBlocks/*.sbc, plus Components.sbc):
+SHA256 Content/Data/Components.sbc: 0b6fc6d3639b002a2996124aaf996ac72b3049a4eadf0f729d6074d696d8edf4
+SHA256 Content/Data/CubeBlocks/BlockPositions.sbc: b151a392b12043f3e7a2fe72d8260c8b5c80e6d86ab334b6fb95865e473a510f
+SHA256 Content/Data/CubeBlocks/CubeBlocks_ApexSurvivalPack.sbc: a232f7efae6f5f37d52ca86de22fbc7c71302bcc27274130f7dea3de59e29674
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Armor.sbc: f36c38b497fb532da9996f25bc38449a00e3fe2fdc8ed3a42e15ee7a2c0f3d66
+SHA256 Content/Data/CubeBlocks/CubeBlocks_ArmorPanels.sbc: eaeab6d28e8fea3904585ec7025a37fd651975de4d29793be995536eb9e94721
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Armor_2.sbc: 57912b81008ce011cdecb25856e337f13464090fdd6eafdadf3128702a88dec1
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Armor_3.sbc: 811e5aed6ffec4e2b3a23bae699effe93315ad46736a8297f97240886add0b82
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Automation.sbc: 62a6ed56207dedffe2c751a58e87ffe35fd38257db9dc29482ea5c3bc05b5e64
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Communications.sbc: e844fd0e3da4acf8aa6e2dcd61ffded3dd3397bf2df97d6a6fd30f05a18b7b96
+SHA256 Content/Data/CubeBlocks/CubeBlocks_ContactPack.sbc: e056beced0ec7b55ab4014b2c98d5c3ae2e174b9f888f99809148f97044e1566
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Control.sbc: 8d66279aa31fe8f5a34fe1edc57ef3b72c72b9e7025896b55e1d4e982e472b40
+SHA256 Content/Data/CubeBlocks/CubeBlocks_CoreSystemsPack.sbc: 5ccfc473414674a94d0d846372af8b8fbbc5ea763e747e7ccabfb13bf771e20c
+SHA256 Content/Data/CubeBlocks/CubeBlocks_DecorativePack.sbc: 21faf82784033bf90df0211152fe99775a12494bafe21e21a25e13a61df19e54
+SHA256 Content/Data/CubeBlocks/CubeBlocks_DecorativePack2.sbc: 53688911643837b436c825d5ce6603fb84369449e77c0b3894a9cc73f25e5512
+SHA256 Content/Data/CubeBlocks/CubeBlocks_DecorativePack3.sbc: 28676617553831a8978b595d27ea955479f2e03d6958ff529a9853bea77d98e9
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Doors.sbc: 80a41d1b97d50242652f3a7d10f86ad9f466bcae87336b052bc60b99d409213d
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Economy.sbc: 2ead3a2b0cf62746c56a462fc551c586d8e6818981f2de8a4567c3b78a4cfde2
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Economy2Pack.sbc: 48f7544a47e28b03f6907d84a84741363677b7b42891ccd71827f96d3081793e
+SHA256 Content/Data/CubeBlocks/CubeBlocks_EconomyDeluxe.sbc: a985052de77d34b858f99445716eb92995cb6d21f07720a76290be2580119cf6
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Energy.sbc: db10705933db5ba7b1080fb567a5ac60611715e056c62a86b59b92679b53e3c6
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Extras.sbc: 714502db3068c93a30387e29228fa4b13a111db430199bde1d6e64329f9b7763
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Fieldwork.sbc: 9c29712807c5f502e36c1d2340a3c5dbffeb411893384e60e7ef0831e452634c
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Frostbite.sbc: cc2b1e16b4e5675e834c759600b2f39d5bd030fa056548b0793ff709e123b444
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Gravity.sbc: 2c3442651607492a61d104f93b3b5f220ebe3ef048a989107652f31c0dac5699
+SHA256 Content/Data/CubeBlocks/CubeBlocks_GridAIPack.sbc: 64ded369d1c7c119e671c14211e257d425aea4777f9a936d4ac659cb69ba7e6e
+SHA256 Content/Data/CubeBlocks/CubeBlocks_IndustrialPack.sbc: 49205043d0bb0e01b6f4ad753fda24e44a89073bfdc59159d1d0ace8463fa0b0
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Interiors.sbc: ac494b31e392e5b62ed14308f581b81e503c67c165c7fcc7c02cb8e01c4ca753
+SHA256 Content/Data/CubeBlocks/CubeBlocks_LCDPanels.sbc: 15ab6af899a5525320b5db5d0c64b661c4b8273995ff6cacf665e8557d9f4364
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Lights.sbc: 927207018f69685e3e251606d8d4a04090cbe15302372c9258ab0ffd796ee8d2
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Logistics.sbc: 565c4a448ba309df7c8491ae7c67e744308c70c850cb1d4cfda4ea0a651a0327
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Mechanical.sbc: 45eecab865c03974c1796860e7caf249c2df7bd9ca16a3b1ec92d6cce35ab656
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Medical.sbc: 63a1c11e5a9f8309ed7894e3c68d880700ecf15ba9b68a052ccbd67c1b791f38
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Production.sbc: 26d908d04f6c059f6f1b6b65cd702a267544e9ef4cf88bc326689b6f6965724a
+SHA256 Content/Data/CubeBlocks/CubeBlocks_ProsperityPack.sbc: a051de1730148e9348dc5b7385df197e2b3dba9eb2828c7734e96df36e0abab0
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Prototech.sbc: 537ed9be7df099532b1ef24fec283b32837bf36cf148ed80f6b6c55f3bb3f3c6
+SHA256 Content/Data/CubeBlocks/CubeBlocks_ScrapRacePack.sbc: 1bf91252e69965efb3b54cb04ba9057be58f7e03ca7eb31f5b4810d937c35998
+SHA256 Content/Data/CubeBlocks/CubeBlocks_SignalsPack.sbc: b334693de50de768e0cb268cca646c84f2c3c103102facca8a6d9a99cd9ea2bf
+SHA256 Content/Data/CubeBlocks/CubeBlocks_SparksOfTheFuturePack.sbc: 8c1b726ccd43486863fc1dc501902c34eddf4fb870c298d190b08bf7d43bc3c7
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Structural.sbc: 0c277a38f72aaa777d9e3db2a06c30f64f09e51302f4e7c78455961aa2ffd2cf
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Symbols.sbc: a80279a1fec2ead443cdfc1cdeca4cd21b4e666da16ecbbe3b2895ee636d8322
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Thrusters.sbc: 32b6c37c7a3eec70d1bc6f380d81faaee3ddc33c89969a24bc448bf5465f7031
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Tools.sbc: 1a2fa06919388499f0e6d6939f69ee45e12a7c7702ec38675858aec6e4c1d5f0
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Utility.sbc: f0cb0fb846dcab775ce704bdafb4a23cf0e7c9750fb69b048a5f15be98a18d81
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Warfare1.sbc: 01f67e38eef504137c7276a6622584f578fc7743d58aaacc3d43f626956e77b6
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Warfare2.sbc: 8ab6305f481005fb9eca48ce4006f7b8546cb5cd292ee065c8515d068f0b042f
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Weapons.sbc: 110a4cbec2726e55f769b6f6db8a2c83f7af3d4e6b307eeebdbda6bdc6198317
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Wheels.sbc: 3c84aadd40cb146722f62cfecb20f4d613046161479a21fd9207aea37b751246
+SHA256 Content/Data/CubeBlocks/CubeBlocks_Windows.sbc: cd2d734f1dc7abcf77a5162deb1f444903d2f9942f9602d2cf35295e44e4ccd3
+SHA256 Content/Data/CubeBlocks/Testing.sbc: 8bec11a256c3001ee07b66096565bd149ca79479ba90d7573dbe16e229b6c6c7
+
+Audit sampling: 554650209 is the first blueprint path inspected during input research; not representative.
+Second audit: smallest multi-grid hull with thrust in out/census-2026-08-31/census.csv, sorted by (blocks, workshop_id): 2232450039, 47 blocks, 3 grids, 6 thrusters. All six thrusters are on its main grid; synthetic controls test rotated subgrid thrusters.
+Selection census SHA256: e961ac626ce5e0c4313362ca7cebf038c730f031c99c51c48a97de2963844dd4
+
+dotnet build tests/Thermodynamics.slnx --no-restore
+  Found ini file: /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/mdk.ini
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Binary path was resolved from global settings: /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Loading Space Engineers assemblies from /home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64/
+  Modkit -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tools/modkit/bin/Debug/netframework48/Modkit.dll
+  Thermodynamics.Presentation -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Presentation/bin/Debug/net9.0/Thermodynamics.Presentation.dll
+  Thermodynamics.Core -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Core/bin/Debug/net9.0/Thermodynamics.Core.dll
+  Thermodynamics -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/Thermodynamics/bin/Debug/netframework48/Thermodynamics.dll
+  Thermodynamics.Harness -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Harness/bin/Debug/net9.0/Thermodynamics.Harness.dll
+  Thermodynamics.Sim -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Sim/bin/Debug/net9.0/Thermodynamics.Sim.dll
+  Thermodynamics.Tests -> /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll
+  Your mod "Thermodynamics" has been successfully built.
+  The project was successfully packed.
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.79
+
+
+dotnet test tests/Thermodynamics.Tests --no-build
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  2589, Skipped:     0, Total:  2589, Duration: 1 m 23 s - Thermodynamics.Tests.dll (net9.0)
+
+
+dotnet test tests/Thermodynamics.Tests --no-build --filter 'FullyQualifiedName~AeroPopulationInputTests|FullyQualifiedName~BlueprintTests|FullyQualifiedName~Documentation'
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:    56, Skipped:     0, Total:    56, Duration: 1 s - Thermodynamics.Tests.dll (net9.0)
+
+
+dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs <554650209/bp.sbc>
+Aerodynamic population INPUT AUDIT; no P1/P2 verdict
+Blueprint: /home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/554650209/bp.sbc
+Blueprint SHA256: 1c667edfdcdb9dccbafe3397422060b18eb28e4ed2c6b1f86dc6854b169e97c5
+Harness MVID: 0bd1e45a-ee7e-4800-a9b8-0954efab8ebe
+Relative air density 1; atmosphere present; unlimited fuel/power; multiplier one.
+World-space unit force directions; nominal/effective ratings in N; functional blocks assumed.
+grid,cell_x,cell_y,cell_z,definition,direction_x,direction_y,direction_z,nominal_n,effective_n
+0,3,5,1,SmallBlockSmallAtmosphericThrust,0.28492942,0.95793897,-0.03417805,96000,96000
+0,-3,5,1,SmallBlockSmallAtmosphericThrust,0.28492942,0.95793897,-0.03417805,96000,96000
+0,9,5,6,SmallBlockLargeAtmosphericThrust,-0.9582055,0.2836926,-0.036887586,576000,576000
+0,-11,5,6,SmallBlockLargeAtmosphericThrust,-0.9582055,0.2836926,-0.036887586,576000,576000
+0,2,5,1,SmallBlockSmallAtmosphericThrust,0.28492942,0.95793897,-0.03417805,96000,96000
+0,-2,5,1,SmallBlockSmallAtmosphericThrust,0.28492942,0.95793897,-0.03417805,96000,96000
+0,2,7,14,SmallBlockSmallAtmosphericThrust,-0.025639998,0.043259952,0.9987348,96000,96000
+0,-1,8,11,SmallBlockSmallAtmosphericThrust,0.28492942,0.95793897,-0.03417805,96000,96000
+0,1,8,11,SmallBlockSmallAtmosphericThrust,0.28492942,0.95793897,-0.03417805,96000,96000
+0,-1,6,18,SmallBlockSmallAtmosphericThrust,-0.28492942,-0.95793897,0.03417805,96000,96000
+0,-4,7,11,SmallBlockSmallAtmosphericThrust,0.025639998,-0.043259952,-0.9987348,96000,96000
+0,0,3,15,SmallBlockSmallAtmosphericThrust,-0.28492942,-0.95793897,0.03417805,96000,96000
+0,0,4,15,SmallBlockSmallAtmosphericThrust,-0.28492942,-0.95793897,0.03417805,96000,96000
+0,-4,7,14,SmallBlockSmallAtmosphericThrust,0.025639998,-0.043259952,-0.9987348,96000,96000
+0,1,6,18,SmallBlockSmallAtmosphericThrust,-0.28492942,-0.95793897,0.03417805,96000,96000
+0,0,6,16,SmallBlockSmallAtmosphericThrust,-0.28492942,-0.95793897,0.03417805,96000,96000
+0,0,5,16,SmallBlockSmallAtmosphericThrust,-0.28492942,-0.95793897,0.03417805,96000,96000
+0,-4,7,13,SmallBlockSmallAtmosphericThrust,0.025639998,-0.043259952,-0.9987348,96000,96000
+0,2,7,13,SmallBlockSmallAtmosphericThrust,-0.025639998,0.043259952,0.9987348,96000,96000
+0,-1,6,24,SmallBlockLargeAtmosphericThrust,-0.9582055,0.2836926,-0.036887586,576000,576000
+0,-4,7,12,SmallBlockSmallAtmosphericThrust,0.025639998,-0.043259952,-0.9987348,96000,96000
+0,2,7,11,SmallBlockSmallAtmosphericThrust,-0.025639998,0.043259952,0.9987348,96000,96000
+0,2,7,12,SmallBlockSmallAtmosphericThrust,-0.025639998,0.043259952,0.9987348,96000,96000
+Grids inspected: 1; thrusters: 23
+
+
+
+dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs <2232450039/bp.sbc>
+Aerodynamic population INPUT AUDIT; no P1/P2 verdict
+Blueprint: /home/gauge/.local/share/thermal-dynamics/corpus/steamapps/workshop/content/244850/2232450039/bp.sbc
+Blueprint SHA256: e9e43c75c6ef5b13b52b5fe0d0f6ab982df9b555685480eb9bfe6a71b27b2b39
+Harness MVID: 0bd1e45a-ee7e-4800-a9b8-0954efab8ebe
+Relative air density 1; atmosphere present; unlimited fuel/power; multiplier one.
+World-space unit force directions; nominal/effective ratings in N; functional blocks assumed.
+grid,cell_x,cell_y,cell_z,definition,direction_x,direction_y,direction_z,nominal_n,effective_n
+0,0,-1,1,SmallBlockSmallThrust,-0.72678345,-0.3063201,-0.6147795,14400,2879.9998
+0,-1,0,0,SmallBlockSmallThrust,0.5797673,-0.7535304,-0.30993843,14400,2879.9998
+0,0,0,3,SmallBlockSmallThrust,-0.36831465,-0.58168715,0.7252478,14400,2879.9998
+0,-1,-1,1,SmallBlockSmallThrust,-0.5797673,0.7535304,0.30993843,14400,2879.9998
+0,1,-1,1,SmallBlockSmallThrust,0.72678345,0.3063201,0.6147795,14400,2879.9998
+0,-1,0,2,SmallBlockSmallThrust,0.36831465,0.58168715,-0.7252478,14400,2879.9998
+Grids inspected: 3; thrusters: 6
+

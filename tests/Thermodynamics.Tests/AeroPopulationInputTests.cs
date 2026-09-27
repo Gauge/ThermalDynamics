@@ -66,6 +66,10 @@ namespace Thermodynamics.Tests
             BlueprintFrame frame = BlueprintFrame.Read(pose);
             Assert.True(frame.Valid, frame.Error);
             Near(Vector3D.Left, frame.World.Forward);
+            XElement quaternionOnly = new XElement(pose);
+            quaternionOnly.Element("Forward").Remove();
+            quaternionOnly.Element("Up").Remove();
+            Near(Vector3D.Left, BlueprintFrame.Read(quaternionOnly).World.Forward);
             pose.Add(new XElement("Forward", new XAttribute("x", 0), new XAttribute("y", 0), new XAttribute("z", -1)));
             pose.Add(new XElement("Up", new XAttribute("x", 0), new XAttribute("y", 1), new XAttribute("z", 0)));
             Near(Vector3D.Forward, BlueprintFrame.Read(pose).World.Forward);
@@ -116,17 +120,19 @@ namespace Thermodynamics.Tests
                     new XElement("CubeBlocks", new XElement("MyObjectBuilder_CubeBlock",
                         new XElement("SubtypeName", "LargeBlockArmorBlock"),
                         new XElement("Min", new XAttribute("x", 0), new XAttribute("y", 0), new XAttribute("z", 0)))));
+                XElement other = new XElement(grid);
+                other.Element("PositionAndOrientation").ReplaceWith(Pose(MatrixD.Identity));
                 new XDocument(new XElement("Definitions", new XElement("ShipBlueprints", new XElement("ShipBlueprint",
-                    new XElement("CubeGrids", grid, new XElement(grid)))))).Save(path);
+                    new XElement("CubeGrids", grid, other))))).Save(path);
                 var ships = Blueprints.Read(path);
                 Assert.Single(ships);
                 Assert.Equal(2, ships[0].Grids.Count);
-                foreach (Blueprints.Grid part in ships[0].Grids)
-                {
-                    Assert.True(part.Frame.Valid, part.Frame.Error);
-                    Assert.Equal(translated.Translation, part.Frame.World.Translation);
-                    Near(Vector3D.Left, part.Frame.World.Forward);
-                }
+                Assert.All(ships[0].Grids, part => Assert.True(part.Frame.Valid, part.Frame.Error));
+                Blueprints.Grid shifted = Assert.Single(ships[0].Grids, part => part.Frame.World.Translation.X > 1e11);
+                Near(Vector3D.Left, shifted.Frame.World.Forward);
+                Assert.Equal(translated.Translation, shifted.Frame.World.Translation);
+                Blueprints.Grid origin = Assert.Single(ships[0].Grids, part => part.Frame.World.Translation == Vector3D.Zero);
+                Near(Vector3D.Forward, origin.Frame.World.Forward);
             }
             finally { File.Delete(path); }
         }

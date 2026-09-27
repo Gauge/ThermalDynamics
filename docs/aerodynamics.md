@@ -1164,10 +1164,16 @@ self-lifting population selection, multiple-grid geometry and complete resumable
 Historical nominal-thrust census results retain their original scope. No drag coefficients or P1/P2
 thresholds change with this input work.
 
+[Recorded input validation](../tests/benchmarks/aerodynamics/population-inputs-2026-09-27.txt) pins
+the installed engine/SBC sources and two blueprint audits. The full offline suite passes 2,589
+cases; 56 final focused checks pass after strengthening the pose tests. The multi-grid example
+has all six thrusters on its main grid; rotated subgrid force directions are covered synthetically.
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added retained blueprint world frames and engine-relative-density thrust ratings for the population lab. The aero-inputs command audits rated world-space thrust vectors; nominal census fields are unchanged and no P1/P2 verdict is claimed. |
 | 2026-09-27 | Published drag-profile geometry and damping through a detached snapshot API. External consumers can request bounded preparation with force writes disabled. Six offline cases cover geometry reconstruction, damping signs, snapshot ownership and demand lifecycle; native consumer dispatch and lift data remain open. |
 | 2026-09-27 | Connected bounded profiles to the engine adapter and documented engine force/angular conversion, centre jitter, API face overrides and remaining native limits. Recorded [adapter evidence](../tests/benchmarks/aerodynamics/engine-adapter-2026-09-27.txt): 2,565 offline cases pass; S5 recovers at 29.0 s, S6 diverges, S7 density scaling holds, with no guards in these flight rigs. |
 | 2026-09-26 | Added bounded centre preparation with atomic publication, exact legacy-equivalence checks and zero allocation. Recorded initial and warmed timing runs, including the warmup correction, repeat caps and observed maxima. |

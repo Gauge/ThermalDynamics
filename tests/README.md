@@ -379,6 +379,15 @@ centre-preparation slice in each centre update. Run it under the required
 memory cap without concurrent tests. The [aerodynamics lab record](../docs/aerodynamics.md#profile-construction-and-tick-cost)
 carries provenance, results and limits; synthetic timing is not population or live-frame validation.
 
+## Aerodynamic population inputs
+
+Run `dotnet run --no-build --project tests/Thermodynamics.Sim -- aero-inputs <blueprint>` under the
+memory cap after building. It prints each thruster's saved world-space force direction, nominal
+rating and atmospheric rating, plus the blueprint hash and harness MVID. Missing/invalid grid poses
+or unknown definitions fail the audit. The command does not build aerodynamic profiles or score
+P1/P2. [The population input record](../docs/aerodynamics.md#population-input-validation) states the
+engine source checks, synthetic controls and remaining population requirements.
+
 ## The balance commands
 
 Five commands, none of them a scenario or a benchmark. Each answers one balance question, each
@@ -658,7 +667,7 @@ PipeFitter.BuildRing(builder, ring);      // pump goes on the first straight run
 
 ## Test coverage
 
-2,571 tests. **What each class is for is stated in its own summary, not here** —
+2,589 tests. **What each class is for is stated in its own summary, not here** —
 the index below says where to look, and `EveryTestClassSaysWhatItIsFor` fails when a class arrives
 without saying. This table is checked by `EveryTestClassIsInTheIndex`, so a suite cannot be added
 and left off it.
@@ -725,6 +734,7 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added AeroPopulationInputTests for engine thrust curves, installed SBC ratings, rotated grid frames, XML quaternion assignment and invalid-pose reporting. Full offline suite: 2,589 passing cases; two blueprint input audits do not establish population acceptance. |
 | 2026-09-27 | Added AeroProfileApiTests for independent geometry/interpolation reconstruction, signed damping, detached arrays, consumer demand and no-work getters. Full offline suite: 2,571 passing cases; corpus walks disabled. |
 | 2026-09-27 | Added AeroRuntimeTests for lifecycle, centre jitter, zero allocation, world covariance, guards, face overrides and independent flight controls. Full offline suite: 2,565 passing cases; native and corpus checks remain outside this run. |
 | 2026-09-26 | Added `AeroCentreUpdateTests` for bounded atomic centre changes, cancellation and zero allocation. Added the first-read cache regression and centre-slice instrument checks. Full offline suite: 2,553 passing cases. |
