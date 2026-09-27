@@ -889,6 +889,15 @@ not.
 
 #### What it did: the shipped coefficient fails, and 0.5 passes
 
+**Scope correction, 2026-09-27:** the historical census supplied nominal `ForceMagnitude`, not
+available thrust after the engine's atmospheric-effectiveness curve. Its self-lifting selection
+and ceilings below therefore describe the nominal-rating rig. Installed ion thrusters deliver
+only 20 % of nominal at relative air density 1; atmospheric and hydrogen definitions follow their
+own curves. The recorded percentages and speeds are preserved as that historical calculation,
+not evidence that those hulls can supply that thrust in sea-level air. The rebuilt model's P1/P2
+walk must use explicitly stated thrust assumptions; [population input validation](aerodynamics.md#population-input-validation)
+now retains those curves and subgrid world frames. No threshold or coefficient is changed here.
+
 **The population had to be corrected first, and by reading the criterion rather than the data.**
 Scored over every thrust-carrying hull, the worst ceilings are `Moat Tower`, `International Space
 Station`, `Asteroid Base`, `Modern House #3` — **stations with one or two thrusters**, thrust-to-
@@ -1965,6 +1974,7 @@ is an enclosing hull, and the corpus has hulls.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Corrected the scope of historical K5 self-lifting and ceiling results: the census used nominal ForceMagnitude without atmospheric effectiveness. Preserved the figures as a nominal-rating calculation; they do not validate current sea-level P1/P2 (E10). |
 | 2026-08-31 | **The drag milestone's criterion has a scorer, and it was proven against the hand computation before it was used.** [`dragfit.py`](../tools/corpus/dragfit.py) reproduces 14.06 % / 55.7 m/s at `C_d` 1 and 3.13 % / 78.8 m/s at 0.5 over the same 5,649 self-lifting hulls — to the digit. Re-scored with the shape term on, **`C_d` 1.54 is calibration-neutral**: 3.42 % and 78.2 m/s, and the cruise medians reproduce exactly. The two criteria were never fitted to each other and land on the same number. What moves is *which* ships: 69.6 % overlap, the rescued reading a median shape factor of 0.243 and the condemned 0.438. |
 | 2026-08-31 | **The 2026-08-30 cruise figures needed a second correction, and this one was a tool default rather than a formula.** `cruise.py` scored at `C_d` 1.0 — its own default — while the mod ships 0.5, so the corrected column published under `K12` was itself twice the drag the mod applies. Median sea-level cruise is **199.2 m/s**, not 140.9; **7.6 %** of ships fall inside RTS's authored band, not 19.0; **11.6 %** are drag-limited below the engine cap, not 22.4. Pinned now, and guarded. |
 | 2026-08-28 | **The air re-take finished and its cost-half prediction turned out to be unscoreable.** 8,137 ships, 32,548 rows, whole. The demand half did not move to three decimals (p99 34.779, p95 30.195, max 36.614, all identical to the cap walk's control arm), and `G1` in air tripled — 0.0246 % to 0.0737 % — which is `A13`'s 15.76 % of extra heat arriving where heat goes and not where cost does. The cost half was predicted against **5,812,731**, a figure withdrawn four days earlier for omitting the link term, and `out/air-corpus-2026-08-24` **has no `links` column**, so it cannot be re-scored to recover a corrected baseline: the comparison the prediction named never existed (`P2`). Scored against the cap walk's control arm instead, which carries the column, work p99 falls **1.30 %** to 7,199,204 where closing the gap needs 21 % — so the verdict row holds, `G6`'s cost half fails at **1.80×** the allowance on 712 of 32,548 runs. **A prediction registered against a number in a paragraph is not registered**; a baseline names a committed summary (`E5`). |

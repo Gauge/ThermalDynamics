@@ -1142,10 +1142,38 @@ multiplayer or the lift portion of AR19.
 [admits the profile contract](../tests/benchmarks/aerodynamics/profile-api-whitelist-2026-09-27.txt);
 its two earlier instrument failures and the framework-subset correction are retained in that record.
 
+## Population input validation
+
+The old census records nominal installed thrust, and its reader did not retain grid world poses.
+A directional profile comparison must first retain those inputs. The new flight-input reader keeps
+nominal thrust unchanged and adds the engine's effectiveness curve as a separate quantity. Before
+measuring corpus hulls, require: synthetic ion/atmospheric/default curves reproduce hand-computed
+endpoints, midpoint and clamping; equal influence endpoints follow the engine's multiplier-one
+branch; atmosphere-required thrusters use their minimum effectiveness in vacuum. Exhaust-forward
+must produce force backward. A rotated subgrid must rotate that force into the blueprint world
+frame; common rigid rotation must preserve magnitudes and relative directions. Missing, nonfinite
+or degenerate poses must be reported rather than silently replaced by identity. Tests must cover
+both Forward/Up and quaternion forms and their XML assignment order. Installed definition checks
+must pin a nonzero ion, atmospheric and hydrogen example to independently read SBC values.
+
+The inspection command `aero-inputs <blueprint>` reports full-power rated thrust vectors at relative
+air density 1, with atmosphere present. It assumes unlimited power/fuel, functioning blocks and
+thrust multiplier one; it does not infer cargo, current enable/override state or resource sufficiency.
+It is an input audit, not a P1/P2 scorer. The later scorer must address directional thrust feasibility,
+self-lifting population selection, multiple-grid geometry and complete resumable corpus coverage.
+Historical nominal-thrust census results retain their original scope. No drag coefficients or P1/P2
+thresholds change with this input work.
+
+[Recorded input validation](../tests/benchmarks/aerodynamics/population-inputs-2026-09-27.txt) pins
+the installed engine/SBC sources and two blueprint audits. The full offline suite passes 2,589
+cases; 56 final focused checks pass after strengthening the pose tests. The multi-grid example
+has all six thrusters on its main grid; rotated subgrid force directions are covered synthetically.
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Added retained blueprint world frames and engine-relative-density thrust ratings for the population lab. The aero-inputs command audits rated world-space thrust vectors; nominal census fields are unchanged and no P1/P2 verdict is claimed. |
 | 2026-09-27 | Published drag-profile geometry and damping through a detached snapshot API. External consumers can request bounded preparation with force writes disabled. Six offline cases cover geometry reconstruction, damping signs, snapshot ownership and demand lifecycle; native consumer dispatch and lift data remain open. |
 | 2026-09-27 | Connected bounded profiles to the engine adapter and documented engine force/angular conversion, centre jitter, API face overrides and remaining native limits. Recorded [adapter evidence](../tests/benchmarks/aerodynamics/engine-adapter-2026-09-27.txt): 2,565 offline cases pass; S5 recovers at 29.0 s, S6 diverges, S7 density scaling holds, with no guards in these flight rigs. |
 | 2026-09-26 | Added bounded centre preparation with atomic publication, exact legacy-equivalence checks and zero allocation. Recorded initial and warmed timing runs, including the warmup correction, repeat caps and observed maxima. |
