@@ -1354,8 +1354,10 @@ an unnamespaced `MyObjectBuilder_CubeBlock` element without `xsi:type`. The read
 explicit element type when the attribute is absent. Generic names, foreign namespaces and unknown
 builders remain unresolved; an explicit `xsi:type` retains priority. Five new synthetic cases and
 the complete installed-prefab readability test pass (47 focused reader/documentation cases total).
-The failed full run was 2,621 passed and one failed; it is not a clean validation. The corrected
-full suite must pass before merge. These checks do not establish population acceptance.
+The failed full run was 2,621 passed and one failed; it is not a clean validation. A second full run found one stale negative fixture that still treated the now-supported legacy
+element as missing type; it now uses an explicitly unknown builder. The [final integration run](../tests/benchmarks/aerodynamics/backlog-integration-validation-2026-09-27.txt)
+passes all 2,627 C# cases, with 239 Python passes and one missing historical-data skip.
+These checks establish integration readiness, not population acceptance.
 
 ### Completed first population generation
 
