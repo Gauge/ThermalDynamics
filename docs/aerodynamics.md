@@ -208,9 +208,14 @@ angle of attack and falls away beyond it. The size is fiction: 12.25·ρ³·v² 
 of 0.037, so any tilted brick is a wing. The Newtonian transverse sum this mod uses is wrong the
 other way: it cancels on any symmetric hull, and lift can never exceed drag.
 
-**The real law needs two numbers the surface data already has, planform area and span:**
-`CL_α = 2π·AR / (2 + √(AR² + 4))` (Helmbold). That one formula covers a slender box (low aspect
-ratio, lift ∝ `(π/2)·AR·α`) and a proper wing. Stall comes at 12–15° for a high aspect ratio and
+**The baseline approximation needs planform area and span:**
+`CL_α = 2π·AR / (2 + √(AR² + 4))` (Helmbold). Its low-aspect-ratio limit is
+`CL_α ≈ (π/2)·AR`; it is not a validated universal law for boxes or arbitrary lifting bodies.
+[Saltzman, Wang and Iliff's flight analysis](https://ntrs.nasa.gov/citations/19990052613)
+compares body and wing-body lift slopes with theory and shows why reference area must be stated.
+The paper's discussion of Figure 2 also reports lifting bodies above and below the theoretical
+relationships. Body shape and vortex lift therefore remain limits of this approximation, to be
+checked on independent rigs. Stall comes at 12–15° for a high aspect ratio and
 much later for a low one, and past stall the plate's normal force goes to `CN ≈ 1.2·sin α`. On the
 drag side, AR11 then charges for the lift. Requirement: body lift is computed from the planform
 the air sees, with that law, and replaces the Newtonian transverse sum. **`K23`'s four criteria are
@@ -218,6 +223,15 @@ re-registered, not inherited.** Its "p95 lift-to-drag ≤ 2" was written against
 make lift. Real aircraft reach 10–20, so the bound becomes a rig check against the formula
 (a flat plate at 10° gives `CN` within 10 % of the textbook value). The population criterion that
 keeps bricks from flying without thrust stays.
+
+The primary [Ortiz, Rival and Wood plate experiment](https://www.mdpi.com/1996-1073/8/4/2438)
+is a candidate independent post-stall check. Its [eight normal-incidence measurements](../tests/benchmarks/aerodynamics/plate-reference-ortiz-2015.csv)
+and [provenance](../tests/benchmarks/aerodynamics/plate-reference-ortiz-2015.txt) retain the full
+aspect-ratio range and observed transverse residuals. Figures were visually inspected; no graph
+ordinates have yet been digitized. These finite-thickness, low-Reynolds-number plates do not
+establish the accuracy of a ship-scale body-lift law or locate its attached-flow stall boundary.
+The `1.2·sin α` expression above remains an approximation requiring a combined lift-and-drag
+comparison, not an experimentally verified law over every post-stall angle.
 
 ### AR9 — Lifting surfaces found from the hull, authored where they must be
 
@@ -246,6 +260,15 @@ on lift is stall, which AR8 already has.
 Lift costs drag: `CDi = CL² / (π·e·AR)`, with e ≈ 0.7–0.9. Neither mod has it. Without it, a
 lifting hull glides further than anything real, and AR12 has nothing to act on. Requirement: every
 lifting surface and the body pay induced drag from their own aspect ratio.
+
+**Force accounting is part of that requirement.** [NASA Glenn's definition](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/induced-drag-coefficient/)
+uses the same wing-area basis for lift and induced drag, and adds induced drag to **zero-lift**
+drag. The current profile contains incidence-dependent pressure drag. It cannot simply be
+relabeled zero-lift drag. Before connecting lift, the rig must explicitly separate the attached-flow
+contribution from separated-flow pressure drag, and check the sum against independent plate
+lift **and** drag observations. A post-stall normal force already has a streamwise component;
+counting that component again as another drag term would double-count the same force.
+This is a required model-accounting check, not evidence that the current drag-only code is faulty.
 
 ### AR12 — Ground effect with the right sign
 
@@ -1294,6 +1317,8 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Archived all eight primary flat-plate normal-incidence reference rows, including residuals and measurement basis, for independent lift/drag validation. No model fit or acceptance verdict is claimed. |
+| 2026-09-27 | Corrected AR8's claim that Helmbold is a universal body-lift law, citing NASA flight comparisons. Clarified AR11's common reference area and zero-lift drag basis before lift is implemented; no coefficients or acceptance thresholds changed. |
 | 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Recorded independent controls and a two-specimen pipeline/resume pilot; full corpus scoring remains outstanding. |
 | 2026-09-27 | Added a directional rated-thrust optimizer and schema-1 machine input export. Hand solutions and 80 nonzero vertex-enumeration controls validate force balance and independently recomputed dual bounds; complete population scoring remains open. |
 | 2026-09-27 | Added retained blueprint world frames and engine-relative-density thrust ratings for the population lab. The aero-inputs command audits rated world-space thrust vectors; nominal census fields are unchanged and no P1/P2 verdict is claimed. |
