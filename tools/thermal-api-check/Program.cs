@@ -23,6 +23,12 @@ var analyzer = (DiagnosticAnalyzer)Activator.CreateInstance(type, BindingFlags.I
     null, new object[]{compiler.Whitelist, MyWhitelistTarget.ModApi}, null);
 var cases = new Dictionary<string,string> {
 
+ ["aero-grid-inputs"] = "public class Probe { public void Read(Sandbox.Game.Entities.MyCubeGrid g, Sandbox.Game.Entities.MyPlanet p) { var centre=g.Physics.CenterOfMassWorld; var local=VRageMath.Vector3D.Transform(centre,g.PositionComp.WorldMatrixNormalizedInv); var orientation=g.WorldMatrix.GetOrientation(); var density=p.GetAirDensity(centre); g.Physics.AddForce(VRage.Game.Components.MyPhysicsForceType.APPLY_WORLD_FORCE, VRageMath.Vector3.Zero, null, null); g.Physics.AddForce(VRage.Game.Components.MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, null, null, VRageMath.Vector3.Zero); } }",
+
+ ["aero-physics-interface"] = "public class Probe { public void Read(VRage.Game.Components.MyPhysicsComponentBase p) { var centre=p.CenterOfMassWorld; var mass=p.Mass; var velocity=p.LinearVelocity; var spin=p.AngularVelocity; var live=p.Enabled && p.HasRigidBody && !p.IsStatic; p.AddForce(VRage.Game.Components.MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, velocity, centre, spin, null, true, false); } }",
+
+ ["aero-physics-inertia"] = "public class Probe { public VRageMath.Matrix Read(VRage.Game.Components.MyPhysicsComponentBase p) { return p.RigidBody.InertiaTensor; } }",
+
  ["thermal-celestial"] = "public class Probe { public double Read(Sandbox.Game.Entities.MyPlanet p) { var sun=Sandbox.Game.MyVisualScriptLogicProvider.GetSunDirection(); var position=p.PositionComp.WorldMatrixRef.Translation; var up=p.WorldMatrix.Up; var radius=p.AverageRadius; return radius+sun.X+position.X+up.X; } }",
 
  ["thermal-local-frustum"] = "public class Probe { public bool Check(VRageMath.MatrixD grid, VRageMath.BoundingBoxD box) { var camera=Sandbox.ModAPI.MyAPIGateway.Session.Camera; var frustum=new VRageMath.BoundingFrustumD(grid*VRageMath.MatrixD.Invert(camera.WorldMatrix)*camera.ProjectionMatrix); return frustum.Contains(box)!=VRageMath.ContainmentType.Disjoint; } }",
@@ -61,7 +67,7 @@ foreach(var pair in cases) {
  var diagnostics = await compilation.WithAnalyzers(ImmutableArray.Create(analyzer)).GetAnalyzerDiagnosticsAsync();
  Console.WriteLine(pair.Key + ": compiler="+errors.Length+", whitelist="+diagnostics.Length);
  foreach(var d in errors.Concat(diagnostics)) Console.WriteLine(d);
- bool rejected = pair.Key == "occlusion-concrete-rejected" || pair.Key == "voxel-direct" || pair.Key == "voxel-builder" || pair.Key == "model-materials" || pair.Key == "grid-render-data";
+ bool rejected = pair.Key == "aero-physics-inertia" || pair.Key == "occlusion-concrete-rejected" || pair.Key == "voxel-direct" || pair.Key == "voxel-builder" || pair.Key == "model-materials" || pair.Key == "grid-render-data";
  if (errors.Length != 0 || diagnostics.Any(x => x.Id != "ProhibitedMemberRule")
      || (rejected ? diagnostics.Length == 0 : diagnostics.Length != 0)) failed = true;
 }

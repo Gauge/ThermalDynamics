@@ -4,6 +4,7 @@ Requires dotnet 9 and ilspycmd. Generates decompiled bootstrap/build output outs
 Does not execute the snippets or alter a running game. See docs/thermal-vision-lab.md.
 """
 import argparse
+import hashlib
 import pathlib
 import shutil
 import struct
@@ -40,6 +41,9 @@ def main():
     game_bin = (args.game / "Bin64").resolve(strict=True)
     work = pathlib.Path(tempfile.mkdtemp(prefix="thermal-api-check-"))
     print("Artifacts:", work, flush=True)
+    for path in [game_bin / "Sandbox.Game.dll", game_bin / "VRage.Game.dll", game_bin / "SpaceEngineers.Game.dll",
+                 pathlib.Path(__file__).resolve(), pathlib.Path(__file__).with_name("Program.cs").resolve()]:
+        print("SHA256:", path.name, hashlib.sha256(path.read_bytes()).hexdigest(), flush=True)
     source = subprocess.check_output([args.ilspy, "-t", "SpaceEngineers.Game.MySpaceGameDefaultIlChecker",
                                       str(game_bin / "SpaceEngineers.Game.dll")], text=True)
     source = replace_once(source, "public class MySpaceGameDefaultIlChecker : MySandboxGame.IGameCustomIlChecker",
@@ -47,7 +51,7 @@ def main():
     source = replace_once(source, "MyVRage.Platform.Scripting.OpenWhitelistBatch()",
                           "MyScriptCompiler.Static.Whitelist.OpenBatch()")
     source = replace_once(source, "AllowDefaultNamespaces(handle);",
-                          "handle.AllowTypes(MyWhitelistTarget.Both, typeof(object), typeof(string), typeof(byte), typeof(int), typeof(float), typeof(double), typeof(System.IO.BinaryReader), typeof(System.IO.Stream));\n"
+                          "handle.AllowTypes(MyWhitelistTarget.Both, typeof(object), typeof(string), typeof(bool), typeof(byte), typeof(int), typeof(float), typeof(double), typeof(System.IO.BinaryReader), typeof(System.IO.Stream));\n"
                           "CompatibleNamespaces(handle, MyWhitelistTarget.Both, typeof(Dictionary<,>));")
     source = source.replace("typeof(Task)", "typeof(ParallelTasks.Task)")
     source = source.replace("handle.AllowNamespaceOfTypes(", "CompatibleNamespaces(handle, ")
