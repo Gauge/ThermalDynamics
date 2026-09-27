@@ -61,6 +61,8 @@ namespace Thermodynamics.Harness
 
             public int AmbiguousBlocks;
 
+            public int UpgradedBlocks;
+
 
             public List<string> UnknownSubtypes = new List<string>();
 
@@ -391,6 +393,7 @@ namespace Thermodynamics.Harness
             {
                 string subtype = (string)block.Element("SubtypeName");
                 GameBlocks.Definition definition = null;
+                bool upgraded = false;
                 string named = subtype;
 
                 if (string.IsNullOrEmpty(subtype))
@@ -414,8 +417,9 @@ namespace Thermodynamics.Harness
                         || !GameBlocks.ByTypeAndSubtype().TryGetValue(
                             GameBlocks.TypeAndSubtypeKey(typeId, subtype), out definition))
                     {
-                        definition = null;
-                        if (definitions.TryGetValue(subtype, out definition)) ship.AmbiguousBlocks++;
+                        definition = GameBlocks.UniqueSubtypeUpgrade(typeId, subtype);
+                        upgraded = definition != null;
+                        if (definition == null && definitions.ContainsKey(subtype)) ship.AmbiguousBlocks++;
                     }
                 }
 
@@ -434,6 +438,7 @@ namespace Thermodynamics.Harness
                 Vector3I cell = ParseCell(block.Element("Min"));
                 part.Builder.Place(Model(definition), cell, Orientation(block));
                 part.Blocks++;
+                if (upgraded) ship.UpgradedBlocks++;
 
 
                 long entityId = ParseLong(block.Element("EntityId"));

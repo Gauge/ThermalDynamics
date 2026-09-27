@@ -119,6 +119,7 @@ namespace Thermodynamics.Tests
                 MatrixD translated = MatrixD.CreateWorld(new Vector3D(1e12 + 0.25, 4, 5), Vector3D.Left, Vector3D.Up);
                 XElement grid = new XElement("CubeGrid", new XElement("GridSizeEnum", "Large"), Pose(translated),
                     new XElement("CubeBlocks", new XElement("MyObjectBuilder_CubeBlock",
+                        new XAttribute(XName.Get("type", "http://www.w3.org/2001/XMLSchema-instance"), "MyObjectBuilder_CubeBlock"),
                         new XElement("SubtypeName", "LargeBlockArmorBlock"),
                         new XElement("Min", new XAttribute("x", 0), new XAttribute("y", 0), new XAttribute("z", 0)))));
                 XElement other = new XElement(grid);

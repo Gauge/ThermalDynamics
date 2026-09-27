@@ -80,6 +80,62 @@ namespace Thermodynamics.Tests
         }
 
         [Fact]
+        public void UpgradeLookupRejectsMissingUnknownAndCompetingIdentities()
+        {
+            Assert.Null(GameBlocks.UniqueSubtypeUpgrade(null, "AutoCannonTurret"));
+            Assert.Null(GameBlocks.UniqueSubtypeUpgrade("NoSuchObjectBuilder", "AutoCannonTurret"));
+            Assert.Null(GameBlocks.UniqueSubtypeUpgrade("LargeMissileTurret", "NoSuchSubtype"));
+            Assert.Null(GameBlocks.UniqueSubtypeUpgrade("LargeMissileTurret", ""));
+            Assert.Null(GameBlocks.UniqueSubtypeUpgrade("CubeBlock", "LargePistonBase"));
+            var upgraded = GameBlocks.UniqueSubtypeUpgrade("MyObjectBuilder_LargeMissileTurret", "AutoCannonTurret");
+            Assert.NotNull(upgraded);
+            Assert.Equal("LargeGatlingTurret", upgraded.TypeId);
+            Assert.False(upgraded.Large);
+        }
+
+        [Fact]
+        public void UpgradeCannotChangeGridSizeOrChooseACompetingDefinition()
+        {
+            foreach (string xml in new[] { Typed("LargeMissileTurret", "AutoCannonTurret", 1, 0, 0),
+                Typed("CubeBlock", "LargePistonBase", 1, 0, 0), Typed("NoSuchObjectBuilder", "AutoCannonTurret", 1, 0, 0) })
+            {
+                string path = WriteBlueprint(Block("LargeBlockArmorBlock", 0, 0, 0) + xml);
+                try
+                {
+                    var ship = Assert.Single(Blueprints.Read(path));
+                    Assert.Equal(1, ship.Blocks);
+                    Assert.Equal(1, ship.UnknownBlocks);
+                    Assert.Equal(0, ship.UpgradedBlocks);
+                }
+                finally { Directory.Delete(Path.GetDirectoryName(path), true); }
+            }
+        }
+
+        [Fact]
+        public void LegacyAutocannonTypeLoadsWithTheInstalledReplacementGeometry()
+        {
+            string legacy = WriteBlueprint(Typed("LargeMissileTurret", "AutoCannonTurret", 2, 3, 4), false);
+            string modern = WriteBlueprint(Typed("LargeGatlingTurret", "AutoCannonTurret", 2, 3, 4), false);
+            try
+            {
+                var before = Assert.Single(Blueprints.Read(legacy));
+                var after = Assert.Single(Blueprints.Read(modern));
+                Assert.True(before.IsVanilla);
+                Assert.Equal(0, before.AmbiguousBlocks);
+                Assert.Equal(1, before.UpgradedBlocks);
+                Assert.Equal(0, after.UpgradedBlocks);
+                var a = Assert.Single(before.Grids[0].Builder.Grid.Blocks);
+                var b = Assert.Single(after.Grids[0].Builder.Grid.Blocks);
+                Assert.Equal(b.Mass, a.Mass);
+                Assert.Equal(b.Name, a.Name);
+                Assert.Equal(b.Position, a.Position);
+                Assert.Equal(b.Model.Size, a.Model.Size);
+                Assert.True(a.Mass > 0);
+            }
+            finally { Directory.Delete(Path.GetDirectoryName(legacy), true); Directory.Delete(Path.GetDirectoryName(modern), true); }
+        }
+
+        [Fact]
 
         public void AShipIsReadWithItsNameAndItsBlocks()
         {

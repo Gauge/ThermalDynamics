@@ -1248,6 +1248,22 @@ not a population selection. The three-grid hull supplies about 2.88 kN in each r
 the atmospheric single-grid hull has no downward rated capacity under this model. Neither finding
 scores drag or P1/P2.
 
+### Blueprint definition upgrades found by the population walk
+
+The frozen walk found a blueprint with fourteen `LargeMissileTurret/AutoCannonTurret` blocks.
+The installed definition is `LargeGatlingTurret/AutoCannonTurret`. Inspection of the installed
+engine's `MyCubeGrid.UpgradeCubeBlock` and `FindDefinitionUpgrade` shows a subtype-based
+upgrade when the original type/subtype pair is absent. The offline reader previously selected
+its first subtype match but still marked the block ambiguous, so the population gate withheld it.
+
+The correction resolves a unique installed subtype when the saved type is itself represented
+in installed definitions. Exact type/subtype matches retain priority. Missing or unknown saved
+types and competing subtype matches stay unresolved; a replacement cannot change grid size.
+Ambiguous matches no longer build geometry from whichever definition the dictionary happened
+to contain. Upgraded blocks are counted separately and exported with population inputs.
+The already running frozen corpus generation is unchanged; it cannot mix receipts from the
+corrected reader into its older manifest.
+
 ## Population runner protocol (registered before the walk)
 
 The candidate population uses the existing corpus convention: every recursively discovered
@@ -1317,6 +1333,7 @@ pilot coverage is complete. The full corpus walk remains outstanding.
 
 | Date | Change |
 | --- | --- |
+| 2026-09-27 | Documented the native definition-upgrade path exposed by an unresolved corpus hull and the constrained reader correction. Frozen receipts remain tied to their original reader. |
 | 2026-09-27 | Archived all eight primary flat-plate normal-incidence reference rows, including residuals and measurement basis, for independent lift/drag validation. No model fit or acceptance verdict is claimed. |
 | 2026-09-27 | Corrected AR8's claim that Helmbold is a universal body-lift law, citing NASA flight comparisons. Clarified AR11's common reference area and zero-lift drag basis before lift is implemented; no coefficients or acceptance thresholds changed. |
 | 2026-09-27 | Registered and implemented the resumable population protocol, global resultant-thrust selection, static profile-drag brackets and coverage-aware P1/P2 scorer. Recorded independent controls and a two-specimen pipeline/resume pilot; full corpus scoring remains outstanding. |
