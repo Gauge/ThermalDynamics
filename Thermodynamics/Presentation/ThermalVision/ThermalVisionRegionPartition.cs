@@ -6,13 +6,22 @@ namespace Thermodynamics.Presentation
 {
     public sealed class ThermalVisionRegionPartition
     {
-        public struct Region
+        // Regions key the per-frame surface-field dictionaries. Without these members every
+        // lookup fell back to ValueType's reflection equality: ~400 ns and ~560 bytes of boxing each.
+        public struct Region : IEquatable<Region>
         {
             public Vector3D Min, Max;
             public float Kelvin;
 
             public Region(Vector3D min, Vector3D max, float kelvin)
             { Min = min; Max = max; Kelvin = kelvin; }
+
+            public bool Equals(Region other)
+            { return Min.Equals(other.Min) && Max.Equals(other.Max) && Kelvin.Equals(other.Kelvin); }
+
+            public override bool Equals(object obj) { return obj is Region && Equals((Region)obj); }
+
+            public override int GetHashCode() { return Min.GetHashCode() ^ (Max.GetHashCode() * 397); }
         }
 
         private readonly int capacity;

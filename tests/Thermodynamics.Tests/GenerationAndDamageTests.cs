@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -19,9 +20,9 @@ namespace Thermodynamics.Tests
     public class HeatGenerationTests
     {
 
-        private static ThermalSettings Isolated()
+        private static HistoricalThermalSettings Isolated()
         {
-            ThermalSettings settings = new ThermalSettings { Frequency = 4 };
+            HistoricalThermalSettings settings = new HistoricalThermalSettings { Frequency = 4 };
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
@@ -115,7 +116,7 @@ namespace Thermodynamics.Tests
         private static float TemperatureAfterOneSecond(int frequency)
         {
 
-            ThermalSettings settings = Isolated();
+            HistoricalThermalSettings settings = Isolated();
             settings.Frequency = frequency;
             settings.Derive();
 
@@ -141,7 +142,7 @@ namespace Thermodynamics.Tests
     public class DamageTests
     {
 
-        private static ThermalSimulation Overheated(ThermalSettings settings, float temperature)
+        private static ThermalSimulation Overheated(HistoricalThermalSettings settings, float temperature)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.LightArmor(), Vector3I.Zero);
@@ -151,10 +152,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static ThermalSettings NoTransfer(int frequency)
+        private static HistoricalThermalSettings NoTransfer(int frequency)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
@@ -205,11 +206,11 @@ namespace Thermodynamics.Tests
         public void TheOldPerStepBehaviourIsStillAvailableAndScalesWithFrequency()
         {
 
-            ThermalSettings four = NoTransfer(4);
+            HistoricalThermalSettings four = NoTransfer(4);
             four.DamageIsPerSecond = false;
 
 
-            ThermalSettings sixteen = NoTransfer(16);
+            HistoricalThermalSettings sixteen = NoTransfer(16);
             sixteen.DamageIsPerSecond = false;
 
 
@@ -222,7 +223,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static float TotalDamageOverOneSecond(ThermalSettings settings)
+        private static float TotalDamageOverOneSecond(HistoricalThermalSettings settings)
         {
 
             ThermalSimulation simulation = Overheated(settings, 1000f);
@@ -251,7 +252,7 @@ namespace Thermodynamics.Tests
             builder.Place(BlockModel.Solid("Fragile", Vector3I.One, 500f, thermal), Vector3I.Zero);
 
 
-            ThermalSettings settings = NoTransfer(1);
+            HistoricalThermalSettings settings = NoTransfer(1);
             ThermalSimulation simulation = builder.BuildSimulation(settings, 600f);
 
             simulation.StepExact(1, Worlds.Shadow());
@@ -264,7 +265,7 @@ namespace Thermodynamics.Tests
         public void DisablingDamageSilencesTheEvents()
         {
 
-            ThermalSettings settings = NoTransfer(4);
+            HistoricalThermalSettings settings = NoTransfer(4);
             settings.EnableDamage = false;
 
 

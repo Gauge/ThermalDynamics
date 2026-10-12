@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -21,7 +22,7 @@ namespace Thermodynamics.Tests
     public class CoolantLoopTests
     {
 
-        private static ThermalSettings Isolated()
+        private static HistoricalThermalSettings Isolated()
         {
             return Isolation.DeadWorld();
         }
@@ -356,7 +357,7 @@ namespace Thermodynamics.Tests
             builder.Place(Catalog.Radiator(), cells[5] + Vector3I.Up);
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
             settings.EnableDamage = false;
@@ -510,7 +511,7 @@ namespace Thermodynamics.Tests
         public void DisablingLoopsRemovesThemFromTheSolver()
         {
 
-            ThermalSettings settings = Isolated();
+            HistoricalThermalSettings settings = Isolated();
             settings.EnableCoolantLoops = false;
 
             GridBuilder builder = GridBuilder.Large();

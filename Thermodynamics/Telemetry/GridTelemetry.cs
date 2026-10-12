@@ -57,6 +57,8 @@ namespace Thermodynamics
         public int Sealed;
         public int Mounted;
         public int Interior;
+        public float WindwardDot;
+        public float BlockFrictionWatts;
         public float SunDot;
         public float SunLitFraction;
         public float SolarWatts;
@@ -819,6 +821,8 @@ namespace Thermodynamics
                     row.Sealed = faces[face].Sealed;
                     row.Mounted = faces[face].Mounted;
                     row.Interior = faces[face].Interior;
+                    row.WindwardDot = Vector3.Dot(Face.Normals[face], -Grid.LastState.WindDirectionLocal);
+                    row.BlockFrictionWatts = node.LastFrictionWatts;
                     row.SunDot = Vector3.Dot(Face.Normals[face], sun);
                     row.SunLitFraction = shadow.FaceLitFraction(block, face);
                     row.SolarWatts = node.LastSolarWatts;

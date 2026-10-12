@@ -222,7 +222,34 @@ namespace Thermodynamics.Core
 
         public bool NeedsEnvironmentSample
         {
-            get { return !solver.StepInFlight; }
+            get { return !solver.StepInFlight && stepDelayFrames <= 0 && !(StepPhaseFrames > 0 && StepAbandoned); }
+        }
+
+        /// <summary>
+        /// Frames this grid's step start is held back after load or an abandoned step. Every grid
+        /// accrues step credit at the same fraction of its step per frame, so grids started together
+        /// reach every step boundary on the same frame, and each boundary's unsliced work (the
+        /// environment sample, the step prologue, after-step, a small grid's whole step) stacks into
+        /// one hitch at the step rate. Distinct phases spread those boundaries across frames.
+        /// </summary>
+        public int StepPhaseFrames
+        {
+            get { return stepPhaseFrames; }
+            set
+            {
+                stepPhaseFrames = value < 0 ? 0 : value;
+                if (!solver.StepInFlight) stepDelayFrames = stepPhaseFrames;
+            }
+        }
+
+        private int stepPhaseFrames;
+        private int stepDelayFrames;
+        private bool stepBegun;
+        private long stepCountAtBegin;
+
+        private bool StepAbandoned
+        {
+            get { return stepBegun && !solver.StepInFlight && solver.StepCount == stepCountAtBegin; }
         }
 
         public bool StepInFlight
@@ -643,6 +670,15 @@ namespace Thermodynamics.Core
 
             if (!solver.StepInFlight)
             {
+                if (StepAbandoned && stepPhaseFrames > 0) stepDelayFrames = stepPhaseFrames;
+                stepBegun = false;
+
+                if (stepDelayFrames > 0)
+                {
+                    stepDelayFrames--;
+                    return;
+                }
+
                 EnvironmentState state = EnvironmentSolver.Solve(settings, planet, sample);
 
                 float demand;
@@ -659,6 +695,9 @@ namespace Thermodynamics.Core
                 RefillLoops(seconds);
 
                 if (!solver.BeginStep(seconds, state, demand)) return;
+
+                stepBegun = true;
+                stepCountAtBegin = solver.StepCount;
 
                 overheats.Clear();
                 crossings.Clear();

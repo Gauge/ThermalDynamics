@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -16,6 +17,7 @@ namespace Thermodynamics.Tests
     /// it fails a test and is read (`D5`), and hold the shipped constants to the fit (`D3`).
     /// </summary>
     [Trait("speed", "slow")]
+    [Trait("scope", "integration")]
     public class AeroCalibrationTests
     {
         private static readonly Lazy<AeroCalibrationLab.Result> Fitted = new Lazy<AeroCalibrationLab.Result>(
@@ -91,6 +93,7 @@ namespace Thermodynamics.Tests
     /// flat face is flat to its rim — the block-gradient normal it replaced tilted every rim cell, and
     /// a game-scale plate is mostly rim.
     /// </summary>
+    [Trait("scope", "integration")]
     public class AeroIncidenceTests
     {
         private static float MeanSquaredIncidence(GridModel grid, Vector3 upstream)

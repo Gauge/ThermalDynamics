@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
 using VRageMath;
@@ -30,10 +31,11 @@ namespace Thermodynamics.Tests
         private const float Speed = 120f;
 
 
-        private static ThermalSettings Settings()
+        private static HistoricalThermalSettings Settings()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;

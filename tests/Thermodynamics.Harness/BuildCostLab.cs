@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -192,7 +193,7 @@ namespace Thermodynamics.Harness
                 }
 
                 ThermalSimulation simulation =
-                    builder.BuildSimulation(new ThermalSettings(), 293.15f);
+                    builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
                 const float Interval = 1f;
                 int perSample = Math.Max(1, (int)(Interval / simulation.Settings.StepSeconds));

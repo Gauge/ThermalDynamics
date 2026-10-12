@@ -1,0 +1,29 @@
+Merge review: 2026-10-11 (America/Los_Angeles)
+Baseline: 136c6c32, shared by local master and codex/k25-corrected-population-walk.
+Scope: all pending Thermodynamics changes, including existing extraction/refactor,
+fixture migration, telemetry/presentation changes, documentation and historical receipts.
+
+Review corrections:
+- Keep exposed area out of the fixed watts row; add provider watts directly.
+- Regression SmallProviderHeatIsNotCancelledByExposedArea failed before the fix.
+- Correct fixed-source test summaries for temperature-dependent provider heating.
+- Clarify that compile-only validation does not deploy.
+- Restore the model-table repair entry to the development change log.
+- Describe unmeasured frame-gap time as unattributed, not proof of another cause.
+
+Before corrections: full .NET suite 2670 passed, 0 failed, 0 skipped (1m17s).
+Python checks: 280 passed (corpus 240, gradient study 21, lanes 10,
+glow 5, static API contract 4).
+Final build: zero errors; one CS0618 warning for the existing modder billboard API.
+Validation uses SDK 10.0.112, net9.0 offline projects, NoPackage, one build worker,
+and a systemd scope capped at 24G with no swap. No deployment performed.
+
+Known limits: findings in docs/repository-review-2026-10-08.md remain open,
+including coolant discovery, room-map startup, unsliced work and opt-in parallel
+provider fault handling. No native gameplay, multiplayer or population sweep.
+Workshop identity, assets and vendored source paths are unchanged.
+
+Final full .NET suite: 2671 passed, 0 failed, 0 skipped (1m34s).
+Command: bash tools/validate.sh --integration
+TRX: out/validation/validation.trx (ignored local artifact).
+The new heating regression passes in the full run. git diff --check passes.

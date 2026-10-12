@@ -11,6 +11,40 @@ namespace Thermodynamics.Tests
     /// <summary>Spatial ordering against independent ray intervals, field preservation and fragmentation bounds.</summary>
     public class ThermalVisionRegionOrderTests
     {
+        /// <summary>
+        /// Regions key the renderer's per-frame surface-field dictionaries, several lookups per drawn
+        /// cell. Without its own equality a struct key falls back to ValueType's reflection path,
+        /// which measured ~400 ns and ~560 bytes of boxing per lookup at a 13,764-region fleet frame.
+        /// </summary>
+        [Fact]
+        public void RegionKeysCompareByValueWithoutAllocating()
+        {
+            var a=new Region(new Vector3D(0,1,2),new Vector3D(3,4,5),300);
+            Assert.True(a.Equals(new Region(new Vector3D(0,1,2),new Vector3D(3,4,5),300)));
+            Assert.False(a.Equals(new Region(new Vector3D(0,1,2),new Vector3D(3,4,5),301)));
+            Assert.False(a.Equals(new Region(new Vector3D(0,1,2),new Vector3D(3,4,6),300)));
+            var zero=new Region(new Vector3D(0,0,0),Vector3D.One,300);
+            var negative=new Region(new Vector3D(-0.0,0,0),Vector3D.One,300);
+            Assert.True(zero.Equals((object)negative));
+            Assert.Equal(zero.GetHashCode(),negative.GetHashCode());
+
+            var map=new Dictionary<Region,int>();
+            for(int i=0;i<512;i++){var p=new Vector3D(i%8,i/8%8,i/64);map.Add(new Region(p,p+Vector3D.One,250+i),i);}
+            Assert.Equal(511*512/2,SumLookups(map));
+            long before=GC.GetAllocatedBytesForCurrentThread();
+            int sum=SumLookups(map);
+            Assert.Equal(0,GC.GetAllocatedBytesForCurrentThread()-before);
+            Assert.Equal(511*512/2,sum);
+        }
+
+        // Called once to warm before the measured call, so JIT work is not counted as the keys'.
+        private static int SumLookups(Dictionary<Region,int> map)
+        {
+            int sum=0;
+            for(int i=0;i<512;i++){var p=new Vector3D(i%8,i/8%8,i/64);sum+=map[new Region(p,p+Vector3D.One,250+i)];}
+            return sum;
+        }
+
         [Fact]
 
         public void SolidBlockersPruneHiddenRegionsAndImmediatelyRevealOnRemoval()

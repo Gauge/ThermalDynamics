@@ -1,0 +1,49 @@
+Thermodynamics cleanup completion — 2026-10-01
+
+Scope: the seven-phase cleanup in docs/development.md. This repository only.
+Aerodynamics and RelativeTopSpeed repositories were not modified, built or deployed.
+Existing extraction edits were preserved; the before-state is in out/cleanup-refactor/ (ignored).
+No commit, publication or in-game deployment performed.
+
+Implemented:
+- Production Core now compiles only production sources and test visibility attributes.
+- HistoricalThermalSettings, the AeroGrid adapter and read-only sibling inputs live in
+  Thermodynamics.Fixtures. Historical rigs select their heating provider explicitly.
+- SettingsAccess holds one ordered catalogue for all 87 tunable names and read/write bindings.
+  SettingsStorage owns persistence. SessionCommands owns command dispatch and replies.
+- Settings menu entry and page metadata are grouped in ThermalSettingsMenuLayout.
+- Solver responsibilities split into topology, devices, environment, coupling, stability,
+  state/publication, stepping and cues. Numerical method bodies were moved verbatim.
+- Telemetry CSV, climate and performance sections split from report coordination.
+- Thermal vision geometry preparation split from lifecycle; world reset shares HUD release.
+- Documentation and backlog distinguish completed cleanup from native/product work.
+- Optimization assessment retained the existing cache; integration-sensitive changes remain
+  separately designed under D21-D25. See cleanup-performance-2026-10-01.txt.
+
+Compatibility audit against the preserved before-state:
+- All 89 serialized setting field identifiers, types and default expressions unchanged.
+- All 87 tunable names retain their order.
+- 132 solver, 51 report and 23 session method bodies unchanged.
+- No solver term, arithmetic ordering, persisted identifier or Workshop identity changed.
+
+Validation:
+- Production Core builds on its own, with no sibling source input: 0 warnings/errors.
+- The local solution and native mod/whitelist build succeed with MdkBuildConfiguration=NoPackage.
+- Full suite: 2,662 passed, 0 failed, 0 skipped; 1m33s.
+  Command: systemd-run --user --scope -p MemoryMax=24G -p MemorySwapMax=0 --quiet
+    dotnet test tests/Thermodynamics.Tests --no-build --no-restore -v quiet
+    --logger 'trx;LogFileName=final.trx' --results-directory out/cleanup-refactor
+- TRX and build logs are in out/cleanup-refactor/ (ignored).
+- Final documentation, project-boundary and session-unload follow-up: 39 passed, 0 failed.
+- git diff --check and bash -n tools/validate.sh passed.
+
+The separation first exposed five rigs relying on automatic heating; those rigs now opt into
+HistoricalThermalSettings. The first focused check also found a menu-source scan that needed to
+follow the extracted metadata file. Both are covered by the passing final suite.
+
+Build limitations: NuGet's vulnerability metadata endpoint was unavailable during restore
+(NU1900). The existing mod-facing AddTriangleBillboard call reports the engine's CS0618
+'Only for modders' annotation after relocation. No warnings were suppressed to hide these.
+The full historical harness still requires read-only Aero sources; only production Core is
+independent. Offline checks do not certify native multiplayer delivery, HUD rendering or game
+frame costs. Those existing backlog items remain open.

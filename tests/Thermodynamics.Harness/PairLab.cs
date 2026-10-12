@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -88,7 +89,7 @@ namespace Thermodynamics.Harness
             public ThermalSettings Settings()
             {
 
-                ThermalSettings settings = new ThermalSettings();
+                ThermalSettings settings = new HistoricalThermalSettings();
                 settings.HeatTimeScale = Clock;
                 return settings.Derive();
             }

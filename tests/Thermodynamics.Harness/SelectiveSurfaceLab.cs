@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -93,7 +94,7 @@ namespace Thermodynamics.Harness
                 height += radiator.Size.Y;
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             EnvironmentSample sky = sunlit ? Worlds.Space(Vector3.UnitX) : Worlds.Shadow();
             simulation.StepExact((int)(Seconds / simulation.Settings.StepSeconds), sky);

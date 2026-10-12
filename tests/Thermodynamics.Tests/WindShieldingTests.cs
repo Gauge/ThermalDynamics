@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -29,10 +30,10 @@ namespace Thermodynamics.Tests
         private const float Speed = 120f;
 
 
-        private static ThermalSettings Settings(bool shielding)
+        private static HistoricalThermalSettings Settings(bool shielding)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;
@@ -78,7 +79,7 @@ namespace Thermodynamics.Tests
 
         public void TheDefaultIsTheHarsherAnswer()
         {
-            Assert.False(new ThermalSettings().EnableWindwardShielding);
+            Assert.False(new HistoricalThermalSettings().EnableWindwardShielding);
             Assert.True(DragWatts(Sheltered(false)) >= DragWatts(Sheltered(true)));
         }
 
@@ -149,7 +150,7 @@ namespace Thermodynamics.Tests
         private static ThermalSimulation Convecting(bool shielding)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;
             settings.EnableWindwardShielding = shielding;

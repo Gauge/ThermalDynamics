@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Thermodynamics.Presentation/Thermodynamics.Presentation.csproj" />
+    <ProjectReference Include="../Thermodynamics.Fixtures/Thermodynamics.Fixtures.csproj" />
     <ProjectReference Include="../Thermodynamics.Core/Thermodynamics.Core.csproj" />
   </ItemGroup>
 

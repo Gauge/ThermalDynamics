@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -64,7 +65,7 @@ namespace Thermodynamics.Tests
         };
 
 
-        private static List<float> Fingerprint(Action<ThermalSettings> apply)
+        private static List<float> Fingerprint(Action<HistoricalThermalSettings> apply)
         {
 
             List<float> readings = new List<float>();
@@ -74,6 +75,7 @@ namespace Thermodynamics.Tests
             InTheSun(apply, readings);
             NearAStar(apply, readings);
             Flying(apply, readings);
+            Reentry(apply, readings);
             FlyingInTrail(apply, readings);
             Plumbed(apply, readings);
             Pumped(apply, readings);
@@ -88,10 +90,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static ThermalSettings Settings(Action<ThermalSettings> apply)
+        private static HistoricalThermalSettings Settings(Action<HistoricalThermalSettings> apply)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             if (apply != null) apply(settings);
             return settings.Derive();
         }
@@ -132,7 +134,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void BuriedSource(Action<ThermalSettings> apply, List<float> into)
+        private static void BuriedSource(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(5, 5, 5));
@@ -145,7 +147,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void OnAPlanet(Action<ThermalSettings> apply, List<float> into)
+        private static void OnAPlanet(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Shell(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(5, 5, 5));
@@ -158,7 +160,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void InTheSun(Action<ThermalSettings> apply, List<float> into)
+        private static void InTheSun(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(6, 1, 2));
@@ -172,7 +174,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void NearAStar(Action<ThermalSettings> apply, List<float> into)
+        private static void NearAStar(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(3, 3, 3));
@@ -192,7 +194,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Cooking(Action<ThermalSettings> apply, List<float> into)
+        private static void Cooking(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(4, 4, 4));
@@ -206,7 +208,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Paced(Action<ThermalSettings> apply, List<float> into)
+        private static void Paced(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(4, 4, 4));
@@ -223,10 +225,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Starved(Action<ThermalSettings> apply, List<float> into)
+        private static void Starved(Action<HistoricalThermalSettings> apply, List<float> into)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             if (apply != null) apply(settings);
 
             settings.MaxSubsteps = 2;
@@ -241,10 +243,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void OverBudget(Action<ThermalSettings> apply, List<float> into)
+        private static void OverBudget(Action<HistoricalThermalSettings> apply, List<float> into)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             if (apply != null) apply(settings);
 
             settings.MaxElementVisitsPerStep = 512;
@@ -259,7 +261,19 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Flying(Action<ThermalSettings> apply, List<float> into)
+        private static void Reentry(Action<HistoricalThermalSettings> apply, List<float> into)
+        {
+            HistoricalThermalSettings settings = new HistoricalThermalSettings { EnableReentryHeating = true };
+            if (apply != null) apply(settings);
+            settings.Derive();
+            GridBuilder builder = GridBuilder.Large();
+            builder.Place(Catalog.LightArmor(), Vector3I.Zero);
+            ThermalSimulation simulation = builder.BuildSimulation(settings, 293.15f);
+            simulation.StepExact(3, Worlds.Flight(1f, 600f));
+            Read(simulation, into);
+        }
+
+        private static void Flying(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Shell(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(5, 5, 5));
@@ -270,7 +284,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void FlyingInTrail(Action<ThermalSettings> apply, List<float> into)
+        private static void FlyingInTrail(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
 
@@ -283,7 +297,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Plumbed(Action<ThermalSettings> apply, List<float> into)
+        private static void Plumbed(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
 
@@ -306,7 +320,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Pumped(Action<ThermalSettings> apply, List<float> into)
+        private static void Pumped(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.LightArmor(), new Vector3I(0, 0, -1));
@@ -333,7 +347,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Sealed(Action<ThermalSettings> apply, List<float> into)
+        private static void Sealed(Action<HistoricalThermalSettings> apply, List<float> into)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Shell(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(5, 5, 5));
@@ -354,10 +368,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static void Suit(Action<ThermalSettings> apply, List<float> into)
+        private static void Suit(Action<HistoricalThermalSettings> apply, List<float> into)
         {
 
-            ThermalSettings settings = Settings(apply);
+            HistoricalThermalSettings settings = Settings(apply);
 
             float interior = SuitThermal.ComfortKelvin;
             float damage = 0f;
@@ -383,7 +397,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static object[] Levels(FieldInfo field, ThermalSettings shipped)
+        private static object[] Levels(FieldInfo field, HistoricalThermalSettings shipped)
         {
             if (field.FieldType == typeof(bool))
             {
@@ -430,7 +444,7 @@ namespace Thermodynamics.Tests
 
             List<FieldInfo> fields = new List<FieldInfo>();
 
-            foreach (FieldInfo field in typeof(ThermalSettings)
+            foreach (FieldInfo field in typeof(HistoricalThermalSettings)
                 .GetFields(BindingFlags.Public | BindingFlags.Instance))
             {
                 Type type = field.FieldType;
@@ -458,7 +472,7 @@ namespace Thermodynamics.Tests
             {
                 bool moved = false;
 
-                foreach (object level in Levels(field, new ThermalSettings()))
+                foreach (object level in Levels(field, new HistoricalThermalSettings()))
                 {
                     FieldInfo captured = field;
                     object value = level;

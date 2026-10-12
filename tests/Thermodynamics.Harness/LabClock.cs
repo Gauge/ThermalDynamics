@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using Thermodynamics.Core;
 
 namespace Thermodynamics.Harness
@@ -11,7 +12,7 @@ namespace Thermodynamics.Harness
             get
             {
 
-                float clock = new ThermalSettings().HeatTimeScale;
+                float clock = new HistoricalThermalSettings().HeatTimeScale;
                 return clock > 0f ? clock : 1f;
             }
         }

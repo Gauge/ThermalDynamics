@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -110,7 +111,7 @@ namespace Thermodynamics.Tests
             thermal.Clamp();
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableDamage = false;
             settings.EnableFriction = false;
 

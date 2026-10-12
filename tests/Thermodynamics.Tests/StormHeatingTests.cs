@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -34,7 +35,7 @@ namespace Thermodynamics.Tests
         private static float Settled(float windSpeed, float seconds)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableDamage = false;
             settings.EnableSolarHeat = false;
             settings.Derive();
@@ -89,7 +90,7 @@ namespace Thermodynamics.Tests
 
         [Fact]
 
-        public void AtTheShippedDefaultFrictionIsLiveAtEverySpeedAndVanishesByTheCube()
+        public void TheLegacyCubicPotentialIsLiveAtEverySpeed()
         {
 
             float slow = FrictionWatts(10f, 0f);
@@ -110,7 +111,7 @@ namespace Thermodynamics.Tests
         public void AirspeedCoolsAHotHullSlowAndHeatsItFast()
         {
 
-            ThermalSettings world = new ThermalSettings();
+            HistoricalThermalSettings world = new HistoricalThermalSettings();
             world.EnableDamage = false;
             world.EnableSolarHeat = false;
             world.Derive();
@@ -140,7 +141,7 @@ namespace Thermodynamics.Tests
         public void AWindyDayCoolsAHullThatIsMakingHeat()
         {
 
-            ThermalSettings world = new ThermalSettings();
+            HistoricalThermalSettings world = new HistoricalThermalSettings();
             world.EnableDamage = false;
             world.EnableSolarHeat = false;
             world.Derive();
@@ -169,7 +170,8 @@ namespace Thermodynamics.Tests
         private static float FrictionWatts(float windSpeed, float floor)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Test the potential before temperature limiting.
             settings.EnableDamage = false;
             settings.EnableSolarHeat = false;
             settings.FrictionAtSpeedsAbove = floor;
@@ -193,7 +195,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static float Mean(GridBuilder builder, ThermalSettings settings,
+        private static float Mean(GridBuilder builder, HistoricalThermalSettings settings,
             EnvironmentSample world, float seconds)
         {
             ThermalSimulation simulation = builder.BuildSimulation(settings, 293.15f);

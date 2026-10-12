@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using Thermodynamics.Presentation;
 using System;
 using System.Collections.Generic;

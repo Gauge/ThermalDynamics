@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -47,10 +48,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static ThermalSettings Isolated()
+        private static HistoricalThermalSettings Isolated()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;

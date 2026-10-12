@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -11,10 +12,10 @@ namespace Thermodynamics.Tests
     public static class Fixture
     {
 
-        public static ThermalSettings ConductionOnly(int frequency = 4)
+        public static HistoricalThermalSettings ConductionOnly(int frequency = 4)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
@@ -24,10 +25,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        public static ThermalSettings EnvironmentOnly(int frequency = 4)
+        public static HistoricalThermalSettings EnvironmentOnly(int frequency = 4)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
             settings.EnableDamage = false;
@@ -365,7 +366,7 @@ namespace Thermodynamics.Tests
             builder.Place(Fixture.Foil(), Vector3I.Zero);
             builder.Place(Fixture.Foil(), new Vector3I(1, 0, 0));
 
-            ThermalSettings settings = Fixture.ConductionOnly(1);
+            HistoricalThermalSettings settings = Fixture.ConductionOnly(1);
             ThermalSimulation simulation = builder.BuildSimulation(settings);
 
             simulation.Solver.GetNodeAt(Vector3I.Zero).Temperature = 900f;
@@ -381,7 +382,7 @@ namespace Thermodynamics.Tests
             GridBuilder builder = GridBuilder.Large();
             for (int x = 0; x < 8; x++) builder.Place(Fixture.Foil(1f), new Vector3I(x, 0, 0));
 
-            ThermalSettings settings = Fixture.ConductionOnly(1);
+            HistoricalThermalSettings settings = Fixture.ConductionOnly(1);
             ThermalSimulation simulation = builder.BuildSimulation(settings);
 
             simulation.Solver.GetNodeAt(Vector3I.Zero).Temperature = 1000f;
@@ -410,7 +411,7 @@ namespace Thermodynamics.Tests
             GridBuilder builder = GridBuilder.Large();
             for (int x = 0; x < 8; x++) builder.Place(Fixture.Foil(1f), new Vector3I(x, 0, 0));
 
-            ThermalSettings settings = Fixture.ConductionOnly(1);
+            HistoricalThermalSettings settings = Fixture.ConductionOnly(1);
             settings.ClampConductionOvershoot = false;
 
             ThermalSimulation simulation = builder.BuildSimulation(settings);

@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -84,7 +85,7 @@ namespace Thermodynamics.Harness
 
         private static Row Measure(int frequency, float simulatedSeconds)
         {
-            ThermalSettings settings = new ThermalSettings
+            ThermalSettings settings = new HistoricalThermalSettings
             {
                 Frequency = frequency,
                 SimulationSpeed = 1f,

@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -35,7 +36,7 @@ namespace Thermodynamics.Harness
         private static ThermalSettings Settings()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.Frequency = FieldFrequency;
             return settings.Derive();
         }

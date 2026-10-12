@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using System.IO;
 using Thermodynamics.Core;
@@ -8,12 +9,13 @@ using Xunit;
 namespace Thermodynamics.Tests
 {
     /// <summary>Profile lifetime, bounded preparation, force-coordinate covariance and numerical units at the engine boundary.</summary>
+    [Trait("scope", "integration")]
     public class AeroRuntimeTests
     {
         [Theory]
         [InlineData(26)]
         [InlineData(98)]
-        public void RuntimePublishesOnlyCurrentGeometryResolutionAndMass(int directions)
+        public void RuntimeReplacesGeometryResolutionAndMassWithoutDroppingTheActiveProfile(int directions)
         {
             GridModel grid = AeroCalibrationLab.Box(3, 3, 3);
             AeroRuntime runtime = new AeroRuntime();
@@ -26,16 +28,20 @@ namespace Thermodynamics.Tests
             Assert.Equal(0, runtime.BuildWork);
             Assert.Equal(0, runtime.CentreWork);
             grid.Add(new BlockModel { Mass = 10f }, new Vector3I(4, 0, 0));
-            Assert.False(runtime.Prepare(grid, true, directions, 0, centre, 1, 1));
-            Assert.Null(runtime.Profile);
+            Assert.True(runtime.Prepare(grid, true, directions, 0, centre, 1, 1));
+            Assert.True(runtime.Rebuilding);
+            Assert.Same(first, runtime.Profile);
             Assert.Equal(1, runtime.BuildWork);
             Finish(runtime, grid, directions, 0, centre);
             Assert.NotSame(first, runtime.Profile);
-            Assert.False(runtime.Prepare(grid, true, directions, 1, centre, 0, 0));
-            Assert.Null(runtime.Profile);
+            Assert.True(runtime.Prepare(grid, true, directions, 1, centre, 0, 0));
+            Assert.True(runtime.Rebuilding);
+            Assert.Equal(0, runtime.ProfileRevision);
             Finish(runtime, grid, directions, 1, centre);
             int other = directions == 26 ? 98 : 26;
-            Assert.False(runtime.Prepare(grid, true, other, 1, centre, 0, 0));
+            Assert.True(runtime.Prepare(grid, true, other, 1, centre, 0, 0));
+            Assert.True(runtime.Rebuilding);
+            Assert.Equal(directions, runtime.Profile.Directions);
             Finish(runtime, grid, other, 1, centre);
             Assert.Equal(other, runtime.Profile.Directions);
         }
@@ -57,19 +63,24 @@ namespace Thermodynamics.Tests
             Assert.Equal(0, runtime.CentreWork);
             Finish(runtime, grid, 26, 0, Vector3.Zero);
             Assert.True(runtime.Ready);
-            Assert.False(runtime.Prepare(null, true, 26, 0, Vector3.Zero, 100, 100));
+            var active = runtime.Profile;
+            Assert.True(runtime.Prepare(null, true, 26, 0, Vector3.Zero, 100, 100));
+            Assert.Same(active, runtime.Profile);
+            Assert.True(runtime.Rebuilding);
+            runtime.Reset();
             Assert.Null(runtime.Profile);
         }
 
         [Fact]
-        public void CentreChangesSuppressReadinessUntilTheirOwnBudgetFinishes()
+        public void CentreChangesKeepTheActiveCacheUntilTheirOwnBudgetFinishes()
         {
             GridModel grid = AeroCalibrationLab.Box(3, 3, 3);
             AeroRuntime runtime = new AeroRuntime();
             Vector3 original = new Vector3(2.5f);
             Finish(runtime, grid, 26, 0, original);
-            Assert.False(runtime.Prepare(grid, true, 26, 0, original + Vector3.One, 0, 7));
-            Assert.False(runtime.Ready);
+            Assert.True(runtime.Prepare(grid, true, 26, 0, original + Vector3.One, 0, 7));
+            Assert.True(runtime.Ready);
+            Assert.True(runtime.Rebuilding);
             Assert.Equal(original, runtime.Profile.CentreOfMass);
             Assert.Equal(7, runtime.CentreWork);
             Assert.True(runtime.Prepare(grid, true, 26, 0, original + Vector3.One, 0, 47));
@@ -214,17 +225,17 @@ namespace Thermodynamics.Tests
         [Fact]
         public void TheGameTickReachesPhysicsBeforeTheThermalEarlyReturn()
         {
-            string root = ShippedBlocks.ModRoot();
-            string tick = File.ReadAllText(Path.Combine(root, "Game", "ThermalGridSimulation.cs"));
-            Assert.True(tick.IndexOf("TickAerodynamics();", StringComparison.Ordinal)
-                < tick.IndexOf("if (stepped <= 0) return;", StringComparison.Ordinal));
-            string adapter = File.ReadAllText(Path.Combine(root, "Game", "ThermalGridAerodynamics.cs"));
-            Assert.DoesNotContain("IsServer", adapter);
-            Assert.DoesNotContain("Temperature", adapter);
-            Assert.Contains("if (!aerodynamics.Prepare", adapter);
-            Assert.Contains("APPLY_WORLD_FORCE, wrench.Force, null, null", adapter);
-            Assert.Contains("APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, null, null, torque", adapter);
-            Assert.Contains("wind - Grid.Physics.LinearVelocity", adapter);
+            string root = ShippedBlocks.RepoRoot();
+            string thermal = File.ReadAllText(Path.Combine(root,"Thermodynamics/Game/ThermalGridSimulation.cs"));
+            Assert.DoesNotContain("TickAerodynamics",thermal);
+            string adapter=File.ReadAllText(Path.Combine(root,"../Aerodynamics/Source/FlightGrid.cs"));
+            Assert.DoesNotContain("ThermalGrid",adapter);
+            Assert.DoesNotContain("Simulation.Solver",adapter);
+            Assert.Contains("api.Geometry(Grid)",adapter);
+            Assert.Contains("Runtime.Flight.Evaluate",adapter);
+            Assert.Contains("APPLY_WORLD_FORCE,Wrench.Force,null,null",System.Text.RegularExpressions.Regex.Replace(adapter, @"\s+", ""));
+            Assert.Contains("APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE,null,null,torque",System.Text.RegularExpressions.Regex.Replace(adapter, @"\s+", ""));
+
         }
 
         private static Vector3 Turn(Vector3 v) { return new Vector3(-v.Y, v.X, v.Z); }
@@ -232,7 +243,7 @@ namespace Thermodynamics.Tests
         private static void Finish(AeroRuntime runtime, GridModel grid, int directions, long revision, Vector3 centre)
         {
             int calls = 0;
-            while (!runtime.Prepare(grid, true, directions, revision, centre, 127, 7))
+            while (!runtime.Prepare(grid, true, directions, revision, centre, 127, 7) || runtime.Rebuilding)
             {
                 Assert.InRange(runtime.BuildWork, 0, 127);
                 Assert.InRange(runtime.CentreWork, 0, 7);

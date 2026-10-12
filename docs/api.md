@@ -60,13 +60,22 @@ Unregister the handler in `UnloadData`.
 | `GetRoom` | `Func<IMyCubeGrid, Vector3I, MyTuple<bool,float,float,float>>` | Is a sealed room, air temperature K, pressure 0..1, volume m³. |
 | `GetGridHeatBalance` | `Func<IMyCubeGrid, MyTuple<float,float>>` | Watts the grid is venting, watts it is making. Venting reads zero while a grid is net absorbing. |
 | `GetGridFrictionWatts` | `Func<IMyCubeGrid, float>` | Watts the grid is taking from the air by aerodynamic friction. **One term of the second figure above, not a third one** — adding them counts it twice. |
-| `GetGridAeroForces` | `Func<IMyCubeGrid, MyTuple<Vector3,Vector3>>` | The aerodynamic forces this mod applies to the grid, in **world newtons**: drag first, then lift. Drag is the force applied in the latest physics tick; lift remains zero until its separate model is implemented. Disabled, static and unprepared grids report zero. Its meaning and the major are unchanged ([aerodynamics.md](aerodynamics.md#strip-and-rebuild)). |
-| `GetGridAeroMoments` | `Func<IMyCubeGrid, MyTuple<Vector3,Vector3>>` | Latest restoring and rotational-damping moments in **world N·m**, separately. |
-| `GetGridAeroProfile` | `Func<IMyCubeGrid, Dictionary<string,object>>` | Detached snapshot of the last fully prepared drag profile, schema below. Null while unavailable, rebuilding or preparing a new centre. Allocates copies only when called; never builds geometry in the getter. |
-| `SetGridAeroProfileConsumer` | `Func<IMyCubeGrid, long, bool, bool>` | Registers/releases a consumer id on a simulated grid; returns false if unavailable. Repeating an id is idempotent. Each add-on uses its own stable id (e.g. workshop id) and releases every registered grid when finished. Any remaining consumer keeps bounded profile preparation running even with forces off (including static grids with physics), without enabling force writes. Registrations are session-local and removed on grid close; client and server register independently. |
+| `GetGridAeroForces` | `Func<IMyCubeGrid, MyTuple<Vector3,Vector3>>` | Latest provider-reported aerodynamic forces in **world newtons**: drag first, then lift. Thermodynamics forwards the registered provider; without that delegate both vectors are zero. Force application and preparation belong to Aerodynamics. |
+| `GetGridAeroMoments` | `Func<IMyCubeGrid, MyTuple<Vector3,Vector3>>` | Provider-reported restoring and rotational-damping moments in **world N·m**, separately; zero without that delegate. |
+| `GetGridGeometryVersion` | `Func<IMyCubeGrid, long>` | Geometry/mass/face-weight revision, or -1 while unavailable. Cheap poll; fetch geometry only when changed. |
+| `GetGridGeometry` | `Func<IMyCubeGrid, Dictionary<string, object>>` | Detached raw geometry, schema 1, documented below. No aerodynamic computation. |
+| `GetGridEnvironment` | `Func<IMyCubeGrid, MyTuple<bool, Vector3, float, float, float, Vector3>>` | Planet available, world wind m/s, density kg/m³, ambient K, terrain height m, world radial up. |
+| `GetEnvironmentAt` | `Func<Vector3D, MyTuple<bool, Vector3, float, float, float, Vector3>>` | Same environment tuple at a character/world position. Nearby grid climate is reused; remote fallback uses planetary daytime temperature and sampled wind. |
+| `GetGridWindCeiling` | `Func<IMyCubeGrid, float>` | Native planet wind ceiling at this grid, m/s. |
+| `GetGridThermalUpstream` | `Func<IMyCubeGrid, Vector3>` | Last thermal upstream direction, grid-local; may lag current physics. |
+| `RegisterAerodynamics` | `Func<long, Dictionary<string, Delegate>, bool>` | Claim the external aerodynamic provider with a nonzero owner id; null dictionary releases that owner's claim. One provider at a time. |
+| `GetGridAeroProfile` | `Func<IMyCubeGrid, Dictionary<string,object>>` | Detached snapshot of the last fully prepared aerodynamic profile, schema below. Null until first preparation or after explicit reset; replacement keeps the last completed profile readable. Allocates copies only when called; never builds geometry in the getter. |
+| `SetGridAeroProfileConsumer` | `Func<IMyCubeGrid, long, bool, bool>` | Registers/releases a consumer id on a simulated grid; returns false if unavailable. Repeating an id is idempotent. Forwarded to the provider, which owns preparation and registration lifecycle; false without that delegate. Each add-on uses its own stable id (e.g. workshop id) and releases every registered grid when finished; client and server register independently. |
 | `GetGridAeroStatus` | `Func<IMyCubeGrid, MyTuple<bool,bool,int,int>>` | Latest profile readiness, numerical-guard binding, construction work units and centre-update face count. Readiness does not certify native or population validation. |
 | `GetCoolantLoop` | `Func<IMySlimBlock, MyTuple<bool,float,float,float,int>>` | The coolant loop a pipe block belongs to: found, mean temperature K, hottest pipe K, coldest pipe K, pipe count. `GetGridSummary` gives the loop *count*; this reads a loop. Keyed on a pipe block, not a loop index, because a rebuild reorders the list but the block a player placed is stable. Hottest and coldest are given beside the mean because a working loop has a gradient the mean hides. Found is false for a block that is not a pipe, is on no loop, or is not simulated. |
 | `SetBlockDragProfile` | `Func<IMySlimBlock, float[], bool>` | Six multipliers in face order, each 0..1, telling the aerodynamic terms this block is more slippery on some faces than its area says — a nacelle is slippery nose-on and blunt side-on, and an axis-aligned face count cannot tell. **A profile may only reduce**: anything over 1, under 0, or not a number is clamped to 1, which is *no change*. Touches friction heating and the wind's convection and **not** the sun; the rebuilt force reads it too. |
+| `SetBlockLiftProfile` | `Func<IMySlimBlock, float[], bool>` | Eight floats for an authored lifting surface: block-local normal, block-local span direction, planform area in m², span in metres. Replaces that block's aerodynamic pressure geometry; skin friction remains. Rejects invalid geometry. Apply by block definition in a consumer mod when the mesh differs from occupied cells. |
+| `ClearBlockLiftProfile` | `Func<IMySlimBlock, bool>` | Removes the authored lifting surface and rebuilds automatic geometry. |
 | `ClearBlockDragProfile` | `Func<IMySlimBlock, bool>` | Removes a profile, so the block's faces read as their own area again. |
 
 A block that is not simulated — excluded by `ExcludeFromSimulation`, on a grid without physics, or not yet
@@ -90,11 +99,12 @@ if (loop.Item1)                       // this block is on a loop
 ### Aerodynamic profile snapshot, schema 1
 
 Every dictionary and array belongs to the caller. Editing or retaining it cannot alter the live
-profile, and it remains unchanged across later hull/centre updates. Copying is serialized with the
-adapter's preparation; callers need not select an update phase. Read occasionally and cache it:
-this getter allocates O(direction count) storage on every successful call. Registration schedules
-work on subsequent physics ticks; it does not make the profile ready synchronously. Poll the getter
-for availability. With forces disabled and no registered consumers, no profile work runs.
+profile, and it remains unchanged across later hull/centre updates. Call profile and geometry
+accessors on the game thread. The external provider owns profile preparation, publication and
+consumer scheduling. Read occasionally and cache it: a profile copy uses O(direction count)
+storage, while the raw geometry getter copies O(blocks + occupied cells) data. Thermodynamics
+forwards profile calls and returns null without the delegate; registration alone does not
+make a profile available synchronously.
 
 | Key | Runtime type | Meaning |
 | --- | --- | --- |
@@ -110,9 +120,17 @@ for availability. With forces disabled and no registered consumers, no profile w
 | `DampingMoments` | `float[]` | Six nonnegative surface integrals (m⁵), in +X, −X, +Y, −Y, +Z, −Z spin order. Per-axis moment is −0.5·density·RotationalDrag·integral·ω·abs(ω). |
 | `RotationalDrag` | `float` | Dimensionless coefficient for those damping integrals. |
 
-Schema 1 contains the implemented drag geometry only. It contains no lift planform/span,
-compressibility, native inertia tensor or force-ownership agreement. A separate force mod can
-register demand, turn `EnableAeroForces` off through the settings API, and read this geometry while
+Schema 1 retains its original drag fields and adds optional lifting geometry:
+`LiftNormals`, `LiftCentres`, `LiftSizes`, and `LiftSpanAxes` are detached `Vector3[]` arrays in
+grid axes/metres. `LiftGeometry` is a `float[]` with area, authored span and authored chord per
+surface (m², m, m). A zero span axis means an automatically detected axis-aligned rectangle,
+whose extent is `LiftSizes`; otherwise span axis and its cross product with the normal define
+the authored rectangle. `LiftBodyAreas`, `LiftBodyFirstMoments` and `LiftBodyDampingMoments`
+use the original layouts with lifting-surface pressure/damping removed. Original fields retain
+the drag-only control; do not add lift to their incidence-dependent pressure drag. Consumers
+must keep their own separation histories. This is geometry, not live stall state, a native
+inertia tensor, or a force-ownership agreement. A separate force mod can
+register demand, have the host turn `EnableForces` off in Aerodynamics, and read this geometry while
 owning its own forces. Releasing a consumer does not change the world's force setting. Turning off
 forces and releasing the final consumer clears the prepared geometry on the next physics tick.
 
@@ -229,7 +247,9 @@ game session, and its two seams are meant to be used:
   promise about each implementation — it was a promise until 2026-08-28, and `GetSetting` had been
   breaking it, throwing where its `SetSetting` sibling returned `false`. Asking for a setting before
   this mod has loaded its own is safe now, and answers with the defaults rather than with zero.
-* No API call is required to be made on a particular thread or update phase.
+* The API does not enforce a thread or update phase, but it does not synchronize live grid
+  collections. Call engine-facing getters and mutations on the game thread; detached snapshot
+  arrays may be processed elsewhere. Exception guards do not provide thread safety.
 * Delegate signatures use whitelisted types only, so scripts and mods can both bind.
 * Keys will not change meaning within a major version. New keys may be added; missing keys mean an
   older build, so test for null after casting.
@@ -253,6 +273,8 @@ than *not within a major*.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Correct provider forwarding, snapshot costs, thread-safety limits and exception behavior. |
+| 2026-09-27 | Added authored lift overrides, actual submitted lift reporting and optional lifting/residual geometry in profile snapshots. |
 | 2026-09-27 | Documented bounded physical-energy extraction and its exclusive-access, completed-step contract. |
 | 2026-09-27 | Added detached schema-1 drag-profile snapshots and explicit per-grid consumer registration. Documented all fields, units, lifetime, copy cost and force-off behavior; added matching drop-in client bindings. |
 | 2026-09-27 | Added current applied drag, separate restoring/damping moments and preparation status to the grid API and drop-in client; registered face overrides now reach profile construction. |
@@ -264,3 +286,41 @@ than *not within a major*.
 | 2026-08-21 | Checked every link on this page against the files and headings it names. |
 | 2026-08-19 | Added what a grid vents against what it makes. Renamed the definition dials that said the wrong thing, and the API entries with them. |
 | 2026-08-13 | Opened the page as the contract: `EveryModApiEntryIsDocumented` fails when the delegate table carries a key this page does not name. |
+
+## Standalone Aerodynamics integration
+
+Load both mod packages. Thermodynamics performs no aerodynamic force writes. Existing force,
+profile, status and lift-authoring API calls forward to the registered Aerodynamics module;
+without it they return zero/false/null. Drag face weights remain geometry data and invalidate
+raw geometry revisions. No mod-specific CLR types cross this boundary. Thermodynamics broadcasts
+`false` on the API channel when unloading; consumers must drop delegates and stop force writes.
+The standalone consumer retries discovery and waits for server settings before applying forces.
+
+Raw geometry keys: `Schema` (int 1), `Revision` (long), `GridSize` (float metres), `Min` and
+`MaxExclusive` (Vector3I[] block bounds), `Mass` (float[] kg), `Cells` (Vector3I[] flattened occupied
+cells), `CellStarts` (int[], block count + 1 offsets into Cells), `FaceWeights` (float[], six per
+block in the same face order as drag authoring). All arrays are copies; mutating them never changes
+Thermodynamics. Export is O(blocks + cells), requested only after a revision changes. Profile
+construction, surface reconstruction, lift detection and numerical guards belong to Aerodynamics.
+
+The provider dictionary must supply `SurfaceHeating` as
+`Func<float,float,float,float,float,float,float,float>`: effective exposed upstream area m²,
+air-density fraction, airspeed m/s, ambient K, surface K, heat capacity J/K, integration duration s;
+return watts. Thermodynamics integrates the returned source and sanitizes invalid values.
+An optional `SurfaceHeatingGate` (`Func<float,bool>`, airspeed m/s to active) skips heating work
+when the provider is disabled or below its threshold. Without that optional callback, a registered
+provider is considered active at positive speed. The heating callback must also enforce its own
+switches. Without any registered provider the gate is false.
+No provider means zero aerodynamic heating. The registered provider also supplies the existing
+force/profile/status/lift-authoring delegates with their existing signatures. Registration is
+local to each server/client session and released on unload. A `SurfaceHeating` exception disables registration, logs a fault and announces unavailability;
+discovery must succeed again before forwarding resumes. A `SurfaceHeatingGate` exception logs
+a fault and returns false for that sample; it does not release the provider. Exceptions in
+forwarded force/profile delegates are caught by the API guard without releasing registration.
+Heating callbacks run inside the solver and can execute concurrently on different grid workers
+when `ParallelGrids` is enabled. Keep them allocation-free where possible, thread-safe, and
+independent of engine reads or writes. The current heating-exception path itself invokes
+telemetry and mod messaging inline; worker-safe recovery remains a review finding.
+
+Changelog: 2026-09-27 — added raw geometry/environment and external-provider contracts; aerodynamic
+runtime extracted to a separate package while preserving existing delegate signatures.

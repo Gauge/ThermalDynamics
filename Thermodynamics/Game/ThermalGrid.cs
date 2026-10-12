@@ -84,6 +84,18 @@ namespace Thermodynamics
 
         private static readonly List<ThermalGrid> Live = new List<ThermalGrid>();
 
+        private static int stepPhaseCursor;
+
+        // Round-robin over one step's frames, so grids loaded together start their steps apart.
+        private static int NextStepPhase()
+        {
+            float stepsPerSecond = Settings.Instance.StepsPerSecond;
+            int framesPerStep = stepsPerSecond > 0f
+                ? Math.Max(1, (int)Math.Round(1f / (stepsPerSecond * ThermalGridScheduler.FrameSeconds)))
+                : 1;
+            return stepPhaseCursor++ % framesPerStep;
+        }
+
         public static IList<ThermalGrid> LiveGrids
         {
             get { return Live; }
@@ -116,6 +128,7 @@ namespace Thermodynamics
 
             Model = new GridModel(Grid.GridSize);
             Simulation = new ThermalSimulation(Settings.Instance.ToCore(), Model);
+            Simulation.StepPhaseFrames = NextStepPhase();
 
             Stats = Telemetry.RegisterGrid(this);
             if (Stats != null) Simulation.Profiler = Stats.Profiler;
@@ -181,7 +194,7 @@ namespace Thermodynamics
 
         public override void Close()
         {
-            ResetAerodynamics();
+
             if (Stats != null)
             {
                 Stats.Close();

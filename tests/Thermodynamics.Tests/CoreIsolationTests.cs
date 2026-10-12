@@ -30,6 +30,26 @@ namespace Thermodynamics.Tests
 
         private static readonly Assembly Core = typeof(ThermalSolver).Assembly;
 
+        [Fact]
+        public void ProductionCoreHasNoHistoricalHeatingOrAerodynamicImplementation()
+        {
+            foreach (Type type in Core.GetTypes())
+            {
+                Assert.False((type.Namespace ?? "").StartsWith("Aerodynamics", StringComparison.Ordinal), type.FullName);
+                Assert.DoesNotContain("Historical", type.Name);
+            }
+
+            var production = new ThermalSettings();
+            Assert.Null(production.SurfaceHeating);
+            Assert.Null(production.SurfaceHeatingGate);
+            Assert.Null(typeof(ThermalSettings).GetField("EnableFriction"));
+            var historical = new Thermodynamics.Fixtures.HistoricalThermalSettings();
+            Assert.NotEqual(Core, historical.GetType().Assembly);
+            Assert.True(historical.AcceptSurfaceHeating(100f));
+            historical.EnableFriction = false;
+            Assert.False(historical.AcceptSurfaceHeating(100f));
+        }
+
 
         private static bool IsAllowed(string assemblyName)
         {

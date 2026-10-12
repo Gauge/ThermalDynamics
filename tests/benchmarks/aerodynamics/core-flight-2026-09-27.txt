@@ -1,0 +1,71 @@
+Core aerodynamic implementation verification
+UTC: 2026-09-27T18:48:27.439051+00:00
+Base commit: 136c6c32c23705417165b1f2003d4dadbd690dbf
+Scope: uncommitted working tree; Water Mod deferred.
+Build marker: core-aero-20260927-upstream-v1
+
+Build: dotnet build tests/Thermodynamics.slnx --no-restore -m:1 -p:MdkBuildConfiguration=NoPackage -v quiet
+
+
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:06.21
+
+Tests: dotnet test tests/Thermodynamics.Tests --no-restore -m:1 -v quiet
+Test run for /home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Results File: /tmp/aero-complete.trx
+
+Passed!  - Failed:     0, Passed:  2654, Skipped:     0, Total:  2654, Duration: 1 m 41 s - Thermodynamics.Tests.dll (net9.0)
+
+Airflow regression before fix: all five upstream-face/shielding controls failed. After fix: all passed.
+Historical thermal-layout controls explicitly reverse travel to preserve their old heated faces and temperature hashes; new direction controls assert physical upstream behavior.
+Test runner required loopback-socket permission. Packaging disabled; no deployment or Workshop publication.
+Native flight/multiplayer and new population acceptance remain unverified. Corpus walks not opted in.
+Lift-law tests establish implementation properties, not agreement with all retained experimental observations.
+
+SHA-256 of changed C# sources:
+9fd524ca8d769a452f0d7ab0f8ff49d941346e229c63b4ce90a30f67458e4ca6  Thermodynamics/AeroOverlay.cs
+203c8e750e6afdb5247d6a7fe1ab98e756c431a31973143d179fd5eb3542ad43  Thermodynamics/Core/Aerodynamics/AeroCharacter.cs
+6d01e05a651370d054ff9e7aeabd5e5453da51241e8bd5e2985e1f2beb3fb2e7  Thermodynamics/Core/Aerodynamics/AeroFlightModel.cs
+1650b84d4bc5f445d3f18b11a3aacd712e2370a01135d23058ddbe69f0ecd79c  Thermodynamics/Core/Aerodynamics/AeroForces.cs
+ec44c0bfb88dbc388146fc28bd1166f2bd0dd1d02f66f9e351e433d56e8adc66  Thermodynamics/Core/Aerodynamics/AeroHeating.cs
+1b18ed5e90b48f7eb5e0a1d7142b5a05094776d0f9f4e94714241857f8844b47  Thermodynamics/Core/Aerodynamics/AeroLiftingSurface.cs
+dc5d01e11e501e7a6de82def88d56cd7aa675ce49ad9bad7bfa5f5b8d8158775  Thermodynamics/Core/Aerodynamics/AeroProfile.cs
+c1860b35c2c2af5cb70ae9d74d0a4213066784be786274d5bd01844741bcca6f  Thermodynamics/Core/Aerodynamics/AeroProfileBuilder.cs
+c213bd10f4dcfca22cd4c72d54fff9b8eef098e6d1b2d9a50f1e137f8d0a8153  Thermodynamics/Core/Aerodynamics/AeroRuntime.cs
+c30a9264190221626b131396eab3e067ad14cc912d3974715e05f97d9c5820e8  Thermodynamics/Core/Aerodynamics/AeroSurfaceBuilder.cs
+892655975e65f7cdc91c239ce0e15228bc0b025c7822e160d0acabc2e59313b7  Thermodynamics/Core/Model/BlockInstance.cs
+ae83514ce536a076c026967d7f6b47520398908a145bbc328207a0d8113c5277  Thermodynamics/Core/Settings/ThermalSettings.cs
+a2623b6390c6f84f189b3e071140c5fb3a2c96d334952d19230a43fca65d0c81  Thermodynamics/Core/Simulation/ThermalSolver.cs
+b49039683796e51d68dec1df8c0784439010a46c76ad70de84746c06accb7d42  Thermodynamics/Game/CharacterAerodynamics.cs
+483db76c0d37c8154b6201d682d1640e416ccbec7df4ec6e8ca8cbdcb2a45a2a  Thermodynamics/Game/ThermalBlock.cs
+dea519c4bdcd4620ee43d7e7d569a48c222508a5e11bfd01309d2cbc8ab50fb0  Thermodynamics/Game/ThermalGridAeroTelemetry.cs
+65aa4abf6f29d4c69cf6480134d50f9341b7d47bf0e0eb1a7b2091f1aa39e2f8  Thermodynamics/Game/ThermalGridAerodynamics.cs
+e82b9e38935265ad348d7461324da9f93e80a30589babba4d5ac41505a482893  Thermodynamics/Session.cs
+d19b871d4d119aeb7a621559b4f5dc419a2dc4a4883a93a920fda9ba267b582a  Thermodynamics/Settings.cs
+400307e42e389175c3ff18685c420b9b589cf960556a0fa5656150531b48212b  Thermodynamics/Telemetry/AeroTelemetry.cs
+126cbcde57e4a9d505940beddf923c625cd01891c72b5e20c7037738537f423c  Thermodynamics/Telemetry/GridTelemetry.cs
+1973c9238224cf8f4d24ea37f40439605fef3346508cb78f832e2e64addbbdf5  Thermodynamics/Telemetry/Telemetry.cs
+e54f40196ea4c04b721105e5c52ee58760bcdb80e5ae23be191971b26d75cde8  Thermodynamics/Telemetry/TelemetryReport.cs
+00810eec611914755329fca7d0195874262be1db4a0d01af295d837d6019e963  Thermodynamics/ThermalApi.cs
+35d16ded36419c485d9526f334f57a590589a1983dd4c7818a27018d72e73528  Thermodynamics/ThermalSettingsMenu.cs
+583dd36554588ec58b64411ce468705b123e3058b57ce4e061bde8b9669558b1  tests/Thermodynamics.Tests/AeroLiftTests.cs
+8ad912a192a550fe492fe60c4546d8c92ea6f9d62b2b1192c5f89203fa928224  tests/Thermodynamics.Tests/AeroRuntimeTests.cs
+b7f49da27ed2d62f78dbf812a82350c09f618004e56f7a31cd3e47bcf9b98ad8  tests/Thermodynamics.Tests/AeroTelemetryTests.cs
+e102c31760d47a7754ad77c14ac9dbae7a6a901d493c621baa1170fc259762da  tests/Thermodynamics.Tests/AerodynamicStripTests.cs
+bb6c72bb5242d801b6508764df2523d91f11476938c356615b244c163c999cd5  tests/Thermodynamics.Tests/AirflowDirectionTests.cs
+f6a90ce7448d4b1fe0c7a44ce6823d6d5a9a199d47b34135a8eac29a95ba4acd  tests/Thermodynamics.Tests/DialReachTests.cs
+69ef69de457a4a90c474e4d9f25460b05bf2f9716063ce77c5a86a6c9239297d  tests/Thermodynamics.Tests/DragProfileTests.cs
+1c620d39bea4b4217bffc3445b2516f9d752c85220b35581bf3cda076908bf7d  tests/Thermodynamics.Tests/DragShapeTests.cs
+094531de2b6748f8f6119570fa132b31ae765b228f5dd601008a308f86fae17c  tests/Thermodynamics.Tests/EnvironmentTests.cs
+5178bed7a39958fb6acfdcca606de141aa6b222e6f9c98c3ba368738b6c8399a  tests/Thermodynamics.Tests/FrictionIsolationTests.cs
+44507c58fc0dc889b2db87e8686e697e903ee1333f746c61658914f391a894f0  tests/Thermodynamics.Tests/GridFrictionTotalTests.cs
+253c8e7771864b556b6790193f4d4b03480b0b9d6bdfca26b186f062a90b6c0a  tests/Thermodynamics.Tests/SettingsDialReachTests.cs
+b29f6062941482a3372cf8692d86b488a1558501a7ed68710feef51c9b4a944d  tests/Thermodynamics.Tests/StormHeatingTests.cs
+a953b23c60ca8b7a5cdcf845c79d5edec16dc13d481c2ec231f6923a898ea1f6  tests/Thermodynamics.Tests/SubstepCeilingTests.cs
+1ee5652e9bd251d65235a75c175737993e4a1d62cfea1a401cf539c862c0c928  tools/modkit/ThermodynamicsApi.cs

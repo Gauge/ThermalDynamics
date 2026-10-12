@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -22,7 +23,7 @@ namespace Thermodynamics.Tests
         public void NoPlanetMeansVacuum()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             EnvironmentState state = EnvironmentSolver.Solve(settings, null, Worlds.Shadow());
 
             Assert.Equal(settings.VacuumTemperature, state.AmbientTemperature, 3);
@@ -36,7 +37,7 @@ namespace Thermodynamics.Tests
         public void AmbientIsNeverColderThanVacuum()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             EnvironmentSample sample = Worlds.PlanetSurface(0.0001f, 0f);
@@ -50,7 +51,7 @@ namespace Thermodynamics.Tests
         public void NoonIsWarmerThanMidnight()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             float noon = EnvironmentSolver.Solve(settings, planet, Worlds.PlanetSurface(1f, 0.5f)).AmbientTemperature;
@@ -66,7 +67,7 @@ namespace Thermodynamics.Tests
         public void UndergroundUsesItsOwnTemperatureAndBlocksTheSun()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             EnvironmentState state = EnvironmentSolver.Solve(settings, planet, Worlds.Underground());
@@ -101,7 +102,7 @@ namespace Thermodynamics.Tests
         public void SolarEnergyDecaysThroughAtmosphere()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             float vacuum = EnvironmentSolver.Solve(settings, planet, Worlds.PlanetSurface(0f, 0.5f)).SolarEnergy;
@@ -116,7 +117,7 @@ namespace Thermodynamics.Tests
         public void WindRaisesTheConvectionCoefficient()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             float still = EnvironmentSolver.Solve(settings, planet, Worlds.PlanetSurface(1f, 0.5f)).ConvectionCoefficient;
@@ -131,7 +132,7 @@ namespace Thermodynamics.Tests
         public void FrictionNeedsBothAirAndSpeed()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             Assert.False(EnvironmentSolver.Solve(settings, planet, Worlds.Flight(0.8f, 0f)).FrictionActive);
@@ -145,7 +146,7 @@ namespace Thermodynamics.Tests
         public void DisablingPlanetsFallsBackToVacuumEvenOnASurface()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnablePlanets = false;
 
             EnvironmentState state = EnvironmentSolver.Solve(
@@ -159,7 +160,7 @@ namespace Thermodynamics.Tests
         public void AmbientPow4TracksAmbient()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             EnvironmentState state = EnvironmentSolver.Solve(settings, PlanetThermalProperties.Default(), Worlds.PlanetSurface(1f, 0.5f));
 
             float t = state.AmbientTemperature;
@@ -180,7 +181,7 @@ namespace Thermodynamics.Tests
     public class RadiationTests
     {
 
-        private static ThermalSimulation SingleBlock(ThermalSettings settings, float temperature)
+        private static ThermalSimulation SingleBlock(HistoricalThermalSettings settings, float temperature)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.LightArmor(), Vector3I.Zero);
@@ -207,7 +208,7 @@ namespace Thermodynamics.Tests
 
         public void RadiatedPowerMatchesStefanBoltzmann()
         {
-            ThermalSettings settings = Fixture.EnvironmentOnly(1000);
+            HistoricalThermalSettings settings = Fixture.EnvironmentOnly(1000);
 
             ThermalSimulation simulation = SingleBlock(settings, 500f);
             ThermalNode node = simulation.Solver.Nodes[0];
@@ -271,7 +272,7 @@ namespace Thermodynamics.Tests
 
         public void ABlockColderThanAmbientWarmsUp()
         {
-            ThermalSettings settings = Fixture.EnvironmentOnly();
+            HistoricalThermalSettings settings = Fixture.EnvironmentOnly();
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.LightArmor(), Vector3I.Zero);
             ThermalSimulation simulation = builder.BuildSimulation(settings, 100f);
@@ -325,7 +326,7 @@ namespace Thermodynamics.Tests
         public void SolarGainMatchesTheProjectedArea()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableFriction = false;
             settings.EnableDamage = false;
@@ -348,7 +349,7 @@ namespace Thermodynamics.Tests
         public void OcclusionRemovesSolarGainEntirely()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.Derive();
 
@@ -368,7 +369,7 @@ namespace Thermodynamics.Tests
         public void SolarGainFollowsTheSunAroundTheBlock()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.Derive();
 
@@ -394,7 +395,7 @@ namespace Thermodynamics.Tests
         public void FrictionActuallyHeatsTheBlock()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;
@@ -419,7 +420,7 @@ namespace Thermodynamics.Tests
         public void BelowAConfiguredFloorFrictionDoesNothing()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.FrictionAtSpeedsAbove = 50f;
@@ -453,7 +454,8 @@ namespace Thermodynamics.Tests
         private static float FrictionWattsAt(float speed)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Cubic potential, before the recovery bound.
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.Derive();
@@ -474,7 +476,7 @@ namespace Thermodynamics.Tests
         public void TheEffectiveCoefficientCarriesTheAtmosphereBlend()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             foreach (float density in new float[] { 1f, 0.5f, 0.25f, 0.05f, 0.001f })
@@ -496,7 +498,7 @@ namespace Thermodynamics.Tests
         public void TheEffectiveCoefficientFallsWithTheAir()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             float sealevel = EnvironmentSolver.Solve(
@@ -549,7 +551,7 @@ namespace Thermodynamics.Tests
         public void WindStillRaisesTheCoefficientAtEveryDensity()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
             foreach (float density in new float[] { 1f, 0.25f })
@@ -566,7 +568,7 @@ namespace Thermodynamics.Tests
 
         private static ThermalSimulation Rig(float density, out EnvironmentSample sample)
         {
-            ThermalSettings settings = new ThermalSettings
+            HistoricalThermalSettings settings = new HistoricalThermalSettings
             {
                 MaxSubsteps = 64,
                 MaxElementVisitsPerStep = 0,

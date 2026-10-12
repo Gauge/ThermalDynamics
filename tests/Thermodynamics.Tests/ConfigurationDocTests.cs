@@ -43,7 +43,7 @@ namespace Thermodynamics.Tests
         public void EverySettingIsOnAMenuPageThatNamesIt()
         {
             string menu = File.ReadAllText(Path.Combine(
-                RepoRoot(), "Thermodynamics", "ThermalSettingsMenu.cs"));
+                RepoRoot(), "Thermodynamics", "ThermalSettingsMenuLayout.cs"));
 
             int folders = menu.IndexOf("private static readonly Folder[] Folders", StringComparison.Ordinal);
             int debug = menu.IndexOf("private static readonly Leaf DebugPage", StringComparison.Ordinal);
@@ -303,7 +303,7 @@ namespace Thermodynamics.Tests
 
         private static readonly HashSet<string> NotReaders = new HashSet<string>
         {
-            "Settings.cs", "ThermalSettingsMenu.cs", "SettingsSync.cs", "SettingsRequests.cs",
+            "Settings.cs", "SettingsAccess.cs", "SettingsStorage.cs", "ThermalSettingsMenu.cs", "ThermalSettingsMenuLayout.cs", "SettingsSync.cs", "SettingsRequests.cs",
         };
 
         [Fact]

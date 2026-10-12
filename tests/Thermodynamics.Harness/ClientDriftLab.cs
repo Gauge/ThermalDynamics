@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -121,7 +122,7 @@ namespace Thermodynamics.Harness
             int blocks, ThermalSettings settings, Correction protocol, Machine host)
         {
 
-            ThermalSettings world = settings ?? new ThermalSettings().Derive();
+            ThermalSettings world = settings ?? new HistoricalThermalSettings().Derive();
 
             Func<float, EnvironmentSample> environment = Environment(scenario);
 

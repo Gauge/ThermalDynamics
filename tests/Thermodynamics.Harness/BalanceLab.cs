@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -112,7 +113,7 @@ namespace Thermodynamics.Harness
 
             List<BlockRow> rows = new List<BlockRow>();
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
 
             foreach (string subtype in ShippedBlocks.Subtypes())
             {
@@ -389,7 +390,7 @@ namespace Thermodynamics.Harness
                 builder.Place(panel, new Vector3I(0, 1 + (i * 5), 0));
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -483,7 +484,7 @@ namespace Thermodynamics.Harness
             sinks[ring.IndexOf(panelTop + Vector3I.Up)] = Vector3I.Down;
             PipeFitter.BuildRing(builder, ring, -1, sinks);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             if (coefficient > 0f || massPerPipe > 0f)
             {
@@ -524,7 +525,7 @@ namespace Thermodynamics.Harness
                 JointDropKelvin = sourceKelvin - panelKelvin,
                 JointWattsPerKelvin = coupling,
                 ThroughJointWatts = 0f,
-                SubstepDemand = simulation.Solver.RequiredSubsteps(new ThermalSettings().StepSeconds),
+                SubstepDemand = simulation.Solver.RequiredSubsteps(new HistoricalThermalSettings().StepSeconds),
             };
         }
 
@@ -627,7 +628,7 @@ namespace Thermodynamics.Harness
             builder.Place(panel, new Vector3I(0, 1, 0));
             BlockInstance placed = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -664,7 +665,7 @@ namespace Thermodynamics.Harness
 
             List<PumpRow> rows = new List<PumpRow>();
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             HeatPumpShape shape = ThermalHeatPumpShapes.Get("Gauge_LG_HeatPump", Vector3I.One);
 
             float cold = 300f;
@@ -733,7 +734,7 @@ namespace Thermodynamics.Harness
 
             List<BlockInstance> pipes = PipeFitter.BuildRing(builder, ring, -1, sinks);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -779,7 +780,7 @@ namespace Thermodynamics.Harness
 
             StringBuilder sb = new StringBuilder();
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
 
             sb.AppendLine("BLOCKS  (shed at " + N(ReferenceTemperature, 0) + " K into a "
 

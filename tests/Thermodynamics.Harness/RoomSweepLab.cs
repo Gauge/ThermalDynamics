@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,7 +43,7 @@ namespace Thermodynamics.Harness
             foreach (Vector3I cell in ordered) builder.Place(armour, cell);
 
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableRoomAir = true;
             settings.Derive();
 

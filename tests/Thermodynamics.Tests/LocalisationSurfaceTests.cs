@@ -49,11 +49,11 @@ namespace Thermodynamics.Tests
             }),
             new KeyValuePair<string, string[]>("settings menu", new[]
             {
-                "ThermalSettingsMenu.cs", "ThermalSettingsWindow.cs",
+                "ThermalSettingsMenu.cs", "ThermalSettingsMenuLayout.cs", "ThermalSettingsWindow.cs",
             }),
             new KeyValuePair<string, string[]>("chat replies", new[]
             {
-                "Game/HeatSourceCommand.cs", "Session.cs",
+                "Game/HeatSourceCommand.cs", "Session.cs", "SessionCommands.cs",
             }),
             new KeyValuePair<string, string[]>("telemetry files", new[] { "Telemetry" }),
             new KeyValuePair<string, string[]>("debug overlays", new[]

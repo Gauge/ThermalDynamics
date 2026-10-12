@@ -308,5 +308,240 @@ namespace Thermodynamics.Core
                 if (device.HotNodeIndex == from) device.HotNodeIndex = to;
             }
         }
+        public bool CanonicalLinkOrder = true;
+
+
+        private void CanonicaliseLinks()
+        {
+            int count = links.Count;
+            int from = 0;
+
+            while (from < count)
+            {
+                int node = links[from].NodeA;
+
+                int to = from + 1;
+                while (to < count && links[to].NodeA == node) to++;
+
+                for (int i = from + 1; i < to; i++)
+                {
+                    ThermalLink moving = links[i];
+                    int j = i - 1;
+
+                    while (j >= from && links[j].NodeB > moving.NodeB)
+                    {
+                        links[j + 1] = links[j];
+                        j--;
+                    }
+
+                    links[j + 1] = moving;
+                }
+
+                for (int i = from; i < to; i++) ChainLink(i);
+
+                from = to;
+            }
+        }
+
+
+        public void BuildLinksIfNeeded()
+        {
+            RebuildLinksIfNeeded();
+        }
+
+
+        private void RebuildLinksIfNeeded()
+        {
+            if (linksDirty)
+            {
+                RebuildLinks();
+                return;
+            }
+
+            if (pendingLinkNodes.Count > 0) LinkPendingNodes();
+        }
+
+
+        public void RebuildLinks()
+        {
+            AbandonStep();
+
+            Work.TopologyRebuilds++;
+            Work.TopologyNodeVisits += nodes.Count;
+
+            for (int i = 0; i < pendingLinkNodes.Count; i++) pendingLinkNodes[i].PendingLinks = false;
+            pendingLinkNodes.Clear();
+
+            links.Clear();
+            syncedLinks = 0;
+
+            int expected = nodes.Count * 2;
+            if (links.Capacity < expected) links.Capacity = expected;
+
+            EnsureBuffers();
+            ResetLinkChains();
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                nodes[i].LinkCount = 0;
+            }
+
+            IBlockAdjacency adjacency = Adjacency;
+
+            GridModel walked = adjacency as GridModel;
+
+            CellBitset occupied = walked != null ? walked.Occupancy() : null;
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                ThermalNode a = nodes[i];
+
+                neighbourScratch.Clear();
+                neighbourFaces.Clear();
+                if (walked != null) walked.GetNeighbours(a.Block, neighbourScratch, neighbourFaces, occupied);
+                else adjacency.GetNeighbours(a.Block, neighbourScratch);
+
+                for (int n = 0; n < neighbourScratch.Count; n++)
+                {
+
+                    ThermalNode b = GetNode(neighbourScratch[n]);
+                    if (b == null) continue;
+
+                    if (b.Index <= a.Index) continue;
+
+                    int face = neighbourFaces.Count == neighbourScratch.Count
+                        ? neighbourFaces[n]
+                        : ConductionBuilder.ContactFace(a.Block, b.Block);
+                    if (face < 0) continue;
+
+                    int contacts = ConductionBuilder.CountContactFaces(a.Block, b.Block, face);
+                    if (contacts <= 0) continue;
+
+                    float conductance = ConductionBuilder.Conductance(
+                        grid.GridSize, a.Block, b.Block, contacts, Face.Axis(face));
+                    if (conductance <= 0f) continue;
+
+                    links.Add(new ThermalLink(a.Index, b.Index, conductance, contacts));
+                    a.LinkCount++;
+                    b.LinkCount++;
+                }
+            }
+
+            EnsureNodeChainCapacity(nodes.Count);
+            EnsureLinkChainCapacity(links.Count);
+            ResetLinkChains();
+
+            if (CanonicalLinkOrder) CanonicaliseLinks();
+            else for (int link = 0; link < links.Count; link++) ChainLink(link);
+
+            Work.LinksBuilt += links.Count;
+
+            linksDirty = false;
+            linkMassFactorFrom = 0;
+            SyncLinkArrays();
+            EnsureBuffers();
+            RecomputeConductanceTotals();
+        }
+
+
+        private void SyncLinkArrays()
+        {
+            if (linkA.Length < links.Count)
+            {
+                int size = Math.Max(16, links.Count * 2);
+                Array.Resize(ref linkA, size);
+                Array.Resize(ref linkB, size);
+                Array.Resize(ref linkConductance, size);
+            }
+
+            for (int i = syncedLinks; i < links.Count; i++)
+            {
+                ThermalLink link = links[i];
+                linkA[i] = link.NodeA;
+                linkB[i] = link.NodeB;
+                linkConductance[i] = link.Conductance;
+            }
+
+            syncedLinks = links.Count;
+        }
+
+
+        private void LinkPendingNodes()
+        {
+            Work.TopologyRebuilds++;
+            Work.TopologyNodeVisits += pendingLinkNodes.Count;
+
+
+            bool buffersGrew = EnsureBuffers();
+
+            IBlockAdjacency adjacency = Adjacency;
+
+            GridModel walked = adjacency as GridModel;
+            int firstNewLink = links.Count;
+
+            for (int p = 0; p < pendingLinkNodes.Count; p++)
+            {
+                ThermalNode a = pendingLinkNodes[p];
+
+                if (a.Index < 0 || a.Index >= nodes.Count || nodes[a.Index] != a) continue;
+
+                neighbourScratch.Clear();
+                neighbourFaces.Clear();
+                if (walked != null) walked.GetNeighbours(a.Block, neighbourScratch, neighbourFaces);
+                else adjacency.GetNeighbours(a.Block, neighbourScratch);
+
+                for (int n = 0; n < neighbourScratch.Count; n++)
+                {
+
+                    ThermalNode b = GetNode(neighbourScratch[n]);
+                    if (b == null) continue;
+
+                    if (b.PendingLinks && b.Index <= a.Index) continue;
+
+                    int face = neighbourFaces.Count == neighbourScratch.Count
+                        ? neighbourFaces[n]
+                        : ConductionBuilder.ContactFace(a.Block, b.Block);
+                    if (face < 0) continue;
+
+                    int contacts = ConductionBuilder.CountContactFaces(a.Block, b.Block, face);
+                    if (contacts <= 0) continue;
+
+                    float conductance = ConductionBuilder.Conductance(
+                        grid.GridSize, a.Block, b.Block, contacts, Face.Axis(face));
+                    if (conductance <= 0f) continue;
+
+                    links.Add(new ThermalLink(a.Index, b.Index, conductance, contacts));
+                    ChainLink(links.Count - 1);
+                    a.LinkCount++;
+                    b.LinkCount++;
+                }
+            }
+
+            for (int p = 0; p < pendingLinkNodes.Count; p++)
+            {
+                pendingLinkNodes[p].PendingLinks = false;
+            }
+            pendingLinkNodes.Clear();
+
+            Work.LinksBuilt += links.Count - firstNewLink;
+
+            SyncLinkArrays();
+
+            if (!buffersGrew) AddConductanceOfNewLinks(firstNewLink);
+
+            if (firstNewLink < linkMassFactorFrom) linkMassFactorFrom = firstNewLink;
+        }
+
+
+        private void AddConductanceOfNewLinks(int firstNewLink)
+        {
+            for (int i = firstNewLink; i < links.Count; i++)
+            {
+                ThermalLink link = links[i];
+                nodeConductanceTotal[link.NodeA] += link.Conductance;
+                nodeConductanceTotal[link.NodeB] += link.Conductance;
+            }
+        }
+
+
     }
 }

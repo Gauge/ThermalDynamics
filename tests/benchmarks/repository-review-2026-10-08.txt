@@ -1,0 +1,49 @@
+Repository review: 2026-10-08
+Scope: current dirty Thermodynamics working tree; no sibling modifications or deployment.
+Probe uses freshly built production Core and the existing Harness catalogue/pipe orientation.
+Timings overlap a running thermal suite, so they are illustrative, not frame-time or benchmark acceptance claims.
+Allocation quadruples with doubled open-chain length and is the principal complexity evidence.
+
+Open straight coolant chains: FindLoops only; min of 3 warmed runs; allocations on current thread
+pipes=128 loops=0 ms=4.291 allocated_bytes=3185080
+pipes=256 loops=0 ms=15.336 allocated_bytes=12657752
+pipes=512 loops=0 ms=58.945 allocated_bytes=50289752
+pipes=1024 loops=0 ms=111.829 allocated_bytes=200040936
+pipes=2048 loops=0 ms=452.885 allocated_bytes=796380176
+
+Reproduction source (temporary console project, optimized net9.0, RuntimeFrameworkVersion 9.0.20,
+UseAppHost=false; reference Core, Harness, Fixtures, Presentation and VRage.Math DLLs from
+tests/Thermodynamics.Tests/bin/Debug/net9.0; no production changes):
+using System;
+using System.Diagnostics;
+using Thermodynamics.Core;
+using Thermodynamics.Harness;
+using VRageMath;
+class Program {
+ static void Main() {
+  Console.WriteLine("Open straight coolant chains: FindLoops only; min of 3 warmed runs; allocations on current thread");
+  foreach(int n in new[]{128,256,512,1024,2048}) {
+   var b=GridBuilder.Large(); var model=Catalog.CoolantPipeStraight();
+   var orientation=PipeFitter.Orient(model,Vector3I.Left,Vector3I.Right);
+   for(int i=0;i<n;i++) b.Place(model,new Vector3I(i,0,0),orientation);
+   var props=LoopThermalProperties.Default();
+   CoolantLoopBuilder.FindLoops(b.Grid,props,293.15f);
+   double best=double.MaxValue; long allocated=0; int count=0;
+   for(int r=0;r<3;r++) { long before=GC.GetAllocatedBytesForCurrentThread(); var sw=Stopwatch.StartNew();
+    count=CoolantLoopBuilder.FindLoops(b.Grid,props,293.15f).Count; sw.Stop();
+    long bytes=GC.GetAllocatedBytesForCurrentThread()-before; if(sw.Elapsed.TotalMilliseconds<best){best=sw.Elapsed.TotalMilliseconds;allocated=bytes;}
+   }
+   Console.WriteLine($"pipes={n} loops={count} ms={best:F3} allocated_bytes={allocated}");
+  }
+ }
+}
+
+Repeat after main thermal lane completed (overlaps final documentation/integration checks):
+Open straight coolant chains: FindLoops only; min of 3 warmed runs; allocations on current thread
+pipes=128 loops=0 ms=4.263 allocated_bytes=3185080
+pipes=256 loops=0 ms=15.050 allocated_bytes=12657752
+pipes=512 loops=0 ms=62.357 allocated_bytes=50289752
+pipes=1024 loops=0 ms=123.049 allocated_bytes=200040936
+pipes=2048 loops=0 ms=522.187 allocated_bytes=796380176
+
+Validation: local NoPackage build, 0 errors, 4 NU1900 warnings. Thermal lane 2505 passed, 0 failed/skipped (3m3s). Final documentation/integration run 187 passed, 0 failed/skipped (7s). Python tooling 280 passed. No native session, population sweep, sibling mutation or deployment.

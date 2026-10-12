@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -55,11 +56,11 @@ namespace Thermodynamics.Tests
                 checkedKnobs++;
 
 
-                ThermalSettings applied = new ThermalSettings();
+                HistoricalThermalSettings applied = new HistoricalThermalSettings();
                 knob.World(applied, knob.Shipped);
 
 
-                ThermalSettings untouched = new ThermalSettings();
+                HistoricalThermalSettings untouched = new HistoricalThermalSettings();
 
                 foreach (string field in Differences(untouched, applied))
                 {
@@ -81,12 +82,12 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static List<string> Differences(ThermalSettings before, ThermalSettings after)
+        private static List<string> Differences(HistoricalThermalSettings before, HistoricalThermalSettings after)
         {
 
             List<string> moved = new List<string>();
 
-            foreach (FieldInfo field in typeof(ThermalSettings).GetFields(
+            foreach (FieldInfo field in typeof(HistoricalThermalSettings).GetFields(
                          BindingFlags.Public | BindingFlags.Instance))
             {
                 object a = field.GetValue(before);

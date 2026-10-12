@@ -22,7 +22,7 @@ in the prose. The conventions are in
 | Document | Contents |
 | --- | --- |
 | [thermal-model.md](thermal-model.md) | Every equation the simulation evaluates, and the surface geometry every area term reads. |
-| [aerodynamics.md](aerodynamics.md) | The aerodynamics requirements `AR1`–`AR22`: the subsonic regime, SEDrag taken apart part by part, and the strip-and-rebuild plan the `K25` milestone follows. |
+| [aerodynamics.md](aerodynamics.md) | Current external-provider ownership, local validation boundary and redirects to archived aerodynamic requirements. |
 | [environment.md](environment.md) | The air, ground, sun and wind outside a grid: how each is computed and what evidence stands behind it. |
 | [scale-design.md](scale-design.md) | Where the model is going: variable block sizes, and grids to a million blocks. |
 | [se2-labs.md](se2-labs.md) | What Space Engineers 2's architecture costs each structure of the model, measured: the lattice tax, the room map at supercell stride, and the conduction kernel in job shapes. |
@@ -56,6 +56,7 @@ in the prose. The conventions are in
 
 | Document | Contents |
 | --- | --- |
+| [repository-review-2026-10-08.md](repository-review-2026-10-08.md) | Current documentation reconciliation, prioritized implementation risks, reproduction and validation limits. |
 | [development.md](development.md) | Building, deploying, repo layout, conventions. |
 | [known-issues.md](known-issues.md) | Deliberate limits, open defects, and the failure patterns worth carrying forward. |
 | [engine-notes.md](engine-notes.md) | What both engines actually provide, and what an SE2 adapter would bind to. |
@@ -67,10 +68,22 @@ in the prose. The conventions are in
 | [tests/README.md](../tests/README.md) | The isolated simulation environment: running the tests and scenarios. |
 | [tools/corpus/README.md](../tools/corpus/README.md) | The corpus tooling: the verdict script and the report builder. |
 
+**Historical records**
+
+Archived pages preserve dated results, failed experiments and decisions. They are not current
+implementation guides or authorization to maintain another repository.
+
+| Record | Contents |
+| --- | --- |
+| [Aerodynamics history](archive/aerodynamics-history.md) | Former combined-mod requirements, calibration/population studies and extraction records. |
+| [Backlog priority history](archive/backlog-priority-history.md) | Superseded priority rationale and its original measurements. |
+
 ## Change log
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Index the repository documentation and performance review. |
+| 2026-10-01 | Distinguish current integration guidance from explicitly archived development evidence. |
 | 2026-09-24 | Indexed the aerodynamics requirements page. |
 | 2026-09-20 | Index the natural overheating glow design and validation record. |
 | 2026-09-18 | Indexed the thermal vision design and feasibility assessment. |

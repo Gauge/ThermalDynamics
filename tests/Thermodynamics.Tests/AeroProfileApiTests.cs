@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +10,7 @@ using Xunit;
 namespace Thermodynamics.Tests
 {
     /// <summary>Detached drag-profile contract, independent view/interpolation controls and explicit consumer demand.</summary>
+    [Trait("scope", "integration")]
     public class AeroProfileApiTests
     {
         [Theory]
@@ -102,15 +104,18 @@ namespace Thermodynamics.Tests
                 else Assert.Equal(original[key], next[key]);
             }
             Vector3 savedCentre = (Vector3)original["CentreOfMass"];
-            Assert.False(runtime.Prepare(grid, true, 26, 0, new Vector3(30), 1, 1));
-            Assert.Null(runtime.CopyProfile());
-            for (int i = 0; !runtime.Ready && i < 10000; i++)
+            Assert.True(runtime.Prepare(grid, true, 26, 0, new Vector3(30), 1, 1));
+            Assert.True(runtime.Rebuilding);
+            Assert.Equal(savedCentre, (Vector3)runtime.CopyProfile()["CentreOfMass"]);
+            for (int i = 0; runtime.Rebuilding && i < 10000; i++)
                 runtime.Prepare(grid, true, 26, 0, new Vector3(30), 4096, 256);
             Assert.True(runtime.Ready);
             Assert.Equal(savedCentre, (Vector3)original["CentreOfMass"]);
             Assert.Equal(new Vector3(30), (Vector3)runtime.CopyProfile()["CentreOfMass"]);
             grid.Add(new BlockModel { Mass = 1 }, new Vector3I(50, 50, 50));
-            Assert.Null(runtime.CopyProfile());
+            Assert.True(runtime.Prepare(grid, true, 26, 1, new Vector3(30), 1, 1));
+            Assert.True(runtime.Rebuilding);
+            Assert.NotNull(runtime.CopyProfile());
             Assert.Equal(savedCentre, (Vector3)original["CentreOfMass"]);
         }
 
@@ -171,15 +176,17 @@ namespace Thermodynamics.Tests
         public void ExternalDemandCannotEnablePhysicsWritesAndCloseDropsIt()
         {
             string root = ShippedBlocks.RepoRoot();
-            string adapter = File.ReadAllText(Path.Combine(root, "Thermodynamics/Game/ThermalGridAerodynamics.cs"));
-            int prepared = adapter.IndexOf("if (!aerodynamics.Prepare", StringComparison.Ordinal);
-            int gate = adapter.IndexOf("if (!settings.EnableAeroForces || Grid.Physics.IsStatic) return;", StringComparison.Ordinal);
-            int write = adapter.IndexOf("Grid.Physics.AddForce", StringComparison.Ordinal);
-            Assert.True(prepared >= 0 && gate > prepared && write > gate);
-            Assert.Contains("lock (aeroLock) { return aerodynamics == null ? null : aerodynamics.CopyProfile(); }", adapter);
-            Assert.Contains("aerodynamics = null;", adapter);
-            string lifetime = File.ReadAllText(Path.Combine(root, "Thermodynamics/Game/ThermalGrid.cs"));
-            Assert.Contains("ResetAerodynamics();", lifetime);
+            string adapter=File.ReadAllText(Path.Combine(root,"../Aerodynamics/Source/FlightGrid.cs"));
+            adapter = System.Text.RegularExpressions.Regex.Replace(adapter, @"\s+", "");
+            int prepared=adapter.IndexOf("prepared=PrepareProfile(session,centre)",StringComparison.Ordinal);
+            int gate=adapter.IndexOf("if(!settings.EnableForces||physics.IsStatic)return;",StringComparison.Ordinal);
+            int write=adapter.IndexOf("physics.AddForce",StringComparison.Ordinal);
+            Assert.True(prepared>=0 && gate>prepared && write>gate);
+            string session=File.ReadAllText(Path.Combine(root,"../Aerodynamics/Source/Session.cs"));
+            session = System.Text.RegularExpressions.Regex.Replace(session, @"\s+", "");
+            Assert.Contains("grid.Dispose();grids.Remove",session);
+            Assert.Contains("flight.Runtime.CopyProfile()",session);
+
         }
 
         private static AeroRuntime Finish(GridModel grid, int count)

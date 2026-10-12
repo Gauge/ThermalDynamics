@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -99,7 +100,7 @@ namespace Thermodynamics.Harness
         internal static ThermalSimulation Registered(GridBuilder builder)
         {
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings().Derive(), builder.Grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings().Derive(), builder.Grid);
             for (int i = 0; i < builder.Placed.Count; i++)
             {
                 simulation.Solver.AddBlock(builder.Placed[i], 293.15f);
@@ -274,7 +275,7 @@ namespace Thermodynamics.Harness
             for (int r = 0; !Settled(row); r++)
             {
 
-                ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings().Derive(), builder.Grid);
+                ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings().Derive(), builder.Grid);
 
 
                 long allocated = r == 1 ? Allocated() : 0;

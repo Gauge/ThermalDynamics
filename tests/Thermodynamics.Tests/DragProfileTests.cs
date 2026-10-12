@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
 using VRageMath;
@@ -28,10 +29,11 @@ namespace Thermodynamics.Tests
         private const float ThickAir = 1f;
 
 
-        private static ThermalSettings Settings(bool solar = false)
+        private static HistoricalThermalSettings Settings(bool solar = false)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
 
             settings.EnableEnvironment = solar;
             settings.EnableSolarHeat = solar;

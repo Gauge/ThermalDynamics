@@ -229,6 +229,19 @@ nodes refreshed for exposure, cells flooded. Those counts are what turns "a 90 m
 300,000-block station rebuilt its whole conduction graph", which is a line to change rather than
 a number to worry about.
 
+### Draw timing and frame pacing
+
+The cost report includes total draw time and separate HUD, debug, glow, thermal-vision,
+wind-overlay and debug-panel timings. Frame pacing measures gaps between draw starts,
+counts gaps of at least 50 ms, retains the twelve worst gaps and reports median spacing
+from up to 4,096 hitch timestamps. Each gap carries the previous draw's duration and
+simulation time accumulated since it began. Dedicated servers have no draw-gap samples.
+
+The measured share covers the session simulation and draw callbacks. Build, save, load,
+other callbacks, deferred engine work and GPU work are not attributed by this share.
+These are elapsed times, which can include scheduling delays; a small measured share
+cannot by itself rule out mod-related causes of a hitch.
+
 ### What the stages leave over
 
 The cost table nests, and the nesting is only worth reading if the children add up to the parent.
@@ -422,13 +435,12 @@ difference, and its temperatures will keep climbing until radiation catches up o
 Venting reads zero rather than going negative while a grid is net absorbing, which a hull in
 sunlight or in warm atmosphere legitimately is.
 
-**`friction W` is one of the terms inside `made W`, reported separately because it is drag power.**
-The solver computes `FrictionScale × ρ × v_rel³ × area × windward exposure` summed over the grid's
-nodes, and real drag power is `½ C_d ρ A v³` — the same expression. So this column is the magnitude
-of a force the mod does not apply: it turns the energy into heat in the hull and takes nothing from
-the ship's motion, which over the 8,144 published blueprints at `reentry` is a median **5.05 MW** on
-**100 %** of hulls, 16.8 kN at 300 m/s ([backlog.md](backlog.md) `K1`). A reader adding it to
-`made W` counts it twice.
+**`friction W` is aerodynamic heat inside `made W`.** It sums the sanitized watts returned
+by the registered external heating provider. Without a provider it is zero. It is not the
+provider's drag-power diagnostic, and dividing it by speed does not recover the applied force.
+Thermodynamics applies no aerodynamic forces; those are owned by Aerodynamics. Adding this
+column to `made W` counts the heat twice. Historical cubic-law/population figures refer to the
+explicit fixture heating law and do not certify the current external provider.
 
 It is summed on the hot path beside the other two rather than behind `CollectDiagnostics`, for the
 same reason and one more: `ThermalNode.LastFrictionWatts` is filled only when diagnostics are on, so
@@ -838,6 +850,8 @@ rest.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-11 | Document draw and frame-pacing counters and their attribution limits. |
+| 2026-10-08 | Describe friction watts as provider-supplied heat rather than applied drag power. |
 | 2026-09-20 | Document fault-isolated teardown after the live Telemetry.Reset unload exception. |
 | 2026-09-18 | Added bounded client thermal-probe telemetry, outcome and CPU summaries, recent model/viewpoint events and tester notes in the normal report. |
 | 2026-08-25 | Two headings described what a row *used to* be rather than what it is (`R12`). `build` is a root of its own; the per-mechanism watts row is the one hardest to make free. |
@@ -847,3 +861,17 @@ rest.
 | 2026-08-20 | Recorded faults whether or not collection is running, and caught a grid that has gone numerically bad without collection on. Measured the per-grid visit instead of inferring it, and attributed the eighth of a grid's update that had belonged to nothing. |
 | 2026-08-19 | Reported the convection coefficient after the atmosphere blend rather than before it, showed what a grid vents against what it makes, and measured the room pressure sweep. |
 | 2026-08-12 | Opened the module: off by default, switchable at runtime, and costing a handful of static bool reads when off. |
+
+## Aerodynamic flight recording
+
+Flight telemetry now belongs to the separate [Aerodynamics mod](../../Aerodynamics/README.md).
+Open `/aero menu`. Use Display for indicators and Recording to start/stop capture, set the
+sampling interval, export CSV/log files or clear the bounded 12,000-row buffer. Files live in
+Aerodynamics world storage; the build marker is recorded in each export. Use interval 1 for a
+brief detailed capture, and pair server/client files for multiplayer diagnosis.
+
+Thermal block and surface telemetry stays here. Run `/thermal telemetry on` and `/thermal dump`
+when investigating heating. The surface CSV includes `windward_dot` (outward normal dotted with
+thermal upstream direction; positive faces face incoming air) and `block_friction_w`. The latter
+is a block total repeated on each face, not per-face heating; do not sum it over faces.
+The prior combined-mod marker `core-aero-20260927-upstream-v1` identifies historical dumps only.

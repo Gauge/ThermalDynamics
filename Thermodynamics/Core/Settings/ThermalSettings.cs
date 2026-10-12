@@ -11,9 +11,13 @@ namespace Thermodynamics.Core
     public class ThermalSettings
     {
         /// <summary>
-        /// Current settings version for save file compatibility.
-        /// Incremented when settings structure changes.
+        /// External surface heating law: exposed area, density fraction, speed, ambient and surface K, heat capacity, integration seconds; returns watts.
+        /// Null means no aerodynamic heating provider is installed.
         /// </summary>
+        public Func<float, float, float, float, float, float, float, float> SurfaceHeating { get; set; }
+        public Func<float,bool> SurfaceHeatingGate { get; set; }
+        public bool AcceptSurfaceHeating(float speed) { return SurfaceHeating != null && (SurfaceHeatingGate == null ? speed > 0f : SurfaceHeatingGate(speed)); }
+
         public const int CurrentVersion = 4;
 
         /// <summary>
@@ -75,12 +79,6 @@ namespace Thermodynamics.Core
         /// When false, uses vacuum conditions regardless of planet presence.
         /// </summary>
         public bool EnablePlanets = true;
-
-        /// <summary>
-        /// Enables/disables friction heating from movement through atmosphere.
-        /// When true, fast-moving grids heat up from air friction.
-        /// </summary>
-        public bool EnableFriction = true;
 
         /// <summary>
         /// Enables/disables thermal damage to blocks.
@@ -154,18 +152,6 @@ namespace Thermodynamics.Core
         /// Space Engineers uses 1000 W/m² as a rounded value.
         /// </summary>
         public float SolarEnergy = 1000f;
-
-        /// <summary>
-        /// Minimum wind speed in m/s for friction heating to activate.
-        /// Below this speed, friction heating is disabled.
-        /// </summary>
-        public float FrictionAtSpeedsAbove = 0f;
-
-        /// <summary>
-        /// Scale factor for friction power calculation.
-        /// Adjusts how friction heating scales with speed and conditions.
-        /// </summary>
-        public float FrictionScale = 0.001f;
 
         /// <summary>
         /// Enables windward shielding (leeward side of blocks receives less wind).
@@ -325,6 +311,7 @@ namespace Thermodynamics.Core
         /// Creates a new ThermalSettings with default values.
         /// All fields are initialized to their default values.
         /// </summary>
+
         public ThermalSettings()
         {
             Derive();
@@ -344,8 +331,6 @@ namespace Thermodynamics.Core
             if (HeatTimeScale <= 0f) HeatTimeScale = 1f;
             if (VacuumTemperature < 0f) VacuumTemperature = 0f;
             if (SolarEnergy < 0f) SolarEnergy = 0f;
-            if (FrictionAtSpeedsAbove < 0f) FrictionAtSpeedsAbove = 0f;
-            if (FrictionScale < 0f) FrictionScale = 0f;
             if (RoomConvectionCoefficient < 0f) RoomConvectionCoefficient = 0f;
             if (RoomAirDensity < 0f) RoomAirDensity = 0f;
             if (HeatPumpCarnotFraction < 0f) HeatPumpCarnotFraction = 0f;

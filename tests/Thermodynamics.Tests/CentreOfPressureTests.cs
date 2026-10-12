@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -30,10 +31,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static ThermalSettings Settings()
+        private static HistoricalThermalSettings Settings()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;

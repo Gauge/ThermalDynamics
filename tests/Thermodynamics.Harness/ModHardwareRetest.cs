@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -56,7 +57,7 @@ namespace Thermodynamics.Harness
                 height += radiator.Size.Y;
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             simulation.StepExact((int)(Seconds / simulation.Settings.StepSeconds), Worlds.Shadow());
 
             return Read("radiator-stack", count, preConversion, radiator.Thermal.Conductivity,
@@ -85,7 +86,7 @@ namespace Thermodynamics.Harness
                 .Wasting(SourceWatts);
             BlockInstance source = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             simulation.StepExact((int)(Seconds / simulation.Settings.StepSeconds), Worlds.Shadow());
 
             BlockInstance far = null;

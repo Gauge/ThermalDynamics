@@ -1,10 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netframework48</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <RootNamespace>Thermodynamics</RootNamespace>
     <LangVersion>6</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <Configurations>Release;Debug</Configurations>
     <Platforms>x64</Platforms>
     <!-- Prevent MDK2 app from launching during builds -->
@@ -20,6 +23,8 @@
     <WarningsAsErrors>$(WarningsAsErrors);CS1574;CS1580;CS1581;CS1584;CS1587;CS1710;CS1734</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="**/*.cs" Exclude="bin/**/*.cs;obj/**/*.cs;Content/**/*.cs;Properties/**/*.cs;MDK/**/*.cs" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
     <PackageReference Include="Mal.Mdk2.ModAnalyzers" Version="2.1.16">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

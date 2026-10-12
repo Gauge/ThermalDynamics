@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Thermodynamics.Fixtures</AssemblyName>
+    <LangVersion>6</LangVersion>
+    <SpaceEngineersBinCopyLocal>true</SpaceEngineersBinCopyLocal>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Thermodynamics.Core/Thermodynamics.Core.csproj" />
+    <!-- Read-only inputs for historical rigs; never build or deploy the sibling project. -->
+    <Compile Include="../../../Aerodynamics/Source/Core/**/*.cs" LinkBase="Aerodynamics" />
+    <Compile Include="../../../Aerodynamics/Source/AeroTelemetry.cs" LinkBase="Aerodynamics" />
+    <PackageReference Include="Mal.Mdk2.References" Version="2.2.9" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,7 +100,7 @@ namespace Thermodynamics.Tests
 
                 PerformanceReport.Repeats = 3;
                 PerformanceReport.BuiltHull thrice =
-                    PerformanceReport.RepeatBuild(new ThermalSettings(), hull);
+                    PerformanceReport.RepeatBuild(new HistoricalThermalSettings(), hull);
 
                 Assert.Equal(3, thrice.Builds);
                 Assert.True(thrice.BuildMs > 0d, "the build was not timed");
@@ -110,7 +111,7 @@ namespace Thermodynamics.Tests
 
                 PerformanceReport.Repeats = 1;
                 PerformanceReport.BuiltHull once =
-                    PerformanceReport.RepeatBuild(new ThermalSettings(), hull);
+                    PerformanceReport.RepeatBuild(new HistoricalThermalSettings(), hull);
 
                 Assert.Equal(1, once.Builds);
                 Assert.True(once.BuildMs > 0d);

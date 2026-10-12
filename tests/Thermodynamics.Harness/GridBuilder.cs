@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -184,7 +185,7 @@ namespace Thermodynamics.Harness
         public ThermalSimulation BuildSimulation(ThermalSettings settings = null, float initialTemperature = 293.15f)
         {
 
-            ThermalSettings effective = settings ?? new ThermalSettings();
+            ThermalSettings effective = settings ?? new HistoricalThermalSettings();
             if (SettingsOverride != null) effective = SettingsOverride(effective);
 
             ThermalSimulation simulation = new ThermalSimulation(effective, grid);

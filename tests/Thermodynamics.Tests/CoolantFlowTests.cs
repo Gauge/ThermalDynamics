@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -18,10 +19,10 @@ namespace Thermodynamics.Tests
     public class CoolantFlowTests
     {
 
-        private static ThermalSettings Isolated(float segmentsPerSecond = 4f)
+        private static HistoricalThermalSettings Isolated(float segmentsPerSecond = 4f)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
@@ -278,7 +279,7 @@ namespace Thermodynamics.Tests
         public void TheWellMixedRingIsOneParcelHoldingEverything()
         {
 
-            ThermalSettings settings = Isolated();
+            HistoricalThermalSettings settings = Isolated();
             settings.WellMixedCoolant = true;
 
             GridBuilder builder = GridBuilder.Large();
@@ -304,7 +305,7 @@ namespace Thermodynamics.Tests
         public void BothModelsHoldTheSameHeatAtTheSameTemperature()
         {
 
-            ThermalSettings mixedSettings = Isolated();
+            HistoricalThermalSettings mixedSettings = Isolated();
             mixedSettings.WellMixedCoolant = true;
 
             GridBuilder a = GridBuilder.Large();
@@ -521,7 +522,7 @@ namespace Thermodynamics.Tests
         private static float DemandOfTheHullWithoutItsRing()
         {
 
-            ThermalSettings settings = HeatedRingSettings(4096);
+            HistoricalThermalSettings settings = HeatedRingSettings(4096);
 
             GridBuilder builder = GridBuilder.Large();
             List<Vector3I> cells = PipeFitter.RectangleXZ(Vector3I.Zero, 3, 3);
@@ -534,10 +535,10 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static ThermalSettings HeatedRingSettings(int maxSubsteps)
+        private static HistoricalThermalSettings HeatedRingSettings(int maxSubsteps)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableDamage = false;
             settings.MaxSubsteps = maxSubsteps;
@@ -583,7 +584,7 @@ namespace Thermodynamics.Tests
         private static float SpreadAcrossAHeatedRing(float segmentsPerSecond)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.Frequency = 1;
             settings.EnableEnvironment = false;
             settings.EnableDamage = false;

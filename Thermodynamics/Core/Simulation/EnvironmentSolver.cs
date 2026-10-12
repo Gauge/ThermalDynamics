@@ -154,9 +154,7 @@ namespace Thermodynamics.Core
             if (state.SolarEnergy < 0f) state.SolarEnergy = 0f;
 
             // Friction heating becomes active when wind is strong enough
-            state.FrictionActive = settings.EnableFriction
-                && density > 0.01f
-                && state.WindSpeed > settings.FrictionAtSpeedsAbove;
+            state.FrictionActive = density > 0.01f && settings.AcceptSurfaceHeating(state.WindSpeed);
 
             return state;
         }

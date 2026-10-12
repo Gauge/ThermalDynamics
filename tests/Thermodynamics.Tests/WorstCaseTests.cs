@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -194,7 +195,7 @@ namespace Thermodynamics.Tests
         public void AnAtmosphereActuallyEngagesConvectionAndFriction()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.MaxSubsteps = 4096;
             settings.MaxElementVisitsPerStep = 0;
             settings.Derive();
@@ -220,7 +221,7 @@ namespace Thermodynamics.Tests
         public void TheWorstShapeDependsOnTheWorld()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.MaxSubsteps = 4096;
             settings.MaxElementVisitsPerStep = 0;
             settings.Derive();
@@ -240,7 +241,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static float Demand(string shape, ThermalSettings settings, EnvironmentSample sample)
+        private static float Demand(string shape, HistoricalThermalSettings settings, EnvironmentSample sample)
         {
             WorstCases.Built built = WorstCases.Hull(shape, Size, settings);
             built.Simulation.StepExact(2, sample);

@@ -1,5 +1,9 @@
 # Configuration
 
+Aerodynamic settings now belong to the separate [Aerodynamics mod](../../Aerodynamics/README.md).
+Thermodynamics supplies geometry/environment data and integrates externally supplied heat; it applies no aerodynamic forces.
+
+
 Settings live in `ThermodynamicsConfig.cfg` in world storage, written with defaults the first time
 a world loads and regenerated when `Version` does not match.
 
@@ -14,8 +18,9 @@ a world loads and regenerated when `Version` does not match.
 
 Every setting can also be changed while the world is running. A change is written into the settings
 object every grid already holds and picked up on the next step: heat capacities are rescaled,
-coolant loops and room air are rebuilt, and each mechanism reads its own switch. Nothing is written
-to disk unless asked.
+coolant loops and room air are rebuilt, and each mechanism reads its own switch. Applying local
+settings marks a deferred save; the server flushes accepted changes to world storage.
+`/thermal save` remains available to save explicitly.
 
 ## Runtime control
 
@@ -24,7 +29,7 @@ to disk unless asked.
 | `/thermal status` | Collection state, sample stride, live grids, block models, bridges, and how many validation problems have been reported. |
 | `/thermal problems` | Every distinct problem the definition and settings validators found this session, once each. The same lines are in the game log. |
 | `/thermal settings` | Every setting and its current value. |
-| `/thermal set <name> <value>` | Changes one setting for this session. Switches take `on`/`off` or `1`/`0`. On a multiplayer client this asks the server, which answers whether it was allowed. |
+| `/thermal set <name> <value>` | Requests a live setting change; accepted host changes are saved automatically. Switches take `on`/`off` or `1`/`0`. On a multiplayer client this asks the server, which answers whether it was allowed. |
 | `/thermal save` | Writes the current values to the config file. |
 | `/thermal sync` | Digest of every replicated setting, to compare a client against the server by eye. Run it on both; the strings must match. |
 | `/thermal sync fetch` | Client only: asks the server for the settings again. |
@@ -52,7 +57,6 @@ then six folders.
 | **Solver** | Cost limits, Pace |
 | **Heat transfer** | Ambient exchange, Sunlight |
 | **Ship systems** | Coolant loops, Heat pumps, Room air, Heat made and damage, Suit |
-| **Aerodynamics** | Friction heating |
 | **Multiplayer** | Temperatures |
 | **World** | Climate, Underground, Wind |
 
@@ -209,8 +213,6 @@ whether a cheaper rung is known to be possible and nobody has built it.
 | Convection | `EnableConvection` | 2 | None known. |
 | Waste heat | `EnableWasteHeat` | 2 | None known: it is a per-block fraction of a wattage the game already reports. |
 | Point heat sources | `EnableHeatSources` | 2 | The inverse square is already cut off by range. A rung that sampled the registry less often is possible and has never been wanted, because the registry is usually empty. |
-| Aerodynamic forces | `EnableAeroForces` | 3 | Off, 26 directions, or the default 98-direction profile; thermal heating is independent. |
-| Aerodynamic friction | `EnableFriction` | 2 + dials | `FrictionScale` and `FrictionAtSpeedsAbove` are balance dials rather than fidelity rungs — they change how much friction there is, not how well it is modelled. |
 | Windward shielding | `EnableWindwardShielding` | 2 | On or off. There is no cheaper form that is still the mechanism — the pass is already sliced and already budgeted — and the rung below it is the unshielded model, which is what off means. |
 | Room air | `EnableRoomAir` | 2 | **A cheaper rung is possible and unbuilt.** Room air is a well-mixed body already; what is expensive is the flood fill that finds the rooms, and a coarser or less frequent map is a rung. `D2` measures the fill at **3,934 ticks — about eleven minutes — on a million blocks** (re-measured 2026-08-28 by `bench scale --max 1000000`; the 7,207 this row carried predates the 2026-08-26 word skip and the 2026-08-27 span flood). **What the rung would buy is latency rather than CPU**: the mapper is budgeted per tick and capped at 4,096 cells, so convergence is the bounding volume divided by that cap and the performance passes moved the milliseconds without moving the wait. A *coarser* map shortens it; a *less frequent* one makes it worse, so only one of the two rungs this row names is the rung. |
 | Heat pumps | `EnableHeatPumps` | 2 | None known. Off makes them ordinary blocks. |
@@ -242,9 +244,6 @@ Each switch removes exactly its own mechanism and its own cost.
 | `EnableHeatSources` | `true` | Gain from point sources registered by other mods. |
 | `EnableWasteHeat` | `true` | Heat from power production, power draw and thrust. |
 | `EnablePlanets` | `true` | Planetary climate. Off means ambient is always `VacuumTemperature`. |
-| `EnableAeroForces` | `true` | Per-tick drag, restoring moments and spin damping. Off stops physics writes and clears geometry unless an API consumer explicitly requests profile preparation; use off with another aerodynamic force mod. |
-| `AeroProfileDirections` | `98` | Direction-table resolution: 98 by default, or 26 for lower construction and evaluation cost. Other values resolve to 98. |
-| `EnableFriction` | `true` | Aerodynamic heating at speed in atmosphere. |
 | `EnableWind` | `true` | The wind field and everything that shapes it: the boundary-layer profile, terrain speed-up and shelter, slope channelling, the diurnal cycle and burial. Off is no wind anywhere rather than the game's wind unmodelled, because the game exposes a ceiling rather than a wind. A grid still feels its own motion through the air. |
 | `EnableDamage` | `true` | Damage above a block's critical temperature. |
 | `EnableCoolantLoops` | `true` | Coolant loop heat transport. |
@@ -829,8 +828,6 @@ will not move it much.
 | `ClimateWeatherInfluence` | 1.0 | How much the weather standing over a grid changes the air around it, 0..1. At 1 the game's own authored figures apply in full — a heavy snowstorm about 18 K colder with a tenth of the sun and twice the wind, a sandstorm 12 K warmer. At 0 the weather affects nothing but the wind, which is what it did before. |
 | `VacuumTemperature` | 2.7 K | Ambient in space, and the floor for planetary ambient. |
 | `SolarEnergy` | 1000 W/m² | Solar irradiance above the atmosphere. |
-| `FrictionAtSpeedsAbove` | 0 m/s | Relative airspeed below which friction heating is off. **Zero since 2026-09-02**: the v³ law makes low-speed friction vanish on its own (~1 W/m² at 10 m/s), so the old 50 m/s guard bought nothing but a step in the heat and the force at the speed it named, and it kept lift and drag from existing below it. The cooling-to-heating crossover the guard imitated is emergent — convection removes `h·A·(T−T_ambient)` growing with √v while friction adds ∝ v³ — and depends on how hot the hull is; the aero debug view reports it live. Set above zero to restore the legacy cut. Worlds that saved a config while the default was 50 keep their saved 50 until they change it. |
-| `FrictionScale` | 0.001 | Coefficient on the v³ friction term. |
 | `EnableWindwardShielding` | 0 | A block behind another is sheltered from the wind, for heat — the sun's self-shadowing pass aimed at the relative wind. **Off**: it is a second sliced pass and 3 MB on a large hull, and unshielded is the conservative answer, so a world without it is heated and dragged at least as much as it should be. Its rebuild threshold is 20° rather than the sun's 2°, because the wind direction is grid-local and moves when the *ship* turns. |
 | `RoomConvectionCoefficient` | 8 W/(m²·K) | Coupling between a room's air and the surfaces facing it. Lower than the planetary figure because room air is still. **It carries no pressure term**, so a compartment at a fiftieth of an atmosphere couples its walls as hard as a full one and pressure decides only whether the coupling exists — see [thermal-model.md](thermal-model.md#room-air). |
 | `RoomAirDensity` | 1.225 kg/m³ | Air density in a fully pressurised room. |
@@ -967,8 +964,7 @@ indicator, which are what a player meets while playing rather than diagnostics f
 | --- | --- | --- |
 | `DebugTextOnScreen` | `false` | Crosshair readout: temperature, per-mechanism watts, block constants, environment, grid totals, room classification, raw surface bits. Switching it on also makes the solver record per-mechanism watts, which is not free. |
 | `DebugSolarRaycast` | `false` | Draws the sun ray from each grid, white when lit and red when occluded. |
-| `DebugWindRaycast` | `false` | Draws the relative wind each grid is flying through, as a line from the grid scaled by its speed: green in still air, red once the grid is over `FrictionAtSpeedsAbove` and the leading face is heating. |
-| `DebugAeroOverlay` | `false` | The aerodynamics debug view, on the grid being flown or looked at: the group's centre of mass in yellow, the relative wind in blue, and in orange the centre of the air's heating with the arm from the centre of mass drawn. The printed lines give the wind, the air density, the friction watts, the speed at which the air stops cooling the hull and starts heating it, and the ship's top speed — RelativeTopSpeed's cruise speed and ceiling where that mod governs the grid, the engine's own cap otherwise. **No aerodynamic force is applied while the force model is rebuilt** (see [aerodynamics.md](aerodynamics.md)), and a red line names the gates that stop friction heating. `/thermal aero` toggles it. Arms per-node diagnostics while on, like the crosshair readout. |
+| `DebugWindRaycast` | `false` | Displays the sampled wind/shielding rays. |
 | `DebugWindOverlay` | 0 | Which view the wind map opens a session on: 0 off, 1 the lattice around you, 2 the whole planet. |
 | `DebugWindIndicator` | `true` | The wind needle and speed under the crosshair. |
 | `ShowEnvironmentReadout` | `true` | **One line, bottom centre, always on**: the air temperature around your ship and one word for the ship against its own rating — `cool`, `warm` or `hot`. `hot` begins exactly where the glow does, so the line and the block cannot disagree. It is what makes the mod visible in a world where nothing is going wrong; everything else it draws is a warning. Off costs a comparison and walks no grid. |
@@ -1285,7 +1281,7 @@ a session starts on — the keybind is how each client drives it.
 **This mod does not set a ship's top speed.** [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed)
 does, where a world installs it; without it the engine's own cap applies, which is 100 m/s in a
 vanilla world. The mod reads RelativeTopSpeed's API to say which limit a ship is under — the
-aerodynamics debug view prints its cruise speed and ceiling — and writes nothing to it. The port of
+separate Aerodynamics mod may display its cruise speed and ceiling — and writes nothing to it. The port of
 that mod which lived here, and the nineteen settings it carried, are retired; see
 [aerodynamics.md](aerodynamics.md#ar15--top-speed-belongs-to-relativetopspeed-this-mod-reads-it).
 
@@ -1388,13 +1384,14 @@ one with a migration risk — is late rather than first.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Remove the retired aerodynamics settings folder and correct top-speed display ownership. |
+| 2026-10-01 | Correct the persistence description to match deferred saving in Settings.Apply and FlushPending. |
+| 2026-09-27 | Added lift, ground effect, character drag and recovery heating defaults, plus optional gameplay re-entry heating. New protocol slots 167–173 preserve retired identifiers. |
 | 2026-09-27 | Clarified that EnableAeroForces off stops physics writes while explicitly registered API consumers may keep profile preparation running. |
 | 2026-09-27 | Added EnableAeroForces and the 26/98 AeroProfileDirections choices with new serialization identifiers 165/166. |
-| 2026-09-24 | **The aerodynamic force and the top-speed port are retired** (`K25` step 0; [aerodynamics.md](aerodynamics.md#strip-and-rebuild)). Twenty-four settings are gone: `EnableDrag`, `DragCoefficient`, `EnableShapeDrag`, `EnableLift`, `LiftCoefficient`, and the Top speed page's nineteen — `EnableTopSpeed`, `SpeedLimit`, `EnableSpeedBoost`, the twelve cruise-curve points, both boost ceilings and both resistances. Their `ProtoMember` numbers — 135, 136, 138 to 140 and 145 to 163 — are retired and never reissued (`W2`), so a saved world's value is ignored rather than read into something else, and `/thermal get` answers a retired name with nothing rather than a number. **What a world notices**: no aerodynamic force on any ship; the engine's own speed cap in place of 140 m/s unless RelativeTopSpeed is installed; and, because the Newtonian shape factor left the friction row with the force it was fitted for, friction heating at the projected area again — 1.71× on a four-cube brick and 2.10× on a wedge, and a median 4.56 K at re-entry by `K22`'s population measurement. `EnableWindwardShielding` stays and moves to the Friction heating page. |
 | 2026-09-20 | Add HDR glow emission and runtime glow counters to `/thermal status`. |
 | 2026-09-20 | Document the soft glow and rendering caps; correct the sound cue description. |
 | 2026-09-04 | **The aero overlay honours the anchored-group veto, and names it as a gate.** The overlay's summation was a hand copy of the drag pass's that did not know a group with a static member takes no force, so a base standing in wind drew drag and lift arrows the server never applies — against the overlay's own promise of being the force applied rather than a second opinion. Both now read one summation (`AeroGroupForces`); an anchored group shows its centre of mass and wind, zero force, and *anchored* in the red gate line. |
-| 2026-09-02 | **`FrictionAtSpeedsAbove` ships at 0: the aerodynamic term — heating, drag and lift — is live at every speed.** The 50 m/s guard was created against low-speed heating the v³ law already prevents by arithmetic (~1 W/m² at 10 m/s), and it cost a discontinuity in heat and force at 50 and the absence of lift and drag below it. The cooling-to-heating crossover the guard imitated is emergent (convection ∝ √v·(T−T_amb) against friction ∝ v³, so it depends on hull temperature) and the aero debug view now reports the hull's net air watts and its own crossover speed. The dial remains for worlds wanting the legacy cut; a force is never applied to a group with a static grid in it, which is what keeps bases standing in wind free now that the term reaches them. Also added `DebugAeroOverlay` (this page, above) and the `EnableDrag` dependency to `EnableLift`'s row, which was documented as needing only `EnableShapeDrag`. |
 | 2026-08-31 | **The menu's *Other* page is empty, and three defects were found emptying it.** Eleven settings had no layout entry and lived there with their field name for a label and a 0..1,000 slider whatever they were — the six suit dials, `ParallelGrids`, `FloorBlocksWhenOverBudget`, `ShowEnvironmentReadout`, `DebugOverlayMaxBoxes` and `PlanetUndergroundConvectionCoefficient`. They have pages now: **Suit** under Ship systems and **Threading** under Solver are new. **`IsFlag` missed six switches**, three of them already on the Debug page and drawn as *sliders from 0 to 1* — it decides the menu's control, whether `/thermal` prints `on` or a number, and whether telemetry records a bool, so each was wrong three ways. **And `WellMixedCoolant` was reachable by nothing**: a documented rung of the coolant ladder, in the config and read by the solver, but missing from `Names()`, so only hand-editing a world's XML could set it. Two guards added — every setting reaches a page, and every `bool` is a flag and nothing else is. |
 | 2026-08-31 | **Reworked the menu: Aerodynamics is its own folder, Overview is gone, and a page is its sections rather than a lattice of tiles.** `EnableDrag`, `DragCoefficient` and `EnableWindwardShielding` had no layout entry, so the force half of the friction term sat unlabelled on the *Other* page while the heat half was a Ship systems page; both halves are now the **Aerodynamics** folder. **Overview is removed** — a count, a three-word conflict flag and three clipped figures, every one of them a worse version of a line on the page that wraps — and **Status is now Statistics**, carrying the world's settings, what is running, the energy it is moving, what the solver is spending and the frame cost. **Its figures were never refreshing**: `Refresh` was called from the settings sync and nowhere else, so a category headed *Right now* held whatever the world was doing when the menu was built; `ThermalSettingsMenu.Tick` now re-reads it twice a second while the terminal is open. **A section is one tile now** rather than tiles of three packed two to a row. Also fixed the subheader, which compared a page name against the `Display` *category* constant that no page is called — so on a client every page claimed to be server side, Debug included. |
 | 2026-08-28 | **Corrected the room map's convergence figure, which had been stale for nine days and was quoted here from `D2`** (`E10`, `E5`). It read 7,207 ticks — twenty minutes — on a million blocks; re-measured by `bench scale --max 1000000` it is **3,934 ticks, about eleven minutes**, on 1,000,294 blocks and a 14,278,796-cell box. The 7,207 predated the 2026-08-26 word skip and the 2026-08-27 span flood, both of which `D2`'s own body already recorded — the headline outlived the paragraph that superseded it. **And the figure is structural**: convergence is the box over a 4,096-cell tick budget, so no work on milliseconds a cell can move it, which `RoomMapConvergenceIsTheBoxDividedByItsBudget` now pins. |
@@ -1441,7 +1438,6 @@ one with a migration risk — is late rather than first.
 | 2026-08-22 | Brought the loop and planet definitions into the menu as world settings, replicated and reachable from `/thermal set` and the mod API. |
 | 2026-08-19 | Documented the twenty-one settings the reference had never listed — the whole `Loop*` and `Planet*` families, `MaxSubsteps` and `ClampEnvironmentOvershoot` — and added `ConfigurationDocTests`, which fails when a setting exists in one place and not the other. Let an admin change world settings from a client, over a secure channel rather than the shared one. |
 | 2026-08-18 | Added the five profiles as a ladder on two axes, and fixed the clamp defect that had to be fixed before they were safe. *(The profiles were removed on 2026-08-22; the clamp fix stands — see [realism.md](realism.md).)* |
-| 2026-09-09 | **The aerodynamic model ships on: `EnableDrag`, `EnableShapeDrag`, `EnableLift` and `EnableTopSpeed` are all on by default, and `DragCoefficient` moves 0.5 → 1.54 with them.** Every one of them was built, measured and scored against a criterion registered before its walk, and every one was left off pending a decision rather than evidence; the decision is taken. **The coefficient is not a separate change** — the shape term multiplies the projected area by a `sin²θ` whose population median is 0.3250, so 0.5 would have made every ship in the game three times slipperier than the coefficient was ever measured to make it, and 1.54 is what holds the population where `K22` scored it (3.42 % and 78.2 m/s against a 5 % and 60 m/s criterion). **What a player will notice**, in order: the world speed cap becomes `SpeedLimit` 140 m/s and each ship gets a cruise speed from its own mass; air slows ships down and pushes them sideways a little; and hulls run a median **4.56 K cooler** in atmosphere than they did, because the shape term takes friction off as well as drag. `EnableWindwardShielding` stays **off** — it was not part of the configuration `K22` scored, and shipping it on would ship a population figure nobody has measured. The one shape the term reads badly is a bare one-cell plate ([backlog.md](backlog.md) `K24`). |
 | 2026-09-09 | **Two defects in the top-speed port, both found by the aero wiring trace on 2026-09-02 and both fixed.** `EnableSpeedBoost` was **inert**: the switch was read one line after a `speed <= cruise` return had already made its condition unreachable, so all three documented rungs behaved as the third and no world ever got the hard cap at cruise. What it decides is the ceiling handed to the engine, and that choice now lives in `TopSpeedForce.Ceiling` where `TopSpeedForceTests` can ask what the switch changes — `ThermalGridTopSpeed` needs a session, a physics component and a grid group, which is why nothing caught it. And `LargeGridMaxBoostSpeed` / `SmallGridMaxBoostSpeed` were documented and labelled as **newtons**: the value is `AddForce`'s `maxSpeed`, which clamps a body's velocity, so they are **m/s** and always were. The numbers did not move; what they are called did. |
 | 2026-09-01 | **RelativeTopSpeed absorbed** (`K10`): the world's speed cap, the per-mass cruise curve and the boost are world settings on a new **Top speed** page, and a server-side force holds each physical group under the cruise speed its combined mass earns. Off by default, like the drag switch and for the same reason. The curve is the original's arithmetic, quirks included, so a world moving over flies the same. |
 | 2026-09-01 | **Ctrl and a click on a slider turns it into a field**, for the ranges a slider can nearly divide but not exactly. |

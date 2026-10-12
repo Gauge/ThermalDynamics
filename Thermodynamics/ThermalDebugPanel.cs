@@ -259,12 +259,8 @@ namespace Thermodynamics
             Text.Append('\n');
 
             Text.Append("speed    ").Append(state.WindSpeed.ToString("n1")).Append(" m/s\n");
-            Text.Append("threshold ")
-                .Append(Settings.Instance.FrictionAtSpeedsAbove.ToString("n0")).Append(" m/s")
-                .Append(state.FrictionActive ? "  (active)" : "  (below)").Append('\n');
-            Text.Append("air      ").Append(state.AirDensity.ToString("n3")).Append(" kg/m3\n");
-            Text.Append("mechanism ")
-                .Append(Settings.Instance.EnableFriction ? "on" : "OFF").Append('\n');
+            Text.Append("air fraction ").Append(state.AirDensity.ToString("n3")).Append('\n');
+            Text.Append("Heating supplied by the Aerodynamics mod API\n");
         }
 
         private static void Rooms(ThermalGrid thermals)

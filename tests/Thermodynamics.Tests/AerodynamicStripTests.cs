@@ -1,3 +1,5 @@
+using Thermodynamics.Fixtures;
+using Aerodynamics.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +36,8 @@ namespace Thermodynamics.Tests
     {
         private static ThermalSimulation Built(bool wedge)
         {
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
             settings.Derive();
 
             GridBuilder builder = GridBuilder.Large();
@@ -74,7 +77,9 @@ namespace Thermodynamics.Tests
             bool wedge, float friction, ulong temperatures)
         {
             ThermalSimulation simulation = Built(wedge);
-            simulation.StepExact(200, Worlds.Flight(1f, 120f));
+            // Historical byte-level control: reverse travel to retain the same heated faces
+            // after correcting the upstream convention. Physical direction is tested separately.
+            simulation.StepExact(200, Worlds.Flight(1f, -120f));
 
             float peak = 0f;
             for (int i = 0; i < simulation.Solver.Nodes.Count; i++)
@@ -111,8 +116,15 @@ namespace Thermodynamics.Tests
             }
 
             Assert.True(read > 100, "read only " + read + " mod source files, which is not the mod");
-            Assert.Equal(2, found.Count);
-            Assert.All(found, line => Assert.Contains("ThermalGridAerodynamics.cs", line));
+            Assert.Empty(found);
+            string standalone=Path.Combine(ShippedBlocks.RepoRoot(),"../Aerodynamics/Source");
+            int external=0;
+            foreach(string path in Directory.GetFiles(standalone,"*.cs",SearchOption.AllDirectories))
+            {
+                if(path.Contains("/obj/")||path.Contains("/bin/"))continue;
+                foreach(string line in File.ReadAllLines(path))if(writes.IsMatch(line))external++;
+            }
+            Assert.Equal(3,external);
         }
 
         [Fact]
@@ -126,8 +138,8 @@ namespace Thermodynamics.Tests
                 RegexOptions.Singleline);
 
             Assert.True(body.Success, "GetGridAeroForces is no longer declared the way this reads it");
-            Assert.Contains("thermals.AeroForceWorld", body.Groups[1].Value);
-            Assert.Contains("Vector3.Zero", body.Groups[1].Value);
+            Assert.Contains("AeroMethod<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>", body.Groups[1].Value);
+            Assert.Contains("call(grid)", body.Groups[1].Value);
         }
     }
 }

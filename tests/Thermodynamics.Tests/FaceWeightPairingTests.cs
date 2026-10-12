@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System.Collections.Generic;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -20,7 +21,7 @@ namespace Thermodynamics.Tests
     public class FaceWeightPairingTests
     {
 
-        private static ThermalSimulation OpenOn(int face, ThermalSettings settings)
+        private static ThermalSimulation OpenOn(int face, HistoricalThermalSettings settings)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.LightArmor(), Vector3I.Zero);
@@ -66,7 +67,7 @@ namespace Thermodynamics.Tests
                 for (int from = 0; from < Face.Count; from++)
                 {
 
-                    ThermalSimulation simulation = OpenOn(open, new ThermalSettings());
+                    ThermalSimulation simulation = OpenOn(open, new HistoricalThermalSettings());
                     simulation.StepExact(1, Worlds.Space(Face.Normals[from]));
 
 
@@ -106,7 +107,7 @@ namespace Thermodynamics.Tests
                 for (int blowing = 0; blowing < Face.Count; blowing++)
                 {
 
-                    ThermalSimulation simulation = OpenOn(open, new ThermalSettings());
+                    ThermalSimulation simulation = OpenOn(open, new HistoricalThermalSettings());
                     simulation.StepExact(1, Worlds.WindAndMotion(
                         1f, Speed, Face.Normals[blowing], Vector3.Zero));
 

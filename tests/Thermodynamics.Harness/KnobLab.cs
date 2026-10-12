@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -33,7 +34,7 @@ namespace Thermodynamics.Harness
 
             public Func<float, Func<string, string, BlockThermalProperties, BlockThermalProperties>> Material;
 
-            public Action<ThermalSettings, float> World;
+            public Action<HistoricalThermalSettings, float> World;
         }
 
         public class Configuration
@@ -45,10 +46,10 @@ namespace Thermodynamics.Harness
             public bool IsShipped;
 
 
-            public ThermalSettings Settings()
+            public HistoricalThermalSettings Settings()
             {
 
-                ThermalSettings settings = new ThermalSettings();
+                HistoricalThermalSettings settings = new HistoricalThermalSettings();
                 if (Knob.World != null) Knob.World(settings, Level);
                 return settings.Derive();
             }

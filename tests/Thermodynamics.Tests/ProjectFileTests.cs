@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Text.RegularExpressions;
 using Thermodynamics.Harness;
 using Xunit;
 
@@ -30,6 +31,28 @@ namespace Thermodynamics.Tests
     /// </summary>
     public class ProjectFileTests
     {
+        [Fact]
+        public void SolutionsAndProjectReferencesStayInsideThisRepository()
+        {
+            string root = ShippedBlocks.RepoRoot();
+            string prefix = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            foreach (object[] row in MsBuildFiles())
+            {
+                string path = Path.Combine(root, (string)row[0]);
+                var document = new XmlDocument();
+                document.Load(path);
+                foreach (XmlNode node in document.SelectNodes("//*[local-name()='ProjectReference']/@Include | /*[local-name()='Solution']//*[local-name()='Project']/@Path"))
+                {
+                    string target = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), node.Value.Replace('\\', Path.DirectorySeparatorChar)));
+                    Assert.True(target.StartsWith(prefix, StringComparison.Ordinal), path + " builds an external project: " + node.Value);
+                }
+            }
+            foreach (Match project in Regex.Matches(File.ReadAllText(Path.Combine(root, "Thermodynamics.sln")), "\"([^\"]+\\.csproj)\""))
+            {
+                string target = Path.GetFullPath(Path.Combine(root, project.Groups[1].Value.Replace('\\', Path.DirectorySeparatorChar)));
+                Assert.True(target.StartsWith(prefix, StringComparison.Ordinal), "Root solution builds an external project: " + target);
+            }
+        }
 
         public static IEnumerable<object[]> MsBuildFiles()
         {

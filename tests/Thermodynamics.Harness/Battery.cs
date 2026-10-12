@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -239,7 +240,7 @@ namespace Thermodynamics.Harness
         private static ScenarioOutcome Run(Blueprints.Ship ship, Scenario scenario,
             ThermalSettings settings, float fixedSeconds)
         {
-            ShipAssembly assembly = ship.Build(settings ?? new ThermalSettings());
+            ShipAssembly assembly = ship.Build(settings ?? new HistoricalThermalSettings());
             assembly.CollectDiagnostics(true);
 
             ShipLoad.Apply(assembly, scenario.Load);

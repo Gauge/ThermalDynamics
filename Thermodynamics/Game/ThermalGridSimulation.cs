@@ -136,12 +136,6 @@ namespace Thermodynamics
                     work.RoomCellsVisited - roomCellsBefore);
             }
 
-            try { TickAerodynamics(); }
-            catch (Exception e)
-            {
-                lock (aeroLock) { if (aerodynamics != null) aerodynamics.Reset(); }
-                Telemetry.Exception("ThermalGrid.Aerodynamics", e);
-            }
             if (stepped <= 0) return;
 
             StepsRun += stepped;
@@ -171,7 +165,6 @@ namespace Thermodynamics
 
             bool wanted = Telemetry.Enabled
                 || (client && Settings.Instance.DebugTextOnScreen)
-                || (client && Settings.Instance.DebugAeroOverlay)
                 || (client && ThermalDebugView.NeedsWatts);
 
             Simulation.Solver.CollectDiagnostics = wanted;
@@ -323,7 +316,7 @@ namespace Thermodynamics
             for (int i = 0; i < share; i++)
             {
                 if (massSweepCursor >= count) massSweepCursor = 0;
-                if (sweepOrder[massSweepCursor++].RefreshMass()) InvalidateAerodynamics();
+                if (sweepOrder[massSweepCursor++].RefreshMass()) InvalidateGeometry();
             }
         }
 

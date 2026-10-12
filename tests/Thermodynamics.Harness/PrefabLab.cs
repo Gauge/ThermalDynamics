@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -68,7 +69,7 @@ namespace Thermodynamics.Harness
             outcome.UnknownBlocks = ship.UnknownBlocks;
             outcome.Grids = ship.Grids.Count;
 
-            ShipAssembly assembly = ship.Build(settings ?? new ThermalSettings().Derive());
+            ShipAssembly assembly = ship.Build(settings ?? new HistoricalThermalSettings().Derive());
             outcome.Blocks = assembly.NodeCount;
 
             if (outcome.Blocks == 0)

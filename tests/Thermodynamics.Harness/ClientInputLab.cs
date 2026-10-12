@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -123,10 +124,10 @@ namespace Thermodynamics.Harness
             if (loadPeriodSeconds < 1e8f) loadPeriodSeconds = LabClock.Seconds(loadPeriodSeconds);
 
 
-            ThermalSettings world = new ThermalSettings().Derive();
+            ThermalSettings world = new HistoricalThermalSettings().Derive();
 
 
-            ThermalSettings served = new ThermalSettings();
+            ThermalSettings served = new HistoricalThermalSettings();
             served.HeatTimeScale = world.HeatTimeScale * 0.5f;
             served = served.Derive();
 

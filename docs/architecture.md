@@ -11,6 +11,33 @@ The model is what [`tests/`](../tests) builds and tests outside the game; the ad
 compiles around it. Everything the game supplies crosses one of three boundaries — block layout, an
 environment sample, and results out — and nothing else.
 
+### Repository and provider boundary
+
+Thermodynamics owns the thermal model, SE1 adapter, thermal presentation and its public API.
+Aerodynamics and RelativeTopSpeed are external projects and are not built or maintained here.
+`ThermalApiAerodynamics` exports copied geometry/environment inputs and dispatches registered
+heating and flight-readout delegates. `ThermalGridGeometryApi` tracks geometry revisions.
+No force application occurs in Thermodynamics. See [the integration boundary](aerodynamics.md).
+
+The production model and presentation remain separate. `Thermodynamics.Core` now compiles the
+same production Core sources and has no fixture or flight implementation. Historical rigs opt
+into `HistoricalThermalSettings` in `Thermodynamics.Fixtures`; that assembly owns read-only flight
+sources and adaptation to thermal grids. No provider is installed by a normal Core constructor.
+
+### Responsibilities after cleanup
+
+| Area | Source ownership |
+| --- | --- |
+| Session | `Session.cs` owns startup, tick, input and unload; `SessionCommands.cs` owns chat dispatch and replies. |
+| Settings | `Settings.cs` owns serialized fields, defaults, migration and model application; `SettingsAccess.cs` owns the ordered read/write catalogue and client ownership; `SettingsStorage.cs` owns world persistence. |
+| Settings UI | `ThermalSettingsMenuLayout.cs` owns labels, ranges and page metadata; the menu and window own live controls and rendering. |
+| Solver | `ThermalSolver.cs` owns shared state and block access. `Topology` owns links, `Devices` owns loop/room/pump construction, `Environment` owns environmental terms and shadow refresh, `Coupling` owns conduction/loop/room exchange, `Stability` owns substep demand, and `State` owns synchronization and publication. Existing `Step` and `Cues` partials retain execution and event sequencing. |
+| Telemetry | Collectors retain their measurements. `TelemetryReport.cs` coordinates writing and general sections; `TelemetryReportPerformance.cs` owns cost calculations, `TelemetryReportEnvironment.cs` owns climate summaries, and `TelemetryReportCsv.cs` owns CSV serialization. |
+| Thermal vision | `ThermalVisionProbeGeometry.cs` owns geometry preparation and model drawing. The probe owns cached geometry and pending builds: `Stop` clears those, `ResetHud` releases controls while preserving the active view, and `Reset` additionally clears fleet and mode state. |
+
+Partial files share their original classes; this adds no dispatch or per-step allocation.
+No solver term or summation order changes as part of the split.
+
 ### Thermal vision is presentation, not simulation
 
 Thermal vision consumes temperatures; its palettes, exposure, LOD, surface
@@ -82,7 +109,7 @@ temperatures, overheat events and threshold crossings.
 
 | File | Type | Role |
 | --- | --- | --- |
-| [Session.cs](../Thermodynamics/Session.cs) | `MySessionComponentBase` | Loads settings, boots the Definition Extensions client, the HUD, the terminal controls and the mod API. Runs the chat commands, cross-grid conduction and the debug overlay. |
+| [Session.cs](../Thermodynamics/Session.cs) | `MySessionComponentBase` | Loads settings, boots the Definition Extensions client, the HUD, the terminal controls and the mod API. Runs cross-grid conduction and the debug overlay; chat dispatch lives in `SessionCommands.cs`. |
 | [PlanetManager.cs](../Thermodynamics/PlanetManager.cs) | `MySessionComponentBase` | Which planet is closest to a point. |
 | [Game/ThermalGrid.cs](../Thermodynamics/Game/ThermalGrid.cs) | `MyGameLogicComponent` | The per-grid root: mirrors the game grid into a `GridModel`, owns the `ThermalSimulation`, wires block and grid events. `partial`, split across four more files. |
 | [Game/ThermalGridSimulation.cs](../Thermodynamics/Game/ThermalGridSimulation.cs) | `partial` | The tick: sample, step, apply damage, raise crossings, refresh readouts. |
@@ -108,7 +135,7 @@ temperatures, overheat events and threshold crossings.
 | [ThermalSettingsWindow.cs](../Thermodynamics/ThermalSettingsWindow.cs) | `WindowBase` | The window the menu is drawn in, built from the framework's HUD elements rather than from terminal pages. See [configuration.md](configuration.md#the-settings-menu). |
 | [ThermalDebugPanel.cs](../Thermodynamics/ThermalDebugPanel.cs) | static | The Rich HUD readout beside the overlay: per-view figures for the grid being drawn. |
 | [Debug.cs](../Thermodynamics/Debug.cs) | static | The crosshair readout. |
-| [Settings.cs](../Thermodynamics/Settings.cs) | class | Config file, defaults, access by name, and the write-through to the model's settings. |
+| [Settings.cs](../Thermodynamics/Settings.cs) | partial class | Serialized schema, defaults, migration and model application. Access and persistence live in `SettingsAccess.cs` and `SettingsStorage.cs`. |
 | [SettingsSync.cs](../Thermodynamics/SettingsSync.cs) | static | Replicates the world's settings to every client, over `SENetworkAPI`. |
 | [SettingsRequests.cs](../Thermodynamics/SettingsRequests.cs) | static | An administrator changing a setting from a client, over the engine's secure handler. |
 | [Game/ThermalGridSync.cs](../Thermodynamics/Game/ThermalGridSync.cs) | static | Replicates block temperatures to clients: the whole hull once, then the near-critical band. Plumbing only — the protocol is `Core/Sync`. |
@@ -255,6 +282,8 @@ pumps `ThermalSimulation` — which is exactly what the test harness does.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-01 | Map session, settings, solver, telemetry and thermal-vision responsibilities after the refactor. |
+| 2026-10-01 | State production, test-fixture and external-provider ownership separately. |
 | 2026-09-19 | Grouped SE1 thermal vision under Game, split heat lookup from surface preparation, and removed the performance tool's unused model reference. |
 | 2026-09-19 | Separated thermal-vision presentation from the simulation model, with an independent project and assembly isolation checks. |
 | 2026-09-01 | Added `ThermalSettingsWindow`, and said what the settings menu file now is: the menu moved out of the Rich HUD terminal into a window this mod draws. |

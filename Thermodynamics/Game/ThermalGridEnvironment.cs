@@ -140,7 +140,7 @@ namespace Thermodynamics
             bool samePlanet = planetId == currentPlanetId;
 
             sample.PreviousAmbient = LastState.AmbientTemperature;
-            sample.HasPreviousAmbient = hasAmbientHistory && samePlanet;
+            sample.HasPreviousAmbient = hasAmbientHistory && samePlanet && LastState.AirDensity > 0f;
             sample.SecondsSincePrevious = TickSeconds;
             hasAmbientHistory = true;
 
@@ -511,7 +511,7 @@ namespace Thermodynamics
             if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated) return;
             if (speed <= 0f) return;
 
-            Vector4 colour = (speed > Settings.Instance.FrictionAtSpeedsAbove
+            Vector4 colour = (speed > 0f
                 ? new Color(235, 70, 55)
                 : new Color(90, 220, 120)).ToVector4();
 

@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,7 +13,7 @@ namespace Thermodynamics.Harness
         private class Toggle
         {
             public string Name;
-            public Action<ThermalSettings, bool> Set;
+            public Action<HistoricalThermalSettings, bool> Set;
         }
 
         private static readonly Toggle[] Toggles =
@@ -47,7 +48,7 @@ namespace Thermodynamics.Harness
         }
 
 
-        private static ScenarioRunner Rig(ThermalSettings settings)
+        private static ScenarioRunner Rig(HistoricalThermalSettings settings)
         {
             GridBuilder builder = GridBuilder.Large();
 
@@ -110,7 +111,7 @@ namespace Thermodynamics.Harness
         {
             Row row = new Row { Profile = profile.Name, Combination = label };
 
-            ThermalSettings wanted = profile.ToSettings();
+            HistoricalThermalSettings wanted = profile.ToSettings();
             if (single != null)
             {
                 if (only)
@@ -178,7 +179,7 @@ namespace Thermodynamics.Harness
         }
 
 
-        private static ThermalSettings Copy(ThermalSettings target, ThermalSettings wanted)
+        private static ThermalSettings Copy(ThermalSettings target, HistoricalThermalSettings wanted)
         {
             target.HeatTimeScale = wanted.HeatTimeScale;
             target.Frequency = wanted.Frequency;
@@ -197,7 +198,8 @@ namespace Thermodynamics.Harness
             target.EnableCoolantLoops = wanted.EnableCoolantLoops;
             target.EnableRoomAir = wanted.EnableRoomAir;
             target.EnableHeatPumps = wanted.EnableHeatPumps;
-            target.EnableFriction = wanted.EnableFriction;
+            target.SurfaceHeating = wanted.SurfaceHeating;
+            target.SurfaceHeatingGate = wanted.SurfaceHeatingGate;
             target.EnableDamage = wanted.EnableDamage;
             target.SolarSelfShadowing = wanted.SolarSelfShadowing;
             target.WellMixedCoolant = wanted.WellMixedCoolant;

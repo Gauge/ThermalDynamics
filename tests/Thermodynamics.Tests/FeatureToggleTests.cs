@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -32,7 +33,7 @@ namespace Thermodynamics.Tests
     public class FeatureToggleTests
     {
 
-        private static ThermalSimulation TwoBlocks(ThermalSettings settings, float hot, float cold)
+        private static ThermalSimulation TwoBlocks(HistoricalThermalSettings settings, float hot, float cold)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.HeavyArmor(), Vector3I.Zero);
@@ -48,7 +49,7 @@ namespace Thermodynamics.Tests
         public void ConductionOffLeavesNeighboursAlone()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableConduction = false;
             settings.Derive();
@@ -66,7 +67,7 @@ namespace Thermodynamics.Tests
         public void ConductionOnEqualisesThem()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.Derive();
 
@@ -85,7 +86,7 @@ namespace Thermodynamics.Tests
         public void RadiationOffStopsAHotBlockCoolingIntoSpace()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableRadiation = false;
             settings.Derive();
 
@@ -101,7 +102,7 @@ namespace Thermodynamics.Tests
         public void RadiationOnCoolsIt()
         {
 
-            ThermalSimulation simulation = TwoBlocks(new ThermalSettings(), 900f, 900f);
+            ThermalSimulation simulation = TwoBlocks(new HistoricalThermalSettings(), 900f, 900f);
             simulation.StepExact(50, Worlds.Shadow());
 
             Assert.True(simulation.Solver.Nodes[0].Temperature < 899f);
@@ -112,7 +113,7 @@ namespace Thermodynamics.Tests
         public void RadiationShedsWhatTheLawSays()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableConduction = false;
             settings.Derive();
 
@@ -142,7 +143,7 @@ namespace Thermodynamics.Tests
         public void ConvectionOffLeavesOnlyRadiationInAtmosphere()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableConvection = false;
             settings.Derive();
 
@@ -151,7 +152,7 @@ namespace Thermodynamics.Tests
             withoutConvection.StepExact(20, Worlds.PlanetSurface(1f, 0.5f));
 
 
-            ThermalSimulation withConvection = TwoBlocks(new ThermalSettings(), 600f, 600f);
+            ThermalSimulation withConvection = TwoBlocks(new HistoricalThermalSettings(), 600f, 600f);
             withConvection.StepExact(20, Worlds.PlanetSurface(1f, 0.5f));
 
             Assert.True(withoutConvection.Solver.Nodes[0].Temperature
@@ -163,7 +164,7 @@ namespace Thermodynamics.Tests
         public void ConvectionOffLeavesTheRadiativeShareUntouched()
         {
 
-            ThermalSettings off = new ThermalSettings();
+            HistoricalThermalSettings off = new HistoricalThermalSettings();
             off.EnableConvection = false;
             off.Derive();
 
@@ -173,7 +174,7 @@ namespace Thermodynamics.Tests
             without.StepExact(1, ThinAir());
 
 
-            ThermalSimulation with = TwoBlocks(new ThermalSettings(), 600f, 600f);
+            ThermalSimulation with = TwoBlocks(new HistoricalThermalSettings(), 600f, 600f);
             with.Solver.CollectDiagnostics = true;
             with.StepExact(1, ThinAir());
 
@@ -197,7 +198,7 @@ namespace Thermodynamics.Tests
         public void TheEnvironmentSwitchRemovesRadiationAndConvectionAndLeavesSourcesAlone()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.Derive();
 
@@ -215,7 +216,7 @@ namespace Thermodynamics.Tests
             Assert.True(node.HeatGenerationWatts > 0f);
             Assert.True(node.Temperature > 600f);
 
-            ThermalSimulation exchanging = builder.BuildSimulation(new ThermalSettings(), 600f);
+            ThermalSimulation exchanging = builder.BuildSimulation(new HistoricalThermalSettings(), 600f);
             exchanging.Solver.CollectDiagnostics = true;
             exchanging.StepExact(1, ThinAir());
 
@@ -228,7 +229,7 @@ namespace Thermodynamics.Tests
         public void WasteHeatOffStopsAReactorHeatingItself()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableWasteHeat = false;
             settings.Derive();
@@ -247,7 +248,7 @@ namespace Thermodynamics.Tests
         public void SwitchingASettingTakesEffectWithoutARebuild()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.Derive();
 
@@ -271,7 +272,7 @@ namespace Thermodynamics.Tests
         public void ChangingHeatTimeScaleMidSessionRescalesCapacity()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.HeatTimeScale = 1f;
             settings.Derive();
@@ -294,7 +295,7 @@ namespace Thermodynamics.Tests
         public void CoolantLoopsSwitchOffMidSession()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.Derive();
 
@@ -332,7 +333,7 @@ namespace Thermodynamics.Tests
         private static ThermalNode HullAtSpeed(bool friction)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;
@@ -358,7 +359,7 @@ namespace Thermodynamics.Tests
             builder.Place(Catalog.LightArmor(), Vector3I.Zero);
 
 
-            ThermalSettings off = new ThermalSettings();
+            HistoricalThermalSettings off = new HistoricalThermalSettings();
             off.EnableSolarHeat = false;
             off.Derive();
 
@@ -367,7 +368,7 @@ namespace Thermodynamics.Tests
             dark.StepExact(1, Worlds.Space(new Vector3(1f, 0f, 0f)));
 
 
-            ThermalSettings on = new ThermalSettings();
+            HistoricalThermalSettings on = new HistoricalThermalSettings();
             on.EnableSolarHeat = true;
             on.Derive();
 
@@ -398,7 +399,7 @@ namespace Thermodynamics.Tests
         private static float HotBlockBesideARing(bool loops)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
@@ -444,7 +445,7 @@ namespace Thermodynamics.Tests
         private static float FarWallOfASealedBox(bool air)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableConduction = false;
             settings.EnableRoomAir = air;

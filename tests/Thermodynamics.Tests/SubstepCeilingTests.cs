@@ -35,7 +35,8 @@ namespace Thermodynamics.Tests
         private static List<LoadBenchmarks.CeilingRow> Ladder(int frequency, int steps = Steps)
         {
             return LoadBenchmarks.SubstepCeiling("ship", Blocks, steps, null,
-                null, false, frequency);
+                // Preserve this historical thermal-layout control after the upstream-face fix.
+                null, false, frequency, -200f);
         }
 
 

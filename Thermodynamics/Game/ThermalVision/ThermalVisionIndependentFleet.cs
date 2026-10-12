@@ -43,6 +43,9 @@ namespace Thermodynamics
         private static readonly List<Vector3D> nearCapPolygon=new List<Vector3D>(16);
 
         private static readonly List<Vector3D> nearCapScratch=new List<Vector3D>(16);
+
+        // Reused per grid each frame: nothing retains the frustum past the draw call.
+        private static readonly BoundingFrustumD fleetFrustum=new BoundingFrustumD();
         private static readonly System.Diagnostics.Stopwatch FleetClock = System.Diagnostics.Stopwatch.StartNew();
         private static Dictionary<Region,ThermalVisionSurfaceField> previousSurface;
         private static float surfaceBlend = 1;
@@ -307,7 +310,7 @@ namespace Thermodynamics
                 if(surfaceBlend>=1 && view.Previous.Count>0) view.Previous.Clear();
                 MatrixD localCamera=camera.WorldMatrix*MatrixD.Invert(regionRenderMatrix); Vector3D eye=localCamera.Translation;
 
-                var localFrustum=new BoundingFrustumD(regionRenderMatrix*inverseCamera*camera.ProjectionMatrix);
+                var localFrustum=fleetFrustum; localFrustum.Matrix=regionRenderMatrix*inverseCamera*camera.ProjectionMatrix;
                 localVisionBlockers.Clear();
                 for(int i=0;i<visionOccluders.Count;i++)
                     if(visionOccluders[i].Owner==view.Grid)localVisionBlockers.Add(visionOccluders[i].Bounds);
@@ -317,7 +320,9 @@ namespace Thermodynamics
                 hiddenSubtrees+=gridHiddenSubtrees;
                 foreach(var cell in regionDrawOrder)
                 {
-                    if(automaticRange) { SceneRange.Observe(view.Fields[cell].Minimum); SceneRange.Observe(view.Fields[cell].Maximum); }
+                    ThermalVisionSurfaceField cellField;
+                    if(!view.Fields.TryGetValue(cell,out cellField)) continue;
+                    if(automaticRange) { SceneRange.Observe(cellField.Minimum); SceneRange.Observe(cellField.Maximum); }
                     Vector3D middle=(cell.Min+cell.Max)*.5, half=(cell.Max-cell.Min)*.5;
                     double depth=Vector3D.Dot(middle-eye,localCamera.Forward), radius=Vector3D.Dot(half,Vector3D.Abs(localCamera.Forward));
                     if(depth-radius<=near && depth+radius>=near)
@@ -330,8 +335,8 @@ namespace Thermodynamics
                         bool upper=side==1;
                         bool entering=(RegionAxis(eye,axis)-RegionAxis(upper?cell.Max:cell.Min,axis))*(upper?1:-1)>0;
                         if(entering!=(pass==0)) continue;
-                        if(!entering && (view.Fields[cell].PairedFaceMask & (1<<(axis*2+side)))!=0) { sharedExitsSkipped++; continue; }
-                        RegionFace(cell,axis,upper,RegionNeutral,eye,entering,localFrustum);
+                        if(!entering && (cellField.PairedFaceMask & (1<<(axis*2+side)))!=0) { sharedExitsSkipped++; continue; }
+                        RegionFace(cell,axis,upper,RegionNeutral,eye,entering,localFrustum,cellField);
                     }
                     regionDrawnCells++;
                 }

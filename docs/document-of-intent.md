@@ -1177,8 +1177,8 @@ to ask.
 
 [api.md](api.md#guarantees) states them and this is what they are for. **No call throws into the
 caller** — bad arguments come back as `false`, `0` or `NaN`, because an exception crossing a mod
-boundary lands in somebody else's session with this mod's name on it. **No call is bound to a thread
-or an update phase.** **Delegate signatures use whitelisted types only**, so an in-game script and a
+boundary lands in somebody else's session with this mod's name on it. **Calls have no enforced thread or update phase; live engine-facing calls belong on the game
+thread because the collections are not synchronized.** **Delegate signatures use whitelisted types only**, so an in-game script and a
 mod can both bind. And **keys do not change meaning within a major version**.
 
 Together they are what makes the table safe to publish at all — the *why* under
@@ -1252,8 +1252,8 @@ surface changes how a ship flies.
 **One mod beside this one can be detected, and it is worth naming because it is the exception.**
 [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed) publishes an API and speaks the same
 `SENetworkAPI` this repository vendors, so *is something else already slowing ships down* is a
-question with an answer — unlike *is something else already simulating heat*, which is not. The current decision is `AR15`: RTS owns the cruise curve and this mod owns atmospheric drag;
-both may act. `EnableAeroForces` can disable this mod's force channel for a different composition.
+question with an answer — unlike *is something else already simulating heat*, which is not. The current decision is `AR15`: RTS owns the cruise curve and the separate Aerodynamics mod
+owns atmospheric drag. Thermodynamics applies no force; the provider owns its force switch.
 The embedded top-speed port remains removed.
 
 **Every output can be turned off, and the last one that could not was fixed for this.** The
@@ -1531,6 +1531,7 @@ as a *second* change rather than as a substitute. [backlog](backlog.md) `D19`.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Correct current atmospheric-force ownership after extraction. |
 | 2026-09-27 | Scoped hand-cooling figures to physical reference inventory and withdrew the untested claim that those figures establish the implemented tool balance. |
 | 2026-09-27 | Refreshed the offline suite count to 2,603 cases after adding aerodynamic population controls. |
 | 2026-09-27 | Updated the current aerodynamic composition and implementation status for the rebuilt engine adapter; preserved the superseded design as historical context. |

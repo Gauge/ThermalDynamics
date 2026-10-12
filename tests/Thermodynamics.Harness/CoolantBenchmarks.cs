@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -95,7 +96,7 @@ namespace Thermodynamics.Harness
         private static ThermalSimulation Build(int hullSize, int rings, bool wellMixed, float flowOverride)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.WellMixedCoolant = wellMixed;
 
             settings.MaxSubsteps = 4096;

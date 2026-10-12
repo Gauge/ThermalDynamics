@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -10,6 +11,7 @@ namespace Thermodynamics.Tests
     /// Centre changes prepare bounded face work and publish atomically. Completed forces and damping
     /// are bit-identical to the legacy surface pass; interrupted preparation must leave live forces intact.
     /// </summary>
+    [Trait("scope", "integration")]
     public class AeroCentreUpdateTests
     {
         [Theory]

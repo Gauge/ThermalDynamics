@@ -12,7 +12,9 @@
 
 ## Thermal-vision boundary
 
-The simulation project compiles `Core/` only. The separate
+Production simulation sources live under `Core/`; the offline Core assembly builds those same
+sources plus test visibility attributes. Historical heating and aerodynamic inputs live in the
+separate `Thermodynamics.Fixtures` assembly, selected explicitly by historical rigs. The separate
 `tests/Thermodynamics.Presentation` project links `Presentation/`, which contains
 thermal-vision approximation and display policies, with no solver or engine-runtime
 reference. Both libraries currently use the documented `VRage.Math` exception.
@@ -23,7 +25,12 @@ Do not put display behavior back into `Core/Simulation` merely to test it offlin
 ## Prerequisites
 
 * Space Engineers installed (the project references DLLs from `Bin64/` directly).
-* .NET Framework 4.7.2 targeting pack, or a Mono/MSBuild setup that can target `net472`.
+* .NET SDK 9 or newer for the offline projects; the mod targets .NET Framework 4.8 through
+  the reference-assemblies package. Runtime sources remain C# 6.
+* Cached/restored NuGet packages. Run `dotnet restore tests/Thermodynamics.slnx` when dependencies
+  change; restore operates on projects in this repository.
+* The historical fixture assembly reads selected sources from a sibling Aerodynamics
+  checkout. It neither builds nor modifies that project. Production Core needs no sibling source.
 * The mod's own runtime dependencies for testing in game: Definition Extensions
   (`2756894170`) and Rich HUD Master (`1965654081`).
 
@@ -47,7 +54,7 @@ not shipped or loaded. What the project gives is three MDK2 packages:
 | --- | --- |
 | `Mal.Mdk2.References` | Finds the installed game and references its assemblies from `Bin64/`. |
 | `Mal.Mdk2.ModAnalyzers` | Checks every source against the game's script whitelist and reports a prohibited type or member as `MDK01`, an error — `rules.md` `C2`. |
-| `Mal.Mdk2.ModPackager` | Packs the mod into the game's local `Mods/Thermodynamics` on every build; see [Deploying to the game](#deploying-to-the-game). |
+| `Mal.Mdk2.ModPackager` | Packs the mod into the game's local `Mods/Thermodynamics` unless `MdkBuildConfiguration=NoPackage` is set; see [Deploying to the game](#deploying-to-the-game). |
 
 **It is a member of `tests/Thermodynamics.slnx`, so the suite's own build compiles it** — building
 the test solution is what checks the mod, and `rules.md` `C11` is why. The test projects link
@@ -55,49 +62,38 @@ the test solution is what checks the mod, and `rules.md` `C11` is why. The test 
 assemblies is compiled here and nowhere else, so leaving this project out of the build would make a
 rename in `Core` invisible until a world load.
 
+Use the repository-local validation entry point from the root:
+
 ```bash
-dotnet build tests/Thermodynamics.slnx                  # everything, mod project included
-dotnet build Thermodynamics/Thermodynamics.csproj       # the mod project alone
+bash tools/validate.sh                   # compile all local projects; thermal checks
+bash tools/validate.sh --fast            # thermal checks excluding speed=slow
+bash tools/validate.sh --integration     # include cross-mod flight checks
+bash tools/validate.sh --build-only      # compile and whitelist checks only
 ```
 
-**Building a project by name does not build the mod, and a full green suite does not either.** The
-test projects compile `Core/**/*.cs` and a named list of adapters; `Game/`, `Definitions/`, the
-session and the HUD compile only in the mod project. So `dotnet build tests/Thermodynamics.Tests`
-followed by `dotnet test --no-build` can be entirely green while the mod does not compile — which
-happened on 2026-08-30, when a cleanup pointed `ThermalLoopDefinition` at `Core`'s
-`LoopThermalProperties` without the `using` and 2,141 historical test cases passed over it. **Build the `.slnx`**;
-it catches that in four errors, and building the test project by name catches it in none.
+The script disables MDK packaging, uses one MSBuild worker, and writes test results to
+`out/validation/validation.trx`. On Linux it runs tests in a user systemd scope capped at 24 GB
+with no swap; `THERMAL_TEST_MEMORY_LIMIT` can select a different ceiling. It expects restored
+packages and a working user systemd session. A failed build prevents any tests from running.
 
-**And the mod project is not a stand-in for the solution either, because the two disagree about what
-an error is.** A doc comment with malformed XML is a warning to the mod project and an error to the
-test projects, because the mod project compiles the vendored files, which carry some that `R6`
-forbids fixing. So *build the mod project* is not the shortcut — build the `.slnx`, which is the
-only command that compiles everything under the strictness each part of it is configured with.
+The equivalent compile-only command is:
 
-**Solution membership is the check for a rename, and it is not the check for a malformed project
-file.** A `.csproj` MSBuild cannot parse does not fail the projects that reference it — it leaves
-the build, and `dotnet build Thermodynamics.Tests.csproj` and `dotnet test --no-build` both go on
-succeeding. `ProjectFileTests` reads every `.csproj`, `.props`, `.targets` and `.slnx` in the tree
-and asserts it parses, so the failure is in the suite everybody runs rather than in the one command a
-session may not have run.
+```bash
+dotnet build tests/Thermodynamics.slnx --no-restore -m:1 -nr:false -p:MdkBuildConfiguration=NoPackage
+```
 
-**The game's assemblies are found by MDK2**, through `Mal.Mdk2.References`: the build prints
-`Loading Space Engineers assemblies from …` with the path it chose, which on this machine is the one
-MDK Hub is configured with. The mod project and the test projects both take it from there.
+Both solutions and every project reference stay inside Thermodynamics, checked by
+`SolutionsAndProjectReferencesStayInsideThisRepository`. Read-only source links are confined to the historical
+fixture project. Do not add a sibling mod project to either solution.
 
-Two things about that reference set are easy to get wrong:
+Build the solution for acceptance: tests alone do not compile `Game/`, the session, definitions
+or HUD. If a test assembly appears stale during development, rebuild its project with
+`--no-incremental`, then rerun the solution check. That diagnostic does not replace the mod's
+whitelist build. `ProjectFileTests` also checks that each MSBuild file is readable.
 
-* **Target .NET Framework 4.8, not 4.7.2.** `VRage.Platform.Windows` and its RestSharp dependency
-  are built against 4.8; at 4.7.2 they silently fail to resolve.
-* **Do not reference `VRage.Native.dll`.** It is unmanaged and produces
-  `MSB3246: PE image does not have metadata`.
-
-XML documentation ships next to the DLLs for `Sandbox.Game`, `VRage.Game`, `VRage` and others,
-so IntelliSense will show the engine's own docs once the references resolve. See
-[engine-notes.md](engine-notes.md) for a survey of what is available.
-[.gitignore](../.gitignore) drops `bin/`, `obj/`, `.vs/` and `out/`; it lists `*.csproj`, `*.sln`
-and `*.props` and then un-ignores them again, because the mod project and the test projects are
-both built from checked-in files.
+MDK2 discovers the installed game assemblies. Target `net48`, and exclude the unmanaged
+`VRage.Native.dll` from managed references. XML API documentation next to the installed DLLs
+is available to IntelliSense; [engine-notes.md](engine-notes.md) records the surveyed APIs.
 
 Constraints that matter when writing code for this project:
 
@@ -134,12 +130,17 @@ content under `Thermodynamics/Content/` beside them, leaving out what
 machine the `Mods` folder is the Proton prefix's
 `drive_c/users/steamuser/AppData/Roaming/SpaceEngineers/Mods`, configured in MDK Hub; a
 machine-specific path belongs in `Thermodynamics/mdk.local.ini`, which stays ignored.
+The `output` value names the parent `Mods` folder; MDK2 appends `Thermodynamics`.
+Other projects are outside this repository's build and deployment scope.
+
+Use `-p:MdkBuildConfiguration=NoPackage` for compile-only validation. To package somewhere
+else, pass `-p:MdkArguments="-output /absolute/path/to/staging"` explicitly. Thermodynamics uses MDK2 directly; no zip/archive step is required.
 
 Then enable "Thermodynamics" in the world's mod list alongside the two dependencies. Script changes
 take effect on world reload; definition XML changes also require a reload.
 
-**Every build of the solution redeploys**, including a build run only to test, so the game's local
-copy is always the working tree's last successful build.
+**Builds with packaging enabled redeploy.** The validation script and builds with
+`MdkBuildConfiguration=NoPackage` only compile; they leave the game's local copy unchanged.
 
 ## Repository layout
 
@@ -179,6 +180,40 @@ workshop identity files are not regenerated. Both have their own sections below.
 * [Workshop/metadata.mod](../Workshop/metadata.mod) and [Workshop/modinfo.sbmi](../Workshop/modinfo.sbmi)
   carry the workshop identity — `modinfo.sbmi` holds the Steam workshop id `2985582372`. Do not
   regenerate them, or the mod will publish as a new item.
+
+## Cleanup sequence
+
+All maintenance, validation outputs and deployment decisions are scoped to this repository.
+Aerodynamics and RelativeTopSpeed remain external dependencies. Preserve existing working changes,
+public API signatures, serialized identifiers, Workshop identity, assets and vendored libraries.
+
+| Phase | Scope | Acceptance |
+| --- | --- | --- |
+| 1 | Local build boundary and baseline | No solution/project references build sibling projects; record the baseline before changes. |
+| 2 | Current documentation and evidence | Reconcile current guides and backlog; archive dated narratives with working links. |
+| 3 | Production/test separation | Remove automatic fixture behavior and external flight sources from the ordinary Core assembly; retain explicit historical/integration fixtures. |
+| 4 | Settings and session responsibilities | Consolidate metadata and separate lifecycle/commands without changing persistence, permissions or defaults. |
+| 5 | Solver organization | Separate topology, coupling, environmental terms and publication while preserving numerical order and allocations. |
+| 6 | Telemetry and presentation | Separate collection/calculation/formatting and clarify cache/lifecycle ownership. |
+| 7 | Measured optimization | Evaluate precomputation, exposed-node iteration and temperature ownership; design remapping/sleep separately. |
+
+Phases 1–6 are implemented; phase 7 is assessed in the
+[fresh benchmark review](redesign.md#cleanup-assessment-2026-10-01). The source split preserves
+solver arithmetic and step order.
+The settings catalogue retains name ordering, protobuf identifiers, defaults, permissions and
+setter side effects; the suite compiles its real accessors against field declarations and tests
+read/write behavior, flags, unknown names and overlay/telemetry notifications. The review retains
+current precomputation and leaves topology/sleep, exposed indexing and temperature ownership as
+separate designs; no speculative runtime optimization is included.
+
+The [completion receipt](../tests/benchmarks/cleanup-refactor-2026-10-01.txt) records the
+compatibility audit, full-suite result and build limitations.
+
+The ordinary Core can be built alone with
+`dotnet build tests/Thermodynamics.Core/Thermodynamics.Core.csproj --no-restore`.
+The full harness still requires the read-only sibling sources used by the fixture assembly.
+Other long measurement pages retain their evidence. Native-session validation and the product
+features in the backlog remain separate from this behavior-preserving cleanup.
 
 ## Documentation conventions
 
@@ -300,7 +335,7 @@ Two are about the sun rather than about heat flow:
   `/thermal dump`. The cost section breaks the update into topology rebuild, room mapping,
   exposure refresh and solver, which is the breakdown you want before optimising anything. See
   [telemetry.md](telemetry.md).
-* **Auditing a dump:** `dotnet run --project Thermodynamics.Sim -- dump` reads the newest
+* **Auditing a dump:** `dotnet run --project tests/Thermodynamics.Sim -- dump` reads the newest
   environment CSV out of the game's saves and checks it against the claims the model makes about
   itself — that the wind decomposes into the factors reported beside it, that convection is
   reported only where there is air, that a positive depth means a buried grid. `--path` names a
@@ -352,6 +387,9 @@ of the repository.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-11 | Clarify compile-only builds do not deploy; move the model-table repair entry into this log. |
+| 2026-10-08 | Repair the model-suffix table and root-relative dump command. |
+| 2026-10-01 | Document local compile-only validation, repository boundaries, SDK requirements and the staged cleanup sequence. |
 | 2026-09-24 | **Rewritten for the MDK2 layout.** The mod project is `Thermodynamics/Thermodynamics.csproj` rather than `Generic.csproj`; building it packs and deploys the mod, so *this repository is the mod folder* and the symlink it was deployed by are gone, and so is the root `Directory.Build.props` that sent build output to a sibling directory — the packer's `ignores` do that job now. The whitelist is checked by the build (`MDK01`) and `#pragma` is refused. Two change-log rows that a merge had spliced into the model-naming table are back in this log. |
 | 2026-09-19 | Separated thermal-vision presentation from the simulation model, with an independent project and assembly isolation checks. |
 | 2026-08-27 | **The mod project had not built for three commits and nothing said so.** Pass 9's fourth iteration wrote a `--` into an XML comment in `Generic.csproj`; MSBuild refuses the file, so it left the build rather than failing it, and every other command kept passing. Fixed, and `ProjectFileTests` now asserts that every MSBuild file in the tree parses — `C11`'s solution membership catches a rename, not an unreadable project. |

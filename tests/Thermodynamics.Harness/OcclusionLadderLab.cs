@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -382,7 +383,7 @@ namespace Thermodynamics.Harness
             StringBuilder sb = new StringBuilder();
 
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.Derive();
 
 

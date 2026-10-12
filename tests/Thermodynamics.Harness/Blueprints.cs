@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -75,7 +76,7 @@ namespace Thermodynamics.Harness
             public ShipAssembly Build(ThermalSettings settings = null, float kelvin = 293.15f)
             {
 
-                ThermalSettings effective = settings ?? new ThermalSettings();
+                ThermalSettings effective = settings ?? new HistoricalThermalSettings();
 
                 ShipAssembly assembly = new ShipAssembly();
 

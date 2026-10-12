@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -74,7 +75,7 @@ namespace Thermodynamics.Harness
             List<Row> rows = new List<Row>();
 
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.MaxElementVisitsPerStep = 0;
             settings.Derive();
 
@@ -128,7 +129,7 @@ namespace Thermodynamics.Harness
         public static Row RunUneven(IList<int> gridSizes, int threads, Action<string> log = null)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.MaxElementVisitsPerStep = 0;
             settings.Derive();
 

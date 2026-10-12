@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -221,7 +222,7 @@ namespace Thermodynamics.Harness
             GridBuilder builder = GridBuilder.Large();
             builder.PlaceCensus(cells);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings());
             simulation.RebuildAll();
 
             while (simulation.HasPendingWork)

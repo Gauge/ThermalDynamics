@@ -2172,6 +2172,10 @@ described a whole grid.
 Vanilla caps a grid at 100 m/s; the servers this mod is played on commonly run 300. The two terms
 scale in opposite directions, and that is the whole finding:
 
+The friction scaling and `FrictionScale` sweep below are historical fixture results. Production
+Thermodynamics delegates heating to the registered Aerodynamics provider and has no
+`FrictionScale` setting; these figures must not be used as its current heating law.
+
 * **Friction goes as the cube of airspeed.** 100 → 300 m/s is **27×** the friction heat.
 * **Forced convection saturates.** `h = h₀ × (1 + 0.1 √v)`, so the same change moves cooling from
   2.00× still air to 2.732× — **1.37×**.
@@ -2310,6 +2314,7 @@ instrument can say and a days-long one would say better.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Mark cubic-law heating sweeps as historical fixture evidence. |
 | 2026-09-27 | Corrected the hand-cooling clock-independence claim and labelled the physical-energy/game-time window estimate. Analytic controls distinguish fixed joules, physical inventory and steady power; all 32 targeted hand-cooling and documentation cases passed under a 12 GiB/no-swap cap. |
 | 2026-08-26 | *Coolant rings* re-measured after `C43`: the coupling column is **identical**, because mass is not in a conductance, and the settled column moved 4.4 K to 10.8 K. Corrected the sentence under it, which said the fluid mass does not grow with the ring — true when the charge was per loop, false since it became per pipe — and dropped a citation to `LongerRingsCoupleHarderAndCarryTheSameFluid`, a test that no longer exists. |
 | 2026-08-26 | Noted on *What it did: the exploit was priced out by a fix aimed at something else* that every figure in it is at the flat 50 kg a pipe carried when it was measured, and that `C43` multiplied that by **10.31**: the grind is 243,490 W rather than 23,611 W, 8.15 % of the largest reactor rather than 0.79 %. **Left as measured** (`E10`) — the section is a record of registered predictions against outcomes, and the conclusion does not depend on the size, because `B44`'s vent takes the whole ring and a refill at the break-even excess is neutral at any charge. |

@@ -13,9 +13,23 @@ debugged in seconds instead of by loading a world.
 | The performance report and the scale ladder | [benchmarks.md](../docs/benchmarks.md) |
 | The balance lab this harness runs | [balance-lab.md](../docs/balance-lab.md) |
 
+`AeroLiftTests` covers lifting-region geometry, force symmetry, stall memory, ground effect, frame covariance and recovery heating.
+
+`AirflowDirectionTests` checks physical windward heating and shielding under motion, wind and rotation.
+`AeroTelemetryTests` checks drag-power sign diagnostics, capture bounds and invariant CSV formatting.
+
+`AerodynamicsExtractionTests` verifies the detached geometry contract, profile equivalence, missing heating provider and independent mod ownership.
+
 ## Layout
 
-`Thermodynamics.Core` builds only the simulation model. Thermal-vision algorithms
+The solution contains only local projects. `Thermodynamics.Fixtures` expects selected source
+files under `../Aerodynamics` relative to this repository root; they are read-only compiler inputs,
+not a project to build. The production Core project has no external source or fixture dependency.
+
+`Thermodynamics.Core` builds the production simulation and test visibility attributes only.
+Historical thermal rigs explicitly construct `HistoricalThermalSettings` from the fixture
+assembly to install their heating law. A plain `ThermalSettings` has no heating provider, just as
+in production. `CoreIsolationTests` checks that boundary. Thermal-vision algorithms
 compile separately in `Thermodynamics.Presentation`, linking
 `Thermodynamics/Presentation/**/*.cs`. The harness, visual benchmarks
 and tests reference presentation explicitly; the model does not. The SE1 renderer
@@ -44,16 +58,17 @@ assembly and checks both libraries' permitted assembly dependencies.
 
 | Project | What it is |
 | --- | --- |
-| `Thermodynamics.Core` | The simulation itself. Sources live in [`../Thermodynamics/Core`](../Thermodynamics/Core) so the game compiles them as part of the mod; this project links the same files. |
+| `Thermodynamics.Core` | Production simulation sources from [`../Thermodynamics/Core`](../Thermodynamics/Core), without fixture behavior. |
+| `Thermodynamics.Fixtures` | Explicit historical heating settings, the grid adapter and read-only aerodynamic sources for compatibility tests and labs. |
 | `Thermodynamics.Harness` | Synthetic block catalogue, grid builder, canned environments, scenario library. |
 | `Thermodynamics.Sim` | Command line front end for the scenarios. |
 | `Thermodynamics.Tests` | xUnit suite. |
-| `../Thermodynamics/Thermodynamics.csproj` | The mod project (MDK2): the mod's own compile check and whitelist check, and **not** part of the isolated environment. It is in the solution so that building the solution compiles every file the game compiles; see [rules.md](../docs/rules.md) `C11`. Building it also deploys the mod to the game's local `Mods` folder; see [development.md](../docs/development.md#deploying-to-the-game). It runs nothing and `dotnet test` skips it. |
+| `../Thermodynamics/Thermodynamics.csproj` | The mod project (MDK2): the mod's own compile check and whitelist check, and **not** part of the isolated environment. It is in the solution so that building the solution compiles every file the game compiles; see [rules.md](../docs/rules.md) `C11`. Building it deploys the mod to the game's local `Mods` folder unless `MdkBuildConfiguration=NoPackage` is set (as in the validation script); see [development.md](../docs/development.md#deploying-to-the-game). It runs nothing and `dotnet test` skips it. |
 | `../tools/modkit/Modkit.csproj` | Compiles the drop-in API client as a consumer mod would, as C# 6 through the whitelist; see [tools/modkit/README.md](../tools/modkit/README.md). |
 
 ## What makes it isolated
 
-The four projects above reference exactly one Space Engineers assembly: `VRage.Math.dll`, for
+The offline projects above use one Space Engineers assembly at runtime: `VRage.Math.dll`, for
 `Vector3I`, `Vector3`, `Matrix` and `Base6Directions`. That is pure managed maths and loads fine on
 .NET on Linux. There is no `Sandbox.*`, no `VRage.Game`, no `MyAPIGateway`, no session, no entity.
 
@@ -102,26 +117,14 @@ sufficient. See [development.md](../docs/development.md#repo-conventions) for th
 
 ## Long walks, and builds that lie
 
-**Build the test project, not the solution, before `--no-build`.** `dotnet build` from the repo root
-leaves `Thermodynamics.Tests.dll` stale — measured at **25 minutes** behind the sources in one case,
-with `-m:1 --no-incremental` and no error printed. A `dotnet test --no-build` then reports the
-*previous* edit's results, which reads as a test that mysteriously still fails after being fixed, or
-worse, one that passes after being broken. It cost three false readings in a single session. Build
-`tests/Thermodynamics.Tests` by name, and if a result looks impossible, check the DLL's timestamp
-before believing it. **And an incremental build does not notice a property passed on the command
-line**: `dotnet build -p:Optimize=false` over an up-to-date tree recompiled nothing and left the
-optimised assemblies in place, so a check proven against a *flag* has to be proven against
-`--no-incremental` as well — which is how `OptimisedBuildTests` was shown to fail before it was
-believed:
+The canonical validation workflow builds `tests/Thermodynamics.slnx` with packaging disabled,
+then runs the freshly built suite. Use [the build guide](../docs/development.md#building) for the
+commands and repository boundary. A test-project-only build can diagnose a stale assembly but
+cannot validate the game adapter. If changing build properties such as optimization, use
+`--no-incremental` so the result cannot silently come from the previous configuration.
 
-```bash
-dotnet build tests/Thermodynamics.Tests -v q --nologo
-ls -la --time-style=+%H:%M:%S .build/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Tests.dll
-```
-
-**Clean up after a build.** `dotnet build-server shutdown` does *not* reap the `nodeReuse` MSBuild
-worker nodes; they idle out after ten to fifteen minutes and hold about 128 MB each until they do.
-Kill them if the machine is wanted.
+Validation uses one worker and disables node reuse. It does not kill shared build processes.
+Long tests and corpus runs require the memory ceiling in [rules.md](../docs/rules.md#o1--every-long-run-is-capped).
 
 **An hours-long walk is taken in slices, not in one hold.** Every corpus sweep resumes exactly — a
 blueprint is written to `done-<walk>.txt` only once every ship in it has been recorded (`O3`), so a
@@ -224,8 +227,9 @@ multi-node build entirely.
 ```bash
 cd tests
 
-dotnet test                                    # the whole suite, two and a half minutes
-dotnet test --filter "speed!=slow"             # the fast lane, six seconds
+bash ../tools/validate.sh                      # thermal suite; includes build
+bash ../tools/validate.sh --fast               # thermal fast lane
+bash ../tools/validate.sh --integration        # include external flight checks
 dotnet run --project Thermodynamics.Sim -- list
 dotnet run --project Thermodynamics.Sim -- run reactor
 dotnet run --project Thermodynamics.Sim -- run all --csv out/
@@ -234,6 +238,20 @@ dotnet run --project Thermodynamics.Sim -- run all --csv out/
 The game's assemblies are found by MDK2's `Mal.Mdk2.References`, for the test projects and the mod
 project alike; the build prints `Loading Space Engineers assemblies from …` with the path it chose.
 See [development.md](../docs/development.md#building).
+
+Cross-mod flight tests carry `scope=integration`. The default validation script excludes them;
+`--integration` includes the full suite. Direct `dotnet test` without a filter still runs every
+compiled case. Thermal API ownership/extraction and windward-heating regressions remain in the
+normal lane. The speed trait is independent of scope; `--fast --integration` includes fast cases
+from both scopes. No mode builds or deploys an external mod. Results are written under this
+repository's `out/validation` directory.
+
+### Reading the dated suite measurements
+
+The lane counts and timings below are historical measurements at the stated dates, not current
+suite totals or a runtime guarantee. Use the fresh validation TRX for the current executed,
+excluded and skipped counts. The [repository review](../docs/repository-review-2026-10-08.md)
+records the latest maintenance check and its coverage limits.
 
 ### The two lanes, and the rule that sorts them
 
@@ -703,7 +721,7 @@ hold — `A13` was a change to how *vanilla* blocks are read, and it moved the p
 | **Bit-identity: an optimisation against what it replaced** | `PrecomputedEnvironmentTests` `HeatGainHoistTests` `CanonicalLinkOrderTests` `FixedSourceRowTests` `WattsClearFusionTests` `ConductionClampGateTests` `DiagnosticBatchingTests` `ExposureSkipTests` |
 | **Settings, storage and definitions** | `DialReachTests` `SettingsDialReachTests` `LoopDialReachTests` `PlanetDialReachTests` `BlockDialReachTests` `LoopBeforeTests` `LoopCoolantMassTests` `CellSizeTests` `DesignedHullTests` `SettingsTests` `SettingsDefaultsTests` `SettingsWiringTests` `ShippedIdentityTests` `ValidationReportingTests` `StorageCodecTests` `SchedulerTests` `DefinitionTests` `DefinitionFileTests` `ShippedDefinitionTests` `AuthoredMaterialTests` `AuthoredWasteTests` `BlockDerivationTests` `SolarAbsorptivityTests` `SelectiveSurfaceTests` `MaterialOverrideTests` `FeatureToggleTests` `DefaultSettingsTests` `ProfileSuiteTests` `ProfileClockTests` `WorldSettingsTests` |
 | **Readouts a player sees** | `TemperatureScaleTests` `UnitsTests` |
-| **Telemetry, reports and overlays** | `RunningStatTests` `HistogramTests` `TimingStatTests` `TelemetryFormatTests` `TelemetryAnomalyTests` `SampleGateTests` `GridHealthTests` `AnomalyRegistryTests` `FrameCostTests` `ProfilerTests` `RescanGateTests` `OverlayBudgetTests` `PerformanceReportTests` `BenchmarkBaselineTests` `OptimisedBuildTests` `CensusBoltTests` `StageLabTests` `FirstStepLabTests` `RemapLocalityLabTests` `NodeActivityLabTests` `EnvironmentWalkLabTests` `StepWalksLabTests` `HeatSourceWalkLabTests` `SampleStatisticTests` `StepPhaseLabTests` `LinkSpanProbe` `ProjectFileTests` `EnvironmentReadoutTests` |
+| **Telemetry, reports and overlays** | `RunningStatTests` `HistogramTests` `TimingStatTests` `TelemetryFormatTests` `TelemetryAnomalyTests` `SampleGateTests` `GridHealthTests` `AnomalyRegistryTests` `FrameCostTests` `FramePacingTests` `StepPhaseTests` `ProfilerTests` `RescanGateTests` `OverlayBudgetTests` `PerformanceReportTests` `BenchmarkBaselineTests` `OptimisedBuildTests` `CensusBoltTests` `StageLabTests` `FirstStepLabTests` `RemapLocalityLabTests` `NodeActivityLabTests` `EnvironmentWalkLabTests` `StepWalksLabTests` `HeatSourceWalkLabTests` `SampleStatisticTests` `StepPhaseLabTests` `LinkSpanProbe` `ProjectFileTests` `EnvironmentReadoutTests` |
 | **Field dumps: the mod checked against a world** | `DumpAuditTests` `FieldDumpTests` `CensusFidelityTests` |
 | **End to end, and the host boundary** | `SimulationIntegrationTests` `ScenarioTests` `ScenarioClaimTests` `HostAdapterTests` `CoreIsolationTests` `FleetParallelTests` `ParallelTickTests` |
 | **Balance, and the ships it is decided on** | `BalanceTests` `CoolingLadderTests` `RetrofitTests` `BlockHeatIndexTests` `HandCoolingTests` `BuildCostTests` `GlowChannelTests` `SuspendedRulesTests` `KnobBaselineTests` `LocalisationSurfaceTests` `CorpusProvenanceTests` `TimeToLossTests` `CatalogDriftTests` `ModHardwareRetestTests` `RetestSetTests` `SettleReadingTests` `SettleExtrapolationTests` `DecorativeStiffnessTests` `ElementCostFitTests` `ScreeningTests` `BlueprintTests` `SubgridBridgeTests` `PrefabWalk` `CorpusCapWalk` `CorpusGuardTests` `CorpusArchiveTests` `CorpusRecordTests` `ClientDriftTests` `ClientInputTests` `HotTailTests` `HotTailSyncTests` `AirCostTests` `ConductionPaceTests` `LoadDialTests` `WorstCaseTests` `LabRunTests` `LabInvariantTests` |
@@ -738,6 +756,9 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Explicitly distinguish dated lane measurements from current validation totals. |
+| 2026-10-01 | Separate production Core from explicit historical fixtures; preserve the read-only integration lane. |
+| 2026-10-01 | Unify build instructions, add explicit integration scope, and document the remaining fixture/source coupling honestly. |
 | 2026-09-27 | Added blueprint regression controls for native subtype upgrades, exact identity priority, competing targets, missing/unknown types and grid-size rejection. Corrected a frame fixture to declare its block type explicitly. |
 | 2026-09-27 | Added AeroPopulationDragTests for analytic terminal-speed brackets, censoring, rejected invalid curves and rotated multigrid comparison with the legacy evaluator. Added the population selection and drag CLI stages. Full offline suite: 2,603 passing cases; Python corpus tools: 224 passing checks. |
 | 2026-09-27 | Added a machine-export contract check to AeroPopulationInputTests. The directional Python tool has ten tests, including 80 nonzero independent LP controls and injected certificate faults. |

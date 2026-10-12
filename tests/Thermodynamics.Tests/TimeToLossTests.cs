@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -141,7 +142,7 @@ namespace Thermodynamics.Tests
             thermal.ExposedSurfaceMultiplier = 1f;
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableDamage = true;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;

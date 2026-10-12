@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -165,7 +166,7 @@ namespace Thermodynamics.Tests
             builder.Place(Sized("big", V(4, 4, 4), 4000f), V(0, 0, 0));
             builder.Place(Sized("small", V(1, 1, 1), 100f), V(1, 1, 4));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings());
 
             Assert.Single(simulation.Solver.Links);
             Assert.Equal(1, simulation.Solver.Links[0].ContactFaces);
@@ -190,7 +191,7 @@ namespace Thermodynamics.Tests
             builder.Place(Sized("a", sizeA, massA), V(0, 0, 0));
             builder.Place(Sized("b", sizeB, massB), V(0, 0, sizeA.Z));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings());
             Assert.Single(simulation.Solver.Links);
             return simulation.Solver.Links[0].Conductance;
         }
@@ -212,7 +213,7 @@ namespace Thermodynamics.Tests
 
         public void EnergyIsConservedAcrossAJointBetweenVeryDifferentBlockSizes()
         {
-            ThermalSettings settings = new ThermalSettings
+            HistoricalThermalSettings settings = new HistoricalThermalSettings
             {
                 EnableEnvironment = false,
                 EnableSolarHeat = false,
@@ -250,7 +251,7 @@ namespace Thermodynamics.Tests
                 }
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings());
 
             Assert.Equal(10, simulation.Solver.Nodes.Count);
             Assert.Equal(9 + 12, simulation.Solver.Links.Count);
@@ -263,7 +264,7 @@ namespace Thermodynamics.Tests
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Sized("solo", V(4, 4, 4), 4000f), V(0, 0, 0));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings());
 
             Assert.Single(simulation.Solver.Nodes);
             Assert.Empty(simulation.Solver.Links);
@@ -277,7 +278,7 @@ namespace Thermodynamics.Tests
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Sized("solo", V(2, 3, 4), 2400f), V(0, 0, 0));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings());
             ThermalNode node = simulation.Solver.Nodes[0];
 
             Assert.Equal(BoxGeometry.SurfaceAreaCells(V(2, 3, 4)), node.TotalExposedFaces);
@@ -289,13 +290,13 @@ namespace Thermodynamics.Tests
         {
             GridBuilder bare = GridBuilder.Large();
             bare.Place(Sized("slab", V(3, 3, 1), 900f), V(0, 0, 0));
-            int exposedAlone = bare.BuildSimulation(new ThermalSettings()).Solver.Nodes[0].TotalExposedFaces;
+            int exposedAlone = bare.BuildSimulation(new HistoricalThermalSettings()).Solver.Nodes[0].TotalExposedFaces;
 
             GridBuilder covered = GridBuilder.Large();
             covered.Place(Sized("slab", V(3, 3, 1), 900f), V(0, 0, 0));
             covered.Place(Sized("lid", V(3, 3, 1), 900f), V(0, 0, 1));
 
-            ThermalSimulation simulation = covered.BuildSimulation(new ThermalSettings());
+            ThermalSimulation simulation = covered.BuildSimulation(new HistoricalThermalSettings());
             ThermalNode slab = simulation.Solver.GetNodeAt(V(0, 0, 0));
 
             Assert.Equal(exposedAlone - 9, slab.TotalExposedFaces);

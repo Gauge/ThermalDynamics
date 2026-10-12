@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -121,7 +122,7 @@ namespace Thermodynamics.Harness
 
         private static ThermalSettings Settings(bool environment)
         {
-            ThermalSettings settings = new ThermalSettings
+            ThermalSettings settings = new HistoricalThermalSettings
             {
                 Frequency = 4,
                 SimulationSpeed = 1f,

@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Harness", "t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Core", "tests\Thermodynamics.Core\Thermodynamics.Core.csproj", "{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermodynamics.Fixtures", "tests\Thermodynamics.Fixtures\Thermodynamics.Fixtures.csproj", "{F3BD66F8-FAB1-48AA-AC6D-349F495E2B63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -42,5 +44,9 @@ Global
 		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Debug|x64.Build.0 = Debug|Any CPU
 		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Release|x64.ActiveCfg = Release|Any CPU
 		{F51DF2CD-0904-4F82-85C3-6F6AAD2F3E1A}.Release|x64.Build.0 = Release|Any CPU
+		{F3BD66F8-FAB1-48AA-AC6D-349F495E2B63}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F3BD66F8-FAB1-48AA-AC6D-349F495E2B63}.Debug|x64.Build.0 = Debug|Any CPU
+		{F3BD66F8-FAB1-48AA-AC6D-349F495E2B63}.Release|x64.ActiveCfg = Release|Any CPU
+		{F3BD66F8-FAB1-48AA-AC6D-349F495E2B63}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

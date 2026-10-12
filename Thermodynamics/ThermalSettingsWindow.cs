@@ -539,9 +539,6 @@ namespace Thermodynamics
                     () => (int)ThermalDebugView.Current);
             }
 
-            if (name == "AeroProfileDirections")
-                return Choice(name, enabled, label, tip, new[] { "26: coarse", "98: fine" }, null, new[] { 26, 98 });
-
             if (name == "ShadowDetail")
             {
 

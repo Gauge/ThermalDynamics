@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -144,7 +145,7 @@ namespace Thermodynamics.Harness
             Stopwatch build = Stopwatch.StartNew();
 
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings(), builder.Grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings(), builder.Grid);
             for (int i = 0; i < builder.Placed.Count; i++)
             {
                 simulation.Solver.AddBlock(builder.Placed[i], 293.15f);
@@ -406,7 +407,7 @@ namespace Thermodynamics.Harness
             foreach (Vector3I cell in cells) builder.Place(armour, cell);
 
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings(), builder.Grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings(), builder.Grid);
             for (int i = 0; i < builder.Placed.Count; i++)
             {
                 simulation.Solver.AddBlock(builder.Placed[i], 293.15f);
@@ -447,7 +448,7 @@ namespace Thermodynamics.Harness
             int maxSubsteps, float realSeconds)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.Frequency = frequency;
             settings.HeatTimeScale = heatTimeScale;
             settings.MaxSubsteps = maxSubsteps;
@@ -575,7 +576,7 @@ namespace Thermodynamics.Harness
             int maxSubsteps, float realSeconds, int length)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.Frequency = frequency;
             settings.SimulationSpeed = speed;
             settings.HeatTimeScale = heatTimeScale;
@@ -861,7 +862,7 @@ namespace Thermodynamics.Harness
                 "by cell, by slot, and the flat list"));
 
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings(), grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings(), grid);
             simulation.Surfaces.Rebuild(grid);
 
 
@@ -1158,7 +1159,7 @@ namespace Thermodynamics.Harness
             }
 
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings(), builder.Grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings(), builder.Grid);
             for (int i = 0; i < builder.Placed.Count; i++)
             {
                 simulation.Solver.AddBlock(builder.Placed[i], 293.15f);
@@ -1247,7 +1248,7 @@ namespace Thermodynamics.Harness
             builder.PlaceCensus(cells);
 
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.MaxSubstepsPerBlock = cap;
 
             if (frequency > 0) settings.Frequency = frequency;
@@ -1485,7 +1486,7 @@ namespace Thermodynamics.Harness
             string fixture, float flow)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             if (frequency > 0) settings.Frequency = frequency;
 
             settings.MaxSubsteps = ceiling;

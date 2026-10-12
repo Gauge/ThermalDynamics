@@ -12,6 +12,25 @@ The method is the repository's usual one: a criterion is written before the data
 instrument is a lab in the tree reachable by a command (`D2`), and a candidate leaves this page
 either as a design row in [backlog.md](backlog.md) or as a refusal with a figure attached.
 
+## Cleanup assessment, 2026-10-01
+
+The cleanup reran the existing instruments after separating production Core from historical
+fixtures. These are local synthetic-hull measurements, not native-session frame times. The
+flight row explicitly installs the historical heating provider. Raw output and commands are
+retained in [the cleanup benchmark receipt](../tests/benchmarks/cleanup-performance-2026-10-01.txt).
+
+| Question | Fresh observation | Decision for this cleanup |
+| --- | --- | --- |
+| Keep environment precomputation? | At 32,800 nodes, uncapped flight takes 6.305 ms cached versus 10.533 ms when filled every substep; atmosphere is 4.437 versus 7.281 ms and vacuum 1.453 versus 2.008 ms. | Retain the current cache and its bit-identity checks. No additional caching or altered heating evaluation. |
+| Introduce an exposed-node index? | At 128,820 nodes, the compact prototype is 0.734 times the branch walk (0.059 versus 0.081 ms per pass). | Keep `D23` as a separate runtime design. The prototype excludes index maintenance and the complete solver's diagnostics, slicing and topology changes. |
+| Invert temperature ownership or fuse walks? | The fusion prototype is 0.842 times the separate walks; real clean-state mirroring costs 0.135 ms, 1.8% of a 7.496 ms settled step. | Keep `D24` separate. A small mirror saving does not justify changing public temperature handles during structural cleanup; fusion still needs integration and numerical validation. |
+
+The cleanup therefore changes organization and verification, not the solver's arithmetic.
+`D21` change-local remapping and `D22` sleep remain their existing independent designs: they need
+invalidation, wake-up and moving-environment evidence before implementation. `D25` source-row
+folding also remains open because it changes summation order and diagnostic attribution.
+This assessment completes the cleanup's optimization review without declaring those designs done.
+
 ## The survey: what is already answered
 
 Most of the redesign space has been measured before, and the answers are citations rather than
@@ -317,6 +336,12 @@ to a lab.
 | Threshold crossings scanned per node per threshold | **already bounded** | `ThermalThresholds.Collect` is called per block only across the temperature interval it actually moved, and the shipped threshold set is tiny; it is O(blocks × thresholds) with thresholds ~O(1), not a hidden square |
 | The hottest-node / overheat scan as a per-substep sort | **already amortised** | overheats are accumulated into a per-node row and filed once at end of step (`nodeOverheatDamage`), and the lowest-critical bound skips the whole scan below it (pass 5) — no per-substep ordering work |
 
+The coolant row above describes steady-state advection and segment integration only. It does
+not cover loop discovery: open chains are retraced from every unclaimed pipe and can incur
+quadratic traversal and allocation during rebuilding. The
+[repository review](repository-review-2026-10-08.md#open-coolant-chains-are-retraced-quadratically)
+records a separate reproduction of that path.
+
 ### 6. Heat sources folded into the precomputed source row
 
 **The candidate.** A registered heat source resolves to one direction and one irradiance per grid
@@ -382,6 +407,8 @@ problem, and this page only prices the prize.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-08 | Separate linear coolant integration from quadratic open-chain discovery. |
+| 2026-10-01 | Record fresh precomputation, exposed-index and temperature-ownership measurements and the cleanup decision. |
 | 2026-09-05 | **The fourth sweep decides: `D25`, the largest per-item cost the evaluation has found.** Folding registered heat sources into the precomputed source row (as solar already is) removes 88 % of a per-source cost measured at **16.9 % of a step at 126,731 blocks and 12.7 % at 505,566** — one source, a sixth of a step, because `Weighted` re-reads the face weights per node per source per substep. Filed conditional (shipped worlds have no sources), and the fold to have before the source block ships. The other four feared O(n²) hazards were measured or read absent. |
 | 2026-09-05 | **The fourth sweep opened**: costs that scale on something other than node count. Four feared hazards were measured or read to be absent — point-source falloff is O(sources) not O(sources × nodes) (resolved at the grid centre), the coolant solve is O(pipes) not O(pipes²), threshold crossings and the overheat scan are already bounded — and one candidate survived to `bench heatsourcewalk` with its criterion fixed before the run: folding registered sources into the precomputed source row the way solar already is. |
 | 2026-09-05 | **The third sweep decides: one refusal, one design.** Fusing apply(n) with env(n+1) clears 0.85 at 126k (0.801) but misses at 505k (0.888) — the win is shared-cache locality and it evaporates as the rows outrun cache, the wrong shape for a scale change; refused with the curve, and with the finding that a rescheduling prototype cannot prove its own bit-identity (the JIT vectorises the fused loop differently), so fusion correctness is `SolverAb`'s job. The per-step mirror walk costs 5.9 % of a settled step at 505k and *grows* with size (1.9 % at 126k — 12.6× the cost for 3.9× the nodes), a cold-handle pointer chase off a cache cliff; filed as `D24`. |

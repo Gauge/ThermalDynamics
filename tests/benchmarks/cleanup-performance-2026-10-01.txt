@@ -1,0 +1,67 @@
+Thermodynamics cleanup performance assessment — 2026-10-01
+
+Commands (sequential, local only, no builds or deployment):
+Each dotnet command below was prefixed by:
+  systemd-run --user --scope -p MemoryMax=24G -p MemorySwapMax=0 --quiet
+
+dotnet run --project tests/Thermodynamics.Sim --no-build --no-restore -- bench rowfill --size 32000 --ticks 20 --csv out/cleanup-refactor/rowfill
+dotnet run --project tests/Thermodynamics.Sim --no-build --no-restore -- bench envwalk --size 126731
+dotnet run --project tests/Thermodynamics.Sim --no-build --no-restore -- bench stepwalks --size 126731
+
+Existing instruments, synthetic census hulls on this host; not native-session timing.
+Requested sizes are target sizes; the constructed node counts are reported below.
+No new performance claim against a pre-refactor binary is made.
+Decision: keep existing environment precomputation. Keep compact exposed indexing,
+walk fusion and temperature ownership as separate integration designs. Remapping and
+sleep remain separate because neither is safe without event/wake/invalidation coverage.
+
+
+
+== row fill, 32,000 blocks ==
+  The per-node environment terms a step fills once and every later substep reads.
+  Measured by turning the cache off, so a step of N substeps pays N fills instead of one:
+  the difference is N-1 fills, which multiplies the signal by the substep count rather than dividing it.
+
+  row fill: flight, uncapped
+  row fill: flight, cap 4
+  row fill: atmosphere, uncapped
+  row fill: atmosphere, cap 4
+  row fill: vacuum, uncapped
+  row fill: vacuum, cap 4
+  world         cap  substeps  clamp    bound      cached   every fill     one fill   ns/node   of a step
+  flight        -        28  off      0.0%     6.305ms    10.533ms    0.1566ms     4.774       2.5%
+  flight        4         4  live    16.5%     2.042ms     2.657ms    0.2052ms     6.255      10.0%
+  atmosphere    -        19  off      0.0%     4.437ms     7.281ms    0.1580ms     4.817       3.6%
+  atmosphere    4         4  live    12.8%     2.034ms     2.614ms    0.1933ms     5.893       9.5%
+  vacuum        -         8  off      0.0%     1.453ms     2.008ms    0.0793ms     2.418       5.5%
+  vacuum        4         4  live    12.6%     1.858ms     2.252ms    0.1313ms     4.003       7.1%
+
+csv -> out/cleanup-refactor/rowfill/rowfill.csv
+
+
+== environment walk shapes, ship 126,731 blocks ==
+  The shipped buried-branch walk against a bulk clear plus a compacted
+  exposed index, on the real hull's sparsity (redesign.md, second sweep).
+
+  126,731 blocks
+shape                          nodes   exposed    best ms   ns/node
+branchy (shipped shape)      128,820    62,682      0.081      0.63
+clear + compact index        128,820    62,682      0.059      0.46
+
+compact / branchy: 0.734  (buried share 51.3 %)
+
+
+
+== step walks, ship 126,731 blocks ==
+  Fusing apply(n) with env(n+1) - three sweeps a substep to two -
+  and the real per-step mirror's cost (redesign.md, third sweep).
+
+  fusion prototypes, 128,820 nodes
+  the per-step mirror, measured on the real SyncNodeState
+walk                                   nodes    best ms  ns/node/substep
+separate: env walk + apply walk      128,820      2.442             1.18
+fused: apply(n) + env(n+1)           128,820      2.057             1.00
+fused / separate: 0.842
+
+the per-step mirror (the real SyncNodeState, clean incremental path): 0.135 ms against a settled step's 7.496 ms — 1.8 %
+

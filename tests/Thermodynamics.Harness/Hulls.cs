@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -14,7 +15,7 @@ namespace Thermodynamics.Harness
         public static ThermalSettings Uncapped(int maxSubsteps = Unbounded)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            ThermalSettings settings = new HistoricalThermalSettings();
             settings.MaxSubsteps = maxSubsteps;
             settings.MaxElementVisitsPerStep = 0;
             settings.Derive();

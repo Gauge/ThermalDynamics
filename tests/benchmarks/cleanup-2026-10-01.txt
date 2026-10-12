@@ -1,0 +1,27 @@
+Thermodynamics cleanup, phases 1-2 — 2026-10-01
+
+Scope: this repository only. No runtime/physics changes in this batch.
+Existing extraction changes preserved. Aerodynamics and RTS repositories untouched.
+No mod deployment; all build commands used MdkBuildConfiguration=NoPackage.
+
+Before edits:
+- Local test-project build: 0 warnings, 0 errors.
+- Baseline: 2,658 passed, 0 failed, 0 skipped.
+- Working-state snapshot and baseline TRX: out/cleanup-baseline/ (ignored).
+
+After edits:
+- bash tools/validate.sh --build-only: 0 warnings, 0 errors.
+- bash tools/validate.sh: 2,502 cases; 2,501 passed, one broken archive anchor.
+- Fixed the archive anchor, then ran scope=integration|FullyQualifiedName~DocumentationTests:
+  180 passed, 0 failed, 0 skipped (157 integration cases and 23 repeated documentation cases).
+- Combined latest results by test ID and name: 2,659 distinct cases passed, none missing from baseline.
+- bash -n tools/validate.sh and git diff --check passed.
+- TRX files: out/validation/validation.trx and out/validation/integration-and-docs.trx (ignored).
+
+Tests ran under systemd user scopes with MemoryMax=24G and MemorySwapMax=0.
+The new case guards repository-local solution/project references.
+Default validation excludes scope=integration; --integration includes the full suite.
+
+Remaining limitation: the offline Core assembly still includes historical heating fixtures
+and reads sibling aerodynamic sources. Phase 3 separates that assembly; neither lane
+builds or writes to a sibling project. No native gameplay or multiplayer validation performed.

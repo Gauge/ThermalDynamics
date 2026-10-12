@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,39 +32,39 @@ namespace Thermodynamics.Harness
         private class Feature
         {
             public string Name;
-            public Action<ThermalSettings, bool> Set;
+            public Action<HistoricalThermalSettings, bool> Set;
         }
 
         private static readonly Feature[] Features =
         {
 
-            new Feature { Name = "conduction",   Set = delegate (ThermalSettings s, bool on) { s.EnableConduction = on; } },
+            new Feature { Name = "conduction",   Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableConduction = on; } },
 
-            new Feature { Name = "radiation",    Set = delegate (ThermalSettings s, bool on) { s.EnableRadiation = on; } },
+            new Feature { Name = "radiation",    Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableRadiation = on; } },
 
-            new Feature { Name = "convection",   Set = delegate (ThermalSettings s, bool on) { s.EnableConvection = on; } },
+            new Feature { Name = "convection",   Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableConvection = on; } },
 
-            new Feature { Name = "solar",        Set = delegate (ThermalSettings s, bool on) { s.EnableSolarHeat = on; } },
+            new Feature { Name = "solar",        Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableSolarHeat = on; } },
 
-            new Feature { Name = "self shadow",  Set = delegate (ThermalSettings s, bool on) { s.SolarSelfShadowing = on; } },
+            new Feature { Name = "self shadow",  Set = delegate (HistoricalThermalSettings s, bool on) { s.SolarSelfShadowing = on; } },
 
-            new Feature { Name = "waste heat",   Set = delegate (ThermalSettings s, bool on) { s.EnableWasteHeat = on; } },
+            new Feature { Name = "waste heat",   Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableWasteHeat = on; } },
 
-            new Feature { Name = "heat sources", Set = delegate (ThermalSettings s, bool on) { s.EnableHeatSources = on; } },
+            new Feature { Name = "heat sources", Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableHeatSources = on; } },
 
-            new Feature { Name = "friction",     Set = delegate (ThermalSettings s, bool on) { s.EnableFriction = on; } },
+            new Feature { Name = "friction",     Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableFriction = on; } },
 
-            new Feature { Name = "damage",       Set = delegate (ThermalSettings s, bool on) { s.EnableDamage = on; } },
+            new Feature { Name = "damage",       Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableDamage = on; } },
 
-            new Feature { Name = "coolant loops",Set = delegate (ThermalSettings s, bool on) { s.EnableCoolantLoops = on; } },
+            new Feature { Name = "coolant loops",Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableCoolantLoops = on; } },
 
-            new Feature { Name = "room air",     Set = delegate (ThermalSettings s, bool on) { s.EnableRoomAir = on; } },
+            new Feature { Name = "room air",     Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableRoomAir = on; } },
 
-            new Feature { Name = "heat pumps",   Set = delegate (ThermalSettings s, bool on) { s.EnableHeatPumps = on; } },
+            new Feature { Name = "heat pumps",   Set = delegate (HistoricalThermalSettings s, bool on) { s.EnableHeatPumps = on; } },
 
-            new Feature { Name = "conduction clamp", Set = delegate (ThermalSettings s, bool on) { s.ClampConductionOvershoot = on; } },
+            new Feature { Name = "conduction clamp", Set = delegate (HistoricalThermalSettings s, bool on) { s.ClampConductionOvershoot = on; } },
 
-            new Feature { Name = "environment clamp", Set = delegate (ThermalSettings s, bool on) { s.ClampEnvironmentOvershoot = on; } },
+            new Feature { Name = "environment clamp", Set = delegate (HistoricalThermalSettings s, bool on) { s.ClampEnvironmentOvershoot = on; } },
         };
 
         private static readonly int[] Caps = { 0, 16, 8, 4, 2, 1 };
@@ -167,7 +168,7 @@ namespace Thermodynamics.Harness
             if (log != null) log("noise floor");
 
 
-            ThermalSettings settings = Configure(0, true);
+            HistoricalThermalSettings settings = Configure(0, true);
 
             double least = double.MaxValue;
             double most = 0;
@@ -194,7 +195,7 @@ namespace Thermodynamics.Harness
         }
 
 
-        public static BuiltHull RepeatBuild(ThermalSettings settings, GridBuilder hull)
+        public static BuiltHull RepeatBuild(HistoricalThermalSettings settings, GridBuilder hull)
         {
 
             BuiltHull built = new BuiltHull();
@@ -247,7 +248,7 @@ namespace Thermodynamics.Harness
                 if (log != null) log("  ladder " + size.ToString("n0"));
 
 
-                ThermalSettings settings = Configure(0, true);
+                HistoricalThermalSettings settings = Configure(0, true);
 
                 GridBuilder hull = Hull(shape, size);
 
@@ -290,14 +291,14 @@ namespace Thermodynamics.Harness
                 if (log != null) log("  feature " + feature.Name);
 
 
-                ThermalSettings without = Configure(0, true);
+                HistoricalThermalSettings without = Configure(0, true);
                 feature.Set(without, false);
                 without.Derive();
 
                 Sample removed = Measure(without, shape, size, ticks);
 
 
-                ThermalSettings only = Configure(0, false);
+                HistoricalThermalSettings only = Configure(0, false);
                 feature.Set(only, true);
                 only.Derive();
 
@@ -377,7 +378,7 @@ namespace Thermodynamics.Harness
             if (one < 0) return;
 
 
-            ThermalSettings settings = Configure(1, true);
+            HistoricalThermalSettings settings = Configure(1, true);
 
             ThermalSimulation simulation = Build(settings, shape, size);
             LoadBenchmarks.SeedSpread(simulation);
@@ -485,7 +486,7 @@ namespace Thermodynamics.Harness
                     all.DiagnosticsPublished ? 1 : 0, "", false);
 
 
-                ThermalSettings single = Configure(0, true);
+                HistoricalThermalSettings single = Configure(0, true);
                 single.MaxSubsteps = 1;
                 single.Derive();
 
@@ -510,12 +511,12 @@ namespace Thermodynamics.Harness
             if (log != null) log("  clamp " + name);
 
 
-            ThermalSettings gated = Configure(0, true);
+            HistoricalThermalSettings gated = Configure(0, true);
             gated.MaxSubsteps = maxSubsteps;
             gated.Derive();
 
 
-            ThermalSettings ungated = Configure(0, true);
+            HistoricalThermalSettings ungated = Configure(0, true);
             ungated.MaxSubsteps = maxSubsteps;
             ungated.Derive();
 
@@ -669,10 +670,10 @@ namespace Thermodynamics.Harness
         }
 
 
-        private static ThermalSettings Configure(int cap, bool featuresOn)
+        private static HistoricalThermalSettings Configure(int cap, bool featuresOn)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
 
             if (!featuresOn)
             {
@@ -696,13 +697,13 @@ namespace Thermodynamics.Harness
         }
 
 
-        private static ThermalSimulation Build(ThermalSettings settings, string shape, int size)
+        private static ThermalSimulation Build(HistoricalThermalSettings settings, string shape, int size)
         {
             return Build(settings, Hull(shape, size));
         }
 
 
-        private static ThermalSimulation Build(ThermalSettings settings, GridBuilder builder)
+        private static ThermalSimulation Build(HistoricalThermalSettings settings, GridBuilder builder)
         {
             ThermalSimulation simulation = builder.BuildSimulation(settings, 293.15f);
             simulation.RebuildAll();
@@ -712,7 +713,7 @@ namespace Thermodynamics.Harness
         }
 
 
-        private static Sample Measure(ThermalSettings settings, string shape, int size, int ticks,
+        private static Sample Measure(HistoricalThermalSettings settings, string shape, int size, int ticks,
             ThermalSimulation prepared = null, EnvironmentSample? world = null, bool gateClamp = true,
             bool everySubstep = false)
         {

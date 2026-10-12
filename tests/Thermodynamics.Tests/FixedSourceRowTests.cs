@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System.Collections.Generic;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -6,10 +7,8 @@ using VRageMath;
 namespace Thermodynamics.Tests
 {
     /// <summary>
-    /// Waste heat, solar gain and friction are all fixed for the length of a step — none of them
-    /// depends on a node's temperature — so the environment pass carries their sum as one row and
-    /// reads that instead of three arrays per node per substep. The pass is bound by how many node
-    /// arrays it streams, and the three separate rows survive only for the diagnostics substep.
+    /// Waste heat and solar gain are fixed for a step and share a cached source row.
+    /// Provider heating is evaluated separately each substep because it can depend on temperature.
     ///
     /// <para>
     /// The risk that buys is a row that disagrees with its parts: the reported heat gain would
@@ -20,6 +19,29 @@ namespace Thermodynamics.Tests
     /// </summary>
     public class FixedSourceRowTests
     {
+        [Fact]
+        public void SmallProviderHeatIsNotCancelledByExposedArea()
+        {
+            const float heatingWatts = 0.00000001f;
+            ThermalSettings settings = new ThermalSettings
+            {
+                EnableEnvironment = false,
+                EnableSolarHeat = false,
+                EnableConduction = false,
+                EnableDamage = false,
+                EnableWasteHeat = false,
+                SurfaceHeating = (area, density, speed, ambient, temperature, capacity, seconds) => heatingWatts,
+            };
+            settings.Derive();
+            GridBuilder builder = GridBuilder.Large();
+            builder.Place(Catalog.HeavyArmor(), Vector3I.Zero);
+            ThermalSimulation simulation = builder.BuildSimulation(settings, 293.15f);
+            simulation.Planet = PlanetThermalProperties.Default();
+            simulation.StepExact(4, Worlds.Flight(1f, 200f));
+
+            Assert.True(simulation.FrictionWatts > 0f);
+            Assert.Equal(simulation.FrictionWatts, simulation.HeatGainWatts);
+        }
 
         private static ThermalSimulation Hull()
         {
@@ -72,7 +94,7 @@ namespace Thermodynamics.Tests
             builder.Place(Catalog.Reactor(), Vector3I.One)
                    .Producing(4f * ThermalConstants.MegawattsToWatts);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             simulation.RebuildAll();
             simulation.Solver.CollectDiagnostics = true;
 
@@ -99,7 +121,7 @@ namespace Thermodynamics.Tests
             float lit = simulation.HeatGainWatts;
 
             simulation.Settings.EnableSolarHeat = false;
-            simulation.Settings.EnableFriction = false;
+            simulation.Settings.SurfaceHeating = null;
             simulation.Settings.Derive();
 
             simulation.StepExact(4, sample);

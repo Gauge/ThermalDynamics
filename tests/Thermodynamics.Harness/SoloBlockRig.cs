@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using Thermodynamics.Core;
 using VRageMath;
@@ -43,7 +44,7 @@ namespace Thermodynamics.Harness
                 builder.Shell(armour, -Vector3I.One, block.Size + Vector3I.One);
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
             runner.Environment = t => Worlds.Shadow();

@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System.Collections.Generic;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -57,10 +58,10 @@ namespace Thermodynamics.Tests
         private const float ReferenceWatts = 125000f;
 
 
-        private static ThermalSettings Radiating()
+        private static HistoricalThermalSettings Radiating()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = true;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;

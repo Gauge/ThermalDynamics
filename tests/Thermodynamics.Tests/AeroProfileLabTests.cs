@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -10,6 +11,7 @@ namespace Thermodynamics.Tests
     /// threshold is asserted: costs must be read on a held machine, outside the suite (M4, M7).
     /// </summary>
     [Collection("alone")]
+    [Trait("scope", "integration")]
     public class AeroProfileLabTests
     {
         [Theory]

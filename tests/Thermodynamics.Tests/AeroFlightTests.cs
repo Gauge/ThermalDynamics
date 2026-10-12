@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -13,6 +14,7 @@ namespace Thermodynamics.Tests
     /// swings round; a spun hull's spin halves in finite time, sooner in thicker air; and the numerical
     /// guard binds on none of them, because a resolved case never needs it.
     /// </summary>
+    [Trait("scope", "integration")]
     public class AeroFlightTests
     {
         private static readonly AeroProfile Shuttlecock =

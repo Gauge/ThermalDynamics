@@ -9,6 +9,7 @@ using Xunit;
 namespace Thermodynamics.Tests
 {
     /// <summary>Independent full-power thrust and coordinate controls for the population instrument's inputs.</summary>
+    [Trait("scope", "integration")]
     public class AeroPopulationInputTests
     {
         [Theory]

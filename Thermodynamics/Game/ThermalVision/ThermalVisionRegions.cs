@@ -239,7 +239,7 @@ namespace Thermodynamics
 
         private static double RegionAxis(Vector3D v, int axis) { return axis == 0 ? v.X : axis == 1 ? v.Y : v.Z; }
 
-        private static void RegionFace(Region region, int axis, bool upper, Vector4 colour, Vector3D eye, bool gradient = false, BoundingFrustumD patchFrustum = null)
+        private static void RegionFace(Region region, int axis, bool upper, Vector4 colour, Vector3D eye, bool gradient = false, BoundingFrustumD patchFrustum = null, ThermalVisionSurfaceField knownField = null)
         {
             Vector3D a = region.Min, u = Vector3D.Zero, v = Vector3D.Zero;
             if (axis == 0) { a.X = upper ? region.Max.X : region.Min.X; u.Y = region.Max.Y - region.Min.Y; v.Z = region.Max.Z - region.Min.Z; }
@@ -255,8 +255,8 @@ namespace Thermodynamics
             if (!MyAPIGateway.Session.Camera.IsInFrustum(ref faceBounds)) { regionCulledFaces++; return; }
             if (gradient)
             {
-                ThermalVisionSurfaceField field;
-                if (!smoothCorners.TryGetValue(region,out field)) return;
+                ThermalVisionSurfaceField field = knownField;
+                if (field == null && !smoothCorners.TryGetValue(region,out field)) return;
                 Vector3D worldEye=Vector3D.Transform(eye,regionRenderMatrix);
                 Vector3D offset=MyAPIGateway.Session.Camera.WorldMatrix.Backward*.001;
                 Vector3 normal; bool reverse;

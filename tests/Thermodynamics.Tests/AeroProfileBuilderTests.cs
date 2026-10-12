@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -10,6 +11,7 @@ namespace Thermodynamics.Tests
     /// Budgeted geometry must reproduce the pre-budgeting implementation bit for bit (D8), publish
     /// only a complete current hull, and prepare first-tick damping without per-tick allocations (C4).
     /// </summary>
+    [Trait("scope", "integration")]
     public class AeroProfileBuilderTests
     {
         [Theory]

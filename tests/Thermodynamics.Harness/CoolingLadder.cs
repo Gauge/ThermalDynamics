@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -129,7 +130,7 @@ namespace Thermodynamics.Harness
                 height += Math.Max(1, cooler.Size.Y);
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             simulation.Solver.CollectDiagnostics = true;
             simulation.StepExact((int)(Seconds / simulation.Settings.StepSeconds), Worlds.Shadow());
 

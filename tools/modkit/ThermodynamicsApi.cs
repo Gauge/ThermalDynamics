@@ -110,8 +110,17 @@ namespace Thermodynamics.Client
         private Func<IMyCubeGrid, MyTuple<Vector3, Vector3>> getGridAeroMoments;
         private Func<IMyCubeGrid, MyTuple<bool, bool, int, int>> getGridAeroStatus;
         private Func<IMyCubeGrid, Dictionary<string, object>> getGridAeroProfile;
+        private Func<IMyCubeGrid, long> getGridGeometryVersion;
+        private Func<IMyCubeGrid, Dictionary<string, object>> getGridGeometry;
+        private Func<IMyCubeGrid, MyTuple<bool, Vector3, float, float, float, Vector3>> getGridEnvironment;
+        private Func<Vector3D, MyTuple<bool, Vector3, float, float, float, Vector3>> getEnvironmentAt;
+        private Func<IMyCubeGrid, float> getGridWindCeiling;
+        private Func<IMyCubeGrid, Vector3> getGridThermalUpstream;
+        private Func<long, Dictionary<string, Delegate>, bool> registerAerodynamics;
         private Func<IMyCubeGrid, long, bool, bool> setGridAeroProfileConsumer;
         private Func<IMySlimBlock, MyTuple<bool, float, float, float, int>> getCoolantLoop;
+        private Func<IMySlimBlock, float[], bool> setBlockLiftProfile;
+        private Func<IMySlimBlock, bool> clearBlockLiftProfile;
         private Func<IMySlimBlock, float[], bool> setBlockDragProfile;
         private Func<IMySlimBlock, bool> clearBlockDragProfile;
         private Func<IMySlimBlock, float, bool> setBlockTemperature;
@@ -161,8 +170,17 @@ namespace Thermodynamics.Client
             getGridAeroMoments = null;
             getGridAeroStatus = null;
             getGridAeroProfile = null;
+            getGridGeometryVersion = null;
+            getGridGeometry = null;
+            getGridEnvironment = null;
+            getEnvironmentAt = null;
+            getGridWindCeiling = null;
+            getGridThermalUpstream = null;
+            registerAerodynamics = null;
             setGridAeroProfileConsumer = null;
             getCoolantLoop = null;
+            setBlockLiftProfile = null;
+            clearBlockLiftProfile = null;
             setBlockDragProfile = null;
             clearBlockDragProfile = null;
             setBlockTemperature = null;
@@ -216,10 +234,19 @@ namespace Thermodynamics.Client
             getGridAeroForces = Get<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>(table, "GetGridAeroForces");
             getGridAeroMoments = Get<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>(table, "GetGridAeroMoments");
             getGridAeroProfile = Get<Func<IMyCubeGrid, Dictionary<string, object>>>(table, "GetGridAeroProfile");
+            getGridGeometryVersion = Get<Func<IMyCubeGrid, long>>(table, "GetGridGeometryVersion");
+            getGridGeometry = Get<Func<IMyCubeGrid, Dictionary<string, object>>>(table, "GetGridGeometry");
+            getGridEnvironment = Get<Func<IMyCubeGrid, MyTuple<bool, Vector3, float, float, float, Vector3>>>(table, "GetGridEnvironment");
+            getEnvironmentAt = Get<Func<Vector3D, MyTuple<bool, Vector3, float, float, float, Vector3>>>(table, "GetEnvironmentAt");
+            getGridWindCeiling = Get<Func<IMyCubeGrid, float>>(table, "GetGridWindCeiling");
+            getGridThermalUpstream = Get<Func<IMyCubeGrid, Vector3>>(table, "GetGridThermalUpstream");
+            registerAerodynamics = Get<Func<long, Dictionary<string, Delegate>, bool>>(table, "RegisterAerodynamics");
             setGridAeroProfileConsumer = Get<Func<IMyCubeGrid, long, bool, bool>>(table, "SetGridAeroProfileConsumer");
             getGridAeroStatus = Get<Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>>(table, "GetGridAeroStatus");
             getCoolantLoop = Get<Func<IMySlimBlock, MyTuple<bool, float, float, float, int>>>(table, "GetCoolantLoop");
             setBlockDragProfile = Get<Func<IMySlimBlock, float[], bool>>(table, "SetBlockDragProfile");
+            setBlockLiftProfile = Get<Func<IMySlimBlock, float[], bool>>(table, "SetBlockLiftProfile");
+            clearBlockLiftProfile = Get<Func<IMySlimBlock, bool>>(table, "ClearBlockLiftProfile");
             clearBlockDragProfile = Get<Func<IMySlimBlock, bool>>(table, "ClearBlockDragProfile");
             setBlockTemperature = Get<Func<IMySlimBlock, float, bool>>(table, "SetBlockTemperature");
             addBlockHeat = Get<Func<IMySlimBlock, float, bool>>(table, "AddBlockHeat");
@@ -345,6 +372,14 @@ namespace Thermodynamics.Client
         }
 
         /// <summary>A detached schema-1 geometry snapshot, or null until ready; see api.md for the fields.</summary>
+        public long GetGridGeometryVersion(IMyCubeGrid grid) { return getGridGeometryVersion == null ? -1 : getGridGeometryVersion(grid); }
+        public Dictionary<string, object> GetGridGeometry(IMyCubeGrid grid) { return getGridGeometry == null ? null : getGridGeometry(grid); }
+        public MyTuple<bool,Vector3,float,float,float,Vector3> GetGridEnvironment(IMyCubeGrid grid) { return getGridEnvironment == null ? new MyTuple<bool,Vector3,float,float,float,Vector3>() : getGridEnvironment(grid); }
+        public MyTuple<bool,Vector3,float,float,float,Vector3> GetEnvironmentAt(Vector3D position) { return getEnvironmentAt == null ? new MyTuple<bool,Vector3,float,float,float,Vector3>() : getEnvironmentAt(position); }
+        public float GetGridWindCeiling(IMyCubeGrid grid) { return getGridWindCeiling == null ? 0f : getGridWindCeiling(grid); }
+        public Vector3 GetGridThermalUpstream(IMyCubeGrid grid) { return getGridThermalUpstream == null ? Vector3.Zero : getGridThermalUpstream(grid); }
+        public bool RegisterAerodynamics(long owner, Dictionary<string,Delegate> methods) { return registerAerodynamics != null && registerAerodynamics(owner,methods); }
+
         public Dictionary<string, object> GetGridAeroProfile(IMyCubeGrid grid)
         {
             return getGridAeroProfile == null || grid == null ? null : getGridAeroProfile(grid);
@@ -384,6 +419,16 @@ namespace Thermodynamics.Client
             return result;
         }
 
+
+        public bool SetBlockLiftProfile(IMySlimBlock block, Vector3 normal, Vector3 spanDirection, float area, float span)
+        {
+            return setBlockLiftProfile != null && setBlockLiftProfile(block, new[] { normal.X, normal.Y, normal.Z, spanDirection.X, spanDirection.Y, spanDirection.Z, area, span });
+        }
+
+        public bool ClearBlockLiftProfile(IMySlimBlock block)
+        {
+            return clearBlockLiftProfile != null && clearBlockLiftProfile(block);
+        }
 
         public bool SetBlockDragProfile(IMySlimBlock block, float[] faceMultipliers)
         {

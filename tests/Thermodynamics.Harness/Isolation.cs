@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using Thermodynamics.Core;
 
 namespace Thermodynamics.Harness
@@ -5,10 +6,10 @@ namespace Thermodynamics.Harness
     public static class Isolation
     {
 
-        public static ThermalSettings DeadWorld()
+        public static HistoricalThermalSettings DeadWorld()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;

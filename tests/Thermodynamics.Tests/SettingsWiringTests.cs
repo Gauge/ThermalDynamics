@@ -3,24 +3,80 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Xunit;
+using System.Linq;
+using System.Reflection;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Thermodynamics.Tests
 {
     /// <summary>
-    /// The plumbing every setting has to pass through, checked as text.
-    ///
-    /// <para><c>Settings.cs</c> reads <c>Sandbox.*</c> and cannot be linked into this project, so
-    /// none of this can be done by calling it. That is fine: every fault this guards against is
-    /// visible in the source, and each of them is silent at runtime.</para>
-    ///
-    /// <para><b>Why these exist.</b> A setting is wired by hand in five places — a field with a
-    /// <c>ProtoMember</c> number, an entry in <c>Names()</c>, a case in <c>GetValue</c>, a case in
-    /// <c>SetValue</c>, and a row in the reference documentation. Miss one and nothing fails; the
-    /// setting simply does not work, or works in one direction, or quietly overwrites another
-    /// setting on the wire. All four of those have happened in this codebase.</para>
+    /// Settings schema, catalogue coverage and real accessor behavior without loading the game.
+    /// The runtime check compiles SettingsAccess against the serialized field declarations and
+    /// records the game-facing setter notifications through small stubs. Source checks cover
+    /// wire identifiers, clamps, documentation and propagation into the solver.
     /// </summary>
     public class SettingsWiringTests
     {
+
+        [Fact]
+        public void CatalogueAccessorsPreserveValuesAndSideEffects()
+        {
+            string folder = Path.Combine(RepoRoot(), "Thermodynamics");
+            string schema = File.ReadAllText(Path.Combine(folder, "Settings.cs"));
+            var fields = Regex.Matches(schema, @"\[ProtoMember\(\d+\)\]\s*public\s+(bool|int|float)\s+(\w+)")
+                .Cast<Match>().ToDictionary(m => m.Groups[2].Value, m => m.Groups[1].Value);
+            string declarations = string.Join("\n", fields.Select(f => "public " + f.Value + " " + f.Key + ";"));
+            string support = "namespace Thermodynamics { public partial class Settings { " + declarations + @" }
+                public static class ThermalDebugView { public enum Mode { Zero } public static int Last; public static void Set(Mode mode) { Last = (int)mode; } }
+                public static class WindOverlay { public enum Mode { Zero } public static int Last; public static void Set(Mode mode) { Last = (int)mode; } }
+                public static class Telemetry { public static bool Enabled; public static void SetEnabled(bool value) { Enabled = value; } }
+            }";
+            var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")).Split(Path.PathSeparator)
+                .Select(path => MetadataReference.CreateFromFile(path));
+            var compilation = CSharpCompilation.Create("SettingsCatalogueContract", new[]
+            {
+                CSharpSyntaxTree.ParseText(File.ReadAllText(Path.Combine(folder, "SettingsAccess.cs"))),
+                CSharpSyntaxTree.ParseText(support),
+            }, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            using (var stream = new MemoryStream())
+            {
+                var result = compilation.Emit(stream);
+                Assert.True(result.Success, string.Join("\n", result.Diagnostics));
+                var assembly = Assembly.Load(stream.ToArray());
+                var type = assembly.GetType("Thermodynamics.Settings");
+                object settings = Activator.CreateInstance(type);
+                var read = type.GetMethod("GetValue");
+                var write = type.GetMethod("SetValue");
+                var flag = type.GetMethod("IsFlag");
+                var names = (List<string>)type.GetMethod("Names").Invoke(null, null);
+                Assert.Equal(names.Count, names.Distinct().Count());
+                Assert.True(names.Count > 60);
+                foreach (string name in names)
+                {
+                    var field = type.GetField(name);
+                    Assert.NotNull(field);
+                    Assert.Equal(field.FieldType == typeof(bool), (bool)flag.Invoke(null, new object[] { name }));
+                    foreach (float value in new[] { 0f, -2.75f, 7.25f })
+                    {
+                        Assert.True((bool)write.Invoke(settings, new object[] { name, value }));
+                        object expected = field.FieldType == typeof(bool) ? (object)(value != 0f)
+                            : field.FieldType == typeof(int) ? (object)(int)value : value;
+                        Assert.Equal(expected, field.GetValue(settings));
+                        Assert.Equal(Convert.ToSingle(expected), (float)read.Invoke(settings, new object[] { name }));
+                    }
+                }
+                Assert.Equal(7, assembly.GetType("Thermodynamics.ThermalDebugView").GetField("Last").GetValue(null));
+                Assert.Equal(7, assembly.GetType("Thermodynamics.WindOverlay").GetField("Last").GetValue(null));
+                Assert.Equal(true, assembly.GetType("Thermodynamics.Telemetry").GetField("Enabled").GetValue(null));
+                foreach (string missing in new[] { null, "", "enableEnvironment", "Unknown" })
+                {
+                    Assert.True(float.IsNaN((float)read.Invoke(settings, new object[] { missing })));
+                    Assert.False((bool)write.Invoke(settings, new object[] { missing, 1f }));
+                }
+            }
+        }
 
         private static string RepoRoot()
         {
@@ -30,8 +86,8 @@ namespace Thermodynamics.Tests
 
         private static string Source()
         {
-            return File.ReadAllText(Path.Combine(
-                RepoRoot(), "Thermodynamics", "Settings.cs"));
+            return string.Join("\n", new[] { "Settings.cs", "SettingsAccess.cs", "SettingsStorage.cs" }
+                .Select(name => File.ReadAllText(Path.Combine(RepoRoot(), "Thermodynamics", name))));
         }
 
 
@@ -80,6 +136,8 @@ namespace Thermodynamics.Tests
 
             int[] retired =
             {
+                // Extracted aerodynamic settings belong to a different mod and wire contract.
+                18, 42, 43, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173,
                 53, 54, 55, 56, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 76,
                 // the aerodynamic force and the top-speed port, stripped by K25 on 2026-09-24
                 135, 136, 138, 139, 140,
@@ -104,42 +162,31 @@ namespace Thermodynamics.Tests
 
         private static List<string> Names(string source)
         {
-            Match block = Regex.Match(source,
-                @"public static List<string> Names\(\)\s*\{\s*return new List<string>\s*\{(.*?)\};",
-                RegexOptions.Singleline);
-
-            Assert.True(block.Success, "Names() no longer has the shape this test reads");
-
-
-            List<string> names = new List<string>();
-            foreach (Match match in Regex.Matches(block.Groups[1].Value, "\"([A-Za-z0-9_]+)\""))
-            {
+            var names = new List<string>();
+            foreach (Match match in Regex.Matches(source, @"new SettingBinding\(""(\w+)"""))
                 names.Add(match.Groups[1].Value);
-            }
+            Assert.True(names.Count > 60, "The settings catalogue is missing or unreadable.");
+
             return names;
         }
 
 
         private static HashSet<string> Cases(string source, string signature, string endSignature)
         {
-            int start = source.IndexOf(signature, StringComparison.Ordinal);
-            Assert.True(start >= 0, "could not find " + signature);
-
-            int end = endSignature == null
-                ? source.Length
-                : source.IndexOf(endSignature, start, StringComparison.Ordinal);
-
-            if (end < 0) end = source.Length;
-
-
-            HashSet<string> cases = new HashSet<string>();
-            foreach (Match match in Regex.Matches(source.Substring(start, end - start),
-                "case \"([A-Za-z0-9_]+)\""))
+            var cases = new HashSet<string>();
+            var root = CSharpSyntaxTree.ParseText(source).GetRoot();
+            foreach (var entry in root.DescendantNodes().OfType<ObjectCreationExpressionSyntax>()
+                .Where(node => node.Type.ToString() == "SettingBinding"))
             {
-                cases.Add(match.Groups[1].Value);
+                var arguments = entry.ArgumentList.Arguments;
+                Assert.Equal(3, arguments.Count);
+                int accessor = signature.Contains("GetValue") ? 1 : 2;
+                Assert.IsAssignableFrom<LambdaExpressionSyntax>(arguments[accessor].Expression);
+                cases.Add(((LiteralExpressionSyntax)arguments[0].Expression).Token.ValueText);
             }
             return cases;
         }
+
 
         [Fact]
 
@@ -416,6 +463,9 @@ namespace Thermodynamics.Tests
                 .GetFields(System.Reflection.BindingFlags.Public
                     | System.Reflection.BindingFlags.Instance))
             {
+                // The offline assembly adds historical aerodynamic fixture knobs; they are not shipped thermal settings.
+                string production = File.ReadAllText(Path.Combine(RepoRoot(), "Thermodynamics/Core/Settings/ThermalSettings.cs"));
+                if (!Regex.IsMatch(production, @"public\s+(?:bool|float|int)\s+" + field.Name + @"\s*[=;{]")) continue;
                 Type type = field.FieldType;
                 if (type != typeof(bool) && type != typeof(int) && type != typeof(float)) continue;
                 if (exempt.Contains(field.Name)) continue;
@@ -451,6 +501,8 @@ namespace Thermodynamics.Tests
             }
 
 
+            foreach (System.Reflection.PropertyInfo property in typeof(Thermodynamics.Core.ThermalSettings).GetProperties())
+                if (property.CanWrite) core.Add(property.Name); // Includes the externally registered heating callback.
             List<string> stray = new List<string>();
             foreach (Match match in Regex.Matches(Source(), @"\bcore\.([A-Za-z0-9_]+)\s*="))
             {

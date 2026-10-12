@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -35,7 +36,7 @@ namespace Thermodynamics.Harness
             if (settings != null) return settings;
 
 
-            ThermalSettings created = new ThermalSettings();
+            ThermalSettings created = new HistoricalThermalSettings();
             created.MaxSubsteps = 4096;
             created.MaxElementVisitsPerStep = 0;
             return created.Derive();
@@ -170,7 +171,7 @@ namespace Thermodynamics.Harness
             ThermalSettings held = settings ?? Defaults(null);
             held.EnableEnvironment = false;
             held.EnableSolarHeat = false;
-            held.EnableFriction = false;
+            held.SurfaceHeating = null;
             held.EnableWasteHeat = false;
             held.Derive();
 

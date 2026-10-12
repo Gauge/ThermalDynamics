@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -41,14 +42,14 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static ThermalSettings Pace()
+        private static HistoricalThermalSettings Pace()
         {
-            ThermalSettings settings = new ThermalSettings { Frequency = 4 };
+            HistoricalThermalSettings settings = new HistoricalThermalSettings { Frequency = 4 };
             return settings.Derive();
         }
 
 
-        private static ThermalSimulation Build(string name, ThermalSettings settings = null)
+        private static ThermalSimulation Build(string name, HistoricalThermalSettings settings = null)
         {
             GridBuilder builder = GridBuilder.Large();
             builder.PlaceAll(Catalog.LightArmor(), CellsFor(name));
@@ -104,7 +105,7 @@ namespace Thermodynamics.Tests
 
         public void EnergyIsConservedOnEveryShapeWhenIsolated(string name)
         {
-            ThermalSettings settings = new ThermalSettings
+            HistoricalThermalSettings settings = new HistoricalThermalSettings
             {
                 Frequency = 4,
                 EnableEnvironment = false,
@@ -156,7 +157,7 @@ namespace Thermodynamics.Tests
 
         public void EveryShapeReachesAUniformTemperatureWhenIsolated(string name)
         {
-            ThermalSettings settings = new ThermalSettings
+            HistoricalThermalSettings settings = new HistoricalThermalSettings
             {
                 Frequency = 4,
                 EnableEnvironment = false,
@@ -190,7 +191,7 @@ namespace Thermodynamics.Tests
 
         public void HeatCrossesAThinNeckSymmetricallyInBothDirections()
         {
-            ThermalSettings settings = new ThermalSettings
+            HistoricalThermalSettings settings = new HistoricalThermalSettings
             {
                 Frequency = 4,
                 EnableEnvironment = false,
@@ -209,7 +210,7 @@ namespace Thermodynamics.Tests
         }
 
 
-        private static float TransferAcrossDumbbell(ThermalSettings settings, bool hotEndFirst)
+        private static float TransferAcrossDumbbell(HistoricalThermalSettings settings, bool hotEndFirst)
         {
             GridBuilder builder = GridBuilder.Large();
             HashSet<Vector3I> cells = GridShapes.Dumbbell(5, 8);

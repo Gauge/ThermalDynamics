@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using Thermodynamics.Core;
 using VRageMath;
 using Xunit;
@@ -9,6 +10,7 @@ namespace Thermodynamics.Tests
     /// theorem, including rotation, translation and decomposition into equal-density cells (E7).
     /// These check the diagonal inertia used by the offline flight rig, not the engine's mass tensor.
     /// </summary>
+    [Trait("scope", "integration")]
     public class AeroProfileMassTests
     {
         [Theory]

@@ -10,15 +10,18 @@ into atmosphere and into the air of sealed rooms, arrives from the sun, and — 
 * **Namespace:** `Thermodynamics`
 * **Target:** Space Engineers 1 (`net48`, C# 6)
 
+The aerodynamic flight model now ships as a separate [Aerodynamics mod](../Aerodynamics/README.md),
+using the Thermal API for geometry and environment data. Install both updated packages to use flight forces and aerodynamic heating.
+
 ## Design goals
 
-* **Light.** A grid's cost is one pass over its links per substep, and nothing else. Every readout,
-  diagnostic and overlay is off unless something is reading it.
+* **Light.** Schedule and budget grid work, and keep expensive diagnostics and debug overlays
+  opt-in. Benchmarks track simulation, topology and presentation costs separately.
 * **Isolated.** Every mechanism has its own switch, and switching one off removes exactly its own
   cost. Switches take effect on the next step, with no reload.
 * **Tested.** The simulation is a pure library with no dependency on the game session, built and
-  tested outside it — 2,603 tests, 33 deterministic scenarios and a load benchmark that goes to a
-  million blocks in one grid.
+  tested outside it, with deterministic scenarios and a load benchmark that goes to a million
+  blocks in one grid. See [validation](tests/README.md) for the current suite and its boundaries.
 * **Open.** Everything the simulation knows is readable and everything it does is drivable from
   another mod, through a delegate table passed by mod message. See [docs/api.md](docs/api.md).
 
@@ -35,8 +38,8 @@ into atmosphere and into the air of sealed rooms, arrives from the sun, and — 
 | Weather | Rain, snow, storms and fog cool or warm the air, dim the sun, drive the wind and strip heat off a hull faster — read from the game's own authored figures per weather type. |
 | Underground | Depth blunts the day out over tens of metres, then the rock warms toward the planet's core below the sea-level deadzone. |
 | Point sources | Other mods register heat sources bound to an entity or a position; they radiate like small suns. A **Debug Heat Source** block drives the same path from the terminal, so the mechanism can be seen without writing a second mod. |
-| Aerodynamic friction | Fast atmospheric flight heats leading surfaces with the cube of relative airspeed. |
-| Aerodynamic forces | **Drag and moments rebuilt; native validation is still open.** The default-on force channel uses cached geometry and current motion each physics tick. Lift and stall remain unfinished; `EnableAeroForces` disables the channel. A ship's top speed is the game's cap, or [RelativeTopSpeed](https://github.com/Gauge/RelativeTopSpeed)'s if you run that mod. |
+| Aerodynamic heating | The separate Aerodynamics mod computes surface heating through the API; Thermodynamics integrates it. Without a provider, aerodynamic heating is zero. |
+| Aerodynamic forces | Owned by the separate [Aerodynamics mod](../Aerodynamics/README.md): drag, lift, stall, induced drag, moments and ground effect. Thermodynamics applies no aerodynamic forces. |
 | Waste heat | Power producers and consumers convert a configurable share of throughput into heat; thrusters heat with throttle, which is what makes hydrogen thrusters run hot. |
 | Coolant loops | Closed rings of coolant pipe with a pump form a shared fluid mass that pulls heat out of adjacent blocks; radiators shed it to space. |
 | Heat pumps | The one block that moves heat *up* a gradient, for an electrical cost set by Carnot: cheap across a small difference, ruinous across a large one. |
@@ -55,9 +58,10 @@ into atmosphere and into the air of sealed rooms, arrives from the sun, and — 
 ## Quick start
 
 1. Subscribe to Definition Extensions and Rich HUD Master, and enable all three mods.
-2. Load a world and build. Heat simulates immediately; nothing is repainted and nothing is drawn
-   until you ask for it. Fast flight through air heats a hull; the game's own flight model and
-   speed cap are untouched.
+2. Load a world and build. Heat simulates immediately; the environment readout is enabled by
+   default and debug overlays are opt-in. With the separate Aerodynamics mod installed, airflow supplies drag, lift,
+   moments and surface heating. The engine speed cap
+   remains unchanged unless another mod owns it.
 3. Sit in a cockpit for ambient, peak temperature, peak rate of change, critical block count and
    coolant loop count.
 4. Open any block's terminal for its own temperature, rate of change, exposed area, waste heat and
@@ -70,10 +74,9 @@ into atmosphere and into the air of sealed rooms, arrives from the sun, and — 
 7. Press **Ctrl+Shift+=** to cycle the block overlay through its views, and again to switch it off.
 8. Press **Ctrl+Shift+S** for the settings menu: every value in the config file, with a slider or a
    switch and a description of what it does.
-9. `/thermal settings` lists every switch; `/thermal set <name> <value>` changes one live. There is
-   **one configuration** and it is the most faithful one the model has: every mechanism on, nothing
-   approximated, and a clock run fast enough that heat is something you can watch. The settings menu
-   has a **Defaults** button if you want it all back. See
+9. `/thermal settings` lists the settings; `/thermal set <name> <value>` requests a live change.
+   Accepted host changes are saved automatically. The settings menu has a **Defaults** button
+   to restore shipped values. Fidelity and performance tradeoffs are documented in
    [docs/configuration.md](docs/configuration.md).
 
 ## Documentation
@@ -89,6 +92,7 @@ repository is built and laid out.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-01 | Align defaults, persistence and ownership descriptions with the current code; link validation rather than duplicating its count. |
 | 2026-09-27 | Refreshed the offline suite count to 2,603 cases after adding aerodynamic population controls. |
 | 2026-09-27 | Connected rebuilt aerodynamic drag and moments to the game adapter, with an off switch, resolution settings and API readouts. Native handling and population validation remain open. |
 | 2026-09-24 | The aerodynamic forces and the top-speed curve are gone while the flight model is rebuilt; a ship flies as the game flies it, and RelativeTopSpeed is the mod for per-mass top speeds. |

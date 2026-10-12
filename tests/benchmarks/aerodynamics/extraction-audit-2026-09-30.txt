@@ -1,0 +1,35 @@
+SUPERSEDED: The external source edits were reversed at the owner's direction.
+The results and hashes below describe the historical pre-reversal checkout only.
+Only this repository may be edited; see docs/aerodynamics.md for current findings.
+
+Aerodynamics extraction audit — 2026-09-30
+Base Thermodynamics commit: 136c6c32c23705417165b1f2003d4dadbd690dbf
+Scope: current uncommitted Thermodynamics and sibling Aerodynamics sources. Compile only; no deployment or publication.
+
+Both solution builds: 0 warnings, 0 errors.
+Commands: dotnet build tests/Thermodynamics.slnx --no-restore -m:1 -p:MdkBuildConfiguration=NoPackage -v quiet
+          (Aerodynamics) dotnet build Aerodynamics.slnx --no-restore -m:1 -p:MdkBuildConfiguration=NoPackage -v quiet
+
+Before repairs: Thermodynamics 2649 passed, 9 failed, 2658 total.
+Failures: seven AeroRuntime/AeroProfileAPI cases retaining old replacement assumptions or source formatting, one additional profile/API source check, and CSV final-column assumption (see original TRX for exact names).
+After repairs: Thermodynamics 2660 passed, 0 failed, 0 skipped; Aerodynamics 64 passed, 0 failed, 0 skipped.
+Focused integration/settings/docs checks: 62 passed.
+Test commands: dotnet test tests/Thermodynamics.Tests --no-build --no-restore -m:1 -v quiet
+               (Aerodynamics) dotnet test tests/Aerodynamics.Tests --no-build --no-restore -v quiet
+Vendored RTS client copied byte-for-byte from the baseline.
+
+Remaining: combined-mod settings require host transfer; old physical-group heating-centre marker is absent from the replacement overlay; native load-order, flight and multiplayer acceptance are not established.
+See docs/aerodynamics.md, Extraction audit, for repairs and remaining migration differences.
+
+Source SHA-256 (audited integration boundaries):
+5a403e24430ea6f7ac6f2fd73a1eb2819652a864f25c53d90e16e653e6544f97  Thermodynamics/Thermodynamics/ThermalApi.cs
+9848725a75384ce833ec66e882c22d1dfe64056b5004c2a5b0c42bd832fd37d8  Thermodynamics/Thermodynamics/ThermalApiAerodynamics.cs
+29af3e6fa40f5d17a8bd58c08da9d78ababf2b8cafc4011f518195ffd6458a54  Thermodynamics/Thermodynamics/Settings.cs
+9a21d7c20b6f5b644912266a3e7f6be124a3e16e18508bc7031df6b81434ffcf  Thermodynamics/tests/Thermodynamics.Tests/AerodynamicsExtractionTests.cs
+b2ecacbdf1ab40bfaee708eddc0c047a6b9defadd2a35f8626c6f433bebed74c  Thermodynamics/tests/Thermodynamics.Tests/AeroRuntimeTests.cs
+fa1980de210d014a6687ac8f1e3bc60f8848262fabf7bd9bc1e253e5e95f9ebc  Thermodynamics/tests/Thermodynamics.Tests/AeroProfileApiTests.cs
+a16bcdb21324ffa28540f0c98d80f11ca55ab241d71eb45c47abbf8eb6672580  Aerodynamics/Source/Settings.cs
+b4caa34725dd0e6e36c0ede58e9e675d1a7f8c3bfdb65a55daf25ea041bebe1c  Aerodynamics/Source/Session.cs
+ca6bb03002f7aaf3a8c6e695a984c93d21ac19d334834a274b0a62dce794862e  Aerodynamics/Source/AeroReadout.cs
+8b9dac026674a3343c077299455c3e9748525cad7e637acc398902a1321da1b5  Aerodynamics/Source/RelativeTopSpeedLink.cs
+9a39668a5f90c0f65836d59d291fa314823876c6144411ef859193077130e746  Aerodynamics/Source/RelativeTopSpeed/RtsApi.cs

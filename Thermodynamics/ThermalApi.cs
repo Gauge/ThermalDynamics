@@ -10,7 +10,7 @@ using VRageMath;
 
 namespace Thermodynamics
 {
-    public static class ThermalApi
+    public static partial class ThermalApi
     {
         public const long ChannelId = 2985582372;
 
@@ -44,12 +44,14 @@ namespace Thermodynamics
             MyAPIGateway.Utilities.UnregisterMessageHandler(ChannelId, OnRequest);
             ThresholdHandlers.Clear();
             GlobalThresholds.Clear();
+            ClearAerodynamics();
+            MyAPIGateway.Utilities.SendModMessage(ChannelId, false);
             methods = null;
         }
 
         private static void OnRequest(object payload)
         {
-            if (payload is Dictionary<string, Delegate>) return;
+            if (payload is Dictionary<string, Delegate> || payload is bool) return;
             Publish();
         }
 
@@ -103,6 +105,13 @@ namespace Thermodynamics
 
             methods["GetBlockTemperature"] = Guard(new Func<IMySlimBlock, float>(GetBlockTemperature), "GetBlockTemperature");
             methods["GetBlockThermals"] = Guard(new Func<IMySlimBlock, MyTuple<float, float, float, int>>(GetBlockThermals), "GetBlockThermals");
+            methods["GetGridGeometryVersion"] = Guard(new Func<IMyCubeGrid, long>(g => { var t = GridOf(g); return t == null ? -1 : t.GeometryVersion; }), "GetGridGeometryVersion");
+            methods["GetGridGeometry"] = Guard(new Func<IMyCubeGrid, Dictionary<string, object>>(g => { var t = GridOf(g); return t == null ? null : t.CopyGeometry(); }), "GetGridGeometry");
+            methods["GetGridThermalUpstream"] = Guard(new Func<IMyCubeGrid, Vector3>(g => { var t = GridOf(g); return t == null ? Vector3.Zero : -t.LastState.WindDirectionLocal; }), "GetGridThermalUpstream");
+            methods["GetGridWindCeiling"] = Guard(new Func<IMyCubeGrid,float>(g => { if (g == null) return 0f; var p = PlanetManager.GetClosestPlanet(g.GetPosition()); return p == null || p.Entity == null ? 0f : p.Entity.GetWindSpeed(g.GetPosition()); }), "GetGridWindCeiling");
+            methods["GetGridEnvironment"] = Guard(new Func<IMyCubeGrid, MyTuple<bool, Vector3, float, float, float, Vector3>>(GetGridEnvironment), "GetGridEnvironment");
+            methods["GetEnvironmentAt"] = Guard(new Func<Vector3D, MyTuple<bool, Vector3, float, float, float, Vector3>>(GetEnvironmentAt), "GetEnvironmentAt");
+            methods["RegisterAerodynamics"] = Guard(new Func<long, Dictionary<string, Delegate>, bool>(RegisterAerodynamics), "RegisterAerodynamics");
             methods["GetGridSummary"] = Guard(new Func<IMyCubeGrid, MyTuple<float, float, int, int>>(GetGridSummary), "GetGridSummary");
             methods["GetRoom"] = Guard(new Func<IMyCubeGrid, Vector3I, MyTuple<bool, float, float, float>>(GetRoom), "GetRoom");
             methods["GetGridHeatBalance"] = Guard(new Func<IMyCubeGrid, MyTuple<float, float>>(GetGridHeatBalance), "GetGridHeatBalance");
@@ -114,6 +123,8 @@ namespace Thermodynamics
             methods["GetGridAeroStatus"] = Guard(new Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>(GetGridAeroStatus), "GetGridAeroStatus");
             methods["GetCoolantLoop"] = Guard(new Func<IMySlimBlock, MyTuple<bool, float, float, float, int>>(GetCoolantLoop), "GetCoolantLoop");
             methods["SetBlockDragProfile"] = Guard(new Func<IMySlimBlock, float[], bool>(SetBlockDragProfile), "SetBlockDragProfile");
+            methods["SetBlockLiftProfile"] = Guard(new Func<IMySlimBlock, float[], bool>(SetBlockLiftProfile), "SetBlockLiftProfile");
+            methods["ClearBlockLiftProfile"] = Guard(new Func<IMySlimBlock, bool>(ClearBlockLiftProfile), "ClearBlockLiftProfile");
             methods["ClearBlockDragProfile"] = Guard(new Func<IMySlimBlock, bool>(ClearBlockDragProfile), "ClearBlockDragProfile");
 
             methods["SetBlockTemperature"] = Guard(new Func<IMySlimBlock, float, bool>(SetBlockTemperature), "SetBlockTemperature");
@@ -217,8 +228,20 @@ namespace Thermodynamics
             if (bound == null || bound.Node == null) return false;
 
             bound.Node.Drag = DragProfile.Of(faces[0], faces[1], faces[2], faces[3], faces[4], faces[5]);
-            bound.Grid.InvalidateAerodynamics();
+            bound.Grid.InvalidateGeometry();
             return true;
+        }
+
+        private static bool SetBlockLiftProfile(IMySlimBlock block, float[] geometry)
+        {
+            var call = AeroMethod<Func<IMySlimBlock, float[], bool>>("SetBlockLiftProfile");
+            return call == null ? false : call(block, geometry);
+        }
+
+        private static bool ClearBlockLiftProfile(IMySlimBlock block)
+        {
+            var call = AeroMethod<Func<IMySlimBlock, bool>>("ClearBlockLiftProfile");
+            return call == null ? false : call(block);
         }
 
         private static bool ClearBlockDragProfile(IMySlimBlock block)
@@ -227,47 +250,44 @@ namespace Thermodynamics
             if (bound == null || bound.Node == null) return false;
 
             bound.Node.Drag = default(DragProfile);
-            bound.Grid.InvalidateAerodynamics();
+            bound.Grid.InvalidateGeometry();
             return true;
         }
 
         /// <summary>
         /// The aerodynamic drag and lift applied in the last physics tick, in world newtons.
-        /// Lift remains zero until its separate model is implemented; see aerodynamics.md.
+        /// Lift includes the transverse component of the submitted aerodynamic force.
         /// </summary>
         private static MyTuple<Vector3, Vector3> GetGridAeroForces(IMyCubeGrid grid)
         {
-            ThermalGrid thermals = GridOf(grid);
-            return new MyTuple<Vector3, Vector3>(thermals == null ? Vector3.Zero : thermals.AeroForceWorld, Vector3.Zero);
+            var call = AeroMethod<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>("GetGridAeroForces");
+            return call == null ? new MyTuple<Vector3, Vector3>() : call(grid);
         }
 
         /// <summary>Latest world-space restoring and damping moments, N·m.</summary>
         private static MyTuple<Vector3, Vector3> GetGridAeroMoments(IMyCubeGrid grid)
         {
-            ThermalGrid thermals = GridOf(grid);
-            return thermals == null ? new MyTuple<Vector3, Vector3>(Vector3.Zero, Vector3.Zero)
-                : new MyTuple<Vector3, Vector3>(thermals.AeroRestoringWorld, thermals.AeroDampingWorld);
+            var call = AeroMethod<Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>>("GetGridAeroMoments");
+            return call == null ? new MyTuple<Vector3, Vector3>() : call(grid);
         }
 
         /// <summary>Latest profile readiness, guard binding, construction work and centre-update faces.</summary>
         private static MyTuple<bool, bool, int, int> GetGridAeroStatus(IMyCubeGrid grid)
         {
-            ThermalGrid thermals = GridOf(grid);
-            return thermals == null ? new MyTuple<bool, bool, int, int>(false, false, 0, 0)
-                : new MyTuple<bool, bool, int, int>(thermals.AeroReady, thermals.AeroGuarded,
-                    thermals.AeroBuildWork, thermals.AeroCentreWork);
+            var call = AeroMethod<Func<IMyCubeGrid, MyTuple<bool, bool, int, int>>>("GetGridAeroStatus");
+            return call == null ? new MyTuple<bool, bool, int, int>() : call(grid);
         }
 
         private static Dictionary<string, object> GetGridAeroProfile(IMyCubeGrid grid)
         {
-            ThermalGrid thermals = GridOf(grid);
-            return thermals == null ? null : thermals.CopyAeroProfile();
+            var call = AeroMethod<Func<IMyCubeGrid, Dictionary<string, object>>>("GetGridAeroProfile");
+            return call == null ? null : call(grid);
         }
 
         private static bool SetGridAeroProfileConsumer(IMyCubeGrid grid, long consumer, bool enabled)
         {
-            ThermalGrid thermals = GridOf(grid);
-            return thermals != null && thermals.SetAeroProfileConsumer(consumer, enabled);
+            var call = AeroMethod<Func<IMyCubeGrid, long, bool, bool>>("SetGridAeroProfileConsumer");
+            return call == null ? false : call(grid, consumer, enabled);
         }
 
         private static MyTuple<bool, float, float, float, int> GetCoolantLoop(IMySlimBlock block)

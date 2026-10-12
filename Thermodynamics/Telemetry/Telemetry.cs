@@ -95,6 +95,21 @@ namespace Thermodynamics
 
         public static readonly TimingStat SessionFrameTime = new TimingStat("session frame");
 
+        public static readonly TimingStat DrawTime = new TimingStat("draw");
+
+        /// <summary>Session.Draw's parts, in call order: hud, debug view, glow, vision, wind, debug panel.</summary>
+        public static readonly TimingStat[] DrawParts =
+        {
+            new TimingStat("  of which hud"),
+            new TimingStat("  of which debug view"),
+            new TimingStat("  of which heat glow"),
+            new TimingStat("  of which thermal vision"),
+            new TimingStat("  of which wind overlay"),
+            new TimingStat("  of which debug panel"),
+        };
+
+        public static FramePacing Pacing = new FramePacing();
+
 
         public static readonly FrameCostTracker FrameCost = new FrameCostTracker();
 
@@ -307,6 +322,8 @@ namespace Thermodynamics
             Overlay = new OverlayTelemetry();
 
             Vision = new ThermalVisionTelemetry();
+
+            Pacing = new FramePacing();
 
             lock (RegistryLock)
             {

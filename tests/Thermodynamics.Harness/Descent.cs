@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -50,7 +51,7 @@ namespace Thermodynamics.Harness
 
         public static List<Reading> Run(ThermalSettings settings = null, PlanetThermalProperties planet = null)
         {
-            if (settings == null) settings = new ThermalSettings();
+            if (settings == null) settings = new HistoricalThermalSettings();
             if (planet == null) planet = new PlanetThermalProperties();
 
 

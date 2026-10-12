@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -16,10 +17,10 @@ namespace Thermodynamics.Harness
 
 
 
-        public int Frequency = new ThermalSettings().Frequency;
+        public int Frequency = new HistoricalThermalSettings().Frequency;
 
 
-        public int MaxSubsteps = new ThermalSettings().MaxSubsteps;
+        public int MaxSubsteps = new HistoricalThermalSettings().MaxSubsteps;
 
         public bool ClampOvershoot = true;
 
@@ -45,9 +46,9 @@ namespace Thermodynamics.Harness
 
 
 
-        public ThermalSettings ToSettings()
+        public HistoricalThermalSettings ToSettings()
         {
-            ThermalSettings settings = new ThermalSettings
+            HistoricalThermalSettings settings = new HistoricalThermalSettings
             {
                 Frequency = Frequency,
                 SimulationSpeed = 1f,
@@ -100,7 +101,7 @@ namespace Thermodynamics.Harness
         public static BalanceProfile Shipped()
         {
 
-            ThermalSettings shipped = new ThermalSettings();
+            HistoricalThermalSettings shipped = new HistoricalThermalSettings();
 
             return new BalanceProfile
             {
@@ -135,7 +136,7 @@ namespace Thermodynamics.Harness
         public static BalanceProfile Candidate()
         {
 
-            ThermalSettings shipped = new ThermalSettings();
+            HistoricalThermalSettings shipped = new HistoricalThermalSettings();
 
             return new BalanceProfile
             {

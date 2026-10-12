@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
 using VRageMath;
@@ -25,7 +26,8 @@ namespace Thermodynamics.Tests
         private static ThermalSimulation Rig()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
             settings.EnableEnvironment = false;
             settings.EnableSolarHeat = false;
             settings.EnableDamage = false;
@@ -153,7 +155,8 @@ namespace Thermodynamics.Tests
         public void ForcedConvectionCannotTellWindFromMotion()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
             settings.Derive();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
@@ -202,7 +205,8 @@ namespace Thermodynamics.Tests
         public void ForcedConvectionSaturatesWhileFrictionCubes()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
             settings.Derive();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 
@@ -225,7 +229,8 @@ namespace Thermodynamics.Tests
         public void ActivationFollowsTheRelativeWindThroughTheSolve()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
+            settings.EnableRecoveryHeating = false; // Historical cubic-source control.
             settings.Derive();
             PlanetThermalProperties planet = PlanetThermalProperties.Default();
 

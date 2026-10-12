@@ -122,7 +122,16 @@ namespace Thermodynamics.Tests
             out float hottest, out int overCritical, out float early)
         {
 
-            ThermalSimulation simulation = Rig(configuration.Settings(), configuration.Material());
+            ThermalSimulation simulation;
+            if (configuration.Knob.Name == "friction-threshold")
+            {
+                // A powered hot hull is above recovery and correctly receives no aerodynamic heat.
+                // The threshold therefore needs an unpowered, initially cold exposed surface.
+                GridBuilder cold = GridBuilder.Large();
+                cold.Place(Catalog.HeavyArmor(), Vector3I.Zero);
+                simulation = cold.BuildSimulation(configuration.Settings(), 200f);
+            }
+            else simulation = Rig(configuration.Settings(), configuration.Material());
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);

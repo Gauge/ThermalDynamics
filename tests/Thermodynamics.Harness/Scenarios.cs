@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -137,7 +138,7 @@ namespace Thermodynamics.Harness
         public static ScenarioResult SelfShadow()
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.SolarSelfShadowing = true;
 
 
@@ -165,7 +166,7 @@ namespace Thermodynamics.Harness
             float flank = LitShare(simulation, shadow, Face.Forward);
 
 
-            ThermalSettings cheap = new ThermalSettings();
+            HistoricalThermalSettings cheap = new HistoricalThermalSettings();
             cheap.SolarSelfShadowing = false;
 
 
@@ -285,10 +286,10 @@ namespace Thermodynamics.Harness
         }
 
 
-        private static ThermalSettings Shadowing(bool on)
+        private static HistoricalThermalSettings Shadowing(bool on)
         {
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.SolarSelfShadowing = on;
             return settings;
         }
@@ -418,7 +419,7 @@ namespace Thermodynamics.Harness
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.HeavyArmor(), Vector3I.Zero);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 800f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 800f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -443,7 +444,7 @@ namespace Thermodynamics.Harness
             builder.Placed.Remove(centre);
             builder.Place(Catalog.Reactor(), Vector3I.Zero).Producing(15f * ThermalConstants.MegawattsToWatts);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -471,7 +472,7 @@ namespace Thermodynamics.Harness
             builder.Placed.Remove(centre);
             builder.Place(Catalog.Reactor(), Vector3I.Zero).Producing(15f * ThermalConstants.MegawattsToWatts);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -494,7 +495,7 @@ namespace Thermodynamics.Harness
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(3, 1, 3));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 250f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 250f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -524,7 +525,7 @@ namespace Thermodynamics.Harness
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.HeavyArmor(), Vector3I.Zero, new Vector3I(3, 3, 1));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -558,7 +559,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.LightArmor(), new Vector3I(2, 1, 0));
             BlockInstance sink = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -595,7 +596,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.Reactor(), Vector3I.Zero).Wasting(500000f);
             BlockInstance reactor = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             ThermalNode interior = simulation.Solver.GetNode(reactor);
             ThermalNode shell = simulation.Solver.GetNodeAt(new Vector3I(1, 0, 0));
@@ -624,7 +625,7 @@ namespace Thermodynamics.Harness
             GridBuilder builder = GridBuilder.Large();
             builder.Place(Catalog.Reactor(), Vector3I.Zero).Producing(300f * ThermalConstants.MegawattsToWatts);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             float totalDamage = 0f;
             float timeToCritical = -1f;
@@ -663,7 +664,7 @@ namespace Thermodynamics.Harness
             Stopwatch build = Stopwatch.StartNew();
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(side, side, side));
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             build.Stop();
 
             int blocks = simulation.Solver.Nodes.Count;
@@ -690,7 +691,7 @@ namespace Thermodynamics.Harness
 
             GridModel coalescedGrid = new GridModel(Catalog.LargeGridSize);
 
-            ThermalSimulation coalescedSim = new ThermalSimulation(new ThermalSettings(), coalescedGrid);
+            ThermalSimulation coalescedSim = new ThermalSimulation(new HistoricalThermalSettings(), coalescedGrid);
             for (int i = 0; i < weldCount; i++)
             {
                 coalescedSim.AddBlock(new BlockInstance(Catalog.LightArmor(), CellFor(i), BlockOrientation.Identity));
@@ -703,7 +704,7 @@ namespace Thermodynamics.Harness
 
             GridModel eagerGrid = new GridModel(Catalog.LargeGridSize);
 
-            ThermalSimulation eagerSim = new ThermalSimulation(new ThermalSettings(), eagerGrid);
+            ThermalSimulation eagerSim = new ThermalSimulation(new HistoricalThermalSettings(), eagerGrid);
             for (int i = 0; i < weldCount; i++)
             {
                 eagerSim.AddBlock(new BlockInstance(Catalog.LightArmor(), CellFor(i), BlockOrientation.Identity));
@@ -751,7 +752,7 @@ namespace Thermodynamics.Harness
 
 
             GridBuilder builder = HullBuilder(RadiatorPlacement.Clear);
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -810,7 +811,7 @@ namespace Thermodynamics.Harness
 
             GridBuilder builder = HullBuilder(placement);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
             runner.Environment = t => Worlds.Shadow();
@@ -835,7 +836,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.Reactor(), new Vector3I(2, 1, 2))
                    .Wasting(250000f);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             ThermalNode interior = simulation.Solver.GetNodeAt(new Vector3I(2, 1, 2));
 
 
@@ -877,7 +878,7 @@ namespace Thermodynamics.Harness
                    .Wasting(1250000f);
             BlockInstance reactor = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -920,7 +921,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.HeavyArmor(), Vector3I.Zero);
             builder.Place(Catalog.Reactor(), new Vector3I(0, 0, 1)).Wasting(250000f);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             ThermalNode node = simulation.Solver.GetNode(builder.Placed[0]);
             node.Block.Mass *= 0.1f;
             node.RefreshThermalMass();
@@ -951,7 +952,7 @@ namespace Thermodynamics.Harness
 
             GridModel grid = new GridModel(Catalog.LargeGridSize);
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings(), grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings(), grid);
 
             BlockModel armour = Catalog.LightArmor();
             BlockModel doorModel = Catalog.SlideDoor();
@@ -1026,7 +1027,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.HeavyArmor(), Vector3I.Zero);
             builder.Place(Catalog.Reactor(), new Vector3I(0, 0, 1)).Wasting(250000f);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             ThermalNode node = simulation.Solver.GetNode(builder.Placed[0]);
             node.Block.Mass *= massFraction;
@@ -1051,7 +1052,7 @@ namespace Thermodynamics.Harness
             for (int f = 0; f < frequencies.Length; f++)
             {
 
-                ThermalSettings settings = new ThermalSettings();
+                HistoricalThermalSettings settings = new HistoricalThermalSettings();
                 settings.Frequency = frequencies[f];
                 settings.Derive();
 
@@ -1102,7 +1103,7 @@ namespace Thermodynamics.Harness
             for (int i = 0; i < scales.Length; i++)
             {
 
-                ThermalSettings settings = new ThermalSettings();
+                HistoricalThermalSettings settings = new HistoricalThermalSettings();
                 settings.HeatTimeScale = scales[i];
                 settings.Derive();
 
@@ -1140,7 +1141,7 @@ namespace Thermodynamics.Harness
 
             StageTimings timings = new StageTimings();
 
-            ThermalSimulation simulation = new ThermalSimulation(new ThermalSettings(), builder.Grid);
+            ThermalSimulation simulation = new ThermalSimulation(new HistoricalThermalSettings(), builder.Grid);
             simulation.Profiler = timings;
 
             for (int i = 0; i < builder.Placed.Count; i++)
@@ -1195,7 +1196,7 @@ namespace Thermodynamics.Harness
             const int fleetSize = 20;
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.Derive();
 
 
@@ -1284,7 +1285,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.Battery(), new Vector3I(0, 4, 0)).Consuming(200000f);
             BlockInstance exposed = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             while (simulation.HasPendingWork) simulation.Update(1f / 60f, Worlds.Shadow());
 
 
@@ -1326,7 +1327,7 @@ namespace Thermodynamics.Harness
                 builder.Place((index++ % 8) == 0 ? fitting : armour, cell);
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             while (simulation.HasPendingWork) simulation.Update(1f / 60f, Worlds.Shadow());
 
             int cells = simulation.Solver.Nodes.Count;
@@ -1424,7 +1425,7 @@ namespace Thermodynamics.Harness
             GridBuilder builder = GridBuilder.Large();
             builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(3, 1, 3));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             WeatherResponse.Weather storm = WeatherResponse.For("SnowHeavy");
 
@@ -1507,7 +1508,7 @@ namespace Thermodynamics.Harness
                 GridBuilder builder = GridBuilder.Large();
                 builder.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(3, 1, 3));
 
-                ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+                ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
 
                 ScenarioRunner runner = new ScenarioRunner(simulation);
@@ -1544,7 +1545,7 @@ namespace Thermodynamics.Harness
 
             GridBuilder peak = GridBuilder.Large();
             peak.Fill(Catalog.LightArmor(), Vector3I.Zero, new Vector3I(3, 1, 3));
-            ThermalSimulation mountain = peak.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation mountain = peak.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             EnvironmentSample inside = Worlds.PlanetSurface(1f, 0.5f);
             inside.IsUnderground = true;
@@ -1636,7 +1637,7 @@ namespace Thermodynamics.Harness
                 }
             }
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             IList<HeatPumpDevice> pumps = simulation.Solver.HeatPumps;
             for (int i = 0; i < pumps.Count; i++)
@@ -1688,7 +1689,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.HeavyArmor(), new Vector3I(0, 25, 1));
             builder.Place(Catalog.HeavyArmor(), new Vector3I(0, 25, -1));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
             CoolantLoopDiagnostics diagnosis = simulation.DiagnoseLoops();
 
 
@@ -1725,7 +1726,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.Reactor(), new Vector3I(1, -1, 0))
                    .Wasting(500000f);
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
             runner.Environment = t => Worlds.Shadow();
@@ -1757,7 +1758,7 @@ namespace Thermodynamics.Harness
                    .Wasting(500000f);
             BlockInstance reactor = builder.Last;
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             ScenarioRunner runner = new ScenarioRunner(simulation);
             runner.Environment = t => Worlds.Shadow();
@@ -1811,7 +1812,7 @@ namespace Thermodynamics.Harness
                 new BlockOrientation(forward, Base6Directions.Direction.Up));
             builder.Place(Catalog.Radiator(), new Vector3I(0, 0, 2));
 
-            ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+            ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
             IList<HeatPumpDevice> pumps = simulation.Solver.HeatPumps;
             for (int i = 0; i < pumps.Count; i++)
@@ -1848,7 +1849,7 @@ namespace Thermodynamics.Harness
                 BlockInstance hot = builder.Last;
 
 
-                ThermalSettings settings = new ThermalSettings();
+                HistoricalThermalSettings settings = new HistoricalThermalSettings();
                 settings.EnableEnvironment = false;
                 settings.EnableDamage = false;
 
@@ -1914,7 +1915,7 @@ namespace Thermodynamics.Harness
                 BlockInstance reactor = builder.Last;
                 builder.Place(Catalog.Radiator(), cells[5] + Vector3I.Up);
 
-                ThermalSimulation simulation = builder.BuildSimulation(new ThermalSettings(), 293.15f);
+                ThermalSimulation simulation = builder.BuildSimulation(new HistoricalThermalSettings(), 293.15f);
 
                 ScenarioRunner runner = new ScenarioRunner(simulation);
                 runner.Environment = t => Worlds.Shadow();
@@ -1956,7 +1957,7 @@ namespace Thermodynamics.Harness
                 BlockInstance hot = builder.Last;
 
 
-                ThermalSettings settings = new ThermalSettings();
+                HistoricalThermalSettings settings = new HistoricalThermalSettings();
                 settings.EnableEnvironment = false;
                 settings.EnableDamage = false;
 
@@ -1991,7 +1992,7 @@ namespace Thermodynamics.Harness
             }
 
             return Result("loop-stiffness", last,
-                "A ring at three lengths, step " + (1f / new ThermalSettings().Derive().StepsPerSecond).ToString("n4")
+                "A ring at three lengths, step " + (1f / new HistoricalThermalSettings().Derive().StepsPerSecond).ToString("n4")
                 + " s. " + report + ".");
         }
 
@@ -2071,7 +2072,7 @@ namespace Thermodynamics.Harness
             }
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
             settings.EnableDamage = false;
@@ -2137,7 +2138,7 @@ namespace Thermodynamics.Harness
             builder.Place(Catalog.Radiator(), new Vector3I(1, 1, -4));
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableSolarHeat = false;
             settings.EnableFriction = false;
             settings.EnableDamage = false;
@@ -2370,7 +2371,7 @@ namespace Thermodynamics.Harness
             }
 
 
-            ThermalSettings settings = new ThermalSettings();
+            HistoricalThermalSettings settings = new HistoricalThermalSettings();
             settings.EnableRoomAir = roomAir;
             settings.EnableFriction = false;
             settings.EnableSolarHeat = false;

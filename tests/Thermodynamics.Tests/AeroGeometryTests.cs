@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
@@ -13,6 +14,7 @@ namespace Thermodynamics.Tests
     /// area it shows the flow; a face behind another face is not reached; and the hull's length along
     /// the flow is its extent projected on the flow. See aerodynamics.md, AR3 and AR4.
     /// </summary>
+    [Trait("scope", "integration")]
     public class AeroGeometryTests
     {
         private const float Cell = 2.5f;

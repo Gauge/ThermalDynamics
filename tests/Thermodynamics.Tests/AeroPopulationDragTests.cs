@@ -1,3 +1,4 @@
+using Aerodynamics.Core;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -10,6 +11,7 @@ using Xunit;
 namespace Thermodynamics.Tests
 {
     /// <summary>Independent terminal-speed roots and legacy drag on differently oriented grids.</summary>
+    [Trait("scope", "integration")]
     public class AeroPopulationDragTests
     {
         [Theory]

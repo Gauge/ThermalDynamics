@@ -1,3 +1,4 @@
+using Thermodynamics.Fixtures;
 using System;
 using System.Collections.Generic;
 using Thermodynamics.Core;
@@ -93,7 +94,7 @@ namespace Thermodynamics.Harness
         public static ShipProfile Measure(Blueprints.Ship ship, ThermalSettings settings = null)
         {
 
-            ThermalSettings effective = settings ?? new ThermalSettings();
+            ThermalSettings effective = settings ?? new HistoricalThermalSettings();
             ShipAssembly assembly = ship.Build(effective);
 
             ShipProfile profile = new ShipProfile
