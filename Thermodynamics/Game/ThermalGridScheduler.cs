@@ -31,30 +31,39 @@ namespace Thermodynamics
         {
             ready.Clear();
 
-            for (int i = grids.Count - 1; i >= 0; i--)
+            try
             {
-                ThermalGrid grid = grids[i];
-                if (grid == null) continue;
+                for (int i = grids.Count - 1; i >= 0; i--)
+                {
+                    ThermalGrid grid = grids[i];
+                    if (grid == null) continue;
 
-                if (grid.PrepareTick(FrameSeconds)) ready.Add(grid);
+                    if (grid.PrepareTick(FrameSeconds)) ready.Add(grid);
+                }
+
+                if (ready.Count == 0) return;
+
+                if (ready.Count == 1)
+                {
+                    ready[0].SolveTick();
+                }
+                else if (MyAPIGateway.Parallel != null)
+                {
+                    MyAPIGateway.Parallel.ForEach(ready, Solve);
+                }
+                else
+                {
+                    for (int i = 0; i < ready.Count; i++) ready[i].SolveTick();
+                }
+
+                for (int i = 0; i < ready.Count; i++) ready[i].PublishTick();
             }
-
-            if (ready.Count == 0) return;
-
-            if (ready.Count == 1)
+            finally
             {
-                ready[0].SolveTick();
+                // Do not retain whole grid simulations after parallel mode is disabled or a
+                // world closes. Also release references if preparation or publication throws.
+                ready.Clear();
             }
-            else if (MyAPIGateway.Parallel != null)
-            {
-                MyAPIGateway.Parallel.ForEach(ready, Solve);
-            }
-            else
-            {
-                for (int i = 0; i < ready.Count; i++) ready[i].SolveTick();
-            }
-
-            for (int i = 0; i < ready.Count; i++) ready[i].PublishTick();
         }
 
         private static readonly Action<ThermalGrid> Solve = grid => grid.SolveTick();

@@ -148,7 +148,14 @@ namespace Thermodynamics
             RegisterCommand();
             PollKeys();
 
-            ThermalGridScheduler.Tick();
+            try
+            {
+                ThermalGridScheduler.Tick();
+            }
+            finally
+            {
+                ThermalApi.FlushProviderFailures();
+            }
 
             PlanetProbes.Step(ThermalGrid.TickSeconds);
             ThermalHeatSourceDebug.Update(ThermalGrid.TickSeconds);

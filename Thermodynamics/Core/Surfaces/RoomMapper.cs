@@ -60,6 +60,9 @@ namespace Thermodynamics.Core
         private readonly CellBitset visited = new CellBitset();
 
         private byte[] sealing = new byte[0];
+        private readonly List<int> sealingWritten = new List<int>();
+        private bool sparseSealing;
+        private int previousSealingCells;
         private int sealingSizeX;
         private int sealingSizeY;
         private int sealingSizeZ;
@@ -357,9 +360,24 @@ namespace Thermodynamics.Core
             }
 
             if (sealing.Length < cells) sealing = new byte[cells];
-            else Array.Clear(sealing, 0, (int)cells);
+            else if (sparseSealing)
+            {
+                for (int i = 0; i < sealingWritten.Count; i++) sealing[sealingWritten[i]] = 0;
+            }
+            else
+            {
+                // Clear the previous range, not the new bounds: a later growth must not
+                // expose old entries after a dense-to-sparse shrink or an origin change.
+                Array.Clear(sealing, 0, previousSealingCells);
+            }
+            sealingWritten.Clear();
+            previousSealingCells = (int)cells;
 
-            surfaces.CopyStructuralSealing(searchMin, searchMaxExclusive, sealing);
+            // Index tracking is worthwhile for sparse extents, but costs four bytes per
+            // written cell. Dense hulls retain the bulk clear and allocate no index entries.
+            sparseSealing = cells >= 1024 && surfaces.CellCount <= cells / 16;
+            surfaces.CopyStructuralSealing(searchMin, searchMaxExclusive, sealing,
+                sparseSealing ? sealingWritten : null);
 
             for (int face = 0; face < Face.Count; face++)
             {

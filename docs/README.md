@@ -56,6 +56,7 @@ in the prose. The conventions are in
 
 | Document | Contents |
 | --- | --- |
+| [release-review-2026-10-13.md](release-review-2026-10-13.md) | Release priorities, coolant discovery optimization, lifecycle cleanup and validation. |
 | [repository-review-2026-10-08.md](repository-review-2026-10-08.md) | Current documentation reconciliation, prioritized implementation risks, reproduction and validation limits. |
 | [development.md](development.md) | Building, deploying, repo layout, conventions. |
 | [known-issues.md](known-issues.md) | Deliberate limits, open defects, and the failure patterns worth carrying forward. |
@@ -82,6 +83,7 @@ implementation guides or authorization to maintain another repository.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-13 | Index the release-readiness evaluation and measured coolant optimization. |
 | 2026-10-08 | Index the repository documentation and performance review. |
 | 2026-10-01 | Distinguish current integration guidance from explicitly archived development evidence. |
 | 2026-09-24 | Indexed the aerodynamics requirements page. |

@@ -1,0 +1,115 @@
+Release review 2026-10-13
+Baseline: fb9ca3d2; working changes: directional coolant discovery cache and scheduler cleanup.
+Machine: AMD Ryzen 9 9950X, 16 cores / 32 threads, Linux x86_64.
+SDK: 10.0.112. Offline target: optimized net9.0. Mod target: net48 / C# 6.
+No packaging, deployment, external repository edits, native gameplay or population sweep.
+
+Baseline NoPackage solution build: pass, 1 existing CS0618 billboard warning, 0 errors.
+Baseline fast thermal lane: 2181 passed, 0 failed/skipped; 2m1s (test-reported duration).
+Initial focused coolant parity/fault/physics tests: 49 passed, 0 failed/skipped; 579ms.
+Final NoPackage solution build: pass, 0 errors (incremental: 0 warnings; fresh mod compile: existing CS0618 warning).
+Final complete local .NET suite including integration fixtures: 2687 passed, 0 failed/skipped; 1m15s.
+Command: systemd-run --user --scope -p MemoryMax=24G -p MemorySwapMax=0 --quiet env THERMAL_CORPUS_TESTS=0 dotnet test tests/Thermodynamics.Tests --no-build --no-restore -v quiet --results-directory out/release-review-2026-10-13/final --logger 'trx;LogFileName=full.trx'
+Build command: bash tools/validate.sh --build-only
+TRX: out/release-review-2026-10-13/final/full.trx (ignored local artifact).
+Opt-in population cases remain disabled; zero skipped cases is not a population coverage claim.
+Python tooling unchanged and not rerun. git diff --check passes.
+Scheduler cleanup is source-reviewed and compiled; native heap behavior is not measured.
+
+Final discovery benchmark method:
+- Standalone optimized net9.0 console runner; no test workload or build ran concurrently.
+- One warm-up, three measured repetitions; record minimum and maximum elapsed time.
+- Allocation: GC.GetAllocatedBytesForCurrentThread delta, excluding grid construction and Stopwatch creation.
+- Both arms use the same GridModel; baseline is LegacyCoolantLoopBuilder frozen from fb9ca3d2.
+- All cases assert expected loop counts. MB in the guide is decimal, raw bytes below.
+- systemd-run --user --scope -p MemoryMax=24G -p MemorySwapMax=0 --quiet dotnet <runner.dll>
+- Runtime tiering/default GC are not overridden; small timing differences are not native performance claims.
+- No claimed intact-ring time improvement; allocation is unchanged.
+
+scenario,pipes,diagnostics,implementation,loops,min_ms,max_ms,allocated_bytes
+open,128,False,legacy,0,3.904100,4.320600,3185040
+open,128,False,optimized,0,0.059800,0.079500,50888
+open,128,True,legacy,0,6.835100,7.095400,6370232
+open,128,True,optimized,0,0.064900,0.068300,51136
+open,512,False,legacy,0,52.960200,66.618900,50289712
+open,512,False,optimized,0,0.300100,0.303300,208600
+open,512,True,legacy,0,47.621600,95.074700,100579576
+open,512,True,optimized,0,0.287800,0.295200,208848
+open,2048,False,legacy,0,379.131500,386.251600,796380136
+open,2048,False,optimized,0,0.544800,0.805200,855376
+open,2048,True,legacy,0,763.196400,773.710200,1592760424
+open,2048,True,optimized,0,0.498600,0.819200,855624
+mixed,128,False,legacy,0,1.558200,1.576300,3211696
+mixed,128,False,optimized,0,0.063200,0.063500,103008
+mixed,128,True,legacy,0,3.056500,3.224500,6423544
+mixed,128,True,optimized,0,0.066300,0.068200,103256
+mixed,512,False,legacy,0,23.948300,24.580100,50401840
+mixed,512,False,optimized,0,0.239800,0.241900,423136
+mixed,512,True,legacy,0,47.772400,48.154900,100803832
+mixed,512,True,optimized,0,0.265200,0.270500,423384
+mixed,2048,False,legacy,0,379.848100,380.356600,796845440
+mixed,2048,False,optimized,0,0.975500,0.987600,1730432
+mixed,2048,True,legacy,0,763.477900,767.511000,1593691032
+mixed,2048,True,optimized,0,0.933300,0.957800,1730680
+broken,127,False,legacy,0,2.273400,3.068300,4640320
+broken,127,False,optimized,0,0.045100,0.049700,76104
+broken,127,True,legacy,0,4.436800,4.600600,9280792
+broken,127,True,optimized,0,0.049500,0.062800,76352
+broken,511,False,legacy,0,35.945200,36.597300,74767720
+broken,511,False,optimized,0,0.173400,2.166100,314208
+broken,511,True,legacy,0,71.458100,71.703100,149535592
+broken,511,True,optimized,0,0.188100,0.190200,314456
+broken,2047,False,legacy,0,574.684800,577.705900,1190651296
+broken,2047,False,optimized,0,0.691200,0.700200,1288568
+broken,2047,True,legacy,0,1147.201600,1151.183300,2381302744
+broken,2047,True,optimized,0,0.726900,0.736600,1288816
+closed,128,False,legacy,1,0.028100,0.031000,59248
+closed,128,False,optimized,1,0.034300,0.042300,59248
+closed,128,True,legacy,1,0.030200,0.031900,59376
+closed,128,True,optimized,1,0.036500,0.036600,59376
+closed,512,False,legacy,1,0.107300,0.113600,244112
+closed,512,False,optimized,1,0.131900,0.133600,244112
+closed,512,True,legacy,1,0.120600,0.122000,244240
+closed,512,True,optimized,1,0.146600,0.150200,244240
+closed,2048,False,legacy,1,0.440700,0.458000,1005856
+closed,2048,False,optimized,1,0.510000,0.535400,1005856
+closed,2048,True,legacy,1,0.488400,2.191800,1005984
+closed,2048,True,optimized,1,0.495200,0.505400,1005984
+
+Reproduction project (replace the absolute repository path if needed):
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net9.0</TargetFramework><AssemblyName>Thermodynamics.Tests</AssemblyName><Optimize>true</Optimize><UseAppHost>false</UseAppHost></PropertyGroup><ItemGroup><Reference Include="Thermodynamics.Core"><HintPath>/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Core.dll</HintPath></Reference><Reference Include="Thermodynamics.Harness"><HintPath>/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Harness.dll</HintPath></Reference><Reference Include="Thermodynamics.Fixtures"><HintPath>/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Fixtures.dll</HintPath></Reference><Reference Include="Thermodynamics.Presentation"><HintPath>/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/Thermodynamics.Presentation.dll</HintPath></Reference><Reference Include="VRage.Math"><HintPath>/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/bin/Debug/net9.0/VRage.Math.dll</HintPath></Reference><Compile Include="/home/gauge/Content/git/SpaceEngineers/One/Thermodynamics/tests/Thermodynamics.Tests/LegacyCoolantLoopBuilder.cs" /></ItemGroup></Project>
+
+Reproduction Program.cs:
+using System;
+using System.Diagnostics;
+using Thermodynamics.Core;
+using Thermodynamics.Harness;
+using Thermodynamics.Tests;
+using VRageMath;
+class Program {
+ static void Main() {
+  Console.WriteLine("scenario,pipes,diagnostics,implementation,loops,min_ms,max_ms,allocated_bytes");
+  foreach(var scenario in new[]{"open","mixed","broken","closed"}) foreach(int n in new[]{128,512,2048}) {
+   var b=GridBuilder.Large();
+   if(scenario=="open" || scenario=="mixed") {
+    var model=Catalog.CoolantPipeStraight(); var orientation=PipeFitter.Orient(model,Vector3I.Left,Vector3I.Right);
+    for(int i=0;i<n;i++) b.Place(model,new Vector3I(i,0,0),scenario=="mixed" ? PipeFitter.OrientDirected(model,i%2==0?Vector3I.Right:Vector3I.Left,i%2==0?Vector3I.Left:Vector3I.Right) : orientation);
+   } else {
+    var ring=PipeFitter.BuildRing(b,PipeFitter.RectangleXZ(Vector3I.Zero,n/2,2));
+    if(scenario=="broken") b.Grid.Remove(ring[n/2]);
+   }
+   foreach(bool diagnose in new[]{false,true}) foreach(bool legacy in new[]{true,false}) {
+    var props=LoopThermalProperties.Default();
+    Func<int> run=()=> (legacy ? LegacyCoolantLoopBuilder.FindLoops(b.Grid,props,293.15f,null,diagnose?new CoolantLoopDiagnostics():null)
+      : CoolantLoopBuilder.FindLoops(b.Grid,props,293.15f,null,diagnose?new CoolantLoopDiagnostics():null)).Count;
+    run(); double best=double.MaxValue,worst=0; long allocated=0; int count=0; var sw=new Stopwatch();
+    for(int r=0;r<3;r++) { long before=GC.GetAllocatedBytesForCurrentThread(); sw.Restart(); count=run(); sw.Stop();
+     long bytes=GC.GetAllocatedBytesForCurrentThread()-before; if(sw.Elapsed.TotalMilliseconds<best){best=sw.Elapsed.TotalMilliseconds;allocated=bytes;}
+     worst=Math.Max(worst,sw.Elapsed.TotalMilliseconds);
+    }
+    if(count != (scenario=="closed"?1:0)) throw new Exception("Unexpected loop count");
+    Console.WriteLine($"{scenario},{b.Grid.CoolantBlockCount},{diagnose},{(legacy?"legacy":"optimized")},{count},{best:F6},{worst:F6},{allocated}");
+   }
+  }
+ }
+}

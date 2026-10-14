@@ -37,6 +37,8 @@ namespace Thermodynamics.Core
 
 
             HashSet<long> claimed = new HashSet<long>();
+            CoolantLoopSearch search = null;
+            bool searchAttempted = false;
 
             IList<BlockInstance> blocks = grid.Blocks;
             for (int i = 0; i < blocks.Count; i++)
@@ -47,8 +49,20 @@ namespace Thermodynamics.Core
                 if (claimed.Contains(start.Key)) continue;
 
 
-                List<BlockInstance> ring = TraceRing(grid, start);
-                if (ring == null) continue;
+                CoolantFault fault;
+                List<BlockInstance> ring = search == null
+                    ? TraceRing(grid, start) : search.Trace(start, out fault);
+                if (ring == null)
+                {
+                    // Intact rings are already linear. Build the directional failure cache only
+                    // when an unclaimed run fails, and attempt it once for custom-shape fallback.
+                    if (!searchAttempted)
+                    {
+                        searchAttempted = true;
+                        search = CoolantLoopSearch.TryCreate(grid);
+                    }
+                    continue;
+                }
 
 
                 CoolantLoop loop = new CoolantLoop(properties, initialTemperature);
@@ -76,14 +90,14 @@ namespace Thermodynamics.Core
                 loops.Add(loop);
             }
 
-            if (diagnostics != null) Diagnose(grid, claimed, loops, diagnostics);
+            if (diagnostics != null) Diagnose(grid, claimed, loops, diagnostics, search);
 
             return loops;
         }
 
 
         private static void Diagnose(GridModel grid, HashSet<long> claimed,
-            List<CoolantLoop> loops, CoolantLoopDiagnostics diagnostics)
+            List<CoolantLoop> loops, CoolantLoopDiagnostics diagnostics, CoolantLoopSearch search)
         {
             diagnostics.Loops = loops.Count;
             diagnostics.PipesInLoops = claimed.Count;
@@ -96,7 +110,8 @@ namespace Thermodynamics.Core
                 if (claimed.Contains(block.Key)) continue;
 
                 CoolantFault fault;
-                TraceRing(grid, block, out fault);
+                if (search == null) TraceRing(grid, block, out fault);
+                else search.Trace(block, out fault);
                 diagnostics.Record(block, fault);
             }
         }

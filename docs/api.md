@@ -273,6 +273,7 @@ than *not within a major*.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-13 | Defer heating-provider faults to the game thread, disable failed gates, and preserve replacement registrations. |
 | 2026-10-08 | Correct provider forwarding, snapshot costs, thread-safety limits and exception behavior. |
 | 2026-09-27 | Added authored lift overrides, actual submitted lift reporting and optional lifting/residual geometry in profile snapshots. |
 | 2026-09-27 | Documented bounded physical-energy extraction and its exclusive-access, completed-step contract. |
@@ -313,14 +314,23 @@ provider is considered active at positive speed. The heating callback must also 
 switches. Without any registered provider the gate is false.
 No provider means zero aerodynamic heating. The registered provider also supplies the existing
 force/profile/status/lift-authoring delegates with their existing signatures. Registration is
-local to each server/client session and released on unload. A `SurfaceHeating` exception disables registration, logs a fault and announces unavailability;
-discovery must succeed again before forwarding resumes. A `SurfaceHeatingGate` exception logs
-a fault and returns false for that sample; it does not release the provider. Exceptions in
-forwarded force/profile delegates are caught by the API guard without releasing registration.
+local to each server/client session and released on unload. Either a `SurfaceHeating` or
+`SurfaceHeatingGate` exception disables that provider immediately: subsequent heating returns
+zero, its gate returns false, and forwarded methods become unavailable. The worker records one
+failure per registration without logging or calling engine services. After the grid workers join,
+the session drains failures on the game thread, logs the fault and announces unavailability if
+that registration is still current. A replacement registered before the drain is preserved and
+is not announced unavailable. Discovery must succeed again before forwarding resumes.
+Exceptions in forwarded force/profile delegates are caught by the API guard without releasing
+registration.
+
 Heating callbacks run inside the solver and can execute concurrently on different grid workers
-when `ParallelGrids` is enabled. Keep them allocation-free where possible, thread-safe, and
-independent of engine reads or writes. The current heating-exception path itself invokes
-telemetry and mod messaging inline; worker-safe recovery remains a review finding.
+when `ParallelGrids` is enabled. Keep them allocation-free, thread-safe, and independent of engine
+reads or writes. Provider methods and gates are published together as one registration; each
+invocation captures that registration. Already-running callbacks can finish during replacement or
+failure, so this does not promise whole-step provider consistency or make a stateful provider safe.
+The successful callback boundary does not allocate or take a lock. Native parallel-provider
+integration still requires in-game validation.
 
 Changelog: 2026-09-27 — added raw geometry/environment and external-provider contracts; aerodynamic
 runtime extracted to a separate package while preserving existing delegate signatures.

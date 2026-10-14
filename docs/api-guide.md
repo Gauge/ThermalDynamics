@@ -336,8 +336,12 @@ sets where your calls belong:
 
 ## Threading and timing
 
-* **No call requires a particular thread or update phase.** Call from any update order; the API
-  does not touch the simulation's stepping schedule.
+* **Call the live game API on the game thread.** Getters and mutators access live engine and
+  simulation state; exception guards do not synchronize it. No particular update order is required.
+* **Provider heating callbacks are a separate boundary.** With `ParallelGrids` enabled they can
+  run concurrently on solver workers. Keep them independent of engine access and thread-safe.
+  Heating and gate failures disable the registration; logging and unavailability notifications
+  occur on the game thread after workers join. See the [provider contract](api.md#standalone-aerodynamics-integration).
 * **Nothing is required to be called every frame.** Bind once, call when you have reason to.
 * **Return values are per-step live.** A temperature or a force read this frame is this frame's;
   do not cache it across frames.
@@ -365,6 +369,7 @@ the simulation core directly — it has no dependency on the game session and it
 
 | Date | Change |
 | --- | --- |
+| 2026-10-13 | Correct game-thread access guidance and document deferred provider failure handling. |
 | 2026-09-24 | The aerodynamic-force section says the force is zero while it is rebuilt, and the drag-profile section says what a profile touches now. |
 | 2026-09-24 | **Renamed the drop-in client** to `ThermodynamicsApi` in namespace `Thermodynamics.Client` (file `tools/modkit/ThermodynamicsApi.cs`), matching the mod's name. The message channel and table keys are unchanged, so a copy taken under the old name keeps working; only a fresh copy needs its `using` and type name updated. |
 | 2026-09-05 | **Added the drop-in client** ([`tools/modkit/ThermodynamicsApi.cs`](../tools/modkit/ThermodynamicsApi.cs)) and the fast-path section: one file a consumer copies in, `Init`/`Dispose` and typed methods returning structs, held identical to the API table by `ThermodynamicsClientTests`. The manual binding walkthrough stays below it. |

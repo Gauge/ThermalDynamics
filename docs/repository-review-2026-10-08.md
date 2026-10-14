@@ -18,8 +18,9 @@ Offline checks cannot certify native frame time, rendering, multiplayer or exter
 
 ### Open coolant chains are retraced quadratically
 
-**P1, reproduced.** [CoolantLoopBuilder.FindLoops](../Thermodynamics/Core/Loops/CoolantLoopBuilder.cs)
-marks pipes claimed only after discovering a valid ring. Every pipe on an open straight chain
+**Resolved for ordinary two-port plumbing on 2026-10-13; historical reproduction below.**
+Before the fix, [CoolantLoopBuilder.FindLoops](../Thermodynamics/Core/Loops/CoolantLoopBuilder.cs)
+marked pipes claimed only after discovering a valid ring. Every pipe on an open straight chain
 therefore starts another `TraceRing`, traversing part of the same chain and allocating port lists,
 a ring list and a visited set. Across n pipes this is O(n²) traversal and allocation. An intact
 closed ring is claimed once; these are different complexity cases.
@@ -39,10 +40,11 @@ procedure are in the receipt. `ThermalSimulation.Update` calls discovery on topo
 breaking a large ring, welding an unfinished run or editing another block can trigger it.
 Diagnostics additionally retrace unclaimed pipes.
 
-Cache component discovery outcomes within a rebuild and reuse port data. Failed traversal caching
-must preserve port direction and branch diagnostics; add a long broken-ring/open-chain scaling
-regression before replacing the algorithm. This is separate from the linear steady-state coolant
-solve described in the older redesign survey.
+Discovery now caches terminal faults by traversal direction within a rebuild and shares that cache
+with diagnostics. Intact rings retain the original path; custom or degenerate port shapes retain
+the general traversal. Long open-chain/broken-ring allocation and frozen-baseline parity checks
+cover the change. See the [release review](release-review-2026-10-13.md) for fresh measurements
+and the remaining custom-shape limit. Steady-state coolant integration is unchanged.
 
 ### Room-map startup bypasses its cell budget
 
@@ -203,5 +205,6 @@ Native gameplay and population sweeps remain outside this review.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-13 | Mark ordinary open-chain discovery resolved and link the measured release review. |
 | 2026-10-11 | Record merge review, provider-heating correction and telemetry/documentation limits. |
 | 2026-10-08 | Review the current extraction/refactor; reconcile guides and reproduce quadratic open-chain discovery. |

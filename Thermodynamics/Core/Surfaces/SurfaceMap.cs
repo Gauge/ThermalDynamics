@@ -245,6 +245,13 @@ namespace Thermodynamics.Core
 
         public void CopyStructuralSealing(Vector3I min, Vector3I maxExclusive, byte[] sealing)
         {
+            CopyStructuralSealing(min, maxExclusive, sealing, null);
+        }
+
+
+        internal void CopyStructuralSealing(Vector3I min, Vector3I maxExclusive, byte[] sealing,
+            List<int> written)
+        {
             if (sealing == null) return;
 
             int sizeX = maxExclusive.X - min.X;
@@ -263,7 +270,9 @@ namespace Thermodynamics.Core
                 long index = (((long)z * sizeY) + y) * sizeX + x;
                 if (index >= sealing.Length) continue;
 
-                sealing[index] = (byte)(Structural(entry.Value) & CellSurface.SelfAirtightMask);
+                byte value = (byte)(Structural(entry.Value) & CellSurface.SelfAirtightMask);
+                sealing[index] = value;
+                if (written != null && value != 0) written.Add((int)index);
             }
         }
 

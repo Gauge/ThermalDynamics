@@ -9,44 +9,39 @@ namespace Thermodynamics
 {
     public static partial class ThermalApi
     {
-        private static long aeroOwner;
-        private static Dictionary<string, Delegate> aeroMethods;
-        // Resolved once at registration: SurfaceHeating runs per exposed node per substep, so a
-        // by-name lookup there costs a string hash on the solver's hottest loop.
-        private static Func<float,float,float,float,float,float,float,float> aeroHeating;
-        private static Func<float, bool> aeroHeatingGate;
+        private static readonly HeatingProviderRegistry HeatingProvider = new HeatingProviderRegistry();
+
         private static T AeroMethod<T>(string name) where T : class
         {
-            Delegate method;
-            return aeroMethods != null && aeroMethods.TryGetValue(name, out method) ? method as T : null;
+            return HeatingProvider.Method<T>(name);
         }
+
         private static bool RegisterAerodynamics(long owner, Dictionary<string, Delegate> supplied)
         {
-            if (owner == 0 || (aeroOwner != 0 && aeroOwner != owner)) return false;
-            if (supplied == null) { ClearAerodynamics(); return true; }
-            Delegate heat;
-            if (!supplied.TryGetValue("SurfaceHeating", out heat)
-                || !(heat is Func<float,float,float,float,float,float,float,float>)) return false;
-            aeroMethods = new Dictionary<string, Delegate>(supplied); aeroOwner = owner;
-            aeroHeatingGate = AeroMethod<Func<float, bool>>("SurfaceHeatingGate");
-            aeroHeating = AeroMethod<Func<float,float,float,float,float,float,float,float>>("SurfaceHeating");
-            return true;
+            return HeatingProvider.Register(owner, supplied);
         }
-        private static void ClearAerodynamics() { aeroHeating = null; aeroHeatingGate = null; aeroMethods = null; aeroOwner = 0; }
-        internal static bool SurfaceHeatingActive(float speed)
-        {
-            if (aeroHeating == null) return false;
-            var gate = aeroHeatingGate;
-            try { return gate == null ? speed > 0f : gate(speed); }
-            catch (Exception e) { Telemetry.Exception("ThermalApi.SurfaceHeatingGate", e); return false; }
-        }
+
+        private static void ClearAerodynamics() { HeatingProvider.Clear(); }
+
+        internal static bool SurfaceHeatingActive(float speed) { return HeatingProvider.Active(speed); }
+
         internal static float SurfaceHeating(float area, float density, float speed, float ambient, float temperature, float capacity, float seconds)
         {
-            var heat = aeroHeating;
-            if (heat == null) return 0f;
-            try { return heat(area,density,speed,ambient,temperature,capacity,seconds); }
-            catch (Exception e) { Telemetry.Exception("ThermalApi.SurfaceHeating",e); ClearAerodynamics(); MyAPIGateway.Utilities.SendModMessage(ChannelId, false); return 0f; }
+            return HeatingProvider.Heat(area, density, speed, ambient, temperature, capacity, seconds);
         }
+
+        internal static void FlushProviderFailures()
+        {
+            string context;
+            Exception error;
+            bool unavailable;
+            while (HeatingProvider.TryTakeFailure(out context, out error, out unavailable))
+            {
+                Telemetry.Exception(context, error);
+                if (unavailable) MyAPIGateway.Utilities.SendModMessage(ChannelId, false);
+            }
+        }
+
         private static MyTuple<bool, Vector3, float, float, float, Vector3> GetGridEnvironment(IMyCubeGrid grid)
         {
             ThermalGrid thermal = GridOf(grid);
