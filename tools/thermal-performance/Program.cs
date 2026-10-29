@@ -5,6 +5,71 @@ using VRageMath;
 using Region=Thermodynamics.Presentation.ThermalVisionRegionPartition.Region;
 using Old=ThermalPerformance.Baseline.ThermalVisionBlockField;
 using Current=Thermodynamics.Presentation.ThermalVisionBlockField;
+if(args.Contains("--uniform-surfaces"))
+{
+    // Tiny fixture: one 5^3 lattice per endpoint, 32 rebuilds per timing sample.
+    // Verify the entire six-face output against the frozen implementation first.
+    var bounds=new Region(new Vector3D(-2),new Vector3D(2),300);
+    var before=new ThermalVisionSurfaceField(bounds,1);
+    var after=new ThermalVisionSurfaceField(bounds,1);
+    var oldBefore=new ThermalPerformance.SurfaceBaseline.ThermalVisionSurfaceField(bounds,1);
+    var oldAfter=new ThermalPerformance.SurfaceBaseline.ThermalVisionSurfaceField(bounds,1);
+    for(int i=0;i<before.Values.Length;i++)
+    { before.Values[i]=oldBefore.Values[i]=300;after.Values[i]=oldAfter.Values[i]=500; }
+    foreach(bool coolingHotspot in new[]{false,true})
+    {
+        before.Values[0]=oldBefore.Values[0]=coolingHotspot?900:300;
+        after.BuildFaces(20,true,before,20); after.PrepareTransition(before);
+        oldAfter.BuildFaces(20,true,oldBefore,20); oldAfter.PrepareTransition(oldBefore);
+        for(int axis=0;axis<3;axis++)for(int side=0;side<2;side++)
+        {
+            var a=after.Face(axis,side==1);var b=oldAfter.Face(axis,side==1);
+            if(a.Count!=b.Count)throw new Exception("Surface partition changed");
+            for(int i=0;i<a.Count;i++)
+                if(a[i].A!=b[i].A || a[i].B!=b[i].B || a[i].C!=b[i].C || a[i].D!=b[i].D
+                    || a[i].Temperatures!=b[i].Temperatures || a[i].PreviousTemperatures!=b[i].PreviousTemperatures
+                    || a[i].AlternateDiagonal!=b[i].AlternateDiagonal)throw new Exception("Surface output changed");
+        }
+    }
+    // Thirds expose the floating-point reconstruction differences that a
+    // uniform shortcut must not erase at huge, out-of-sensor-range values.
+    foreach(var temperatures in new[]{(current:1e30f,prior:300f),(current:500f,prior:1e30f),(current:-1e30f,prior:300f)})
+    {
+        var extremeBounds=new Region(Vector3D.Zero,new Vector3D(3),300);
+        var next=new ThermalVisionSurfaceField(extremeBounds,1);
+        var prior=new ThermalVisionSurfaceField(extremeBounds,1);
+        var oldNext=new ThermalPerformance.SurfaceBaseline.ThermalVisionSurfaceField(extremeBounds,1);
+        var oldPrior=new ThermalPerformance.SurfaceBaseline.ThermalVisionSurfaceField(extremeBounds,1);
+        for(int i=0;i<next.Values.Length;i++)
+        { next.Values[i]=oldNext.Values[i]=temperatures.current;prior.Values[i]=oldPrior.Values[i]=temperatures.prior; }
+        next.BuildFaces(20,true,prior,20); next.PrepareTransition(prior);
+        oldNext.BuildFaces(20,true,oldPrior,20); oldNext.PrepareTransition(oldPrior);
+        for(int axis=0;axis<3;axis++)for(int side=0;side<2;side++)
+        {
+            var a=next.Face(axis,side==1);var b=oldNext.Face(axis,side==1);
+            if(a.Count!=b.Count)throw new Exception("Extreme surface partition changed");
+            for(int i=0;i<a.Count;i++)
+                if(a[i].A!=b[i].A || a[i].B!=b[i].B || a[i].C!=b[i].C || a[i].D!=b[i].D
+                    || a[i].Temperatures!=b[i].Temperatures || a[i].PreviousTemperatures!=b[i].PreviousTemperatures
+                    || a[i].AlternateDiagonal!=b[i].AlternateDiagonal)throw new Exception("Extreme surface output changed");
+        }
+    }
+    before.Values[0]=oldBefore.Values[0]=300;
+    double RunUniform(bool old)
+    {
+        double sum=0;
+        for(int i=0;i<32;i++)
+        {
+            if(old) { oldAfter.BuildFaces(20,true,oldBefore,20);sum+=oldAfter.Face(0,false).Count; }
+            else { after.BuildFaces(20,true,before,20);sum+=after.Face(0,false).Count; }
+        }
+        return sum;
+    }
+    Console.WriteLine(JsonSerializer.Serialize(new {latticeSamples=before.Values.Length,rebuilds=32,
+        exactOutput=true,baseline=Measure(()=>RunUniform(true)),optimized=Measure(()=>RunUniform(false))},
+        new JsonSerializerOptions{WriteIndented=true}));
+    return;
+}
 if(args.Contains("--occlusion"))
 {
 

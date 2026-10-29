@@ -1,0 +1,60 @@
+using System.Collections.Generic;
+using C = CORE_NAMESPACE;
+using VRageMath;
+
+// Two one-pipe loops isolate replacement storage without native loop discovery.
+sealed class CLASS_NAME : IRig
+{
+    private readonly C.ThermalSimulation simulation;
+    private readonly List<C.CoolantLoop> incoming = new List<C.CoolantLoop>();
+
+    public CLASS_NAME()
+    {
+        var settings = new C.ThermalSettings { EnableEnvironment = false, EnableRoomAir = false,
+            EnableSolarHeat = false, EnableDamage = false };
+        settings.Derive();
+        simulation = new C.ThermalSimulation(settings, new C.GridModel(2.5f));
+        var model = C.BlockModel.Solid("pipe", Vector3I.One, 10f,
+            new C.BlockThermalProperties { SpecificHeat = 200f });
+        for (int i = 0; i < 2; i++)
+        {
+            var pipe = new C.BlockInstance(model, new Vector3I(i * 2, 0, 0), C.BlockOrientation.Identity);
+            simulation.AddBlock(pipe, 300f + i * 20f);
+            var loop = new C.CoolantLoop(C.LoopThermalProperties.Default(), 400f + i * 100f);
+            loop.Pipes.Add(pipe);
+            loop.Pumps.Add(new C.CoolantPump { Block = pipe, Speed = .4f + i * .2f });
+            loop.RefreshSignature();
+            loop.RefreshThermalMass();
+            incoming.Add(loop);
+        }
+        simulation.RebuildAll();
+        Run();
+        Reset();
+    }
+
+    public void Reset()
+    {
+        for (int i = 0; i < incoming.Count; i++)
+        {
+            incoming[i].Temperature = 400f + i * 100f;
+            incoming[i].FillFraction = .25f + i * .5f;
+        }
+    }
+
+    public void Run() { simulation.Solver.SetLoops(incoming); }
+
+    public float[] Values()
+    {
+        var values = new List<float> { simulation.Solver.Loops.Count };
+        foreach (var node in simulation.Solver.Nodes) values.Add(node.Temperature);
+        foreach (var loop in simulation.Solver.Loops)
+        {
+            values.Add(loop.Temperature);
+            values.Add(loop.FillFraction);
+            values.Add(loop.ThermalMass);
+            values.Add(loop.Links.Count);
+            values.Add(loop.Pumps[0].Speed);
+        }
+        return values.ToArray();
+    }
+}

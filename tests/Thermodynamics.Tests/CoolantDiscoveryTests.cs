@@ -11,9 +11,78 @@ namespace Thermodynamics.Tests
     /// Discovery must retain the old ring order, pump direction and per-direction diagnostics,
     /// while open chains and broken rings allocate linearly instead of retracing every suffix.
     /// The frozen pre-optimization builder is the oracle, including for custom plumbing.
+    /// A four-pipe fixture checks direct port transforms across mutable order, duplicates and
+    /// an opened ring without changing the ownership of the public transformed-port lists.
     /// </summary>
     public class CoolantDiscoveryTests
     {
+        [Fact]
+        public void DirectPortDiscoveryMatchesLegacyAcrossFourPipeMutations()
+        {
+            GridBuilder builder = GridBuilder.Large();
+            List<BlockInstance> ring = PipeFitter.BuildPumplessRing(builder,
+                PipeFitter.RectangleXZ(new Vector3I(7, -3, 11), 2, 2));
+            BlockInstance pump = ring[1];
+            CoolantShape shape = pump.Model.Coolant;
+            shape.IsPump = true;
+            Assert.Equal(4, ring.Count);
+            Assert.Contains(ring, pipe => !pipe.Orientation.Equals(BlockOrientation.Identity));
+
+            // The caller still owns its list; clearing it cannot change subsequent discovery.
+            List<GridPort> publicPorts = pump.CoolantLinkPorts();
+            publicPorts.Clear();
+            Assert.Equal(2, pump.CoolantLinkPorts().Count);
+            Compare(builder.Grid);
+            CompareFourPipeTraces(builder.Grid);
+            CoolantLoop initial = Assert.Single(CoolantLoopBuilder.FindLoops(builder.Grid,
+                LoopThermalProperties.Default(), 300f));
+            int direction = Assert.Single(initial.Pumps).Direction;
+
+            CoolantPort first = shape.LinkPorts[0];
+            CoolantPort second = shape.LinkPorts[1];
+            shape.LinkPorts[0] = second;
+            shape.LinkPorts[1] = first;
+            Compare(builder.Grid);
+            CompareFourPipeTraces(builder.Grid);
+            CoolantLoop reversed = Assert.Single(CoolantLoopBuilder.FindLoops(builder.Grid,
+                LoopThermalProperties.Default(), 300f));
+            Assert.Equal(-direction, Assert.Single(reversed.Pumps).Direction);
+
+            // The general path must skip every copy of the entry before taking the first
+            // different port. Port order remains significant for custom shapes.
+            shape.LinkPorts = new[] { second, second, first };
+            Compare(builder.Grid);
+            CompareFourPipeTraces(builder.Grid);
+
+            shape.LinkPorts = new[] { second, new CoolantPort(Vector3I.Up) };
+            Compare(builder.Grid);
+            CompareFourPipeTraces(builder.Grid);
+            var diagnostics = new CoolantLoopDiagnostics();
+            Assert.Empty(CoolantLoopBuilder.FindLoops(builder.Grid,
+                LoopThermalProperties.Default(), 300f, null, diagnostics));
+            Assert.Equal(4, diagnostics.PipesAdrift);
+            Assert.True(diagnostics.CountOf(CoolantFault.OpenEnd) > 0);
+
+            shape.LinkPorts = new[] { first, second };
+            Compare(builder.Grid);
+            CompareFourPipeTraces(builder.Grid);
+            Assert.Single(CoolantLoopBuilder.FindLoops(builder.Grid,
+                LoopThermalProperties.Default(), 300f));
+        }
+
+        private static void CompareFourPipeTraces(GridModel grid)
+        {
+            foreach (BlockInstance start in grid.Blocks)
+            {
+                CoolantFault expectedFault, actualFault;
+                List<BlockInstance> expected = LegacyCoolantLoopBuilder.TraceRing(grid, start, out expectedFault);
+                List<BlockInstance> actual = CoolantLoopBuilder.TraceRing(grid, start, out actualFault);
+                Assert.Equal(expectedFault, actualFault);
+                if (expected == null) Assert.Null(actual);
+                else Assert.Equal(expected.Select(pipe => pipe.Key), actual.Select(pipe => pipe.Key));
+            }
+        }
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]

@@ -1,0 +1,286 @@
+Thermodynamics focused performance review — 2026-10-28
+Baseline: 60677d353dddc0f8b90b7ee7733cdc8789bd3c27
+Scope: working-tree changes, no package/deployment or native gameplay run.
+
+The user requested the smallest examples needed for quick iteration. The broad
+baseline fast lane was stopped after that instruction; it has no completion or
+pass claim. No corpus sweep or complete test suite was run to completion.
+
+FINAL COMPILE
+dotnet build tests/Thermodynamics.slnx --no-restore -m:1 -nr:false -p:MdkBuildConfiguration=NoPackage -v quiet
+Result: 0 errors, 1 existing CS0618 warning, 11.37 seconds.
+Warning: ThermalVisionProbeGeometry.cs:132, obsolete AddTriangleBillboard API.
+This solution compiles the actual mod and invokes the MDK whitelist analyzer.
+It does not load the mod in the game or package it.
+
+FOCUSED REGRESSIONS
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoreHotPathTests|FullyQualifiedName~ThermalVisionFrameBudgetTests|FullyQualifiedName~CullSphereIncludesEveryExpandedFaceCorner|FullyQualifiedName~EngineReceivesLinearHdrWarningRamp|FullyQualifiedName~TheCentreFollowsTheBlocksThatAreFailing|FullyQualifiedName~OneGlowingBlockIsARegionOnIt|FullyQualifiedName~NonfiniteSourceParametersCannotInjectNonfiniteEnergy|FullyQualifiedName~InvalidOrOverflowingCoordinatesProduceNoSource|FullyQualifiedName~IrradianceIsPowerOverTheAreaOfTheSphere|FullyQualifiedName~ACoincidentSourceHasNoDirectionRatherThanANaN|FullyQualifiedName~ActualSessionUnloadRoutesAllStagesThroughTheFailureBoundary' --results-directory out/validation --logger 'trx;LogFileName=review-focused.trx' -v quiet
+Result: 42 passed, 0 failed, 0 skipped; test execution 79 ms.
+Cases cover four-block solver parity, parcel boundaries/uninitialized loops,
+atomic volume admission, field fallback/transitions, conservative glow bounds,
+HDR response, point-source numerical guards and session cleanup wiring.
+
+AFTER FINAL VISION REVIEW CORRECTIONS
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~ThermalVisionFrameBudgetTests' --results-directory out/validation --logger 'trx;LogFileName=review-vision-final.trx' -v quiet
+Result: 9 passed, 0 failed, 0 skipped; test execution 16 ms.
+These are a rerun of the affected cases, not 9 additional unique cases.
+Corrections: nonthermal exit colour, guarded uniform fast path, capacity-one
+flat-face lists. Extreme finite-value equivalence is also checked against the
+frozen reference by the tiny uniform-surface runner.
+
+PAIRED CPU EVIDENCE
+tools/thermal-performance/results-core-hot-path.json
+  Baseline Core extracted from the frozen Git commit; same-process alternating
+  batches; eight cases, 9 samples x 96 calls. Every captured state matches
+  exactly; zero warm-loop allocation in both versions. 128 coolant nodes /
+  256 contacts, or 512 ordinary nodes. Measured runtime approximately one second.
+  Floored stability preparation median: 0.206955 -> 0.138445 ms/batch.
+  Resolved coolant full-step median: 10.524162 -> 8.170542 ms/batch.
+  Mixed coolant full-step median: 0.359387 -> 0.318759 ms/batch.
+  Ordinary unfloored stepping: unchanged within noise.
+
+tools/thermal-performance/results-uniform-surfaces.json
+  Frozen reference; 125-sample lattice, 32 rebuilds per timing batch; five tiny
+  differential fixtures including a cooling hotspot and extreme finite values.
+  Median: 0.1073 -> 0.0208 ms/batch.
+  Allocated bytes: 115240 -> 36904 per batch, including 40 stopwatch bytes.
+  Exact generated patches and transition values match.
+
+Both receipts include machine/runtime/method/source fingerprints and preserve
+earlier valid measurements. Reproduction commands are in the adjacent README.
+All timings are optimized .NET 9 CPU examples. They exclude SE1 .NET Framework
+execution, native drawing, GPU cost, simulation adapter and network behavior.
+
+ENGINE INSPECTION
+SE1: installed Bin64/Sandbox.Game.dll, VRage.Render11.dll, VRage.Game.xml,
+Content/Shaders/Transparent/Billboards.hlsl; render-depth use, entity visibility,
+emissive state restoration, light dirty tracking and sound-emitter lifecycle.
+SE2: installed Game2/SpaceEngineers2.runtimeconfig.json, VRage.DCS.xml,
+Game2.Simulation.xml, VRage.Scripting.xml, and Mod SDK file inventory.
+Engine metadata is not a supported/public mod API compatibility guarantee.
+
+git diff --check: passed.
+No native visual, GPU, multiplayer, save/reload or SE2 port acceptance claimed.
+
+AUTONOMOUS CONTINUATION
+Changes: resumable source/block accumulation; disabled-mechanism stability and
+floor restoration; sparse room bit/sealing pages with bounded page reuse;
+bounded preview/occlusion work and reusable transforms; direct exact-sized
+geometry exports; multiplayer position snapshots and entity lookup; diagnostic
+clock, pulse, bridge and unload fixes.
+
+Final compile (same NoPackage solution command above): 0 errors, 1 existing
+CS0618 warning, 4.55 seconds. No packaging or deployment.
+
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~HeatSourceSliceTests|FullyQualifiedName~InactiveConductanceTests|FullyQualifiedName~RoomPagedStorageTests|FullyQualifiedName~CoreHotPathTests|FullyQualifiedName~PreparedTarget|FullyQualifiedName~CandidateCache|FullyQualifiedName~ExactSizedGeometryCellsRetainLayoutAndCallerOwnership|FullyQualifiedName~NonsenseIsRefusedRatherThanReadAsZero|FullyQualifiedName~APulseIsWattsThenSeconds|FullyQualifiedName~ActualSessionUnloadRoutesAllStagesThroughTheFailureBoundary' --results-directory out/validation --logger 'trx;LogFileName=review-continuation.trx' -v quiet
+Main result: 40 passed, 1 failed, 0 skipped; test execution 74 ms.
+Failure: the new room fixture used an exclusive size-two shell (no interior)
+while expecting one room cell. Fixed to size three, leaving one interior cell.
+Other initial source-fixture iterations corrected the default heat time scale;
+the five source checks then passed alongside two geometry checks (24 ms).
+
+Final affected-case rerun after the fixture correction, active-page rank walk,
+and explicit disabled loop/room clamp gates:
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~RoomPagedStorageTests|FullyQualifiedName~InactiveConductanceTests' --results-directory out/validation --logger 'trx;LogFileName=review-continuation-final.trx' -v quiet
+Result: 9 passed, 0 failed, 0 skipped; test execution 32 ms.
+This validates all 41 selected cases across the main and affected-case runs,
+not 50 different tests or a full-suite result.
+
+Small deterministic evidence:
+- Four blocks, three sources: one-unit source slicing stays within one unit;
+  frozen source-major watts/totals match, including multi-substep and restart.
+- Two/three blocks: disabled paths no longer inflate stability/flooring; an
+  independent source produces the analytic 12.5 K change.
+- Two far blocks: (1000+3)^3 = 1,009,027,027 bounding cells. Old initial arrays
+  imply 1,387,412,179 payload bytes (sealing + three rounded bitsets). New Step(1)
+  allocation passes a 64 KiB cap. The enormous volume is NEVER traversed by the
+  test. Completed-room comparison uses one interior cell across seven passes.
+- Five page tests cover dense/paged reuse, boundary/rank equivalence, and only
+  two retained pages through 16 shifting-key generations.
+- Three small occlusion examples compare the original ray predicate and
+  transformed/cached corners, plus camera-cell/topology/frame invalidation.
+- Empty/two-block geometry examples verify offsets, cell order and ownership.
+
+The earlier CPU timing receipts retain their original source fingerprints.
+They measure the initial isolated hot-path changes, not final combined-tree
+performance after this continuation. No native frame-time improvement is claimed.
+Final git diff --check: passed.
+
+FINAL PAIRED CORE CHECK
+python3 tools/thermal-performance/core_benchmark.py --baseline 60677d353dddc0f8b90b7ee7733cdc8789bd3c27 --game-bin '/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64' --output tools/thermal-performance/results-core-continuation.json
+Build: 2.27 s, 0 warnings/errors. Eight bounded cases, 9 x 96 calls, no corpus.
+All captured states match exactly; all warm measured allocations remain zero.
+Final Core and fixture hashes are recorded in results-core-continuation.json.
+The active-coupling-v2 coolant fixture uses zero block conductivity so the
+corrected inactive-conduction stability behavior does not invalidate parity.
+It is not directly comparable with the initial coolant fixture's timings.
+Final medians ms/batch: floored stability 0.207287 -> 0.142853 (31.1% down);
+resolved coolant 1.420466 -> 1.194875 (15.9% down); well-mixed coolant
+0.337635 -> 0.312868 (7.3% down); ordinary unfloored stepping unchanged within
+noise (24.045077 -> 24.097227). This excludes room initialization and native work.
+
+CONTACT, CACHE AND SPARSE-QUERY CHECKPOINTS
+Later Core changes mean results-core-continuation.json is a historical checkpoint,
+not a timing receipt for the later contact/scratch slicing source.
+
+Initial sparse room-contact fixture: 3 passed, 1 failed (50 ms). The fixture
+created a room at its production default pressure of zero, then expected an air
+contact. Setting pressure to one fixes the fixture and exercises contact building;
+the production sparse fallback needed no correction.
+
+First game build found prohibited Comparison<Candidate> and
+ArgumentOutOfRangeException in new view helpers. Replaced with the admitted
+IComparer<Candidate> and ArgumentException patterns; NoPackage build passed,
+0 errors, same existing obsolete billboard warning (11.48 s).
+
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoupledSliceTests|FullyQualifiedName~CoreHotPathTests|FullyQualifiedName~HeatSourceSliceTests|FullyQualifiedName~SparseGridQueryTests|FullyQualifiedName~ThermalVisionAdmissionTests|FullyQualifiedName~ThermalApiInputsTests|FullyQualifiedName~GeometryEqualityUsesNormalizedWeightsRatherThanRegistrationState' --results-directory out/validation --logger 'trx;LogFileName=review-contact-cache.trx' -v quiet
+Result: 34 passed, 0 failed, 0 skipped; 33 ms test execution.
+
+After device/pressure mutation invalidation, sparse diagnostic normals, released
+shadow occluders, and shared surface workspace: NoPackage build passed (12.38 s).
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoupledSliceTests|FullyQualifiedName~SparseGridQueryTests|FullyQualifiedName~RoomPagedStorageTests|FullyQualifiedName~ThermalVisionSurfaceScratchTests' --results-directory out/validation --logger 'trx;LogFileName=review-coupled-invalidation.trx' -v quiet
+Result: 20 passed, 0 failed, 0 skipped; 54 ms test execution.
+
+After moving parcel-watts/room-scratch clearing into coupled ranges and adding
+removed-cue pruning/callback dispatch: NoPackage build passed (10.78 s).
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoupledSliceTests|FullyQualifiedName~CoreHotPathTests|FullyQualifiedName~HeatCueLifetimeTests|FullyQualifiedName~ThermalThresholdDispatchTests' --results-directory out/validation --logger 'trx;LogFileName=review-clears-callbacks.trx' -v quiet
+Result: 26 passed, 0 failed, 0 skipped; 39 ms test execution.
+
+These selections overlap and are not summed as unique tests. Coupled examples
+use four blocks, sparse query examples three/five blocks, cue pruning four cues,
+and surface scratch three 125-sample lattices. No corpus/native gameplay run.
+The contact budget does not claim to bound atomic ApplyCoupledWatts/advection or
+provide transactional rollback of already-applied public coupled temperatures.
+
+DIAGNOSTIC AND API CONTRACT CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 13.43 s.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoupledSliceTests|FullyQualifiedName~EveryTestClassIsInTheIndex|FullyQualifiedName~EveryTestClassSaysWhatItIsFor|FullyQualifiedName~EveryToolIsNamedByItsReadme|FullyQualifiedName~ModApiShapeTests' --results-directory out/validation --logger 'trx;LogFileName=review-diagnostics-contracts.trx' -v quiet
+Result: 18 passed, 2 failed, 0 skipped; 50 ms test execution.
+The two source-documentation checks found a missing FrameBudgetTests summary and
+the new climate-cache class missing from tests/README.md. Corrected both.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~EveryTestClassIsInTheIndex|FullyQualifiedName~EveryTestClassSaysWhatItIsFor' --results-directory out/validation --logger 'trx;LogFileName=review-index-repair.trx' -v quiet
+Result: 2 passed, 0 failed, 0 skipped; 43 ms. These read source, so no rebuild needed.
+
+STEP SNAPSHOT, CLIMATE AND PACKET CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 81.30 s (host/setup latency increased;
+the small test/benchmark workload sizes were not expanded).
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoupledSliceTests|FullyQualifiedName~ThermalVisionClimateCacheTests|FullyQualifiedName~AnEmptyHullSnapshotAcknowledgesWithoutClearingKnownTemperatures|FullyQualifiedName~AnOverflowingRecordCountIsRejectedBeforeReadingAnyRecords' --results-directory out/validation --logger 'trx;LogFileName=review-step-snapshot.trx' -v quiet
+Result: 21 passed, 0 failed, 0 skipped; reported duration 2 s. The appended-node
+coupled bound correction/test was added afterward and is not included in this run.
+
+CONTACT-SLICING PAIRED CORE CHECKPOINT
+python3 tools/thermal-performance/core_benchmark.py --baseline 60677d353dddc0f8b90b7ee7733cdc8789bd3c27 --game-bin '/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64' --output tools/thermal-performance/results-core-contact-slices.json
+Build 16.54 s, 0 warnings/errors; source setup was unusually slow. Same 8 cases,
+9 x 96 calls, no corpus. All captured states exact; warm allocations zero in both versions.
+Median before/after ms per 96 calls:
+  stability unfloored .122985 / .120080
+  stability floored .208829 / .137994
+  fullstep unfloored 24.063761 / 24.106052
+  fullstep floored 2.836611 / 2.763001
+  coolant clamped .357654 / .342625
+  coolant resolved 1.432698 / 1.161540
+  coolant stagnant .368664 / .359447
+  coolant wellmixed .338828 / .324049
+Source and fixture hashes remain in the JSON. This whole-step checkpoint includes
+coupled slicing, scratch/diagnostic fusion, guarded demand queries and appended-node
+diagnostic bounds. It predates later persistence edits and excludes native work.
+
+PERSISTENCE AND APPENDED-NODE CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning; 169.13 s elapsed on the slow host.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~PersistenceRestoreTests|FullyQualifiedName~AppendedNodesWaitForTheNextStepInBothCoupledPaths|FullyQualifiedName~TemperatureResetOrRoomRestoreCancelsPendingContactWork' --results-directory out/validation --logger 'trx;LogFileName=review-persistence-anchors.trx' -v quiet
+Result: 7 passed, 0 failed, 0 skipped; reported duration 1 s. The persistence cases
+use one block/one room cell; paused-step cases use the existing four-block rig.
+The build also includes unknown-sky palette consistency and proactive sky detail reporting.
+
+BENCHMARK SETUP EXTRACTION CHECK
+The baseline runner now uses two source-extraction Git processes instead of 93.
+Extraction-only validation preserves baseline SHA256
+71ab82cb4694a78d34009190545c610b722b46865ada122ccaaf65f60c262442
+and all 92 transformed paths/content match an independent git archive extraction.
+A missing revision fails before build. No timing workload or .NET tests rerun for this change.
+
+COOLANT, SHADOW SLABS, NEAR-PLANE AND STREAMING CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 17.49 s.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~CoolantApplyTests|FullyQualifiedName~CoupledSlicesMatchFrozenContactEquationsAndPreserveTheApplyBoundary|FullyQualifiedName~MultiCellShadowSkinMatchesTheOccupiedCellOracleAfterRotation|FullyQualifiedName~ThermalVisionOcclusionTests.ClippedNativeFront|FullyQualifiedName~ThermalVisionOcclusionTests.CachedCandidate|FullyQualifiedName~ClosingOneGridRequestsItsReplacementWithoutForgettingAnotherHull' --results-directory out/validation --logger 'trx;LogFileName=review-boundary-paths.trx' -v quiet
+Result: 8 passed, 0 failed, 0 skipped; 26 ms. At most four blocks/parcels.
+This checkpoint predates shadow-skin reuse, the slab fallback for nonpositive model
+dimensions, topology-job cancellation and the external-write temperature-floor fix.
+
+SHADOW REUSE, PUBLICATION, NUMERIC AND VISION LIFETIME CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 20.05 s.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~SunShadowReuseTests|FullyQualifiedName~MultiCellShadowSkinMatchesTheOccupiedCellOracleAfterRotation|FullyQualifiedName~ExternalTemperatureWriteTests|FullyQualifiedName~ThermalNumericBoundaryTests|FullyQualifiedName~AppendedNodeEnvironmentTests|FullyQualifiedName~ThermalVisionRefreshLifecycleTests|FullyQualifiedName~EmptyNearCapMayReturnTheOtherScratchBufferWhileItsVolumeRemainsVisible|FullyQualifiedName~SharedOcclusionBudgetKeepsVisibleLeavesWhenPartialBlockerExhaustsIt|FullyQualifiedName~ReturningSnapshotsResumeAndClosedOrClearedViewsReleaseWork|FullyQualifiedName~EveryTestClassIsInTheIndex|FullyQualifiedName~EveryTestClassSaysWhatItIsFor|FullyQualifiedName~HeatSourceSnapshotTests' --results-directory out/validation --logger 'trx;LogFileName=review-snapshot-boundaries.trx' -v quiet
+Result: 17 completed-change cases passed; the separate pre-fix HeatSourceSnapshotTests
+reproducer failed as expected. 18 total, 325 ms. Mutating its one source between two node
+visits changed reported gain from expected 625.000061 to 937.500122. Normal game sampling
+was traced and does not mutate this buffer in flight; the public Core alias is the exposed
+boundary. A private retained-capacity step snapshot was implemented after this checkpoint.
+
+SOURCE SNAPSHOT AND CONDUCTANCE SCAN CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 173.19 s on the slow host.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~HeatSourceSnapshotTests|FullyQualifiedName~HeatSourceSliceTests|FullyQualifiedName~ConductanceScansObserveFreshLoopFactorsAndPreserveInvalidContactBounds|FullyQualifiedName~CoolantExchangeMatchesTheFrozenLoop|FullyQualifiedName~SparseTopologyAndRoomQueriesAllocateByBlocksRatherThanEmptyBounds' --results-directory out/validation --logger 'trx;LogFileName=review-source-hoist.trx' -v quiet
+Result: 14 passed, 0 failed, 0 skipped; 348 ms. The two-node source mutation reproducer
+now passes, including null/negative/oversized source-count normalization. Frozen coolant
+equations and mutable loop-factor checks pass after hoisting factors once per scan.
+The sparse three-block query and rebuilt source rigs also exercise removal of the redundant
+second full-rebuild chain reset. No timing improvement is claimed for this checkpoint.
+
+ADAPTER, LOOP LIFETIME AND DISPLAY INPUT CHECKPOINT
+Initial NoPackage build found a new local-name collision in the vision refresh iterator
+(mean scan vs mean scalar); renamed the scalar. Rebuild: 0 errors, 1 existing warning, 2.86 s.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~LoopRebuildScratchTests|FullyQualifiedName~QueriesUsePublishedNodesBeforePreparationAndAcrossAnAppendedStep|FullyQualifiedName~DirectTemperatureImportsIgnoreNonfiniteRecordsAndPreserveFiniteFloorAndQuantum|FullyQualifiedName~ThermalOccluderTransformTests|FullyQualifiedName~ThermalVisionTemperatureDataTests|FullyQualifiedName~EveryTestClassIsInTheIndex|FullyQualifiedName~EveryTestClassSaysWhatItIsFor' --results-directory out/validation --logger 'trx;LogFileName=review-adapter-boundaries.trx' -v quiet
+Result: 9 behavior cases and the class-summary check passed; the test-index check found the
+missing ThermalVisionTemperatureDataTests entry. 11 total, 434 ms. Added that entry.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~EveryTestClassIsInTheIndex' --results-directory out/validation --logger 'trx;LogFileName=review-adapter-index.trx' -v quiet
+Result: 1 passed, 0 failed, 0 skipped; 179 ms. Behavioral fixtures use at most two blocks,
+two coolant parcels, one displayed cell or one transform pair. No native rendering timing.
+The build includes the unattached billboard sentinel, shared sky camera snapshot, normal-light
+distance gate and applied-settings read path. This checkpoint predates the newly identified
+empty-first-scan recovery and settings-revision cancellation follow-ups.
+
+SETTINGS CANCELLATION AND VISION RECOVERY CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 18.59 s.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~SettingsRevisionTests.RevisionsCancelBeforeRescalingAndWaitForAFreshSample|FullyQualifiedName~ThermalVisionTemperatureDataTests|FullyQualifiedName~ParallelTickTests.TheSolveHalfNamesNothingThatBelongsToTheGame|FullyQualifiedName~EveryTestClassIsInTheIndex|FullyQualifiedName~EveryTestClassSaysWhatItIsFor' --results-directory out/validation --logger 'trx;LogFileName=review-settings-recovery.trx' -v quiet
+Result: 6 passed, 0 failed, 0 skipped; 468 ms. One block/parcel/air node checks revision
+cancellation, all heat-time scales, no false completion, skipped-sample deferral and the
+existing two-argument Update contract. One-cell fixtures check unknown/over-range inputs
+and temperatures recovering between detail and mean scans. The build also includes sky
+center/seam reuse and disabled-shadow/temporary-native-reference cleanup.
+
+TWO-LOOP LOOKUP REUSE CHECKPOINT
+python3 tools/thermal-performance/core_benchmark.py --baseline 60677d353dddc0f8b90b7ee7733cdc8789bd3c27 --game-bin '/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64' --case loop-rebuild --output tools/thermal-performance/results-core-loop-rebuild.json
+Build: 7.06 s, 0 warnings/errors. Only the selected two-node/two-loop case ran:
+24 warmups, 9 alternating samples x 96 replacements, no step workloads or corpus.
+Captured state matches exactly after every batch. Median before/after batch time:
+0.029005 / 0.014848 ms; best 0.027112 / 0.012704 ms. Warm allocated bytes per
+96 replacements: 68,352 / 6,144, or 712 / 64 bytes each (about 91% less).
+The JSON retains every sample and source/fixture hashes. Remaining allocations at
+this checkpoint are two empty List<GridPort> instances; it predates their removal.
+Only SetLoops lookup/link work is timed, excluding discovery, native adapters,
+rendering and networking. The .NET 9 allocation benefit is the stronger evidence;
+these tiny CPU batches do not measure native frame time.
+
+PORT ITERATION, SHADOW REFERENCE AND ADAPTER LOOKUP CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 12.06 s. The real mod analyzer accepts
+the reference-identity comparer used by the adapter's per-pass heat-pump lookup.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~LoopRebuildScratchTests|FullyQualifiedName~SunShadowReuseTests|FullyQualifiedName~HeatPumpDeviceLookupTests|FullyQualifiedName~DirectPortDiscoveryMatchesLegacyAcrossFourPipeMutations|FullyQualifiedName~ParallelTickTests.TheSolveHalfNamesNothingThatBelongsToTheGame|FullyQualifiedName~EveryTestClassIsInTheIndex|FullyQualifiedName~EveryTestClassSaysWhatItIsFor' --results-directory out/validation --logger 'trx;LogFileName=review-port-lookups.trx' -v quiet
+Result: 9 passed, 0 failed, 0 skipped; 55 ms. At most four pipes or three shadow
+blocks. The build also covers removal of the independent renderer's unused global
+field alias and correction of its obsolete unlimited-quota activation message.
+
+TWO-LOOP DIRECT SINK-PORT CHECKPOINT
+python3 tools/thermal-performance/core_benchmark.py --baseline 60677d353dddc0f8b90b7ee7733cdc8789bd3c27 --game-bin '/home/gauge/Steam/SteamLibrary/steamapps/common/SpaceEngineers/Bin64' --case loop-rebuild --output tools/thermal-performance/results-core-loop-ports.json
+Build: 2.24 s, 0 warnings/errors. Same single two-node fixture, 24 warmups and
+9 x 96 replacements. Captured state matches exactly after every batch.
+Median before/after: 0.029827 / 0.011823 ms per 96 calls; best 0.025669 / 0.011703 ms.
+Warm allocations: 68,352 / 0 bytes per 96 calls (712 / 0 per replacement).
+This compares lookup reuse plus direct sink iteration against the original baseline;
+it excludes discovery, native adapter/renderer work and first-use capacity growth.
+The discovery port removal is covered by the four-pipe oracle only, not this timing.
+Source and fixture hashes remain in the JSON. Later exposure-cursor edits are excluded.
+
+EXPOSURE SWEEP COMPLETION CHECKPOINT
+NoPackage build: 0 errors, 1 existing warning, 6.47 s.
+systemd-run --user --scope -p MemoryMax=4G -p MemorySwapMax=0 --quiet dotnet test tests/Thermodynamics.Tests --no-build --no-restore --filter 'FullyQualifiedName~MaximumBudgetDrainsAPartialSweepWithoutOverflowOrNegativeWork' --results-directory out/validation --logger 'trx;LogFileName=review-exposure-drain.trx' -v quiet
+Result: 2 passed, 0 failed, 0 skipped; 30 ms. Each starts with two adjacent cubes,
+consumes one node, then drains using int.MaxValue, with/without removing both cubes
+before the drain. Visit/write counters remain exact and completion is a no-op.

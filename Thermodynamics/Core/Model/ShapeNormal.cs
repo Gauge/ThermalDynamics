@@ -18,17 +18,30 @@ namespace Thermodynamics.Core
         {
             if (occupancy == null || block == null || radius < 1) return Vector3.Zero;
 
-            if (radius == 1 && block.CellCount == 1) return OneCell(occupancy, block.Min);
+            if (radius == 1 && block.CellCount == 1) return OneCell(occupancy, null, block.Min);
 
 
             return Walking(occupancy, block, radius);
+        }
+
+        // Diagnostic queries on sparse grids need only the local neighbourhood, not a dense hull.
+        internal static Vector3 OfGrid(GridModel grid, BlockInstance block, int radius = Radius)
+        {
+            if (grid == null || block == null || radius < 1) return Vector3.Zero;
+            CellBitset occupancy = grid.OccupancyForQueries();
+            if (radius == 1 && block.CellCount == 1) return OneCell(occupancy, grid, block.Min);
+            return Walking(occupancy, grid, block, radius);
         }
 
 
         public static Vector3 Walking(CellBitset occupancy, BlockInstance block, int radius)
         {
             if (occupancy == null || block == null || radius < 1) return Vector3.Zero;
+            return Walking(occupancy, null, block, radius);
+        }
 
+        private static Vector3 Walking(CellBitset occupancy, GridModel grid, BlockInstance block, int radius)
+        {
             Vector3I min = block.Min;
             Vector3I maxExclusive = block.MaxExclusive;
 
@@ -53,7 +66,8 @@ namespace Thermodynamics.Core
                             continue;
                         }
 
-                        if (!occupancy.Contains(new Vector3I(x, y, z))) continue;
+                        Vector3I cell = new Vector3I(x, y, z);
+                        if (!(occupancy != null ? occupancy.Contains(cell) : grid.IsOccupied(cell))) continue;
 
 
                         Vector3 offset = new Vector3(x - centre.X, y - centre.Y, z - centre.Z);
@@ -119,13 +133,14 @@ namespace Thermodynamics.Core
         }
 
 
-        private static Vector3 OneCell(CellBitset occupancy, Vector3I min)
+        private static Vector3 OneCell(CellBitset occupancy, GridModel grid, Vector3I min)
         {
             Vector3 sum = Vector3.Zero;
 
             for (int i = 0; i < OneCellOffsets.Length; i++)
             {
-                if (!occupancy.Contains(min + OneCellOffsets[i])) continue;
+                Vector3I cell = min + OneCellOffsets[i];
+                if (!(occupancy != null ? occupancy.Contains(cell) : grid.IsOccupied(cell))) continue;
 
                 sum -= OneCellUnits[i];
             }

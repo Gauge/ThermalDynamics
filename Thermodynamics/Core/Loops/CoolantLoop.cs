@@ -57,10 +57,20 @@ namespace Thermodynamics.Core
 
         public int ParcelOf(int pipeIndex)
         {
-            if (segmentCount <= 0) return 0;
+            if (segmentCount <= 1) return 0;
 
-            int slot = (pipeIndex - shift) % segmentCount;
+            int slot = pipeIndex - shift;
+            // A valid pipe and the ring origin differ by less than one circuit.
+            if ((uint)pipeIndex < (uint)segmentCount)
+                return slot < 0 ? slot + segmentCount : slot;
+
+            slot %= segmentCount;
             return slot < 0 ? slot + segmentCount : slot;
+        }
+
+        internal float ParcelTemperature(int parcel)
+        {
+            return segments[parcel];
         }
 
         public int ParcelCount
@@ -421,6 +431,12 @@ namespace Thermodynamics.Core
         private float[] segmentWatts = new float[0];
 
 
+        internal void EnsureSegmentWatts()
+        {
+            if (segmentWatts.Length != segmentCount) segmentWatts = new float[segmentCount];
+        }
+
+
         internal void ClearSegmentWatts()
         {
             if (segmentWatts.Length != segmentCount) segmentWatts = new float[segmentCount];
@@ -428,14 +444,40 @@ namespace Thermodynamics.Core
         }
 
 
-        internal void ApplyParcelWatts(int parcel, float watts, float h, float effectiveMass)
+        internal void ApplyWattsAndAdvect(float h, float effectiveMass)
         {
-            if (segments == null || parcel < 0 || parcel >= segmentCount) return;
+            int count = Math.Min(segmentCount, segmentWatts.Length);
+            float parcels = FlowSegmentsPerSecond * h;
+            bool mixing = segmentCount > 1 && (parcels > 1f || parcels < -1f);
+            float total = 0f;
+            float[] temperatures = segments;
+            float[] watts = segmentWatts;
 
-            float updated = segments[parcel] + (watts * h / effectiveMass);
-            segments[parcel] = updated < ThermalConstants.MinimumTemperature
-                ? ThermalConstants.MinimumTemperature
-                : updated;
+            if (mixing)
+            {
+                // The original mixing pass sums the applied, clamped values in parcel order.
+                // Accumulate that same sum here to avoid rereading the entire ring.
+                for (int i = 0; i < count; i++)
+                {
+                    float updated = temperatures[i] + (watts[i] * h / effectiveMass);
+                    temperatures[i] = updated < ThermalConstants.MinimumTemperature
+                        ? ThermalConstants.MinimumTemperature : updated;
+                    total += temperatures[i];
+                }
+                // Public topology edits may resize parcels before the watts buffer is refreshed.
+                for (int i = count; i < segmentCount; i++) total += temperatures[i];
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    float updated = temperatures[i] + (watts[i] * h / effectiveMass);
+                    temperatures[i] = updated < ThermalConstants.MinimumTemperature
+                        ? ThermalConstants.MinimumTemperature : updated;
+                }
+            }
+
+            Advect(h, mixing, total);
         }
 
         public bool WellMixed
@@ -455,6 +497,12 @@ namespace Thermodynamics.Core
 
         public void Advect(float h)
         {
+            Advect(h, false, 0f);
+        }
+
+
+        private void Advect(float h, bool hasTotal, float total)
+        {
             if (segmentCount < 2 || FlowSegmentsPerSecond == 0f) return;
 
             float parcels = FlowSegmentsPerSecond * h;
@@ -471,18 +519,21 @@ namespace Thermodynamics.Core
             }
 
             float magnitude = parcels < 0f ? -parcels : parcels;
-            if (magnitude > 1f) MixToward(1f - (1f / magnitude));
+            if (magnitude > 1f) MixToward(1f - (1f / magnitude), hasTotal, total);
         }
 
 
-        private void MixToward(float fraction)
+        private void MixToward(float fraction, bool hasTotal, float total)
         {
             if (segmentCount < 2) return;
             if (fraction <= 0f) return;
             if (fraction > 1f) fraction = 1f;
 
-            float total = 0f;
-            for (int i = 0; i < segmentCount; i++) total += segments[i];
+            if (!hasTotal)
+            {
+                total = 0f;
+                for (int i = 0; i < segmentCount; i++) total += segments[i];
+            }
 
             float mean = total / segmentCount;
             for (int i = 0; i < segmentCount; i++)

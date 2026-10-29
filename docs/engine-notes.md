@@ -47,29 +47,29 @@ Reference points:
 
 ---
 
-## The game already computes airtight rooms — **highest value**
+## Native airtight rooms — opportunity and limits
 
-`ThermalGridMapper` is 725 lines that classify every cell as external, sealed structure, or an
-interior room, restarting the whole flood fill on every block change. The engine already does
-this for pressurisation, incrementally, and exposes it on the mod API:
+**Reinspected 2026-10-28.** The current mod already has room-air temperature and a
+portable `RoomMapper`. It maps structural sealing and tracks live door portals;
+the native gas system maps current pressurisation. The native API remains a useful
+adapter opportunity, but it is not a drop-in replacement for that room map.
 
 ```csharp
 IMyGridGasSystem gas = grid.GasSystem;              // VRage.Game.ModAPI.IMyCubeGrid
 
 List<IMyOxygenRoom> rooms = new List<IMyOxygenRoom>();
-gas.GetRooms(rooms);
+bool available = gas.GetRooms(rooms);             // appends; caller clears a reused list
 
 Vector3I cell = block.Position;
-IMyOxygenRoom room = gas.GetOxygenRoomForCubeGridPosition(ref cell);   // null outside any room
+IMyOxygenRoom room = gas.GetOxygenRoomForCubeGridPosition(ref cell);   // null is ambiguous
 
 bool sealed_    = room.IsAirtight;
 float oxygen    = room.OxygenLevel(grid.GridSize);
 float outside   = room.EnvironmentOxygen;
 HashSetReader<Vector3I> cells = room.Blocks;
 
-gas.OnProcessingDataComplete += RefreshExposure;    // same signal as SurfaceCheckComplete
+gas.OnProcessingDataComplete += RefreshExposure;    // Action property, not a versioned snapshot
 bool busy = gas.IsProcessingData;
-gas.ForcePressurize = true;
 ```
 
 The engine's own airtightness test is public too — the logic
@@ -79,23 +79,54 @@ The engine's own airtightness test is public too — the logic
 bool airtight = MyGridGasSystem.IsAirtightBlock(block, cell, normal);   // Sandbox.Game.GameSystems
 ```
 
-What this could replace: the surface bit flags, the external flood fill, the room detection, and
-the per-block `BeginCrawl` restart that is finding **P1** in
-[known-issues.md](known-issues.md). `GetOxygenRoomForCubeGridPosition` is an O(1)
-lookup where the mod currently maintains its own dictionary and queue machinery.
+The installed `MyGridGasSystem.GetRooms` first checks that processing has stopped
+and that the room list exists. It then rebuilds `Blocks` for **every** room by
+calling `CollectRoomCells`, allocating a new hash set and scanning the native
+stored cells for each room. The exterior top room is included. The returned
+interface objects are live mutable room metadata, not detached snapshots.
+`GetRooms` therefore cannot cheaply import only interior cells or guarantee
+bounded preparation time. A point query is a direct forward lookup, but it has
+no processing guard: null can mean outside the stored bounds, a solid/unmapped
+cell, absent data, or data being rebuilt. It does not by itself prove exposure.
+`MyOxygenRoom.Blocks` is a nullable export field populated by `GetRooms`; querying
+a room first and reading `Blocks` does not avoid that export cost.
 
-It also unlocks something the mod cannot currently model at all: `OxygenLevel` and
-`EnvironmentOxygen` per room mean **interior air can have a temperature and convect**, instead of
-sealed interior faces simply dropping out of the exposed count.
+Completion sets `IsProcessingData` false, invokes the callback, then schedules
+further work; edits queued during a worker can still need another pass.
+`OnProcessingDataStart` is invoked for full generation in the inspected code,
+but not the incremental refresh, shrink or removal starts. A start/complete
+event counter alone is therefore not a reliable snapshot version. `ForcePressurize`
+only sets a flag used to allow work without vents; its setter neither schedules
+generation nor creates a gas system. It must not be used as a presumed free
+optimization. Native generation itself still scans the bounding volume when
+finding empty rooms. `MyCubeGridSystems` constructs `GasSystem` only on the
+server when both `EnableOxygen` and `EnableOxygenPressurization` are enabled.
+Client and disabled-system coverage therefore requires the core fallback.
 
-**Verify in game before committing to it:**
+There is also a semantic difference: native rooms merge and split as doors move,
+whereas `RoomMapper` keeps structurally separated regions and updates portal
+reachability. Importing native rooms would change anchors and room-air temperature
+preservation unless the adapter explicitly reconciles those changes. The core
+still needs structural/occupied-cell classification, face exposure, cell counts,
+room contacts and deterministic identity; native room membership alone does not
+replace the surface map.
 
-* Whether room data is populated when `EnableOxygenPressurization` is off in world settings, and
-  exactly what `ForcePressurize` does about that. There must be a fallback — the extracted
-  `RoomMapper` in `Core/` is that fallback, and it is already tested.
-* Whether "not in any room" reliably means "open to space" for the exposed-surface rule. The
-  gas system cares about pressure, the thermal model cares about line of sight to vacuum; they
-  agree in the normal case but may differ for open lattice blocks.
+A future host provider should publish detached, immutable thermal inputs and
+retain the previous complete map while its replacement is uncertain. It needs
+adapter-owned topology tracking, stale/pending-work rules, a door/air-state
+mapping and bounded copying. Boundary point queries plus native room counts may
+avoid the expensive bulk export, but supporting that representation requires a
+new core contract; it cannot be substituted behind the existing cell-enumeration
+API. No native-room provider is enabled by this review.
+
+The implementation evidence above is static inspection of the installed
+`Sandbox.Game.dll` (`de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf`)
+and shipped XML documentation. Existing oxygen diagnostics already compile the
+point-query path. The installed whitelist bootstrap admits the
+`VRage.Game.ModAPI` and `VRage.Collections` namespaces, covering these interfaces
+and `HashSetReader`; those declarations were reinspected, but no new bulk-API
+analyzer probe was run. This review does not claim an in-game snapshot or
+concurrency validation of the bulk API.
 
 ## Parallelism is available to mods
 
@@ -335,6 +366,64 @@ expressed as a share of a day rather than as absolute seconds, which is the outs
   `UpdateBeforeSimulation`, `Simulate`, `UpdateAfterSimulation` and `Draw`. The coarser cadences
   are entity-component only, via `MyEntityUpdateEnum`.
 
+## Billboard batching and ownership
+
+**Inspected 2026-10-28** in the installed `VRage.Game.dll`, `VRage.Render.dll`,
+`VRage.Render11.dll` and `VRage.Library.dll`. `MyTransparentGeometry.AddTriangleBillboard`
+allocates from an engine-owned reusable pool, looks up the material, computes camera distance,
+and submits under one `MyRenderProxy.AddBillboard` lock per triangle. The admitted
+`AddBillboards(IEnumerable<MyBillboard>, false)` path instead takes one lock and appends the
+references with `List.AddRange`, preserving order. The renderer already groups adjacent compatible
+materials into GPU batches, so fewer submission locks do not imply fewer draws or triangles.
+
+Both the installed native whitelist and MDK 2.1.16 admit `VRage.Game.*`, `MyBillboard` and
+`MyTriangleBillboard`. They do not admit `MyRenderProxy` or its transient pool. A caller-owned
+billboard passed to `AddBillboards` is retained by reference, not copied. The internal
+`MySharedData`/`MySwapQueue` exchanges three buffers, but a read buffer can remain in use while
+arbitrarily many new writes replace the waiting buffer. Cycling a custom object pool every two
+or three frames therefore does not establish safe reuse. Allocating new objects each frame
+would trade the existing pool for garbage collection and is not an automatic optimization.
+
+Persistent billboards provide a documented update path through
+`ApplyActionOnPersistentBillboards(Action)`. They need explicit removal and a different ordering
+plan: the renderer gathers persistent entries after transient entries, while initial persistent
+registration also submits the same references transiently. PostPP retains submission order.
+This route needs lifecycle and native rendering validation before replacing the transient thermal
+pass; no custom batch pool is enabled by this inspection.
+
+For already-world-space triangle vertices, `uint.MaxValue` is the unparented sentinel used by
+native `CreateBillboard`. Every other parent ID makes `MyBillboardRenderer.GatherInternal` attempt
+an actor lookup. The thermal triangle submissions use this sentinel to avoid unnecessary lookups
+without changing engine pooling. These are inspected API/control-flow facts, not measured frame
+time or GPU improvements.
+
+## Character highlights do not solve thermal-view readability
+
+**Inspected 2026-10-28** in the installed renderer, highlight system and shaders.
+`MyRender11.DrawGameScene` runs `MyHighlight.Run` before `RenderPostPP`, so the
+opaque thermal bands cover its fill and outline. Independently,
+`MyHighlightPass.Begin` selects `WriteHighlightStencil`: depth is disabled and
+highlight pixels receive stencil bit 64. Ordinary scene depth therefore does not
+prevent a hidden character from being highlighted.
+
+The overlapping-model pass depth-tests with `Equal`, but redraws only explicitly
+registered renderable/instance actors and writes bit 128. The inner blend accepts
+`(stencil & 192) == 64`. Registering the highlighted character itself would reject
+its visible pixels (192), while hidden pixels could remain 64: this is not a
+visible-character mask. Native character code registers the locally controlled
+suit and held items to suppress highlights over them, not every scene occluder.
+Thickness zero removes a highlight; it does not select a cheaper fill-only mode.
+Positive highlights add mesh redraw, copied depth, blur and fullscreen blending.
+
+API availability is separate from that rendering evidence. The inspected MDK
+2.1.16 whitelist admits the provider's `Sandbox.Game` namespace; it has no entry
+for `MyRenderProxy` or `Sandbox.Game.SessionComponents.MyHighlightSystem`.
+`MyVisualScriptLogicProvider.SetHighlightLocal(name, ...)` directly invokes the
+local path with the default player ID. The ordinary `SetHighlight(name, ...)`
+overload instead raises a reliable server-invoked broadcast event. A local entry
+point thus exists, but does not fix ordering or occlusion. No game invocation,
+highlight ownership, material, settings, physics or network state was changed.
+
 ---
 
 ## Re-running the survey
@@ -411,17 +500,27 @@ Surveyed in `~/Steam/SteamLibrary/steamapps/common/SpaceEngineers2/Game2`, gathe
 | Architecture | `MyGameLogicComponent` on entities | **DCS**, Keen's ECS: `Keen.VRage.DCS.Components.Entity` + `GameComponent` |
 | Grid type | `MyCubeGrid` | `CubeGridComponent` |
 | Block type | `IMySlimBlock` / `MyCubeBlock` | `CubeBlockComponent` (a component on an `Entity`) |
-| Mod API | `Sandbox.ModAPI` + whitelist | **none public yet** |
+| Mod API | `Sandbox.ModAPI` + whitelist | No compatible public thermal-mod API identified in the inspected installation |
 
 There is no `VRage.Math.dll` in SE2 at all.
 
 ### Modding status
 
-Only UGC *management* types are public (`Keen.Game2.Client.UI.Shared.UGC.Mods.*` — view models
-and configuration). `VRage.Scripting` contains `ScriptWhitelist`, `IScriptWhitelistProvider`,
-`WhitelistDiagnosticAnalyzer` and `ScriptCompiler`, so a scripting surface is clearly planned,
-but nothing equivalent to `Sandbox.ModAPI` exists today. **An SE2 adapter cannot be written
-yet.** This does not affect the model design, only when it can be hosted.
+The installed game and Mod SDK were re-inspected on 2026-10-28. The game's
+`SpaceEngineers2.runtimeconfig.json` still targets .NET 9 with server GC;
+`VRage.DCS.xml` describes entity-data accessors, and `Game2.Simulation.xml` describes
+linear block-octree storage and occupancy bitsets. `VRage.Scripting.xml` exposes internal
+in-game script memory budgets. These engine facilities do not establish permission for a
+third-party mod to use them. No compatible public thermal-mod entry point, update/physics
+contract or rendering API was identified in that installation or SDK.
+
+The previous categorical statement that only UGC types are public and no code API exists
+was broader than this evidence supports. Keen's [VS1.5 announcement](https://support.keenswh.com/spaceengineers2/pc/announcement/space-engineers-2-alpha-vs-1-5-modding)
+explicitly deferred scripting APIs at that release; it is historical evidence, not a promise
+about later builds. The core is portable design, **not a verified SE2 implementation**.
+Its `VRageMath` dependency needs adaptation, cell-based topology needs a coarse/hierarchical
+representation at the 25 cm lattice, and the host adapter must be validated against a supported
+API when available. Preserving node/link physics does not make the existing mod binary compatible.
 
 ---
 
@@ -668,7 +767,9 @@ object-builder type.
 2. Can all eight block sizes coexist on one grid, or does `RelativeBlockSize` partition them?
 3. What is the largest block size a modder can define — is 4 a hard tier cap?
 4. Does SE2 have a pressurisation/room system, and does it expose rooms the way SE1's
-   `IMyGridGasSystem` does? If so the room mapper can be deleted in both games.
+   `IMyGridGasSystem` does? If so, verify completed-snapshot publication, extraction
+   cost, disabled-system behavior and door semantics before defining a shared host
+   provider. The current portable mapper remains the fallback.
 5. What does `"CellSize": 64` in `GameData` refer to?
 
 ---
@@ -677,6 +778,8 @@ object-builder type.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Record admitted billboard batch APIs, retained-reference lifetime and persistent-order limitations; identify the native unparented sentinel without claiming GPU timing. |
+| 2026-10-28 | Reinspect SE1 native gas-room extraction, server/oxygen gates, completion and whitelist semantics; document bulk-copy and structural-door incompatibilities. Recheck installed SE2 runtime, DCS, octree and scripting metadata; distinguish engine internals from supported mod APIs and qualify earlier categorical compatibility claims. |
 | 2026-08-22 | Corrected two survey entries that read as open work and are not. The underground core temperature is built and the `//TODO` this page quoted no longer exists; block mass is re-read by a rota through `ThermalBlock.RefreshMass`, against the claim here that it was read once at construction. Both now state what is built and what is left — a survey of what the engine offers is worth nothing if a reader cannot tell which offers have been taken. |
 | 2026-08-22 | Merged `engine-api-notes.md` and `se2-research.md` into this page as Parts 1 and 2: both answer "what does the engine give us", and the design that consumes them treats them as one survey. Dropped the section numbering in favour of named anchors. Added the standard header and this log. |
 | 2026-08-20 | Wrote down what the engine gives and what was invented, which is what the wind and climate models are justified against. |

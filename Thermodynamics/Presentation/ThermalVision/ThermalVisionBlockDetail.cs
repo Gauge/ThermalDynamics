@@ -52,7 +52,11 @@ namespace Thermodynamics.Presentation
             if (coarse == null || coarse.Running || coarse.Failure != null || coarse.Generation == 0)
                 throw new ArgumentException("A complete coarse field is required");
             ThermalVisionRegionOrder order;
-            if (refine && !overflow && ThermalVisionRegionOrder.TryBuild(exact, budget, out order))
+            // Temperature data can arrive between the detail and mean scans.
+            // An empty first scan must not replace a populated mean with an
+            // empty reusable order; retain the current coarse geometry instead.
+            if (refine && !overflow && (exact.Count > 0 || coarse.Count == 0)
+                && ThermalVisionRegionOrder.TryBuild(exact, budget, out order))
 
             { AllExact = true; RefinedBlocks = exact.Count; return new List<Region>(exact); }
             for (int take = refine ? focus.Count : 0; take > 0; take /= 2)

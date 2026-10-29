@@ -73,6 +73,31 @@ namespace Thermodynamics.Tests
         }
 
         [Fact]
+        public void SharedOcclusionBudgetKeepsVisibleLeavesWhenPartialBlockerExhaustsIt()
+        {
+            var cells=new List<Region> {
+                new Region(new Vector3D(0,0,10),new Vector3D(1,1,11),300),
+                new Region(new Vector3D(8,0,10),new Vector3D(9,1,11),600) };
+            ThermalVisionRegionOrder order; Assert.True(ThermalVisionRegionOrder.TryBuild(cells,2,out order));
+            var eye=Vector3D.Zero;
+            var frustum=new BoundingFrustumD(MatrixD.CreateLookAt(eye,new Vector3D(0,0,1),Vector3D.Up)
+                *MatrixD.CreatePerspectiveFieldOfView(1.5,1.8,.1,100));
+            var blockers=new List<BoundingBoxD> { new BoundingBoxD(new Vector3D(-.5,-.5,2),new Vector3D(.5,.5,3)) };
+            var all=new List<Region>(); var visible=new List<Region>(); int hidden;
+            order.WriteVisibleNearToFar(eye,all,frustum); Assert.Equal(2,all.Count);
+            order.WriteVisibleNearToFar(eye,visible,frustum,blockers,out hidden);
+            Assert.Equal(1,hidden); Assert.Single(visible); Assert.Equal(cells[1],visible[0]);
+
+            int remaining=1;
+            order.WriteVisibleNearToFar(eye,visible,frustum,blockers,ref remaining,out hidden);
+            Assert.Equal(0,remaining); Assert.Equal(0,hidden); Assert.Equal(all,visible);
+            // A later tree shares the exhausted frame budget, rather than
+            // restarting the occlusion allowance or dropping untested leaves.
+            order.WriteVisibleNearToFar(eye,visible,frustum,blockers,ref remaining,out hidden);
+            Assert.Equal(0,remaining); Assert.Equal(0,hidden); Assert.Equal(all,visible);
+        }
+
+        [Fact]
 
         public void HierarchicalFrustumTraversalMatchesOrderedLeafFilteringForMovingViews()
         {

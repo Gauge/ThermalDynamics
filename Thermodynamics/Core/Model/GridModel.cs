@@ -97,6 +97,24 @@ namespace Thermodynamics.Core
             return occupied;
         }
 
+        internal bool PreferSparseCellStorage
+        {
+            get
+            {
+                if (blocks.Count == 0) return false;
+                Vector3I lower = Min, upper = Max;
+                long volume = ((long)upper.X - lower.X + 3)
+                    * ((long)upper.Y - lower.Y + 3) * ((long)upper.Z - lower.Z + 3);
+                return volume > 65536 && blocksByCell.Count <= volume / 16;
+            }
+        }
+
+        // The dense prefilter is optional: sparse queries already have an exact cell dictionary.
+        internal CellBitset OccupancyForQueries()
+        {
+            return PreferSparseCellStorage ? null : Occupancy();
+        }
+
 
         public void EnsureCellCapacity(int cells)
         {

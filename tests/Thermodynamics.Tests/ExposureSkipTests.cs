@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Thermodynamics.Core;
 using Thermodynamics.Harness;
+using VRageMath;
 
 namespace Thermodynamics.Tests
 {
@@ -20,12 +21,64 @@ namespace Thermodynamics.Tests
     /// <para>
     /// The reference here is the code the skip replaced, not the skip's own intent — six per-face
     /// writes and a `RefreshExposure`, which is unconditional and therefore cannot skip anything.
-    /// The last two tests are what keep the rest honest: without them a skip that never engaged, or
+    /// The unchanged-node and changed-face tests keep the rest honest: without them a skip that never engaged, or
     /// one that swallowed a real change, would pass every equivalence assertion above (`E8`).
     /// </para>
+    /// <para>Two adjacent blocks also pin maximum-budget completion and removal during a partial exposure sweep.</para>
     /// </summary>
     public class ExposureSkipTests
     {
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MaximumBudgetDrainsAPartialSweepWithoutOverflowOrNegativeWork(bool removeBeforeDrain)
+        {
+            var simulation = new ThermalSimulation(new ThermalSettings(), new GridModel(2.5f));
+            var model = BlockModel.Solid("exposure", Vector3I.One, 10f, BlockThermalProperties.Default());
+            var first = simulation.AddBlock(new BlockInstance(model, Vector3I.Zero, BlockOrientation.Identity), 300f);
+            var second = simulation.AddBlock(new BlockInstance(model, Vector3I.UnitX, BlockOrientation.Identity), 300f);
+            simulation.RebuildAll();
+            Assert.Equal(5, first.TotalExposedFaces);
+            Assert.Equal(5, second.TotalExposedFaces);
+            first.SetExposedFaces(new int[Face.Count]);
+            second.SetExposedFaces(new int[Face.Count]);
+            long visits = simulation.Work.ExposureNodeVisits;
+            long writes = simulation.Work.ExposureNodeWrites;
+            var solver = simulation.Solver;
+
+            solver.BeginExposureRefresh(simulation.Rooms.Map);
+            Assert.True(solver.StepExposureRefresh(0));
+            Assert.True(solver.StepExposureRefresh(-1));
+            Assert.Equal(visits, simulation.Work.ExposureNodeVisits);
+            Assert.Equal(writes, simulation.Work.ExposureNodeWrites);
+            Assert.True(solver.StepExposureRefresh(1));
+            Assert.Equal(5, first.TotalExposedFaces);
+            Assert.Equal(0, second.TotalExposedFaces);
+
+            if (removeBeforeDrain)
+            {
+                simulation.RemoveBlock(first.Block);
+                simulation.RemoveBlock(second.Block);
+                Assert.Empty(solver.Nodes);
+            }
+
+            // A zero budget still leaves even an exhausted cursor pending until
+            // a positive-budget call acknowledges completion.
+            Assert.True(solver.StepExposureRefresh(0));
+            Assert.True(solver.ExposureRefreshPending);
+            Assert.False(solver.StepExposureRefresh(int.MaxValue));
+            Assert.False(solver.ExposureRefreshPending);
+            long processed = removeBeforeDrain ? 1L : 2L;
+            Assert.Equal(visits + processed, simulation.Work.ExposureNodeVisits);
+            Assert.Equal(writes + processed, simulation.Work.ExposureNodeWrites);
+            if (!removeBeforeDrain) Assert.Equal(5, second.TotalExposedFaces);
+
+            Assert.False(solver.StepExposureRefresh(int.MaxValue));
+            Assert.False(solver.StepExposureRefresh(0));
+            Assert.Equal(visits + processed, simulation.Work.ExposureNodeVisits);
+            Assert.Equal(writes + processed, simulation.Work.ExposureNodeWrites);
+        }
 
         private static void RewriteEveryNodeTheOldWay(ThermalSimulation simulation)
         {

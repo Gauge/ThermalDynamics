@@ -159,6 +159,10 @@ namespace Thermodynamics
                 if (motor != null) motor.AttachedEntityChanged -= attachmentChanged;
                 ThermalBridges.RemoveAllFor(this);
             }
+            else if (fat is IMyAttachableTopBlock)
+            {
+                ThermalBridges.RemoveAllFor(this);
+            }
 
             if (source != null && outputChanged != null) source.OutputChanged -= outputChanged;
             if (sink != null && inputChanged != null) sink.CurrentInputChanged -= inputChanged;

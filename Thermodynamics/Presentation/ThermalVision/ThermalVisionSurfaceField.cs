@@ -36,37 +36,99 @@ namespace Thermodynamics.Presentation
         public int SavedPatches { get; private set; }
         public float Minimum { get; private set; }
         public float Maximum { get; private set; }
-        private readonly List<Patch>[] faces = new List<Patch>[6];
+        private List<Patch>[] faces;
 
-        public IList<Patch> Face(int axis,bool upper) { return faces[axis*2+(upper?1:0)]; }
+        public IList<Patch> Face(int axis,bool upper)
+        {
+            if(faces==null) faces=new List<Patch>[6];
+            return faces[axis*2+(upper?1:0)];
+        }
         private ThermalVisionSurfaceField transitionReference;
+
+        /// <summary>Sequential face-planning scratch for one refresh job; never retained by a published field.</summary>
+        public sealed class BuildScratch
+        {
+            private byte[] costs,cuts;
+
+            internal void Prepare(out byte[] faceCosts,out byte[] faceCuts)
+            {
+                if(costs==null) { costs=new byte[625]; cuts=new byte[625]; }
+                else Array.Clear(costs,0,costs.Length);
+                faceCosts=costs; faceCuts=cuts;
+            }
+        }
 
         public void BuildFaces(float errorKelvin, bool minimizePatches = false, ThermalVisionSurfaceField previous = null, float leafErrorKelvin = 0)
         {
+            BuildFaces(errorKelvin,minimizePatches,previous,leafErrorKelvin,null);
+        }
+
+        public void BuildFaces(float errorKelvin, bool minimizePatches, ThermalVisionSurfaceField previous, float leafErrorKelvin,
+            BuildScratch scratch)
+        {
             if(previous!=null && (previous.Steps!=Steps || previous.Bounds.Min!=Bounds.Min || previous.Bounds.Max!=Bounds.Max))
                 throw new ArgumentException("Transition lattice must match surface bounds and subdivisions");
+            if(faces==null) faces=new List<Patch>[6];
             transitionReference=previous;
             SavedPatches=0;
             Minimum=float.PositiveInfinity; Maximum=float.NegativeInfinity;
             foreach(float value in Values) { Minimum=Math.Min(Minimum,value); Maximum=Math.Max(Maximum,value); }
+            // Uniform current and prior lattices cannot need a split. The normal path
+            // rechecks every face vertex and cell centre (including the prior lattice).
+            // Keep strict/special tolerances on that path to preserve its rounding rules.
+            bool flat=errorKelvin>=.001f && Minimum==Maximum && Minimum>=0 && Minimum<=100000
+                && (previous==null || previous.IsUniform());
             byte[] costs=null, cuts=null;
             for(int axis=0;axis<3;axis++) for(int side=0;side<2;side++)
             {
 
-                var list=new List<Patch>(); faces[axis*2+side]=list;
+                var list=new List<Patch>(flat?1:0); faces[axis*2+side]=list;
                 int nu=axis==0?Steps.Y:Steps.X, nv=axis==2?Steps.Y:Steps.Z;
-                SplitFace(axis,side==1,0,nu,0,nv,errorKelvin,list);
+                if(flat)
+                {
+                    var t=new Vector4(Minimum);
+                    list.Add(new Patch { A=FacePoint(axis,side==1,0,0), B=FacePoint(axis,side==1,nu,0),
+                        C=FacePoint(axis,side==1,nu,nv), D=FacePoint(axis,side==1,0,nv),
+                        Temperatures=t, PreviousTemperatures=t });
+                }
+                else SplitFace(axis,side==1,0,nu,0,nv,errorKelvin,list);
                 if(minimizePatches && list.Count>1 && list.Count*4<nu*nv*3)
                 {
-                    if(costs==null){costs=new byte[625];cuts=new byte[625];}
+                    if(costs==null)
+                    {
+                        if(scratch==null) { costs=new byte[625]; cuts=new byte[625]; }
+                        else scratch.Prepare(out costs,out cuts);
+                    }
                     else Array.Clear(costs,0,costs.Length);
                     int count=PlanFace(axis,side==1,0,nu,0,nv,errorKelvin,costs,cuts);
                     if(count<list.Count)
                     { SavedPatches+=list.Count-count; list.Clear(); EmitFace(axis,side==1,0,nu,0,nv,cuts,list); }
                 }
             }
-            if(leafErrorKelvin>0) RefineLeafSaddles(leafErrorKelvin);
+            if(!flat && leafErrorKelvin>0) RefineLeafSaddles(leafErrorKelvin);
             transitionReference=null;
+        }
+
+        private bool IsUniform()
+        {
+            float value=Values[0];
+            if(float.IsNaN(value) || value<0 || value>100000) return false;
+            for(int i=1;i<Values.Length;i++) if(Values[i]!=value) return false;
+            return true;
+        }
+
+        // Bounded-frame fallback: preserve the field's corner samples, but
+        // approximate between them with one complete two-triangle face.
+        public Patch WholeFace(int axis,bool upper,ThermalVisionSurfaceField previous)
+        {
+            int nu=axis==0?Steps.Y:Steps.X, nv=axis==2?Steps.Y:Steps.Z;
+            var patch=new Patch { A=FacePoint(axis,upper,0,0), B=FacePoint(axis,upper,nu,0),
+                C=FacePoint(axis,upper,nu,nv), D=FacePoint(axis,upper,0,nv),
+                Temperatures=new Vector4(FaceValue(axis,upper,0,0),FaceValue(axis,upper,nu,0),
+                    FaceValue(axis,upper,nu,nv),FaceValue(axis,upper,0,nv)) };
+            patch.PreviousTemperatures=previous==null?patch.Temperatures:new Vector4(
+                previous.Sample(patch.A),previous.Sample(patch.B),previous.Sample(patch.C),previous.Sample(patch.D));
+            return patch;
         }
 
         private void RefineLeafSaddles(float error)

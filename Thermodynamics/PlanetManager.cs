@@ -23,6 +23,7 @@ namespace Thermodynamics
             public Vector3D Position;
             public MyGravityProviderComponent GravityComponent;
             private PlanetDefinition definition = NullDef;
+            internal Presentation.ThermalVisionClimateCache<Core.PlanetThermalProperties> SkyClimate;
 
             public PlanetDefinition Definition() 
             {
@@ -47,8 +48,20 @@ namespace Thermodynamics
 
         public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
         {
+            Planets.Clear();
             MyAPIGateway.Entities.OnEntityAdd += AddPlanet;
             MyAPIGateway.Entities.OnEntityRemove += RemovePlanet;
+        }
+
+        protected override void UnloadData()
+        {
+            if (MyAPIGateway.Entities != null)
+            {
+                MyAPIGateway.Entities.OnEntityAdd -= AddPlanet;
+                MyAPIGateway.Entities.OnEntityRemove -= RemovePlanet;
+            }
+            Planets.Clear();
+            base.UnloadData();
         }
 
         private void AddPlanet(IMyEntity ent)
@@ -68,7 +81,9 @@ namespace Thermodynamics
 
         private void RemovePlanet(IMyEntity ent)
         {
-            Planets.RemoveAll(p => p.Entity.EntityId == ent.EntityId);
+            if (!(ent is MyPlanet)) return;
+            for (int i = Planets.Count - 1; i >= 0; i--)
+                if (Planets[i].Entity.EntityId == ent.EntityId) Planets.RemoveAt(i);
         }
 
 

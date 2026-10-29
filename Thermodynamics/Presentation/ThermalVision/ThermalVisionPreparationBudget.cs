@@ -2,6 +2,10 @@ namespace Thermodynamics.Presentation
 {
     public static class ThermalVisionPreparationBudget
     {
+        public const int PreviewGridsPerFrame=8;
+        public const int AdmittedGrids=128;
+        public const int RetainedViews=192;
+        public const double RetainSeconds=2;
 
         public static bool PreferBackground(double priorityMilliseconds,double backgroundMilliseconds)
         {

@@ -215,11 +215,14 @@ The must-have is small: *for each exposed block face, does it radiate to space o
 
 Ranked options:
 
-1. **Use the host's pressurisation system.** SE1 has `IMyGridGasSystem.GetOxygenRoomForCubeGridPosition`
-   — an O(1) lookup, incrementally maintained, with the engine's own door handling
-   ([engine-notes.md](engine-notes.md#the-game-already-computes-airtight-rooms--highest-value)). SE2 almost certainly has an equivalent; it is
-   open question 4 in the research notes. This deletes 725 lines in SE1 and the whole problem in
-   SE2, **and** unlocks room air temperature, which the mod cannot model at all today.
+1. **Use a host room provider where its contract is sufficient.** SE1 exposes a
+   direct cell-to-room lookup, but bulk `GetRooms` rebuilds cell sets for every
+   room including the exterior; it is not a cheap completed interior snapshot.
+   Native live-door rooms also differ from the mod's structural rooms and portals.
+   See the [installed-engine review](engine-notes.md#native-airtight-rooms--opportunity-and-limits)
+   for availability, publication and copying limits. Room-air temperature already
+   exists in the core. An SE2 equivalent still needs verification and an adapter;
+   native room availability alone does not remove this problem.
 2. **Flood a coarse lattice, not the block lattice.** Rooms are human-scale; nothing thermal
    depends on resolving a void pocket below ~1 m. Flood at a fixed 2.5 m coarse cell in both
    games. Cost becomes independent of block size and of which game is hosting. A coarse cell is
@@ -227,10 +230,11 @@ Ranked options:
 3. **Do nothing** — treat every uncovered face as external. Cheapest, and what the original mod
    did before rooms existed. Wrong for ship interiors, but it is a legitimate low setting.
 
-Recommendation: **1 with 2 as the fallback**, exactly the arrangement
-[engine-notes.md](engine-notes.md) already proposes for SE1. The existing `RoomMapper`
-becomes option 2 after being retargeted from the block lattice onto the coarse lattice — the
-algorithm is unchanged, only the cell size it walks.
+Long-term direction: a verified host provider with a portable fallback. The
+current exact mapper remains the implemented path; its paged storage and span
+traversal reduce work without changing room boundaries. A coarse replacement is
+still a proposal: thin walls, narrow leaks and doors need explicit treatment,
+so changing the cell size alone does not establish equivalent behavior.
 
 ---
 

@@ -1,0 +1,66 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text.Json;
+interface IRig { void Reset(); void Run(); float[] Values(); }
+static class Program
+{
+    static void Main(string[] args)
+    {
+        var results = new List<object>();
+        if (args.Length == 1 && args[0] == "loop-rebuild")
+        {
+            results.Add(Measure("loop-rebuild", 2, new BeforeRebuildRig(), new AfterRebuildRig()));
+        }
+        else
+        {
+            results.Add(Measure("stability-unfloored", 512, 0, 64, false, false, 0, 1, true));
+            results.Add(Measure("stability-floored", 512, 6, 64, false, false, 0, 1, true));
+            results.Add(Measure("full-step-unfloored", 512, 0, 64, false, false, 0, 1, false));
+            results.Add(Measure("full-step-floored", 512, 6, 64, false, false, 0, 1, false));
+            if (args.Length != 1 || args[0] != "node-preparation")
+            {
+                results.Add(Measure("coolant-clamped", 128, 0, 1, true, false, 4, .37f, false));
+                results.Add(Measure("coolant-resolved", 128, 0, 64, true, false, 4, .37f, false));
+                results.Add(Measure("coolant-stagnant", 128, 0, 1, true, false, 0, .37f, false));
+                results.Add(Measure("coolant-well-mixed", 128, 0, 1, true, true, 4, .37f, false));
+            }
+        }
+        Console.WriteLine(JsonSerializer.Serialize(new { runtime = Environment.Version.ToString(), samples = 9, iterations = 96, results }, new JsonSerializerOptions { WriteIndented = true }));
+    }
+    static object Measure(string name, int count, int floor, int max, bool loop, bool mixed, float flow, float fill, bool prepare)
+    {
+        IRig before = new BeforeRig(count, floor, max, loop, mixed, flow, fill, prepare);
+        IRig after = new AfterRig(count, floor, max, loop, mixed, flow, fill, prepare);
+        return Measure(name, count, before, after);
+    }
+    static object Measure(string name, int count, IRig before, IRig after)
+    {
+        for (int i = 0; i < 24; i++) { before.Run(); after.Run(); }
+        var oldTimes = new List<double>(); var newTimes = new List<double>();
+        long oldAlloc = 0, newAlloc = 0;
+        for (int sample = 0; sample < 9; sample++)
+        {
+            before.Reset(); after.Reset();
+            if (sample % 2 == 0) { oldTimes.Add(Time(before, out oldAlloc)); newTimes.Add(Time(after, out newAlloc)); }
+            else { newTimes.Add(Time(after, out newAlloc)); oldTimes.Add(Time(before, out oldAlloc)); }
+            var expected = before.Values(); var actual = after.Values();
+            if (expected.Length != actual.Length) throw new Exception("Shape " + name);
+            for (int i = 0; i < expected.Length; i++)
+                if (BitConverter.SingleToInt32Bits(expected[i]) != BitConverter.SingleToInt32Bits(actual[i]))
+                    throw new Exception(name + " differs at " + i + ": " + expected[i] + " / " + actual[i]);
+        }
+        var o = oldTimes.OrderBy(x => x).ToArray(); var n = newTimes.OrderBy(x => x).ToArray();
+        return new { name, nodes = count, old_ms = oldTimes, new_ms = newTimes,
+            old_best_ms = o[0], new_best_ms = n[0], old_median_ms = o[4], new_median_ms = n[4],
+            old_allocated_bytes = oldAlloc, new_allocated_bytes = newAlloc, exact_state_match = true };
+    }
+    static double Time(IRig rig, out long allocated)
+    {
+        long bytes = GC.GetAllocatedBytesForCurrentThread(); long started = Stopwatch.GetTimestamp();
+        for (int i = 0; i < 96; i++) rig.Run();
+        long elapsed = Stopwatch.GetTimestamp() - started; allocated = GC.GetAllocatedBytesForCurrentThread() - bytes;
+        return elapsed * 1000d / Stopwatch.Frequency;
+    }
+}

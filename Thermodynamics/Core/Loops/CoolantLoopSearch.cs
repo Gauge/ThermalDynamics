@@ -35,12 +35,14 @@ namespace Thermodynamics.Core
                 if (block.Model.Coolant == null) continue;
                 if (block.Model.Coolant.LinkPorts.Length != 2) return null;
 
-                List<GridPort> ports = block.CoolantLinkPorts();
-                if (!ValidPort(grid, block, ports[0]) || !ValidPort(grid, block, ports[1])
-                    || SamePort(ports[0], ports[1])) return null;
+                CoolantPort[] ports = block.Model.Coolant.LinkPorts;
+                GridPort firstPort = CoolantLoopBuilder.TransformPort(block, ports[0]);
+                GridPort secondPort = CoolantLoopBuilder.TransformPort(block, ports[1]);
+                if (!ValidPort(grid, block, firstPort) || !ValidPort(grid, block, secondPort)
+                    || SamePort(firstPort, secondPort)) return null;
 
-                Exit a = new Exit { Block = block, Port = ports[0] };
-                Exit b = new Exit { Block = block, Port = ports[1], Other = a };
+                Exit a = new Exit { Block = block, Port = firstPort };
+                Exit b = new Exit { Block = block, Port = secondPort, Other = a };
                 a.Other = b;
                 search.first.Add(block, a);
             }

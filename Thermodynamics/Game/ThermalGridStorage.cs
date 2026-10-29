@@ -12,7 +12,9 @@ namespace Thermodynamics
 
         private void Save()
         {
-            if (disabled || Simulation == null || Entity.Storage == null) return;
+            // Native serialization can precede UpdateOnceBeforeFrame; preserve stored heat until
+            // the existing blocks and their saved temperatures have actually been loaded.
+            if (!Started || Entity.Storage == null) return;
 
             try
             {

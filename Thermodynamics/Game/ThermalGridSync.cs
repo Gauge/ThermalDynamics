@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Thermodynamics.Core;
 using VRage.Game.ModAPI;
+using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
@@ -22,6 +23,12 @@ namespace Thermodynamics
         private static readonly HotTailClientState Asked = new HotTailClientState();
 
         private static readonly List<IMyPlayer> Players = new List<IMyPlayer>();
+        private struct RemotePlayer
+        {
+            public ulong Client;
+            public Vector3D Position;
+        }
+        private static readonly List<RemotePlayer> RemotePlayers = new List<RemotePlayer>();
         private static readonly List<StoredTemperature> Selection = new List<StoredTemperature>();
         private static readonly List<StoredTemperature> Received = new List<StoredTemperature>();
         private static readonly List<ulong> WantSnapshot = new List<ulong>();
@@ -63,8 +70,11 @@ namespace Thermodynamics
 
         public static void Unregister()
         {
+            frames = 0;
             Owed.Clear();
             Asked.Clear();
+            ClearPassScratch();
+            Received.Clear();
             SnapshotsSent = 0;
             BandsSent = 0;
             BytesSent = 0;
@@ -107,6 +117,26 @@ namespace Thermodynamics
             {
                 Telemetry.Exception("ThermalGridSync.Tick", e);
             }
+            finally
+            {
+                ClearPassScratch();
+            }
+        }
+
+        public static void ForgetGrid(long gridId)
+        {
+            Asked.Forget(gridId);
+        }
+
+        private static void ClearPassScratch()
+        {
+            WantSnapshot.Clear();
+            WantBand.Clear();
+            Selection.Clear();
+            Players.Clear();
+            RemotePlayers.Clear();
+            Present.Clear();
+            LiveIds.Clear();
         }
 
 
@@ -116,9 +146,24 @@ namespace Thermodynamics
             MyAPIGateway.Players.GetPlayers(Players);
 
             Present.Clear();
+            RemotePlayers.Clear();
+            ulong localClient = MyAPIGateway.Multiplayer.MyId;
             for (int p = 0; p < Players.Count; p++)
             {
-                if (Players[p] != null) Present.Add(Players[p].SteamUserId);
+                IMyPlayer player = Players[p];
+                if (player == null) continue;
+                ulong client = player.SteamUserId;
+                Present.Add(client);
+                if (client != localClient)
+                    RemotePlayers.Add(new RemotePlayer { Client = client, Position = player.GetPosition() });
+            }
+            Players.Clear();
+
+            // No remote recipients remain. Drop their schedules without walking every grid.
+            if (RemotePlayers.Count == 0)
+            {
+                Owed.Clear();
+                return;
             }
 
             IList<ThermalGrid> grids = ThermalGrid.LiveGrids;
@@ -134,6 +179,7 @@ namespace Thermodynamics
             Owed.Advance(seconds);
 
             double range = SyncRange();
+            double rangeSquared = range * range;
 
             for (int g = 0; g < grids.Count; g++)
             {
@@ -146,16 +192,11 @@ namespace Thermodynamics
                 WantSnapshot.Clear();
                 WantBand.Clear();
 
-                for (int p = 0; p < Players.Count; p++)
+                for (int p = 0; p < RemotePlayers.Count; p++)
                 {
-                    IMyPlayer player = Players[p];
-                    if (player == null) continue;
-
-                    ulong client = player.SteamUserId;
-
-                    if (client == MyAPIGateway.Multiplayer.MyId) continue;
-
-                    if (Vector3D.DistanceSquared(player.GetPosition(), at) > range * range) continue;
+                    RemotePlayer player = RemotePlayers[p];
+                    ulong client = player.Client;
+                    if (Vector3D.DistanceSquared(player.Position, at) > rangeSquared) continue;
 
                     HotTailSend send = Owed.Next(client, gridId);
                     if (send == HotTailSend.Snapshot) WantSnapshot.Add(client);
@@ -176,12 +217,6 @@ namespace Thermodynamics
                 }
             }
 
-            WantSnapshot.Clear();
-            WantBand.Clear();
-            Selection.Clear();
-            Players.Clear();
-            Present.Clear();
-            LiveIds.Clear();
         }
 
         private static void Export(ThermalGrid thermals, HotTailKind kind)
@@ -196,9 +231,11 @@ namespace Thermodynamics
         private static void Send(HotTailKind kind, long gridId, List<ulong> recipients)
         {
             int per = HotTailMessage.RecordsPerMessage;
+            int messages = HotTailMessage.Messages(Selection.Count);
 
-            for (int offset = 0; offset < Selection.Count; offset += per)
+            for (int message = 0; message < messages; message++)
             {
+                int offset = message * per;
                 int count = Selection.Count - offset;
                 if (count > per) count = per;
 
@@ -298,6 +335,10 @@ namespace Thermodynamics
                 MessagesDropped++;
                 Telemetry.Exception("ThermalGridSync.Handle", e);
             }
+            finally
+            {
+                Received.Clear();
+            }
         }
 
         private static void Requested(ulong client, long gridId)
@@ -322,13 +363,18 @@ namespace Thermodynamics
 
             if (Owed.Next(client, gridId) != HotTailSend.Snapshot) return;
 
-            Export(thermals, HotTailKind.HullSnapshot);
-
-            WantSnapshot.Clear();
-            WantSnapshot.Add(client);
-            Send(HotTailKind.HullSnapshot, gridId, WantSnapshot);
-            WantSnapshot.Clear();
-            Selection.Clear();
+            try
+            {
+                Export(thermals, HotTailKind.HullSnapshot);
+                WantSnapshot.Clear();
+                WantSnapshot.Add(client);
+                Send(HotTailKind.HullSnapshot, gridId, WantSnapshot);
+            }
+            finally
+            {
+                WantSnapshot.Clear();
+                Selection.Clear();
+            }
         }
 
         private static void Apply(HotTailKind kind, long gridId)
@@ -348,16 +394,12 @@ namespace Thermodynamics
 
         private static ThermalGrid Find(long gridId)
         {
-            IList<ThermalGrid> grids = ThermalGrid.LiveGrids;
-
-            for (int g = 0; g < grids.Count; g++)
-            {
-                ThermalGrid thermals = grids[g];
-                if (thermals == null || !thermals.Started || thermals.Grid == null) continue;
-                if (thermals.Grid.EntityId == gridId) return thermals;
-            }
-
-            return null;
+            IMyEntity entity;
+            if (MyAPIGateway.Entities == null || !MyAPIGateway.Entities.TryGetEntityById(gridId, out entity)
+                || !(entity is IMyCubeGrid) || entity.MarkedForClose || entity.Closed || entity.GameLogic == null)
+                return null;
+            ThermalGrid thermals = entity.GameLogic.GetAs<ThermalGrid>();
+            return thermals != null && thermals.Started && thermals.Grid != null ? thermals : null;
         }
 
         public static string Report()

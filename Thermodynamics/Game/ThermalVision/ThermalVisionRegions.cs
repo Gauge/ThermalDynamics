@@ -232,27 +232,35 @@ namespace Thermodynamics
             Vector3D offset = bias ? MyAPIGateway.Session.Camera.WorldMatrix.Backward * .001 : Vector3D.Zero;
             MyTransparentGeometry.AddTriangleBillboard(a + offset, b + offset, c + offset,
                 (Vector3)n, (Vector3)n, (Vector3)n, Vector2.Zero, Vector2.UnitX, Vector2.UnitY,
-                CompositeSurfaceMaterial, 0, (a + b + c) / 3, colour, MyBillboard.BlendTypeEnum.PostPP);
+                CompositeSurfaceMaterial, uint.MaxValue, (a + b + c) / 3, colour, MyBillboard.BlendTypeEnum.PostPP);
             regionBillboards++; drawn++; examined++;
         }
 
 
         private static double RegionAxis(Vector3D v, int axis) { return axis == 0 ? v.X : axis == 1 ? v.Y : v.Z; }
 
-        private static void RegionFace(Region region, int axis, bool upper, Vector4 colour, Vector3D eye, bool gradient = false, BoundingFrustumD patchFrustum = null, ThermalVisionSurfaceField knownField = null)
+        private static void RegionFace(Region region, int axis, bool upper, Vector4 colour, Vector3D eye, bool gradient = false, BoundingFrustumD patchFrustum = null, ThermalVisionSurfaceField knownField = null, bool coarse = false)
         {
             Vector3D a = region.Min, u = Vector3D.Zero, v = Vector3D.Zero;
             if (axis == 0) { a.X = upper ? region.Max.X : region.Min.X; u.Y = region.Max.Y - region.Min.Y; v.Z = region.Max.Z - region.Min.Z; }
 
             else if (axis == 1) { a.Y = upper ? region.Max.Y : region.Min.Y; u.X = region.Max.X - region.Min.X; v.Z = region.Max.Z - region.Min.Z; }
             else { a.Z = upper ? region.Max.Z : region.Min.Z; u.X = region.Max.X - region.Min.X; v.Y = region.Max.Y - region.Min.Y; }
+            // Independent fleets already have a local frustum. Reject a face
+            // before world-space transforms and avoid another camera API round-trip.
+            ContainmentType faceRelation=patchFrustum==null?ContainmentType.Intersects
+                :patchFrustum.Contains(ThermalVisionGeometry.PatchBounds(a,a+u+v));
+            if(faceRelation==ContainmentType.Disjoint)
+            { regionCulledFaces++; return; }
             Vector3D faceCentre = Vector3D.Transform(a + (u + v) * .5, regionRenderMatrix);
             Vector3D worldU=Vector3D.TransformNormal(u,regionRenderMatrix);
             Vector3D worldV=Vector3D.TransformNormal(v,regionRenderMatrix);
-            Vector3D faceHalf = (Vector3D.Abs(worldU) + Vector3D.Abs(worldV)) * .5 + new Vector3D(.002);
-
-            var faceBounds = new BoundingBoxD(faceCentre - faceHalf, faceCentre + faceHalf);
-            if (!MyAPIGateway.Session.Camera.IsInFrustum(ref faceBounds)) { regionCulledFaces++; return; }
+            if(patchFrustum==null)
+            {
+                Vector3D faceHalf = (Vector3D.Abs(worldU) + Vector3D.Abs(worldV)) * .5 + new Vector3D(.002);
+                var faceBounds = new BoundingBoxD(faceCentre - faceHalf, faceCentre + faceHalf);
+                if(!MyAPIGateway.Session.Camera.IsInFrustum(ref faceBounds)) { regionCulledFaces++; return; }
+            }
             if (gradient)
             {
                 ThermalVisionSurfaceField field = knownField;
@@ -261,8 +269,15 @@ namespace Thermodynamics
                 Vector3D offset=MyAPIGateway.Session.Camera.WorldMatrix.Backward*.001;
                 Vector3 normal; bool reverse;
                 if(!ThermalVisionGeometry.FaceNormal(worldU,worldV,worldEye-faceCentre,out normal,out reverse)) return;
+                if(coarse)
+                {
+                    ThermalVisionSurfaceField previous=null;
+                    if(previousSurface!=null && surfaceBlend<1) previousSurface.TryGetValue(region,out previous);
+                    SmoothPatch(field.WholeFace(axis,upper,previous),offset,normal,reverse,null);
+                    return;
+                }
                 var patches=field.Face(axis,upper);
-                if(patches.Count<=1 || (patchFrustum!=null && patchFrustum.Contains(ThermalVisionGeometry.PatchBounds(a,a+u+v))==ContainmentType.Contains))
+                if(patches.Count<=1 || faceRelation==ContainmentType.Contains)
                     patchFrustum=null;
                 for(int i=0;i<patches.Count;i++) SmoothPatch(patches[i],offset,normal,reverse,patchFrustum);
                 return;

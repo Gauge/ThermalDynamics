@@ -130,7 +130,7 @@ namespace Thermodynamics
                     Vector3 n = projected.Normal;
                     if (gradientLab) { DrawGradient(projected); drawn++; continue; }
                     MyTransparentGeometry.AddTriangleBillboard(projected.A, projected.B, projected.C,
-                        n, n, n, Vector2.Zero, Vector2.UnitX, Vector2.UnitY, compositeMode ? CompositeSurfaceMaterial : Material, 0,
+                        n, n, n, Vector2.Zero, Vector2.UnitX, Vector2.UnitY, compositeMode ? CompositeSurfaceMaterial : Material, uint.MaxValue,
                         (projected.A + projected.B + projected.C) / 3, colour, compositeMode ? MyBillboard.BlendTypeEnum.PostPP : MyBillboard.BlendTypeEnum.Standard);
                     drawn++;
                 }

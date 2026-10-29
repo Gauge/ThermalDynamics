@@ -10,6 +10,35 @@ namespace Thermodynamics.Tests
     /// <summary>Exercises the real Thermal API geometry serializer against the extracted mod's decoder and verifies standalone ownership.</summary>
     public class AerodynamicsExtractionTests
     {
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ExactSizedGeometryCellsRetainLayoutAndCallerOwnership(bool empty)
+        {
+            var source = new GridModel(2.5f);
+            if (!empty)
+            {
+                source.Add(BlockModel.Solid("one", Vector3I.One, 1f,
+                    new BlockThermalProperties()), Vector3I.Zero);
+                source.Add(BlockModel.Solid("four", new Vector3I(2, 2, 1), 4f,
+                    new BlockThermalProperties()), new Vector3I(3, 0, 0));
+            }
+            var data = GridGeometrySnapshot.Copy(source, 42);
+            var cells = (Vector3I[])data["Cells"];
+            var starts = (int[])data["CellStarts"];
+            Assert.Equal(empty ? new[] { 0 } : new[] { 0, 1, 5 }, starts);
+            Assert.Equal(empty ? 0 : 5, cells.Length);
+            Assert.Equal(42L, data["Revision"]);
+            for (int i = 0; i < source.BlockCount; i++)
+                for (int c = 0; c < source.Blocks[i].CellCount; c++)
+                    Assert.Equal(source.Blocks[i].Cells[c], cells[starts[i] + c]);
+            if (empty) return;
+            cells[1] = new Vector3I(999);
+            Assert.NotEqual(cells[1], source.Blocks[1].Cells[0]);
+            var next = GridGeometrySnapshot.Copy(source, 43);
+            Assert.Equal(source.Blocks[1].Cells[0], ((Vector3I[])next["Cells"])[1]);
+        }
+
         [Fact]
         public void DetachedApiGeometryPreservesTheFlightProfile()
         {

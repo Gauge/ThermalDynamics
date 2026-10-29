@@ -7,16 +7,16 @@ namespace Thermodynamics.Core
     public class SunShadowMap
     {
 
-        private CellBitset shadowed = new CellBitset();
+        private PagedCellBitset shadowed = new PagedCellBitset();
 
 
-        private CellBitset building = new CellBitset();
+        private PagedCellBitset building = new PagedCellBitset();
 
 
         private readonly List<Vector3I> pending = new List<Vector3I>();
 
 
-        private readonly CellBitset queued = new CellBitset();
+        private readonly PagedCellBitset queued = new PagedCellBitset();
 
         public struct Occluder
         {
@@ -36,6 +36,9 @@ namespace Thermodynamics.Core
         private GridModel grid;
 
         private GridModel resultGrid;
+
+        private GridModel skinGrid;
+        private int skinVersion = -1;
 
         private Vector3 sun;
         private Vector3 passSun;
@@ -64,15 +67,28 @@ namespace Thermodynamics.Core
         }
 
 
+        /// <summary>Release copied blockers and cancel incomplete rays while retaining the published map and reusable skin.</summary>
+        internal void ReleaseOccluders()
+        {
+            occluders.Clear();
+            occluderSun.Clear();
+            cursor = pending.Count;
+        }
+
+
         public void Clear()
         {
             shadowed.Clear();
             building.Clear();
             pending.Clear();
             queued.Clear();
+            occluders.Clear();
+            occluderSun.Clear();
             cursor = 0;
             grid = null;
             resultGrid = null;
+            skinGrid = null;
+            skinVersion = -1;
             IsBuilt = false;
         }
 
@@ -85,19 +101,21 @@ namespace Thermodynamics.Core
 
         public void Restart(GridModel model, Vector3 sunLocal, IList<Occluder> others)
         {
-            pending.Clear();
             occluders.Clear();
             occluderSun.Clear();
-            cursor = 0;
+            // Retained skin cells are inactive until a valid pass has been prepared.
+            cursor = pending.Count;
 
             grid = model;
-            if (grid == null || sunLocal.LengthSquared() < 1e-6f) return;
+            float directionLengthSquared = sunLocal.LengthSquared();
+            if (grid == null || directionLengthSquared < 1e-6f
+                || float.IsNaN(directionLengthSquared) || float.IsInfinity(directionLengthSquared)) return;
 
             Vector3I setMin = grid.Min - Vector3I.One;
 
             Vector3I setMaxExclusive = grid.Max + new Vector3I(2, 2, 2);
-            building.Reset(setMin, setMaxExclusive);
-            queued.Reset(setMin, setMaxExclusive);
+            bool sparse = grid.PreferSparseCellStorage;
+            building.Reset(setMin, setMaxExclusive, sparse);
 
             passSun = Vector3.Normalize(sunLocal);
 
@@ -116,23 +134,64 @@ namespace Thermodynamics.Core
                 }
             }
 
+            if (!ReferenceEquals(skinGrid, grid) || skinVersion != grid.Version)
+                PrepareSkin(setMin, setMaxExclusive, sparse);
+
+            cursor = 0;
+        }
+
+
+        private void PrepareSkin(Vector3I setMin, Vector3I setMaxExclusive, bool sparse)
+        {
+            pending.Clear();
+            queued.Reset(setMin, setMaxExclusive, sparse);
+
             IList<BlockInstance> blocks = grid.Blocks;
             for (int i = 0; i < blocks.Count; i++)
             {
-                Vector3I[] cells = blocks[i].Cells;
-                for (int c = 0; c < cells.Length; c++)
+                BlockInstance block = blocks[i];
+                if (block.CellCount == 1)
                 {
                     for (int face = 0; face < Face.Count; face++)
+                        QueueOutside(block.Cells[0] + Face.Offsets[face]);
+                    continue;
+                }
+
+                // Legacy public models clamp generated cells, but not their raw box dimensions.
+                // Preserve the cell walk for those malformed bounds rather than losing skin cells.
+                Vector3I size = block.Model.Size;
+                if (size.X < 1 || size.Y < 1 || size.Z < 1)
+                {
+                    Vector3I[] cells = block.Cells;
+                    for (int c = 0; c < cells.Length; c++)
+                        for (int face = 0; face < Face.Count; face++)
+                            QueueOutside(cells[c] + Face.Offsets[face]);
+                    continue;
+                }
+
+                // Every occupied cell inside a block has occupied neighbours in that block.
+                // Only its six outer slabs can contribute air cells to the shadow pass.
+                for (int face = 0; face < Face.Count; face++)
+                {
+                    BoxGeometry.FaceSpan span = BoxGeometry.Span(block.Min, block.MaxExclusive, face);
+                    Vector3I outside = BoxGeometry.WithComponent(span.Offset, span.Axis,
+                        span.Slab + BoxGeometry.Component(span.Offset, span.Axis));
+                    for (int a = span.MinU; a < span.MaxExclusiveU; a++)
                     {
-                        Vector3I outside = cells[c] + Face.Offsets[face];
-
-                        if (grid.IsOccupied(outside)) continue;
-                        if (!queued.Add(outside)) continue;
-
-                        pending.Add(outside);
+                        outside = BoxGeometry.WithComponent(outside, span.U, a);
+                        for (int b = span.MinV; b < span.MaxExclusiveV; b++)
+                            QueueOutside(BoxGeometry.WithComponent(outside, span.V, b));
                     }
                 }
             }
+
+            skinGrid = grid;
+            skinVersion = grid.Version;
+        }
+
+        private void QueueOutside(Vector3I outside)
+        {
+            if (!grid.IsOccupied(outside) && queued.Add(outside)) pending.Add(outside);
         }
 
 
@@ -150,12 +209,12 @@ namespace Thermodynamics.Core
 
             if (IsRunning) return false;
 
-            CellBitset finished = building;
+            PagedCellBitset finished = building;
             building = shadowed;
             shadowed = finished;
 
-            pending.Clear();
-            cursor = 0;
+            // Keep the unique skin for direction-only restarts. cursor is already at Count,
+            // so completed passes still expose no pending work.
 
             sun = passSun;
             resultGrid = grid;

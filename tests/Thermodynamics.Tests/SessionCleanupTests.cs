@@ -69,7 +69,11 @@ namespace Thermodynamics.Tests
             var steps = Assert.IsType<ArrayCreationExpressionSyntax>(call.ArgumentList.Arguments[0].Expression);
             var bodies = steps.Initializer.Expressions.Select(e => e.ToString()).ToArray();
             Assert.Contains("Telemetry.Reset", bodies);
+            Assert.Contains("PlanetProbes.Reset", bodies);
+            Assert.Contains("ThermalHeatSourceDebug.Reset", bodies);
             Assert.Contains("ThermalGlow.Clear", bodies);
+            Assert.Contains("ThermalGrid.ResetCues", bodies);
+            Assert.Contains("ThermalCharacters.Reset", bodies);
             Assert.Contains("ThermalApi.Unregister", bodies);
             Assert.Contains("UnregisterCommands", bodies);
             Assert.Contains(bodies, b => b.Contains("Definitions.UnloadData()"));

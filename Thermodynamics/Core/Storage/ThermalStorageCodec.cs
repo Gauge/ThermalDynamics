@@ -219,6 +219,15 @@ namespace Thermodynamics.Core
         public static bool TryDecode(string data, List<StoredTemperature> blocks, List<StoredLoop> loops,
             List<StoredRoom> rooms, List<StoredHeldCoolant> held, List<StoredLoopFill> fills)
         {
+            bool legacy;
+            return TryDecode(data, blocks, loops, rooms, held, fills, out legacy);
+        }
+
+
+        internal static bool TryDecode(string data, List<StoredTemperature> blocks, List<StoredLoop> loops,
+            List<StoredRoom> rooms, List<StoredHeldCoolant> held, List<StoredLoopFill> fills, out bool legacy)
+        {
+            legacy = false;
             if (blocks != null) blocks.Clear();
             if (loops != null) loops.Clear();
             if (rooms != null) rooms.Clear();
@@ -245,7 +254,7 @@ namespace Thermodynamics.Core
                 return TryDecodeVersion2(bytes, blocks, loops, rooms, held, fills);
             }
 
-
+            legacy = true;
             return TryDecodeLegacyBlocks(bytes, blocks);
         }
 
@@ -272,6 +281,8 @@ namespace Thermodynamics.Core
                     long key = ReadInt64(bytes, ref at);
 
                     float temperature = ReadSingle(bytes, ref at);
+                    // Recover healthy records without importing a nonfinite temperature, fill or capacity.
+                    if (float.IsNaN(temperature) || float.IsInfinity(temperature)) continue;
 
                     if (section == SectionBlocks)
                     {

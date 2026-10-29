@@ -31,6 +31,19 @@ namespace Thermodynamics
 
         private static readonly ThermalVisionState State = new ThermalVisionState();
 
+        public static bool ReplacesScene
+        {
+            get
+            {
+                var gui = MyAPIGateway.Gui;
+                return State.Current != ThermalVisionState.Mode.Off && !renderFailureReported
+                    && (depthMode || compositeMode || (regionMode && (smoothFleet || blockLabMode || regionOrder != null)))
+                    && panel != null && gui != null && EligibleViewpoint() != 0
+                    && !ThermalVisionViewPolicy.SuppressForUi(true, gui.ChatEntryVisible,
+                        BindManager.IsChatOpen, gui.IsCursorVisible);
+            }
+        }
+
         private static readonly ThermalVisionMeshCache<IMyModel> Geometry = new ThermalVisionMeshCache<IMyModel>(MaxCachedModels, MaxCachedTriangles);
 
         private static readonly ThermalVisionMesh Empty = new ThermalVisionMesh(new Triangle[0], new ThermalVisionMeshBatch[0]);
@@ -300,7 +313,7 @@ namespace Thermodynamics
             RecordEvent("enabled " + mode + (gradientLab ? " gradient UV lab" : regionMode ? " region field experiment" : compositeMode ? " composite experiment" : depthMode ? " depth diagnostic" : surveyMode ? " survey" : sceneMode ? " scene" : " target") + " viewpoint=" + view
                 + " type=" + (MyAPIGateway.Session.CameraController.Entity is IMyCameraBlock ? "camera" : "suit"));
             if (gradientLab) return "GRADIENT LAB: aim within 1000 m; aimed model only, nearby measured heat, 6000 examined triangle cap; lock a useful /thermal vision range <low C> <high C>";
-            if (smoothFleet) return "thermal vision STRESS TEST ON: no mod billboard quota; viewport grid gradients, automatic range; /thermal vision off closes";
+            if (smoothFleet) return "thermal vision ON: bounded grid heat detail, automatic range; blue-grey shapes have unknown temperature; /thermal vision off closes";
             if (blockLabMode) return "thermal vision ON: adaptive block/group temperatures at game view distance; /thermal vision off closes";
             if (regionMode) return "REGIONAL LAB ON: archived research renderer, not final thermal vision; /thermal vision off closes";
             if (compositeMode) return "composite experiment ON: 5 km neutral silhouettes, bounded measured surfaces; dark means unmeasured, not cold";

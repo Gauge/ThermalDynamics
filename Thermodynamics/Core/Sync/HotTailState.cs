@@ -179,6 +179,12 @@ namespace Thermodynamics.Core
         }
 
 
+        public void Forget(long gridId)
+        {
+            asked.Remove(gridId);
+        }
+
+
         public void Forget(ICollection<long> grids)
         {
             stale.Clear();

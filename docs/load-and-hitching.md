@@ -339,11 +339,31 @@ next was not: it counted as a single unit of budget however far it went, and acr
 walk covers the whole bounding box. The tick that finished a pass on a 127k ship swept the tail of
 a 1.5-million-cell box in one call and cost 77 ms.
 
-The scan is charged cell by cell now. A pass takes about twice as many ticks and every one of them
-is bounded.
+The scan is charged cell by cell now. A pass takes about twice as many ticks, with each scan slice
+bounded by its cell budget. That bound does not cover all pass setup or publication work.
 
 The load test asserting the budget was respected passed throughout, because it read the counter
 that was not counting the scan. **A budget test is only as good as what it counts.**
+
+The 2026-10-28 pass also removes eager bounding-volume allocation from sparse room bounds. Above
+65,536 cells, when structural occupancy is at most one cell in sixteen, room bits and the immutable
+sealing snapshot use 4,096-cell pages. Reset invalidates a generation in constant time; the first
+write clears one reused page. Pages are recycled across changed linear keys, retaining the peak
+simultaneous page count instead of every location visited over the mapper's lifetime. Ordinary
+dense bounds retain the array path, and publication still rotates three complete maps.
+
+`RoomPagedStorageTests` compares page boundaries, absent-page ranks, changing storage modes and
+published room answers against the existing dense implementation. Its two-block extent from
+`(0,0,0)` to `(1000,1000,1000)` executes **one work unit only**. The old startup array payload is
+calculated as `1,009,027,027 + 3 × 126,128,384 = 1,387,412,179` bytes before ranks and object headers;
+the new first slice is checked below 64 KiB. This is an allocation regression, not a full-grid
+runtime measurement.
+
+The snapshot copy still walks structural cells before the first budgeted visit. The exterior
+flood still visits the bounding volume, so its visited pages eventually approach dense bit
+storage; rank construction, doors and publication are not all sliced. Existing integer room
+counts also remain a limit on extremely large completed floods. Paging removes the eager empty
+volume cost without claiming a hard bound on every call or arbitrary-volume completion.
 
 ### 3. The exposure refresh is budgeted
 
@@ -360,6 +380,29 @@ The coolant loop search and the heat pump rebuild each walked every block asking
 every block answers no to, on every topology change. The grid counts them as they are placed, so a
 ship with no plumbing — nearly every ship — skips two passes over a million blocks for an integer
 test.
+
+When plumbing exists, `SetLoops` retains two lookup tables for prior temperatures, fill and pump
+controls. A single incoming-signature pass marks surviving rings, replacing the old nested ring
+search; the remaining spill/reclaim traversal and arithmetic keep their original order. The
+tables and the lazily allocated self-alias input list release object references after each call.
+`LoopRebuildScratchTests` exercises these transitions with two blocks, including ordinary mean
+temperature reseeding when the solver's own list is supplied. This removes three per-rebuild
+dictionary allocations after warmup and makes survival lookup work linear in old plus incoming
+ring counts on average; no timing result is claimed. Spill reclamation can still allocate its
+three parcel arrays, and rebuilding links remains synchronous.
+That link rebuild now transforms authored sink ports directly in array order instead of allocating
+one temporary `List<GridPort>` per pipe, including pipes without sink ports. The public
+`CoolantSinkPorts()` method still returns an independent list. A rotated pipe/target fixture
+compares the direct path with that public transform, including duplicate targets and the same
+missing/self/unmodelled-target filtering.
+
+Loop discovery also transforms authored link ports directly as it inspects them. An intact
+N-pipe trace previously materialized 2N transformed lists and their backing arrays, plus one list
+per pump when resolving its direction; the failed-run search also materialized one per pipe.
+Those temporary lists are removed without retaining a model cache between searches. The public
+`CoolantLinkPorts()` still returns an independent list. The four-pipe mutation case in
+`CoolantDiscoveryTests` compares the frozen legacy builder's ring order, pump direction and
+diagnostics after port reordering, duplicates, opening and repair; it makes no runtime claim.
 
 ### 5. The mass sweep is a rota, not a walk over every block
 
@@ -477,6 +520,61 @@ node together at the end. A sum has the same value however many pieces it is com
 answer is *bit-identical* to computing it in one go, and `SpreadStepTests` asserts exactly that at
 slice sizes of 1, 7, 64 and 1000 elements and over thirty consecutive steps.
 
+Ordinary step preparation now calculates each node's stability demand and optional mass floor
+while copying its public temperature into the solver rows, removing the immediately following
+node walk. Conductance totals are refreshed first; dirty-property mirroring and every arithmetic
+operation retain their original inputs and order. Explicit prewarming and profiling keep their
+separate preparation path, and an in-flight query never re-copies public temperatures. The
+four-node `NodePreparationFusionTests` oracle covers floor-on/off restoration, direct edits and
+sliced publication. This reduces repeated traversal; it does not budget the remaining prologue
+or establish a timing improvement by itself.
+
+The 2026-10-28 continuation extends this accounting to the coupled stage. A loop used to cost
+one work unit while its parcel and contact sweeps ran in full. The stage now charges each parcel
+scratch clear, each clamp-conductance contact, each parcel relaxation reduction, each heat-exchange
+contact, each room diagnostic reset and each heat pump. Those ranges resume in the original
+loop/room/pump and contact order, and a loop's full relaxation reduction completes before its
+first exchange. Whole-step calls retain direct loops over the same arithmetic helpers. This
+improves how work is spread; it does not change the node/link allowance's calibrated cost model.
+
+Coolant and room watts are cleared immediately before their coupled accumulation instead of in
+an unbudgeted substep prologue. Conduction diagnostics reset within the existing environment
+ranges, including generation-only and buried nodes. Diagnostic fields were already updated over
+several slices; their resets are now also partial while that pass runs. Diagnostic intent is
+captured at `BeginStep`, so enabling/disabling native diagnostics takes effect on the next step
+and cannot change a pending step's work estimate midway through its coupled phase. Public
+temperature apply and publication boundaries are unchanged. `CoupledSliceTests` uses four blocks for frozen-equation
+checks, exact work accounting, inactive devices, abandonment and supported device replacement.
+
+This is still an element-work budget, not a hard time limit on every `AdvanceStep`: first-use
+buffer growth and some environment setup remain outside these ranges. `ApplyCoupledWatts` still
+applies each loop's parcels, advects/mixes it and updates room air before returning. Making that
+resumable requires private result buffers and a deliberate commit boundary; yielding between
+writes to the existing public coolant/room state would expose partly updated results.
+
+Replacing loops, room-air tables or heat pumps, changing room pressure, resetting temperatures,
+or restoring room temperatures now abandons a pending step before invalidating its cursors.
+Read-only substep-demand queries observe the in-flight scratch without resynchronizing it from
+unpublished public nodes or replacing the active environment. **Abandonment is cancellation, not whole-step rollback.**
+It stops future work and the next preparation resynchronizes node scratch from public nodes;
+coolant/room temperatures applied by earlier substeps and nodes already written by a partial
+publication remain. Device energy diagnostics may also describe partial work. The small
+replacement tests stop before application and do not claim rollback of committed substeps.
+
+`ThermalSimulation` also cancels pending work when `ThermalSettings.Derive()` advances the
+settings revision. Block, coolant and room capacities adopt the same changed `HeatTimeScale`
+before the next step is prepared; unrelated setting changes do not rebuild those device tables.
+A full rebuild records the settings it actually applied. Direct `ThermalSolver` consumers must
+still change settings between steps, or cancel explicitly before modifying them.
+
+Hosts that skip environment sampling while a step is active can use
+`Update(frameSeconds, sample, hasEnvironmentSample)`. With `false`, pending work may continue,
+but a cancellation during settings/topology preparation cannot begin a replacement step using
+a default sample. The adapter requests a new sample on a subsequent frame, after any configured
+phase delay. The existing two-argument overload treats its supplied sample as available.
+`SettingsRevisionTests` covers this boundary and capacity rescaling with one block, one parcel
+and one air node; it stops the cancelled step before application and makes no rollback claim.
+
 Per frame at half a million blocks, 900 frames:
 
 | | before (per 1/6 s tick) | after (per 1/60 s frame) |
@@ -518,6 +616,12 @@ and worth nothing, because the writes it would have skipped were already removed
 so what a remap costs falls from about 5.6 ms to 4.1 ms, and the part that stops arriving is the
 unsliced part. `ExposureSkipTests` asserts the answers are bit-identical and that the skip engages
 on every node of an unchanged hull; `SimulationWork.ExposureNodeWrites` is what says so at runtime.
+
+The public budgeted refresh also supports draining a partial sweep with `int.MaxValue`. It bounds
+the remaining node count before adding to the cursor, and completes without additional visits
+if removals have shortened the table past that cursor. Zero or negative budgets keep an active
+refresh pending, as before. Two adjacent-block cases in `ExposureSkipTests` check both drains,
+exact visit/write accounting and repeated completion without a large hull or simulation run.
 
 ### 12. Reconstructing a surface normal costs seven times counting exposed faces
 
@@ -806,10 +910,11 @@ bounding volume rather than by block. See [memory.md](memory.md), which measures
 changes that would give it back — and corrects the 2.5 GB figure this paragraph used to quote,
 which counted garbage.
 
-**The room map floods the bounding volume**, which is 14 times the block count on a hull and worse
-on a station. It is budgeted now, so it costs ticks rather than a stall — 7,237 of them to
-converge at a million blocks, which is twenty minutes of a stale map. Bounded and wrong is better
-than unbounded, but it is still wrong.
+**The room map still floods the bounding volume**, which is 14 times the block count on a hull
+and worse on a station. The historical million-block run took 7,237 ticks to converge, which is
+twenty minutes of a stale map. The 2026-10-28 sparse pages remove eager empty-volume setup storage
+but do not remove that traversal, and the remaining setup/publication work is not entirely sliced.
+These historical memory and timing totals have not been rerun for the page-storage change.
 
 **World load is 2.2 seconds at a million blocks**, in one call, before the first tick — 500 ms
 placing and registering the blocks and 1.7 s in `RebuildAll`. It was **12.0 s** before the
@@ -821,7 +926,10 @@ takes the same path.
 
 **`SweepRoomPressure` is still per room per cadence**, with two game API calls each. Bounded by
 compartment count rather than block count, so it is small on a ship and unmeasured on a station
-with thousands of rooms.
+with thousands of rooms. Settled pressures skip the Core setter's linear room lookup. While a
+new room map is waiting for its sliced exposure refresh and air-table rebuild, the native sweep
+is deferred to the next eight-step cadence; old anchors must not resolve against new numbering.
+This adapter guard does not change direct Core room-query semantics during preparation.
 
 ---
 
@@ -958,6 +1066,9 @@ reasoning that produced it was sound and the premise was not.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Fuse ordinary node mirroring with stability/floor estimation while preserving explicit prewarming, profiling and active-step query behavior; add four-node frozen preparation and sliced-publication checks. |
+| 2026-10-28 | Defer native pressure sweeps while room-map and air-table publication differ, and skip unchanged pressure lookups once they are coherent. |
+| 2026-10-28 | Add sparse room-bit/sealing pages with constant-time generation reset, lazy page reuse and exact dense-path parity tests; state startup allocation evidence and remaining full-volume traversal/publication limits. Slice and charge coupled contact/parcel scratch work, fuse conduction diagnostic clears into environment ranges, and document remaining apply/setup walks and cancellation limits. Retain loop rebuild lookups, replace quadratic survivor searches, and cover self-aliased replacement with a two-block fixture. Bound exposure completion before cursor addition and preserve visit accounting after removals. |
 | 2026-09-24 | **Section 12 describes a cost rather than a pass.** The shape-normal pass left the solver with the aerodynamic force (`K25` step 0), so `SimulationScheduler.ShapeNormalBudget` and the slicing argument that went with it are gone; the measurements stay, because the force profile's rebuild will reconstruct the same normals, and the two halves of the section are one section now. |
 | 2026-09-04 | **The ladder is re-audited and survives**: 580 ms of build at a million blocks against the published 582, settle exactly 3,934 ticks, every stage inside session spread. The step and resident columns read 14 % and 7 % lower with no change to explain them and are left to the session (`M7`). The table now carries the 2026-09-04 figures with the audit note. |
 | 2026-09-04 | **The hitch distribution is re-taken** after the bounded step, the spread step and the prologue hoist: p99 26.47 → 3.11 ms at 126,731 blocks and 28.71 → 6.90 at 505,566, max 60.83 → 24.38 and 208.68 → 50.13, with the one outlier attributed to the process's first walk of the step path (the JIT) rather than to anything a second grid would pay. The superseded rows stay printed beside the new ones. Also: `UncalledCodeTests` crossed two seconds and is tagged slow — the lane checker found it on this pass's refresh. |

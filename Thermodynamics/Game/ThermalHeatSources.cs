@@ -43,7 +43,7 @@ namespace Thermodynamics
 
         public static int Add(IMyEntity entity, float watts, float range)
         {
-            if (entity == null || entity.MarkedForClose) return 0;
+            if (entity == null || entity.MarkedForClose || entity.Closed) return 0;
             return Register(entity, Vector3D.Zero, watts, range);
         }
 
@@ -54,7 +54,9 @@ namespace Thermodynamics
 
         private static int Register(IMyEntity entity, Vector3D position, float watts, float range)
         {
-            if (watts <= 0f || range <= 0f) return 0;
+            if (!(watts > 0f) || float.IsInfinity(watts)
+                || !(range > 0f) || float.IsInfinity(range)
+                || !HeatSourceMath.ValidPosition(position)) return 0;
 
             HeatSource source = new HeatSource();
             source.Id = nextId++;
@@ -69,6 +71,7 @@ namespace Thermodynamics
 
         public static bool Update(int id, float watts)
         {
+            if (float.IsNaN(watts) || float.IsInfinity(watts)) return false;
             for (int i = 0; i < Sources.Count; i++)
             {
                 if (Sources[i].Id != id) continue;
@@ -114,13 +117,14 @@ namespace Thermodynamics
 
                 if (source.Watts <= 0f) continue;
 
+                Vector3D position = source.WorldPosition;
                 float irradiance = HeatSourceMath.Irradiance(
-                    source.WorldPosition, source.Watts, source.Range, gridCentre);
+                    position, source.Watts, source.Range, gridCentre);
 
                 if (irradiance <= 0f) continue;
 
                 Vector3 local = HeatSourceMath.Direction(
-                    source.WorldPosition, gridCentre, ref worldToLocal);
+                    position, gridCentre, ref worldToLocal);
 
                 if (buffer == null || written >= buffer.Length)
                 {

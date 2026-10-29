@@ -8,9 +8,23 @@ namespace Thermodynamics.Core
     {
         private readonly Dictionary<long, float> ventedRings = new Dictionary<long, float>();
 
+        private struct RememberedLoop
+        {
+            public float Temperature;
+            public float Fill;
+            public bool Survives;
+        }
 
-        private void SpillDissolvedLoops(List<CoolantLoop> newLoops,
-            Dictionary<long, float> previousFill)
+        private readonly Dictionary<long, RememberedLoop> rememberedLoops =
+            new Dictionary<long, RememberedLoop>();
+
+        private readonly Dictionary<long, CoolantPump> rememberedLoopPumps =
+            new Dictionary<long, CoolantPump>();
+
+        private List<CoolantLoop> loopInputScratch;
+
+
+        private void SpillDissolvedLoops()
         {
             if (loops.Count == 0) return;
 
@@ -18,17 +32,9 @@ namespace Thermodynamics.Core
             {
                 CoolantLoop dying = loops[i];
 
-                bool survives = false;
-                if (newLoops != null)
-                {
-                    for (int n = 0; n < newLoops.Count; n++)
-                    {
-                        if (newLoops[n].Signature != dying.Signature) continue;
-                        survives = true;
-                        break;
-                    }
-                }
-                if (survives) continue;
+                RememberedLoop remembered;
+                if (rememberedLoops.TryGetValue(dying.Signature, out remembered)
+                    && remembered.Survives) continue;
 
                 int pipes = dying.Pipes.Count;
                 if (pipes <= 0) continue;
@@ -136,75 +142,100 @@ namespace Thermodynamics.Core
 
         public void SetLoops(List<CoolantLoop> newLoops)
         {
-            Dictionary<long, float> previous = new Dictionary<long, float>();
-
-            Dictionary<long, float> previousFill = new Dictionary<long, float>();
-
-            for (int i = 0; i < loops.Count; i++)
+            AbandonStep();
+            try
             {
-                previous[loops[i].Signature] = loops[i].Temperature;
-                previousFill[loops[i].Signature] = loops[i].FillFraction;
-            }
-
-            Dictionary<long, CoolantPump> previousPumps = new Dictionary<long, CoolantPump>();
-            for (int i = 0; i < loops.Count; i++)
-            {
-                IList<CoolantPump> pumps = loops[i].Pumps;
-                for (int p = 0; p < pumps.Count; p++)
+                // Loops exposes this list to native consumers. Preserve an aliased input
+                // before replacing its contents, retaining storage for subsequent rebuilds.
+                if (ReferenceEquals(newLoops, loops))
                 {
-                    if (pumps[p].Block == null) continue;
-                    previousPumps[pumps[p].Block.Key] = pumps[p];
+                    if (loopInputScratch == null) loopInputScratch = new List<CoolantLoop>();
+                    loopInputScratch.AddRange(loops);
+                    newLoops = loopInputScratch;
+                }
+
+                for (int i = 0; i < loops.Count; i++)
+                {
+                    CoolantLoop loop = loops[i];
+                    RememberedLoop remembered;
+                    remembered.Temperature = loop.Temperature;
+                    remembered.Fill = loop.FillFraction;
+                    remembered.Survives = false;
+                    rememberedLoops[loop.Signature] = remembered;
+
+                    IList<CoolantPump> pumps = loop.Pumps;
+                    for (int p = 0; p < pumps.Count; p++)
+                    {
+                        if (pumps[p].Block == null) continue;
+                        rememberedLoopPumps[pumps[p].Block.Key] = pumps[p];
+                    }
+                }
+
+                // Mark survivors once instead of searching all incoming rings for
+                // every old ring. The old values remain copies throughout spill/reclaim.
+                if (loops.Count != 0 && newLoops != null)
+                {
+                    for (int i = 0; i < newLoops.Count; i++)
+                    {
+                        long signature = newLoops[i].Signature;
+                        RememberedLoop remembered;
+                        if (!rememberedLoops.TryGetValue(signature, out remembered)) continue;
+                        remembered.Survives = true;
+                        rememberedLoops[signature] = remembered;
+                    }
+                }
+
+                SpillDissolvedLoops();
+
+                loops.Clear();
+                if (newLoops != null)
+                {
+                    for (int i = 0; i < newLoops.Count; i++)
+                    {
+                        CoolantLoop loop = newLoops[i];
+                        RememberedLoop remembered;
+                        float carriedFill;
+                        if (rememberedLoops.TryGetValue(loop.Signature, out remembered))
+                        {
+                            loop.Temperature = remembered.Temperature;
+                            loop.FillFraction = remembered.Fill;
+                        }
+                        else if (ventedRings.TryGetValue(loop.Signature, out carriedFill))
+                        {
+                            loop.FillFraction = carriedFill;
+                            ventedRings.Remove(loop.Signature);
+                        }
+
+                        loop.HeatTimeScale = settings.HeatTimeScale;
+                        loop.WellMixed = settings.WellMixedCoolant;
+
+                        for (int p = 0; p < loop.Pumps.Count; p++)
+                        {
+                            CoolantPump fresh = loop.Pumps[p];
+                            if (fresh.Block == null) continue;
+
+                            CoolantPump kept;
+                            if (!rememberedLoopPumps.TryGetValue(fresh.Block.Key, out kept)) continue;
+
+                            fresh.Speed = kept.Speed;
+                            fresh.Enabled = kept.Enabled;
+                            fresh.PowerAvailable = kept.PowerAvailable;
+                            fresh.MaxPowerWatts = kept.MaxPowerWatts;
+                        }
+
+                        ReclaimHeldCoolant(loop);
+
+                        loop.RefreshFlow();
+                        BuildLoopLinks(loop);
+                        loops.Add(loop);
+                    }
                 }
             }
-
-            SpillDissolvedLoops(newLoops, previousFill);
-
-            loops.Clear();
-            if (newLoops != null)
+            finally
             {
-                for (int i = 0; i < newLoops.Count; i++)
-                {
-                    CoolantLoop loop = newLoops[i];
-                    float carried;
-                    if (previous.TryGetValue(loop.Signature, out carried))
-                    {
-                        loop.Temperature = carried;
-                    }
-
-                    float carriedFill;
-                    if (previousFill.TryGetValue(loop.Signature, out carriedFill))
-                    {
-                        loop.FillFraction = carriedFill;
-                    }
-                    else if (ventedRings.TryGetValue(loop.Signature, out carriedFill))
-                    {
-                        loop.FillFraction = carriedFill;
-                        ventedRings.Remove(loop.Signature);
-                    }
-
-                    loop.HeatTimeScale = settings.HeatTimeScale;
-                    loop.WellMixed = settings.WellMixedCoolant;
-
-                    for (int p = 0; p < loop.Pumps.Count; p++)
-                    {
-                        CoolantPump fresh = loop.Pumps[p];
-                        if (fresh.Block == null) continue;
-
-                        CoolantPump kept;
-                        if (!previousPumps.TryGetValue(fresh.Block.Key, out kept)) continue;
-
-                        fresh.Speed = kept.Speed;
-                        fresh.Enabled = kept.Enabled;
-                        fresh.PowerAvailable = kept.PowerAvailable;
-                        fresh.MaxPowerWatts = kept.MaxPowerWatts;
-                    }
-
-                    ReclaimHeldCoolant(loop);
-
-                    loop.RefreshFlow();
-                    BuildLoopLinks(loop);
-                    loops.Add(loop);
-                }
+                rememberedLoops.Clear();
+                rememberedLoopPumps.Clear();
+                if (loopInputScratch != null) loopInputScratch.Clear();
             }
 
             EnsureBuffers();
@@ -230,10 +261,15 @@ namespace Thermodynamics.Core
                         i));
                 }
 
-                List<GridPort> sinks = pipe.CoolantSinkPorts();
-                for (int s = 0; s < sinks.Count; s++)
+                CoolantShape shape = pipe.Model.Coolant;
+                CoolantPort[] sinks = shape == null ? null : shape.SinkPorts;
+                if (sinks == null) continue;
+                for (int s = 0; s < sinks.Length; s++)
                 {
-                    BlockInstance target = grid.GetAtCell(sinks[s].Target);
+                    CoolantPort sink = sinks[s];
+                    Vector3I targetCell = pipe.LocalToGrid(sink.LocalCell)
+                        + pipe.LocalDirectionToGrid(sink.LocalDirection);
+                    BlockInstance target = grid.GetAtCell(targetCell);
                     if (target == null || target == pipe) continue;
 
 
@@ -278,8 +314,16 @@ namespace Thermodynamics.Core
             if (exposureMap == null) return false;
             if (nodeBudget <= 0) return true;
 
-            int end = exposureCursor + nodeBudget;
-            if (end > nodes.Count) end = nodes.Count;
+            // Removed nodes can leave the cursor beyond the current table. Complete
+            // without moving it backwards or subtracting visits from the work counters.
+            if (exposureCursor >= nodes.Count)
+            {
+                exposureMap = null;
+                exposureCursor = 0;
+                return false;
+            }
+
+            int end = exposureCursor + Math.Min(nodeBudget, nodes.Count - exposureCursor);
 
             Work.ExposureNodeVisits += end - exposureCursor;
 
@@ -307,7 +351,7 @@ namespace Thermodynamics.Core
             if (affected == null) affected = new HashSet<BlockInstance>();
             affected.Clear();
 
-            CellBitset occupied = grid.Occupancy();
+            CellBitset occupied = grid.OccupancyForQueries();
 
             for (int r = 0; r < roomIndices.Count; r++)
             {
@@ -317,17 +361,17 @@ namespace Thermodynamics.Core
                 foreach (Vector3I cell in rooms.CellsOf(index))
                 {
                     long key = GridMath.Key(cell);
-                    long slot = occupied.IndexOf(cell);
+                    long slot = occupied == null ? -1L : occupied.IndexOf(cell);
 
                     for (int face = 0; face < Face.Count; face++)
                     {
-                        if (!occupied.ContainsIndex(slot + occupied.IndexStep(face))) continue;
+                        if (occupied != null && !occupied.ContainsIndex(slot + occupied.IndexStep(face))) continue;
 
                         BlockInstance block = grid.GetAtKey(key + GridMath.KeyByFace[face]);
                         if (block != null) affected.Add(block);
                     }
 
-                    if (!occupied.ContainsIndex(slot)) continue;
+                    if (occupied != null && !occupied.ContainsIndex(slot)) continue;
 
                     BlockInstance occupant = grid.GetAtKey(key);
                     if (occupant != null) affected.Add(occupant);
@@ -372,6 +416,7 @@ namespace Thermodynamics.Core
 
         public void RebuildRoomAir(RoomMap rooms)
         {
+            AbandonStep();
             Work.RoomAirRebuilds++;
             if (rooms != null) Work.RoomAirRoomVisits += rooms.RoomCount;
 
@@ -459,18 +504,18 @@ namespace Thermodynamics.Core
             if (roomContactFaces.Length < nodes.Count) roomContactFaces = new int[nodes.Count];
             roomContactOrder.Clear();
 
-            CellBitset occupied = grid.Occupancy();
+            CellBitset occupied = grid.OccupancyForQueries();
 
             foreach (Vector3I cell in rooms.CellsOf(air.RoomIndex))
             {
                 long key = GridMath.Key(cell);
-                long slot = occupied.IndexOf(cell);
+                long slot = occupied == null ? -1L : occupied.IndexOf(cell);
 
                 Work.RoomAirFaceProbes += Face.Count;
 
                 for (int face = 0; face < Face.Count; face++)
                 {
-                    if (!occupied.ContainsIndex(slot + occupied.IndexStep(face))) continue;
+                    if (occupied != null && !occupied.ContainsIndex(slot + occupied.IndexStep(face))) continue;
 
                     BlockInstance block = grid.GetAtKey(key + GridMath.KeyByFace[face]);
                     if (block == null) continue;
@@ -523,7 +568,9 @@ namespace Thermodynamics.Core
             Dictionary<Vector3I, float> byAnchor = new Dictionary<Vector3I, float>(stored.Count, Vector3I.Comparer);
             for (int i = 0; i < stored.Count; i++)
             {
-                byAnchor[stored[i].Anchor] = stored[i].Temperature;
+                float temperature = stored[i].Temperature;
+                if (float.IsNaN(temperature) || float.IsInfinity(temperature)) continue;
+                byAnchor[stored[i].Anchor] = temperature;
             }
 
             int restored = 0;
@@ -532,8 +579,13 @@ namespace Thermodynamics.Core
                 float temperature;
                 if (!byAnchor.TryGetValue(roomAir[i].Anchor, out temperature)) continue;
 
-                roomAir[i].Temperature = Math.Max(ThermalConstants.MinimumTemperature, temperature);
-                roomAir[i].Initialised = true;
+                float restoredTemperature = Math.Max(ThermalConstants.MinimumTemperature, temperature);
+                if (roomAir[i].Temperature != restoredTemperature || !roomAir[i].Initialised)
+                {
+                    AbandonStep();
+                    roomAir[i].Temperature = restoredTemperature;
+                    roomAir[i].Initialised = true;
+                }
                 restored++;
             }
 
@@ -570,6 +622,7 @@ namespace Thermodynamics.Core
 
         public void RebuildHeatPumps()
         {
+            AbandonStep();
             Work.HeatPumpRebuilds++;
 
             if (grid.HeatPumpBlockCount == 0)
@@ -647,12 +700,18 @@ namespace Thermodynamics.Core
 
         private void AccumulateHeatPumps(float h)
         {
+            AccumulateHeatPumpRange(h, 0, heatPumps.Count);
+        }
+
+
+        private void AccumulateHeatPumpRange(float h, int from, int to)
+        {
             if (!settings.EnableHeatPumps) return;
 
             float fraction = settings.HeatPumpCarnotFraction;
             float ceiling = settings.HeatPumpMaxCoefficient;
 
-            for (int p = 0; p < heatPumps.Count; p++)
+            for (int p = from; p < to; p++)
             {
                 HeatPumpDevice pump = heatPumps[p];
                 if (!pump.Enabled || !pump.IsConnected) continue;
@@ -727,6 +786,7 @@ namespace Thermodynamics.Core
 
         public bool SetRoomPressure(RoomMap rooms, Vector3I cell, float pressure)
         {
+            if (float.IsNaN(pressure) || float.IsInfinity(pressure)) return false;
 
             RoomAirNode air = GetRoomAir(rooms, cell);
             if (air == null) return false;
@@ -735,6 +795,7 @@ namespace Thermodynamics.Core
             if (pressure > 1f) pressure = 1f;
             if (air.Pressure == pressure) return true;
 
+            AbandonStep();
             bool hadAir = air.HasAir;
             air.Pressure = pressure;
             air.RefreshThermalMass();

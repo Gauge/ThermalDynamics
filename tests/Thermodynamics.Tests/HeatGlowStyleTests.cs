@@ -101,6 +101,25 @@ namespace Thermodynamics.Tests
             Assert.Equal(0.02f, HeatGlowStyle.StandOff(2.5f), 6);
         }
 
+        [Theory]
+        [InlineData(0.25f, 0.25f, 0.25f, 0.5f)]
+        [InlineData(1.25f, 2.5f, 3.75f, 2.5f)]
+        public void CullSphereIncludesEveryExpandedFaceCorner(float x, float y, float z, float gridSize)
+        {
+            Vector3 half = new Vector3(x, y, z);
+            double radius = HeatGlowStyle.CullRadius(half, gridSize);
+            double[] extents = { x, y, z };
+            for (int axis = 0; axis < 3; axis++)
+            {
+                double normal = extents[axis] + gridSize * 0.008;
+                double left = extents[(axis + 1) % 3] * 1.12;
+                double up = extents[(axis + 2) % 3] * 1.12;
+                double cornerRadius = Math.Sqrt(normal * normal + left * left + up * up);
+                Assert.True(radius >= cornerRadius,
+                    "Frustum culling must retain the halo outside the block's physical bounds.");
+            }
+        }
+
         [Fact]
 
         public void WarmedViewShapingAllocatesNoManagedMemory()
@@ -120,6 +139,7 @@ namespace Thermodynamics.Tests
                     * HeatGlowStyle.RangeFade(i % 2500, 2000);
                 sum += HeatGlowStyle.BillboardColour(HeatGlowStyle.LinearEmission(locus, 0.5f), fade).X;
                 sum += HeatGlowStyle.StandOff(2.5f);
+                sum += HeatGlowStyle.CullRadius(new Vector3(1.25f), 2.5f);
             }
             long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
             Assert.True(sum > 0);

@@ -277,6 +277,21 @@ namespace Thermodynamics.Core
         }
 
 
+        internal void CopyStructuralSealing(Vector3I min, Vector3I maxExclusive, RoomSealingSnapshot snapshot)
+        {
+            int sizeX = maxExclusive.X - min.X, sizeY = maxExclusive.Y - min.Y, sizeZ = maxExclusive.Z - min.Z;
+            if (sizeX <= 0 || sizeY <= 0 || sizeZ <= 0) return;
+            foreach (KeyValuePair<long, long> entry in cells)
+            {
+                Vector3I at = GridMath.FromKey(entry.Key);
+                int x = at.X - min.X, y = at.Y - min.Y, z = at.Z - min.Z;
+                if (x < 0 || x >= sizeX || y < 0 || y >= sizeY || z < 0 || z >= sizeZ) continue;
+                byte value = (byte)(Structural(entry.Value) & CellSurface.SelfAirtightMask);
+                snapshot.Write((((long)z * sizeY) + y) * sizeX + x, value);
+            }
+        }
+
+
         public void GetExposedFaces(BlockInstance block, RoomMap rooms, int[] resultsByFace)
         {
             if (resultsByFace == null || resultsByFace.Length < Face.Count)

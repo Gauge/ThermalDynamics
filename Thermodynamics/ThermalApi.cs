@@ -25,6 +25,9 @@ namespace Thermodynamics
         private static readonly List<ThermalThreshold> GlobalThresholds = new List<ThermalThreshold>();
 
         private static int nextThresholdId = 1;
+        private static readonly Func<int, bool> RemoveFailedThreshold = RemoveThreshold;
+        private static readonly Action<Exception> ReportThresholdFailure =
+            error => Telemetry.Exception("ThermalApi.RaiseThreshold", error);
 
         public static void Register()
         {
@@ -159,7 +162,8 @@ namespace Thermodynamics
         private static ThermalBlock Bound(IMySlimBlock block)
         {
             ThermalGrid grid = GridOf(block);
-            return grid == null ? null : grid.Get(block.Min);
+            ThermalBlock bound = grid == null ? null : grid.Get(block.Min);
+            return bound != null && ReferenceEquals(bound.Block, block) ? bound : null;
         }
 
         private static float GetBlockTemperature(IMySlimBlock block)
@@ -227,8 +231,10 @@ namespace Thermodynamics
             ThermalBlock bound = Bound(block);
             if (bound == null || bound.Node == null) return false;
 
-            bound.Node.Drag = DragProfile.Of(faces[0], faces[1], faces[2], faces[3], faces[4], faces[5]);
-            bound.Grid.InvalidateGeometry();
+            DragProfile profile = DragProfile.Of(faces[0], faces[1], faces[2], faces[3], faces[4], faces[5]);
+            bool changed = !bound.Node.Drag.HasSameWeights(profile);
+            bound.Node.Drag = profile;
+            if (changed) bound.Grid.InvalidateGeometry();
             return true;
         }
 
@@ -249,8 +255,9 @@ namespace Thermodynamics
             ThermalBlock bound = Bound(block);
             if (bound == null || bound.Node == null) return false;
 
+            bool changed = !bound.Node.Drag.HasSameWeights(default(DragProfile));
             bound.Node.Drag = default(DragProfile);
-            bound.Grid.InvalidateGeometry();
+            if (changed) bound.Grid.InvalidateGeometry();
             return true;
         }
 
@@ -330,11 +337,12 @@ namespace Thermodynamics
 
         private static bool SetBlockTemperature(IMySlimBlock block, float kelvin)
         {
+            float temperature;
+            if (!ThermalApiInputs.TryTemperature(kelvin, out temperature)) return false;
             ThermalBlock bound = Bound(block);
             if (bound == null || bound.Node == null) return false;
-            if (kelvin < ThermalConstants.MinimumTemperature) kelvin = ThermalConstants.MinimumTemperature;
 
-            bound.Node.Temperature = kelvin;
+            bound.Node.Temperature = temperature;
             return true;
         }
 
@@ -344,15 +352,16 @@ namespace Thermodynamics
             if (bound == null || bound.Node == null) return false;
 
             ThermalNode node = bound.Node;
-            float updated = node.Temperature + (joules / node.ThermalMass);
-            node.Temperature = updated < ThermalConstants.MinimumTemperature
-                ? ThermalConstants.MinimumTemperature
-                : updated;
+            float temperature;
+            if (!ThermalApiInputs.TryAddHeat(node.Temperature, node.ThermalMass, joules, out temperature))
+                return false;
+            node.Temperature = temperature;
             return true;
         }
 
         private static bool SetRoomPressure(IMyCubeGrid grid, Vector3I cell, float pressure)
         {
+            if (!ThermalApiInputs.IsFinite(pressure)) return false;
             ThermalGrid thermals = GridOf(grid);
             if (thermals == null || thermals.Simulation == null) return false;
             return thermals.Simulation.SetRoomPressure(cell, pressure);
@@ -376,7 +385,7 @@ namespace Thermodynamics
         private static int AddThreshold(
             float temperature, int direction, Action<IMySlimBlock, int, float, float, bool> callback)
         {
-            if (callback == null) return 0;
+            if (callback == null || !ThermalApiInputs.IsFinite(temperature)) return 0;
 
             ThresholdDirection resolved =
                 direction == 1 ? ThresholdDirection.Falling :
@@ -430,18 +439,17 @@ namespace Thermodynamics
 
         public static void RaiseThreshold(ThresholdCrossing crossing, IMySlimBlock block)
         {
+            RaiseThreshold(crossing, Bound(block));
+        }
+
+        internal static void RaiseThreshold(ThresholdCrossing crossing, ThermalBlock bound)
+        {
+            if (bound == null) return;
             Action<IMySlimBlock, int, float, float, bool> handler;
             if (!ThresholdHandlers.TryGetValue(crossing.ThresholdId, out handler)) return;
 
-            try
-            {
-                handler(block, crossing.ThresholdId, crossing.Threshold, crossing.Temperature, crossing.Rising);
-            }
-            catch (Exception e)
-            {
-                Telemetry.Exception("ThermalApi.RaiseThreshold", e);
-                ThresholdHandlers.Remove(crossing.ThresholdId);
-            }
+            ThermalThresholdDispatch.Raise(crossing, bound.Instance, bound.Block, handler,
+                RemoveFailedThreshold, ReportThresholdFailure);
         }
     }
 }

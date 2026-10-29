@@ -1,0 +1,50 @@
+{
+  "latticeSamples": 125,
+  "rebuilds": 32,
+  "exactOutput": true,
+  "baseline": {
+    "medianMs": 0.1073,
+    "allocatedBytes": 115240,
+    "checksum": 32
+  },
+  "optimized": {
+    "medianMs": 0.0208,
+    "allocatedBytes": 36904,
+    "checksum": 32
+  },
+  "scope": "CPU surface-patch rebuild only; no native renderer, GPU, world or simulation. Five exact output fixtures: uniform transition, cooling corner hotspot, huge current value, huge prior value, negative huge current value.",
+  "date": "2026-10-28",
+  "baselineRevision": "60677d353dddc0f8b90b7ee7733cdc8789bd3c27",
+  "targetFramework": "net9.0",
+  "sdk": "10.0.112",
+  "host": "Linux 7.2.11-200.fc44.x86_64; AMD Ryzen 9 9950X",
+  "method": "TieredCompilation=0; four warmups, nine timed batches; median; 32 rebuilds per batch. Stopwatch contributes 40 allocation bytes per batch.",
+  "baselineSourceSha256": "26424ed0b888ef36eb68458901d610e116d1cb01c7bda344a87223f4e4eb8030",
+  "notes": "Initial runner invocation failed because SEBinPath was unspecified. Corrected invocation found existing invalid initializer B=b=C=c in BaselineSurfaceBuild.cs; repaired to B=b,C=c. No timings from failed runs. Final rerun followed finite sensor-range guard and three out-of-range differential cases; initial valid timing retained separately. Final capacity-one change removes the otherwise unused three Patch slots per uniform face. Exact five-fixture differential still passes; prior valid measurements retained.",
+  "initialMeasurement": {
+    "baseline": {
+      "medianMs": 0.1056,
+      "allocatedBytes": 115240,
+      "checksum": 32
+    },
+    "optimized": {
+      "medianMs": 0.0329,
+      "allocatedBytes": 115240,
+      "checksum": 32
+    }
+  },
+  "runtime": "Microsoft.NETCore.App 9.0.20",
+  "productionSourceSha256": "c6cd5e7124fe91272c9291ff9f9d84a038b4087b5b8586e7922fcb1939c193ac",
+  "guardedMeasurementBeforeCapacityChange": {
+    "baseline": {
+      "medianMs": 0.1083,
+      "allocatedBytes": 115240,
+      "checksum": 32
+    },
+    "optimized": {
+      "medianMs": 0.0367,
+      "allocatedBytes": 115240,
+      "checksum": 32
+    }
+  }
+}

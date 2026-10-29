@@ -320,6 +320,14 @@ namespace Thermodynamics
         [XmlIgnore]
         private Core.ThermalSettings core;
 
+        // Runtime readers share the last applied settings. ToCore deliberately
+        // reapplies and publishes, which belongs to configuration changes, not ticks.
+        [XmlIgnore]
+        internal Core.ThermalSettings AppliedCore
+        {
+            get { return core ?? ToCore(); }
+        }
+
         public Core.ThermalSettings ToCore()
         {
             if (core == null) core = new Core.ThermalSettings();

@@ -47,7 +47,10 @@ namespace Thermodynamics
                     return Clear();
 
                 case HeatSourceCommand.Verb.Remove:
-                    return ThermalHeatSources.Remove(command.Id)
+                    bool removed = ThermalHeatSources.Remove(command.Id);
+                    for (int i = Ours.Count - 1; i >= 0; i--)
+                        if (Ours[i].Id == command.Id) Ours.RemoveAt(i);
+                    return removed
                         ? "removed heat source " + command.Id
                         : "no heat source with id " + command.Id;
 
@@ -78,11 +81,8 @@ namespace Thermodynamics
             int id = ThermalHeatSources.Add(position, watts, range);
             if (id == 0) return "could not place a heat source";
 
-            Ours.Add(new Placed
-            {
-                Id = id,
-                ExpiresAt = lifetime > 0f ? elapsed + lifetime : 0.0,
-            });
+            if (lifetime > 0f)
+                Ours.Add(new Placed { Id = id, ExpiresAt = elapsed + lifetime });
 
             string note = lifetime > 0f
                 ? " for " + lifetime.ToString("n0", CultureInfo.InvariantCulture) + " s"

@@ -81,6 +81,36 @@ namespace Thermodynamics.Tests
             Assert.Equal(0f, HeatSourceMath.Irradiance(Vector3D.Zero, watts, range, At(10.0)));
         }
 
+        [Theory]
+        [InlineData(float.NaN)]
+        [InlineData(float.PositiveInfinity)]
+        [InlineData(float.NegativeInfinity)]
+        public void NonfiniteSourceParametersCannotInjectNonfiniteEnergy(float invalid)
+        {
+            Assert.Equal(0f, HeatSourceMath.Irradiance(Vector3D.Zero, invalid, 100f, At(10)));
+            Assert.Equal(0f, HeatSourceMath.Irradiance(Vector3D.Zero, 1000f, invalid, At(10)));
+        }
+
+        [Theory]
+        [InlineData(double.NaN)]
+        [InlineData(double.PositiveInfinity)]
+        [InlineData(double.NegativeInfinity)]
+        [InlineData(double.MaxValue)]
+        public void InvalidOrOverflowingCoordinatesProduceNoSource(double invalid)
+        {
+            var identity = MatrixD.Identity;
+            for (int axis = 0; axis < 3; axis++)
+            {
+                var position = new Vector3D(axis == 0 ? invalid : 0,
+                    axis == 1 ? invalid : 0, axis == 2 ? invalid : 0);
+                Assert.Equal(0f, HeatSourceMath.Irradiance(position, 1000f, 100f, Vector3D.Zero));
+                Assert.Equal(0f, HeatSourceMath.Irradiance(Vector3D.Zero, 1000f, 100f, position));
+                Assert.Equal(Vector3.Zero, HeatSourceMath.Direction(position, Vector3D.Zero, ref identity));
+                Assert.Equal(!double.IsNaN(invalid) && !double.IsInfinity(invalid),
+                    HeatSourceMath.ValidPosition(position));
+            }
+        }
+
 
         [Fact]
 

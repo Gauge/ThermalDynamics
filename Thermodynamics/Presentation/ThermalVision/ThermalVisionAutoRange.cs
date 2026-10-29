@@ -19,7 +19,7 @@ namespace Thermodynamics.Presentation
 
         public bool Observe(float kelvin)
         {
-            if (float.IsNaN(kelvin) || float.IsInfinity(kelvin) || kelvin < 0 || kelvin > 100000f)
+            if (float.IsNaN(kelvin) || float.IsInfinity(kelvin) || kelvin < 0 || kelvin > ThermalVisionTemperatureData.MaximumMeasuredKelvin)
                 return false;
             float low = Math.Max(0, (float)Math.Floor((kelvin - 10f) / 25f) * 25f);
             float high = Math.Max(low + 50f, (float)Math.Ceiling((kelvin + 10f) / 25f) * 25f);

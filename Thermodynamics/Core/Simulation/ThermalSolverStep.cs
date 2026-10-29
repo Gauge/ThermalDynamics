@@ -24,6 +24,7 @@ namespace Thermodynamics.Core
 
         private StepStage stage = StepStage.Idle;
         private int stageCursor;
+        private int stepSourceCursor;
 
         public class StepPhaseProfile
         {
@@ -62,6 +63,7 @@ namespace Thermodynamics.Core
         public readonly StepPhaseProfile StepPhases = new StepPhaseProfile();
 
         private EnvironmentState stepEnvironment;
+        private HeatSourceState[] stepHeatSources;
         private EnvironmentPlan stepPlan;
         private float stepDeltaSeconds;
         private float substepSeconds;
@@ -78,6 +80,7 @@ namespace Thermodynamics.Core
         public bool GateConductionClamp = true;
 
         private bool diagnosticsSubstep;
+        private bool stepCollectDiagnostics, stepDiagnosticsOnEverySubstep;
 
         public bool DiagnosticsOnEverySubstep;
 
@@ -101,7 +104,7 @@ namespace Thermodynamics.Core
                 + nodeCount
                 + ((long)sources * nodeCount)
                 + linkCount
-                + loops.Count + roomAir.Count + heatPumps.Count
+                + stepCoupledWork
                 + nodeCount;
         }
 
@@ -141,15 +144,34 @@ namespace Thermodynamics.Core
             }
             else
             {
-                PrepareStepState();
+                float worstNodeRate = PrepareStepState(true);
 
-                required = RequiredSubstepsFromState(deltaSeconds);
+                required = RequiredSubstepsFromState(deltaSeconds, worstNodeRate);
             }
 
             RefreshLinkMassFactors();
 
             stepEnvironment = environment;
+            // Hosts may reuse their sample arrays between slices. Keep the
+            // active source values private; Environment still exposes the
+            // caller's supplied state, not this retained work buffer.
+            int sourceCount=environment.HeatSources==null ? 0
+                : Math.Max(0,Math.Min(environment.HeatSourceCount,environment.HeatSources.Length));
+            if(sourceCount>0)
+            {
+                if(stepHeatSources==null || stepHeatSources.Length<sourceCount)
+                {
+                    int capacity=stepHeatSources==null ? 0 : stepHeatSources.Length;
+                    int doubled=capacity<=int.MaxValue/2 ? capacity*2 : int.MaxValue;
+                    stepHeatSources=new HeatSourceState[Math.Max(4,Math.Max(sourceCount,doubled))];
+                }
+                Array.Copy(environment.HeatSources,stepHeatSources,sourceCount);
+            }
+            stepEnvironment.HeatSources=sourceCount>0 ? stepHeatSources : null;
+            stepEnvironment.HeatSourceCount=sourceCount;
             stepDeltaSeconds = deltaSeconds;
+            stepCollectDiagnostics = CollectDiagnostics;
+            stepDiagnosticsOnEverySubstep = DiagnosticsOnEverySubstep;
 
             InvalidateEnvironmentRows();
 
@@ -189,7 +211,17 @@ namespace Thermodynamics.Core
             stepNodeCount = nodes.Count;
             stepLinkCount = links.Count;
 
-            int sources = settings.EnableHeatSources ? environment.HeatSourceCount : 0;
+            // A refresh during the previous step could only publish its original node set.
+            // Retry once now that appended nodes have joined the prepared state.
+            if (shadowNodesDeferred)
+            {
+                sunLitDirty = true;
+                windLitDirty = true;
+                shadowNodesDeferred = false;
+            }
+
+            stepCoupledWork = CoupledSubstepWork();
+            int sources = settings.EnableHeatSources ? stepEnvironment.HeatSourceCount : 0;
             StepWorkUnits = (SubstepWork(stepNodeCount, stepLinkCount, sources) * substeps)
                 + stepNodeCount;
             StepWorkRemaining = StepWorkUnits;
@@ -244,7 +276,7 @@ namespace Thermodynamics.Core
 
                     case StepStage.Coupled:
 
-                        spent += AdvanceCoupled();
+                        spent += AdvanceCoupled(remaining);
                         break;
 
                     case StepStage.Apply:
@@ -279,13 +311,10 @@ namespace Thermodynamics.Core
         {
             int nodeCount = stepNodeCount;
 
-            diagnosticsSubstep = CollectDiagnostics && (DiagnosticsOnEverySubstep || substepsLeft <= 1);
+            diagnosticsSubstep = stepCollectDiagnostics && (stepDiagnosticsOnEverySubstep || substepsLeft <= 1);
 
             if (!FuseWattsClear) Array.Clear(nodeWatts, 0, nodeCount);
-            for (int i = 0; i < loops.Count; i++) loops[i].ClearSegmentWatts();
-            for (int i = 0; i < roomAir.Count; i++) roomWatts[i] = 0f;
 
-            ClearConductionDiagnostics();
             ResetEnvironmentTotals();
 
 
@@ -293,6 +322,7 @@ namespace Thermodynamics.Core
 
             stage = StepStage.Environment;
             stageCursor = 0;
+            stepSourceCursor = -1;
 
             return nodeCount / 8;
         }
@@ -301,29 +331,41 @@ namespace Thermodynamics.Core
         private long AdvanceEnvironment(long budget)
         {
             int count = stepNodeCount;
+            long spent = 0;
 
-            int end = Advance(count, budget);
-
-            AccumulateEnvironmentRange(ref stepEnvironment, ref stepPlan, substepSeconds,
-                stageCursor, end);
-
-            long spent = end - stageCursor;
-            stageCursor = end;
-
-            if (stageCursor >= count)
+            if (stepSourceCursor < 0)
             {
-                if (stepPlan.SourcesEnabled)
-                {
-                    AccumulateHeatSources(ref stepEnvironment, stepPlan.Diagnostics);
-                    spent += (long)stepEnvironment.HeatSourceCount * count;
-                }
+                int end = Advance(count, budget);
+                AccumulateEnvironmentRange(ref stepEnvironment, ref stepPlan, substepSeconds,
+                    stageCursor, end);
+                spent = end - stageCursor;
+                stageCursor = end;
+                if (stageCursor < count) return spent;
 
-                PublishEnvironmentTotals();
-
-                stage = StepStage.Conduction;
+                stepSourceCursor = 0;
                 stageCursor = 0;
             }
 
+            // Preserve source-major summation order across slices, including diagnostic totals.
+            if (stepPlan.SourcesEnabled && count > 0)
+            {
+                while (stepSourceCursor < stepEnvironment.HeatSourceCount && spent < budget)
+                {
+                    int end = Advance(count, budget - spent);
+                    AccumulateHeatSourceRange(stepEnvironment.HeatSources[stepSourceCursor],
+                        stepPlan.Diagnostics, stageCursor, end);
+                    spent += end - stageCursor;
+                    stageCursor = end;
+                    if (stageCursor < count) return spent;
+                    stepSourceCursor++;
+                    stageCursor = 0;
+                }
+                if (stepSourceCursor < stepEnvironment.HeatSourceCount) return spent;
+            }
+
+            PublishEnvironmentTotals();
+            stage = StepStage.Conduction;
+            stageCursor = 0;
             return spent;
         }
 
@@ -343,22 +385,10 @@ namespace Thermodynamics.Core
             {
                 stage = StepStage.Coupled;
                 stageCursor = 0;
+                ResetCoupledCursor();
             }
 
             return spent;
-        }
-
-
-        private long AdvanceCoupled()
-        {
-            AccumulateLoops(substepSeconds);
-            AccumulateRoomAir(substepSeconds);
-            AccumulateHeatPumps(substepSeconds);
-
-            stage = StepStage.Apply;
-            stageCursor = 0;
-
-            return loops.Count + roomAir.Count + heatPumps.Count;
         }
 
 
@@ -425,7 +455,11 @@ namespace Thermodynamics.Core
                 }
                 else
                 {
-                    node.Temperature += updated - previous;
+                    // Preserve an external write while applying the pending step's delta. Its
+                    // earlier floor was relative to the captured temperature, not this new one.
+                    float published = node.Temperature + (updated - previous);
+                    node.Temperature = published < ThermalConstants.MinimumTemperature
+                        ? ThermalConstants.MinimumTemperature : published;
                 }
 
                 node.LastDeltaTemperature = updated - previous;
@@ -466,6 +500,9 @@ namespace Thermodynamics.Core
         }
 
 
+        // Stops pending work; it is not a rollback. Earlier substeps may already have applied
+        // coolant/room temperatures, and a partial Publish may already have written nodes.
+        // The next preparation resynchronizes node scratch from the public node state.
         public void AbandonStep()
         {
             if (stage == StepStage.Idle) return;

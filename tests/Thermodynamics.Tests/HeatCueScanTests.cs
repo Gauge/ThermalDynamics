@@ -10,6 +10,8 @@ namespace Thermodynamics.Tests
     /// <summary>
     /// The scan that turns a grid's temperatures into cues, and the two things it must not do:
     /// cost anything on a cold hull, and repeat itself on a hot one.
+    /// A two-node boundary case also keeps queries on public temperatures before preparation,
+    /// after append, and while an active step holds unpublished temperatures.
     /// </summary>
     public class HeatCueScanTests
     {
@@ -179,6 +181,71 @@ namespace Thermodynamics.Tests
                 "the rig is meant to be a hull rather than a handful of blocks");
             Assert.Single(cues);
             Assert.Equal(1, rig.State.Count);
+        }
+
+        [Fact]
+        public void QueriesUsePublishedNodesBeforePreparationAndAcrossAnAppendedStep()
+        {
+            var settings = new ThermalSettings { EnableEnvironment = false, EnableSolarHeat = false,
+                EnableConduction = false, EnableWasteHeat = true, EnableDamage = false,
+                HeatTimeScale = 1f, MaxSubsteps = 2, MaxSubstepsPerBlock = 0 };
+            settings.Derive();
+            var simulation = new ThermalSimulation(settings, new GridModel(2.5f));
+            var thermal = new BlockThermalProperties { SpecificHeat = 1f, Conductivity = 0f,
+                Emissivity = 0f, CriticalTemperature = 900f, HeatSourceWatts = 400f };
+            ThermalNode first = simulation.AddBlock(new BlockInstance(
+                BlockModel.Solid("hot", Vector3I.One, 1f, thermal), Vector3I.Zero,
+                BlockOrientation.Identity), 850f);
+            var solver = simulation.Solver;
+            var state = new HeatCueState();
+            var cues = new List<HeatCue>();
+            solver.CollectHeatCues(state, .25f, cues);
+            Assert.Single(cues);
+            Assert.Equal(850f, cues[0].Kelvin);
+            Assert.Equal(900f, cues[0].Critical);
+            Assert.Equal(HeatCueStage.None, cues[0].Stage);
+            Assert.Equal(0L, solver.StepCount);
+
+            solver.PrepareForSteps();
+            Assert.True(solver.BeginStep(.5f, EnvironmentState.Vacuum(300f), 2f));
+            Assert.False(solver.AdvanceStep(2)); // First private substep has heated to 950 K.
+            Assert.Equal(850f, first.Temperature);
+            var appendedThermal = new BlockThermalProperties { SpecificHeat = 1f,
+                CriticalTemperature = 1000f };
+            ThermalNode appended = simulation.AddBlock(new BlockInstance(
+                BlockModel.Solid("appended", Vector3I.One, 1f, appendedThermal), new Vector3I(3, 0, 0),
+                BlockOrientation.Identity), 1025f);
+            long remaining = solver.StepWorkRemaining;
+            cues.Clear();
+            solver.CollectHeatCues(state, .25f, cues);
+            Assert.Equal(2, cues.Count);
+            Assert.Same(first.Block, cues[0].Block);
+            Assert.Equal(850f, cues[0].Kelvin);
+            Assert.Equal(HeatCueStage.None, cues[0].Stage);
+            Assert.Same(appended.Block, cues[1].Block);
+            Assert.Equal(1025f, cues[1].Kelvin);
+            Assert.Equal(1000f, cues[1].Critical);
+            Assert.Equal(HeatCueStage.Critical, cues[1].Stage);
+            Assert.True(solver.StepInFlight);
+            Assert.Equal(remaining, solver.StepWorkRemaining);
+
+            first.Temperature = 860f;
+            thermal.CriticalTemperature = 870f;
+            cues.Clear();
+            solver.CollectHeatCues(state, .25f, cues);
+            Assert.Equal(860f, cues[0].Kelvin);
+            Assert.Equal(870f, cues[0].Critical);
+            Assert.True(solver.StepInFlight);
+            Assert.Equal(remaining, solver.StepWorkRemaining);
+            Assert.True(solver.AdvanceStep(long.MaxValue));
+            Assert.Equal(1060f, first.Temperature);
+            Assert.Equal(1025f, appended.Temperature);
+
+            cues.Clear();
+            solver.CollectHeatCues(state, .25f, cues);
+            Assert.Equal(1060f, cues[0].Kelvin);
+            Assert.Equal(HeatCueStage.Critical, cues[0].Stage);
+            Assert.Equal(1025f, cues[1].Kelvin);
         }
 
         private class Rig

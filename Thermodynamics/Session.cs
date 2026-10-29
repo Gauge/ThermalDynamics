@@ -76,13 +76,17 @@ namespace Thermodynamics
                 Telemetry.LogFaultSummary,
                 () => Telemetry.Finish("world closing"),
                 Telemetry.Reset,
+                PlanetProbes.Reset,
+                ThermalHeatSourceDebug.Reset,
                 ThermalBlockCatalog.Clear,
                 ThermalCoolantShapes.Clear,
                 ThermalHeatPumpShapes.Clear,
                 ThermalBridges.Clear,
                 ThermalGrid.ResetEnvironmentCaches,
                 ThermalHeatSources.Clear,
+                ThermalCharacters.Reset,
                 ThermalGlow.Clear,
+                ThermalGrid.ResetCues,
                 ThermalVisionProbe.Reset,
                 ThermalApi.Unregister,
                 RelativeTopSpeedLink.Unload,
@@ -157,11 +161,10 @@ namespace Thermodynamics
                 ThermalApi.FlushProviderFailures();
             }
 
-            PlanetProbes.Step(ThermalGrid.TickSeconds);
-            ThermalHeatSourceDebug.Update(ThermalGrid.TickSeconds);
-
             if (_frame % 10 == 0)
             {
+                PlanetProbes.Step(ThermalGrid.TickSeconds);
+                ThermalHeatSourceDebug.Update(ThermalGrid.TickSeconds);
                 ThermalBridges.Update(ThermalGrid.TickSeconds);
                 ThermalTerminal.Update();
             }

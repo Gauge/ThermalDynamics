@@ -4,6 +4,35 @@ Architecture: thermal vision consumes simulation outputs through the SE1 adapter
 Its offline algorithms live in `Presentation/ThermalVision`, not the simulation
 core; see [the architectural boundary](architecture.md#thermal-vision-is-presentation-not-simulation).
 
+The 2026-10-28 performance pass bounds the default fleet renderer and adds four
+neutral native-depth context bands for opaque characters, voxels and terrain.
+These categories show scene shape with **unknown temperature**; simulated grid
+fields supply heat and distant planet discs supply climate estimates. Budget
+pressure uses complete coarse cells before falling back to unknown context. The
+[bounded-renderer audit](thermal-vision-optimization-audit.md#bounded-default-renderer-2026-10-28)
+documents limits, fidelity and the installed renderer evidence. Preview acquisition
+is limited to eight new grids per frame. Current bounds select the nearest 128
+grids each frame; admission overflow is explicitly marked as unknown shape
+context. At most 192 recent snapshots remain cached after admission, and inactive
+preparation work is disposed immediately. Returning snapshots expire after two
+seconds since their last admission; topology changes cancel suspended refresh
+work before it resumes. Cross-grid occlusion and same-grid subtree occlusion have
+separate conservative work caps with live candidate validation and visible
+fallback after exhaustion. World frustum scanning remains O(N),
+outside a hard time deadline; sorting covers at most 128 entries. Native rendering
+is retained because the compositor depends on its depth. Full quantitative
+coverage and native GPU cost remain unverified.
+
+The independent fleet's display samples retain the 100,000 K measured/autorange
+ceiling. Higher finite Core temperatures use a bounded saturated display marker
+and do not expand autorange. Absent/nonfinite input is unknown: a wholly empty
+sample set removes previous heat regions instead of substituting room temperature
+or refreshing stale values. Valid data returning later rebuilds the view; when it
+arrives between the detail and mean scans, the populated mean supplies coarse
+geometry rather than leaving an empty reusable order. This
+presentation policy never clamps simulation state; partially missing fields retain
+their existing interpolation estimates from valid samples.
+
 Current test controls: **Ctrl+Shift+T** toggles grey vision. Use
 `/thermal vision bind H` to change the chord to Ctrl+Shift+H (saved locally).
 `/thermal vision grey`, `/thermal vision colour`, and `/thermal vision off` remain available.
@@ -69,6 +98,16 @@ Evidence from the installed assemblies and shader files, inspected on 2026-09-18
 
 * `MyBillboardRenderer.PrepareList` explicitly skips sorting buckets 3 and 4 (`LDR` and `PostPP`),
   preserving submission order within the dynamic billboard stream.
+* The 2026-10-28 inspection also confirms that `AddTriangleBillboard` stores its
+  `parentID` unchanged, while `GatherInternal` looks up an actor for every ID other
+  than `uint.MaxValue`. `CreateBillboard` uses that sentinel for unattached quads.
+  All five thermal triangle call sites already supply world-space vertices and now
+  use the same sentinel, avoiding one redundant actor lookup per submitted triangle.
+  The default fleet/sky budgets bound this saving to at most 18,432 lookups per frame;
+  existing backdrop and face quads already use the sentinel. Native timing is unmeasured.
+  Sky discs reuse identical centre/seam vertices without changing triangle order,
+  and reuse a camera snapshot captured once per draw, including their facing
+  normal; projection math and public helper signatures stay unchanged.
 * `RenderPostPP` binds `BlendAlphaPremult`, `DefaultDepthState` and the original resolved scene
   depth via `DsvRoDepth`. `MyDepthStencil.OnDeviceInit` creates that view with `ReadOnlyDepth`.
   Read-only behavior comes from the view: the default state itself can have a write-enabled
@@ -972,6 +1011,7 @@ The [billboard reduction pass](thermal-vision-lab.md#billboard-reduction-without
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Recorded bounded whole-cell rendering, coarse fallback, neutral depth context and the remaining temperature/transparent-surface limitations. |
 | 2026-09-19 | Preserved toggle selection across camera/HUD changes, removed chat/cursor drawing suppression, and retained selection after render failures. |
 | 2026-09-19 | Separated thermal-vision presentation from the simulation model, with an independent project and assembly isolation checks. |
 | 2026-09-19 | Made viewport-wide grid coverage mandatory; connected fleet budgeting and complete-field fallback. Reopened per-block rendering with exact local bounds and quad submission; connected a bounded single-grid lab and documented corpus counts. Compared fixed, octree and directed partitions; recorded gains and radial/diagonal failure cases without promoting a new renderer. Archived regional presentation as a labelled lab; prioritized gradient separability, identified max-aggregation loss and documented surface-field versus native-lighting candidates. Corrected empty-space fine LOD by anchoring local detail to sampled surfaces; added populated-cell/distance telemetry and approach regressions. Restricted regional acquisition and per-frame thermal submission to viewport-intersecting grids; added viewport-grid telemetry and documented bounding-box limitations. Reviewed the LOD dump; restricted automatic contrast to in-frustum regions and added source/display temperature-range telemetry. Recorded successful cooled-patch feedback and added camera-centred distance LOD with independently budgeted bands, inner-field replacement and approach/dense-scene regressions. Added 2.5 m local temperature detail with coarse-field replacement, capacity fallback and cooling regressions after the 40 m test. Deferred navigation shading. Diagnosed the first regional dump (1,706 zero-submission frames); added in-scan capacity coarsening, normal-view acquisition and an 8,000-sample overflow regression. Connected `regions colour/grey` to native depth with ordered fields, near caps, adaptive group sizing, stale/movement invalidation and telemetry; added the first consolidated test protocol. Added fair, resumable region sampling with atomic publication and a 265,324-sample workload/latency check. Added bounded spatial ordering, independent ray/field preservation checks and a 512-region fragmentation fixture; corrected repeated midpoint subdivision. Added overlap/inside-camera stress fixtures, transactional disjoint-region preparation and rotated near-plane clipping tests. Accepted approximate block-group heat as the revised accuracy target; added ordered-boundary synthetic fixtures and documented remaining region-ordering gates. Audited binary model metadata access and blocked armour render data. Recorded visual rejection and the second composite dump (761 partial frames), traced discovery-prefix starvation and distinguished warm-cache draw limits from rebuild cost. Reviewed the first composite dump (1,297 partial frames), corrected context/reach telemetry and replaced whole-cache flushes with bounded LRU eviction. |

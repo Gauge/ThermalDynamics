@@ -125,8 +125,11 @@ namespace Thermodynamics.Core
         {
             ThermalLink entry = links[link];
 
-            nodeConductanceTotal[entry.NodeA] -= entry.Conductance;
-            nodeConductanceTotal[entry.NodeB] -= entry.Conductance;
+            if (conductanceIncludesBlocks)
+            {
+                nodeConductanceTotal[entry.NodeA] -= entry.Conductance;
+                nodeConductanceTotal[entry.NodeB] -= entry.Conductance;
+            }
 
             nodes[entry.NodeA].LinkCount--;
             nodes[entry.NodeB].LinkCount--;
@@ -389,7 +392,7 @@ namespace Thermodynamics.Core
 
             GridModel walked = adjacency as GridModel;
 
-            CellBitset occupied = walked != null ? walked.Occupancy() : null;
+            CellBitset occupied = walked != null ? walked.OccupancyForQueries() : null;
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -428,7 +431,6 @@ namespace Thermodynamics.Core
 
             EnsureNodeChainCapacity(nodes.Count);
             EnsureLinkChainCapacity(links.Count);
-            ResetLinkChains();
 
             if (CanonicalLinkOrder) CanonicaliseLinks();
             else for (int link = 0; link < links.Count; link++) ChainLink(link);
@@ -534,6 +536,7 @@ namespace Thermodynamics.Core
 
         private void AddConductanceOfNewLinks(int firstNewLink)
         {
+            if (!conductanceIncludesBlocks) return;
             for (int i = firstNewLink; i < links.Count; i++)
             {
                 ThermalLink link = links[i];

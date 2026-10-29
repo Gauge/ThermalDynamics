@@ -47,7 +47,7 @@ namespace Thermodynamics
             MyTransparentGeometry.AddTriangleBillboard(a,reverse?c:b,reverse?b:c,normal,normal,normal,
                 ua,reverse?uc:ub,reverse?ub:uc,
                 State.Current==ThermalVisionState.Mode.Cividis?GradientColour:GradientGrey,
-                0,(a+b+c)/3,Vector4.One,MyBillboard.BlendTypeEnum.PostPP);
+                uint.MaxValue,(a+b+c)/3,Vector4.One,MyBillboard.BlendTypeEnum.PostPP);
             regionBillboards++; drawn++; examined++;
         }
 

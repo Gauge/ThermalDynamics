@@ -51,6 +51,37 @@ flying into a 40 m/s wind at 40 m/s trips the 50 m/s friction threshold that nei
 
 ---
 
+## Moving grid shadows
+
+Full grid shadows carry rays from receiver cells into blocker cells. The transform therefore
+contains the receiver grid size divided by the blocker grid size: `0.2` for a small grid shaded
+by a large grid, `5` in the opposite direction, and `1` for matching sizes. Direction comparisons
+normalize this scale before applying the existing `0.9994` cosine threshold. Previously an
+unchanged `0.2` transform looked changed every refresh, while a `5` transform could hide rotation.
+Translation still invalidates beyond one blocker cell; scale changes also invalidate because they
+change ray coordinates, allowing only relative squared-length roundoff of `1e-10`. Degenerate or
+nonfinite transforms invalidate conservatively.
+
+Each adapter cache also captures the blocker's model version when it publishes the transform.
+Adding or removing a blocker block, or replacing its model under the same entity ID, invalidates
+the receiving grid's shadow on its next occluder refresh. Reading the version from two live model
+references would miss those changes. `ThermalOccluderTransformTests` covers three cell scales and
+one blocker with no native world or render loop.
+
+Disabling solar heat, self-shadowing or full grid shadows clears the adapter's blocker list and
+captured versions on the next ordinary environment sample, including samples that skip solar rays.
+The native overlap query still runs only on the established occlusion-test cadence. Temporary
+entity-overlap and blocker-model lists are cleared after their final use, including failed native
+queries, while retaining list capacity for reuse.
+
+`MarkSunOccludersChanged` also releases the sun and wind maps' copied blocker references and
+parks any unfinished ray pass. It retains the last completed map and cached skin, so pending
+per-node publication, including `FinishSunLit`, can still finish against that completed result.
+The next active shadow update restarts with the current blocker list and reuses the skin when the
+receiving topology is unchanged. This also releases references while solar heat is disabled or
+wind is calm, without waiting for either mechanism to run. A two-block `SunShadowReuseTests` case
+covers both maps, interrupted rays, old-result publication and the subsequent unblocked result.
+
 ## Ambient temperature
 
 `ClimateModel.Target` gives a place the temperature it is heading toward; `ClimateModel.Follow`
@@ -583,7 +614,7 @@ do, so none of them can drift from the model without the model itself changing.
 | Source | What it is | Reach |
 | --- | --- | --- |
 | **Grid telemetry** | Every grid samples its own position. `Thermodynamics_Environment_*.csv`. | Wherever somebody parked. |
-| **Planet probes** | **72 fixed points** — every latitude from −80° to +80° including the equator, eight longitudes each — at five heights, on an interval, whether or not anything is standing there. Wind and climate together, since they share every input. `Thermodynamics_PlanetProbes_*.csv`. Set `TelemetryPlanetProbes` to a step interval; needs `EnableTelemetry`. | The whole planet, over a real day. |
+| **Planet probes** | **72 fixed points** — every latitude from −80° to +80° including the equator, eight longitudes each — at five heights, on an interval, whether or not anything is standing there. Wind and climate together, since they share every input. `Thermodynamics_PlanetProbes_*.csv`. Set `TelemetryPlanetProbes` to an interval in diagnostic ticks, six per simulated second; needs `EnableTelemetry`. | The whole planet, over a real day. |
 | **The offline model** | `dotnet run --project tests/Thermodynamics.Sim -- wind`. A synthetic planet with the engine's own wind function reproduced from its decompiled source, a heightmap with features from forty kilometres down to four hundred metres, and a full day at 73 times of day. Add `--csv out/`, `--flat` or `--weather 1`. | Everything, in about a second. |
 
 ### The columns
@@ -874,6 +905,7 @@ this page depends on any of them.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Describe planet probes in diagnostic ticks at six per simulated second after correcting their session cadence; normalize mixed-grid shadow comparisons, capture blocker topology/model identity, and release disabled adapter caches and query scratch independently of ray cadence. Release dormant Core blocker copies while preserving completed shadows and reusable skin. |
 | 2026-08-22 | Closed `B19`. The terrain factors saturate onto their bounds rather than clipping to them, so SE's ground — eighty times steeper than the literature's — no longer makes every site read exactly the cap. The gradient at zero and the bound at infinity are both unchanged; what comes back is the middle, and terrain telling one place from another. Pertam and an earthlike world now differ, where under the clip both read the cap. |
 | 2026-08-22 | Said *why* the three unbuilt wind mechanisms are unbuilt, which is what made their absence a decision rather than a note, and took the closed `C5` off the known-faults table. Closes `B28`, which was a backlog row recording something this page already recorded. |
 | 2026-08-22 | Closed `B22` as a decision rather than a change: this mod will not author air densities against the engine's, because `C9` says the game's own answer is read and not overridden — and a density that disagreed with the engine's would put this model at odds with the oxygen system, the wind ceiling and the jetpack at once. The lack of differentiation between atmospheric worlds is the definitions', not the model's. |

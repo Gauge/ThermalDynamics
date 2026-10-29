@@ -105,6 +105,10 @@ namespace Thermodynamics.Core
 
         public void MarkSunOccludersChanged()
         {
+            // Dormant sun/wind mechanisms may not restart for a long time. Their
+            // pending publication can still read the last completed map without blockers.
+            sunShadow.ReleaseOccluders();
+            windShadow.ReleaseOccluders();
             sunLitDirty = true;
             windLitDirty = true;
         }
@@ -118,17 +122,20 @@ namespace Thermodynamics.Core
         public int SunLitBudget = 4096;
 
         private int sunLitCursor;
+        private int sunLitCount;
         private bool sunLitPending;
 
         private float sunLitFill = -1f;
 
         private float windLitFill = -1f;
         private int windLitCursor;
+        private int windLitCount;
         private bool windLitPending;
 
         private bool windLitDirty = true;
 
         private bool sunLitDirty = true;
+        private bool shadowNodesDeferred;
 
         private float[] linkMassFactor = new float[0];
 
@@ -405,6 +412,7 @@ namespace Thermodynamics.Core
 
             sunLitDirty = true;
             windLitDirty = true;
+            if (StepInFlight) shadowNodesDeferred = true;
             return node;
         }
 

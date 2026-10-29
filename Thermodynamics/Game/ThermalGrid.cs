@@ -127,7 +127,7 @@ namespace Thermodynamics
             }
 
             Model = new GridModel(Grid.GridSize);
-            Simulation = new ThermalSimulation(Settings.Instance.ToCore(), Model);
+            Simulation = new ThermalSimulation(Settings.Instance.AppliedCore, Model);
             Simulation.StepPhaseFrames = NextStepPhase();
 
             Stats = Telemetry.RegisterGrid(this);
@@ -194,6 +194,10 @@ namespace Thermodynamics
 
         public override void Close()
         {
+            // The same network entity ID can stream back before the next sync pruning pass.
+            if (Grid != null) ThermalGridSync.ForgetGrid(Grid.EntityId);
+            ClearGlow();
+            cueState.Clear();
 
             if (Stats != null)
             {
@@ -324,6 +328,7 @@ namespace Thermodynamics
                     RecentlyRemoved[block.Min] = bound.Node.Temperature;
                 }
 
+                ForgetGlow(block.Min);
                 bound.Detach();
                 Simulation.RemoveBlock(bound.Instance);
                 blocks.Remove(block.Min);

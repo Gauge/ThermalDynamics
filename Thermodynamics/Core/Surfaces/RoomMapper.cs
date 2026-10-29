@@ -57,7 +57,10 @@ namespace Thermodynamics.Core
             return cell;
         }
 
-        private readonly CellBitset visited = new CellBitset();
+        private readonly PagedCellBitset visited = new PagedCellBitset();
+        private readonly RoomSealingSnapshot pagedSealing = new RoomSealingSnapshot();
+        private bool pagedStorage;
+        internal int DenseCellLimit = 65536;
 
         private byte[] sealing = new byte[0];
         private readonly List<int> sealingWritten = new List<int>();
@@ -308,11 +311,14 @@ namespace Thermodynamics.Core
                 working = new RoomMap();
             }
 
-            working.SetSearchBounds(searchMin, searchMaxExclusive);
+            long volume = (long)(searchMaxExclusive.X - searchMin.X)
+                * (searchMaxExclusive.Y - searchMin.Y) * (searchMaxExclusive.Z - searchMin.Z);
+            pagedStorage = volume > DenseCellLimit && surfaces.CellCount <= volume / 16;
+            working.SetSearchBounds(searchMin, searchMaxExclusive, pagedStorage);
 
             if (published != null) working.HintRoomCells(published.RoomCellCount);
             FrontierClear();
-            visited.Reset(searchMin, searchMaxExclusive);
+            visited.Reset(searchMin, searchMaxExclusive, pagedStorage);
             CollectDoorCells();
             TakeSealingSnapshot();
 
@@ -353,31 +359,40 @@ namespace Thermodynamics.Core
             sealingSizeZ = Math.Max(0, searchMaxExclusive.Z - searchMin.Z);
 
             long cells = (long)sealingSizeX * sealingSizeY * sealingSizeZ;
-            if (cells > int.MaxValue)
+            if (cells > int.MaxValue && !pagedStorage)
             {
                 snapshotLive = false;
                 return;
             }
 
-            if (sealing.Length < cells) sealing = new byte[cells];
-            else if (sparseSealing)
+            if (pagedStorage)
             {
-                for (int i = 0; i < sealingWritten.Count; i++) sealing[sealingWritten[i]] = 0;
+                pagedSealing.Reset();
+                surfaces.CopyStructuralSealing(searchMin, searchMaxExclusive, pagedSealing);
             }
             else
             {
-                // Clear the previous range, not the new bounds: a later growth must not
-                // expose old entries after a dense-to-sparse shrink or an origin change.
-                Array.Clear(sealing, 0, previousSealingCells);
-            }
-            sealingWritten.Clear();
-            previousSealingCells = (int)cells;
+                if (sealing.Length < cells) sealing = new byte[cells];
+                else if (sparseSealing)
+                {
+                    for (int i = 0; i < sealingWritten.Count; i++) sealing[sealingWritten[i]] = 0;
+                }
+                else
+                {
+                    // Clear the previous range, not the new bounds: a later growth must not
+                    // expose old entries after a dense-to-sparse shrink or an origin change.
+                    Array.Clear(sealing, 0, previousSealingCells);
+                }
+                sealingWritten.Clear();
+                previousSealingCells = (int)cells;
 
-            // Index tracking is worthwhile for sparse extents, but costs four bytes per
-            // written cell. Dense hulls retain the bulk clear and allocate no index entries.
-            sparseSealing = cells >= 1024 && surfaces.CellCount <= cells / 16;
-            surfaces.CopyStructuralSealing(searchMin, searchMaxExclusive, sealing,
-                sparseSealing ? sealingWritten : null);
+                // Index tracking is worthwhile for sparse extents, but costs four bytes per
+                // written cell. Dense hulls retain the bulk clear and allocate no index entries.
+                sparseSealing = cells >= 1024 && surfaces.CellCount <= cells / 16;
+                surfaces.CopyStructuralSealing(searchMin, searchMaxExclusive, sealing,
+                    sparseSealing ? sealingWritten : null);
+
+            }
 
             for (int face = 0; face < Face.Count; face++)
             {
@@ -385,6 +400,11 @@ namespace Thermodynamics.Core
                 faceDelta[face] = offset.X + ((long)offset.Y * sealingSizeX)
                     + ((long)offset.Z * sealingSizeX * sealingSizeY);
             }
+        }
+
+        private byte SealingAt(long index)
+        {
+            return pagedStorage ? pagedSealing.Read(index) : sealing[index];
         }
 
         public bool SpanFlood = true;
@@ -485,9 +505,9 @@ namespace Thermodynamics.Core
                 {
                     long neighbour = i + delta;
 
-                    if ((sealing[i] & (1 << face)) != 0
+                    if ((SealingAt(i) & (1 << face)) != 0
                         || visited.ContainsIndex(neighbour)
-                        || (sealing[neighbour] & (1 << opposite)) != 0)
+                        || (SealingAt(neighbour) & (1 << opposite)) != 0)
                     {
                         inStretch = false;
                         continue;
@@ -571,9 +591,9 @@ namespace Thermodynamics.Core
                 {
                     long neighbour = i + delta;
 
-                    if ((sealing[i] & (1 << face)) != 0
+                    if ((SealingAt(i) & (1 << face)) != 0
                         || visited.ContainsIndex(neighbour)
-                        || (sealing[neighbour] & (1 << opposite)) != 0)
+                        || (SealingAt(neighbour) & (1 << opposite)) != 0)
                     {
                         inStretch = false;
                         continue;
@@ -613,18 +633,18 @@ namespace Thermodynamics.Core
         private bool ReachesLow(int x, long index)
         {
             return x > searchMin.X
-                && (sealing[index] & (1 << MinusX)) == 0
+                && (SealingAt(index) & (1 << MinusX)) == 0
                 && !visited.ContainsIndex(index - 1)
-                && (sealing[index - 1] & (1 << PlusX)) == 0;
+                && (SealingAt(index - 1) & (1 << PlusX)) == 0;
         }
 
 
         private bool ReachesHigh(int x, long index)
         {
             return x < searchMaxExclusive.X - 1
-                && (sealing[index] & (1 << PlusX)) == 0
+                && (SealingAt(index) & (1 << PlusX)) == 0
                 && !visited.ContainsIndex(index + 1)
-                && (sealing[index + 1] & (1 << MinusX)) == 0;
+                && (SealingAt(index + 1) & (1 << MinusX)) == 0;
         }
 
 
@@ -638,7 +658,7 @@ namespace Thermodynamics.Core
             neighbourIndex = index + faceDelta[face];
             if (visited.ContainsIndex(neighbourIndex)) return false;
 
-            return (sealing[neighbourIndex] & (1 << Face.Opposite(face))) == 0;
+            return (SealingAt(neighbourIndex) & (1 << Face.Opposite(face))) == 0;
         }
 
 
@@ -663,11 +683,11 @@ namespace Thermodynamics.Core
 
 
             long here = SealingIndex(cell);
-            if (here >= 0 && (sealing[here] & (1 << face)) != 0) return true;
+            if (here >= 0 && (SealingAt(here) & (1 << face)) != 0) return true;
 
 
             long there = SealingIndex(neighbour);
-            return there >= 0 && (sealing[there] & (1 << Face.Opposite(face))) != 0;
+            return there >= 0 && (SealingAt(there) & (1 << Face.Opposite(face))) != 0;
         }
 
 
@@ -677,7 +697,7 @@ namespace Thermodynamics.Core
 
 
             long index = SealingIndex(cell);
-            return index >= 0 && (sealing[index] & CellSurface.SelfAirtightMask) == CellSurface.SelfAirtightMask;
+            return index >= 0 && (SealingAt(index) & CellSurface.SelfAirtightMask) == CellSurface.SelfAirtightMask;
         }
 
 
@@ -690,7 +710,7 @@ namespace Thermodynamics.Core
             {
 
                 long index = SealingIndex(cell);
-                int sealingHere = sealing[index];
+                int sealingHere = SealingAt(index);
 
                 for (int face = 0; face < Face.Count; face++)
                 {
@@ -731,7 +751,7 @@ namespace Thermodynamics.Core
             {
 
                 long index = SealingIndex(cell);
-                int sealingHere = sealing[index];
+                int sealingHere = SealingAt(index);
 
                 for (int face = 0; face < Face.Count; face++)
                 {
@@ -858,7 +878,7 @@ namespace Thermodynamics.Core
 
         private bool IsStructureAt(long index, Vector3I cell)
         {
-            if (index < 0 || (sealing[index] & CellSurface.SelfAirtightMask) != CellSurface.SelfAirtightMask)
+            if (index < 0 || (SealingAt(index) & CellSurface.SelfAirtightMask) != CellSurface.SelfAirtightMask)
             {
                 return false;
             }

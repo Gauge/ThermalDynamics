@@ -16,6 +16,9 @@ namespace Thermodynamics
         private static Label visionLegendTitle;
         private static readonly Label[] visionLegendTicks = new Label[5];
         private static string legendTextKey;
+        private static bool legendInputsKnown,legendAutomaticRange;
+        private static ThermalVisionState.Mode legendPalette;
+        private static float legendLow,legendHigh;
         private static int legendFrames;
         private static readonly List<ILegendElement> LegendElements = new List<ILegendElement>();
 
@@ -75,23 +78,32 @@ namespace Thermodynamics
                 Format=new GlyphFormat(new Color(159,189,198),TextAlignment.Center,.58f),
                 Text=new RichText("COOLER                                      HOTTER") };
             legendTextKey=null;
+            legendInputsKnown=false;
         }
         private static void UpdateVisionLegend()
         {
             if(visionLegend==null) BuildVisionLegend();
             visionLegend.Visible=State.Current!=ThermalVisionState.Mode.Off && !depthMode;
             if(!visionLegend.Visible) return;
-            string key=State.Current+"/"+automaticRange+"/"+lowKelvin.ToString("F1")+"/"+highKelvin.ToString("F1");
-            if(key!=legendTextKey)
+            if(!legendInputsKnown || legendPalette!=State.Current || legendAutomaticRange!=automaticRange
+                || legendLow!=lowKelvin || legendHigh!=highKelvin)
             {
-                legendTextKey=key;
-                visionLegendRamp.Material=State.Current==ThermalVisionState.Mode.Cividis?LegendColour:LegendGrey;
-                visionLegendTitle.Text=new RichText("THERMAL / "+(State.Current==ThermalVisionState.Mode.Cividis?"COLOUR":"WHITE HOT")
-                    +" / "+(automaticRange?"AUTO RANGE":"LOCKED RANGE"));
-                for(int i=0;i<5;i++)
+                legendInputsKnown=true; legendPalette=State.Current; legendAutomaticRange=automaticRange;
+                legendLow=lowKelvin; legendHigh=highKelvin;
+                // Preserve the existing rounded-label refresh boundary, while
+                // stable ranges need no enum boxing, formatting or string keys.
+                string key=State.Current+"/"+automaticRange+"/"+lowKelvin.ToString("F1")+"/"+highKelvin.ToString("F1");
+                if(key!=legendTextKey)
                 {
-                    float temperature=lowKelvin+(highKelvin-lowKelvin)*(i/4f)-273.15f;
-                    visionLegendTicks[i].Text=new RichText(temperature.ToString("0")+" C");
+                    legendTextKey=key;
+                    visionLegendRamp.Material=State.Current==ThermalVisionState.Mode.Cividis?LegendColour:LegendGrey;
+                    visionLegendTitle.Text=new RichText("THERMAL / "+(State.Current==ThermalVisionState.Mode.Cividis?"COLOUR":"WHITE HOT")
+                        +" / "+(automaticRange?"AUTO RANGE":"LOCKED RANGE"));
+                    for(int i=0;i<5;i++)
+                    {
+                        float temperature=lowKelvin+(highKelvin-lowKelvin)*(i/4f)-273.15f;
+                        visionLegendTicks[i].Text=new RichText(temperature.ToString("0")+" C");
+                    }
                 }
             }
             var camera=MyAPIGateway.Session.Camera;

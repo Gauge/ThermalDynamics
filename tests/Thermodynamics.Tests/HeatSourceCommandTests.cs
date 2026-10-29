@@ -40,6 +40,9 @@ namespace Thermodynamics.Tests
         [InlineData("M")]
         [InlineData("bonfire")]
         [InlineData("5x")]
+        [InlineData("NaN")]
+        [InlineData("Infinity")]
+        [InlineData("1e30G")]
 
         public void NonsenseIsRefusedRatherThanReadAsZero(string text)
         {

@@ -1,5 +1,307 @@
 # Thermal rendering: synthetic optimization audit
 
+## Bounded default renderer, 2026-10-28
+
+The default independent-fleet view now reserves at most 16,384 grid triangles and
+2,048 celestial triangles per frame, plus ten triangles for four native-depth
+context planes and the far backdrop. HUD submissions and other mods are outside
+these limits. Reservations are conservative, so actual submissions can be lower.
+Each visible grid gets a share before later grids can consume its capacity; unused
+capacity carries forward. Fleet preparation also shares an approximately 512-region
+partition target (power-of-two tiers, minimum 16 per grid), replacing 512 per grid.
+The existing two-millisecond cooperative preparation deadline remains a soft limit.
+
+A cell is admitted as a complete volume, including entry, exit and near-cap faces.
+Shared exits are retained because a neighboring cell may not fit the budget. A
+partial volume can incorrectly colour unrelated objects behind it. When detailed
+patches do not fit, the renderer tries one patch per whole face and a simple cap
+fan, retaining exact corner samples and temporal endpoints. This loses spatial
+detail between samples; the HUD reports limited heat detail. If even the complete
+coarse volume does not fit, native-depth context still supplies its silhouette.
+Both cap paths consume the exact list returned by clipping: an early empty result
+can live in the other scratch buffer while the original still holds the viewport
+rectangle. A tiny off-axis volume case covers that buffer-identity counterexample.
+The cap is a resource bound, not a guarantee of a particular frame time or of full
+temperature detail in arbitrarily large scenes.
+
+Four blue-grey ordered depth bands make opaque characters, terrain, asteroids and
+grids without temperature detail visible with no CPU mesh extraction, entity scan
+or raycast. Their shading means **shape/depth context, temperature unknown**.
+Celestial discs remain climate estimates. The character subsystem stores a server
+side suit-interior value only while suit damage is enabled; treating this as a
+client-visible exterior surface temperature would be incorrect. Transparent effects
+without native depth writes are still outside the demonstrated coverage. Separate
+objects within the same depth band can merge visually; this is coarse context,
+not guaranteed separation of every silhouette. Four full-screen layers have a GPU fill cost; no GPU measurement accompanies this pass.
+
+The installed `VRage.Render11.dll` was reinspected with `ilspycmd`:
+`MyBillboardRenderer.PrepareList` preserves PostPP bucket ordering, and
+`RenderPostPP` binds `ResolvedDepthStencil.DsvRoDepth`, premultiplied blending and
+the default depth state. In `VRage.Game.dll`, `MyRenderComponentBase.Visible` sends
+visibility changes through child render objects. Hiding these objects would remove
+the depth needed by the compositor. No supported colour-only suppression retaining
+complete depth was demonstrated; native render/physics state is unchanged.
+
+The same installed-source audit confirms that `AddTriangleBillboard` forwards
+`parentID` unchanged and `MyBillboardRenderer.GatherInternal` performs an actor
+lookup unless that ID is `uint.MaxValue`, the sentinel used by `CreateBillboard`
+for unattached quads. All five thermal triangle call sites already transform their
+vertices to world space, so they now pass the sentinel instead of zero. This
+removes exactly one actor lookup per submitted triangle, at most 16,384 grid plus
+2,048 celestial lookups in a default frame (18,432 total). Existing quad helpers
+already use the sentinel. No geometry, material, depth, ordering or legitimate
+attachment ID changed; native frame-time savings remain unmeasured.
+
+Sky drawing also captures camera world/projection matrices, viewport height and
+the facing normal once per draw. Vertex projection and triangle submission reuse
+that snapshot, removing repeated camera property reads inside both loops without
+changing the public projection helper, arithmetic order or tessellation. Region
+faces build world-space culling bounds only when the existing local-frustum path
+is unavailable; the fallback bounds and game-camera check are unchanged.
+Each sky disc also reuses its identical centre and seam vertices in the existing
+scratch array. For `R` rings and `S` sectors, normal/projection/climate/UV evaluations
+drop from `(R+1)*(S+1)` to `1+R*S`, saving `S+R` evaluations while retaining every
+triangle and its order. This halves the one-ring sun's sampling work. The centre
+still uses the original ring calculation, including its degenerate-radius numeric
+behavior; this change introduces no substitute normal or temperature.
+
+Inspected SHA-256 values:
+
+- `VRage.Render11.dll`: `b4a6502f913b70e53c8f715bfc6dfebef2ae9e87be52a95c84eb7c5fedcdde3b`
+- `VRage.Game.dll`: `f0970c2b60335f7690e158a485cd528703717c8c5002f2713556e04f09c508e1`
+
+Uniform current/prior surface lattices now skip repeated face interpolation/error
+checks. One tiny fixture (125 lattice samples, 32 rebuilds) measured 0.1073 → 0.0208
+ms median; allocated bytes fell from 115,240 to 36,904 per batch by reserving
+exactly one patch per uniform face instead of the default capacity of four. Exact patch positions,
+temperatures, transition endpoints and ordering matched the frozen reference for
+a uniform transition, a cooling-hotspot counterexample and three extreme finite
+value cases (current/prior/negative). Values outside 0–100,000 K keep the ordinary
+interpolation path. This is about 81% less CPU and 68% fewer allocated bytes for uniform patch preparation, not overall rendering. See
+[`results-uniform-surfaces.json`](../tools/thermal-performance/results-uniform-surfaces.json)
+for host and method, and the tool README for `--uniform-surfaces`. Independent
+fleet faces also use their already-built local frustum before world transforms;
+no native CPU saving is claimed for that change.
+
+Tiny regression cases cover atomic cell reservation, paired exits, capped shares,
+coarse face samples, preparation tiers and ordered context bands. Native camera
+intersections, animation, transparency, all scene categories and GPU cost still
+need in-game validation. This pass does not claim complete quantitative thermal
+vision for characters or voxels.
+
+### Discovery and occlusion follow-up
+
+Initial field/tree creation previously ran once for every newly visible grid
+before the preparation timer started. It now admits at most eight new grid
+previews per rendered frame. Other grids keep native-depth context while later
+frames acquire their fields. The HUD counts deferred previews. Indexed traversal
+of the live-grid list avoids its interface-enumerator allocation; each discovered
+view records its frame AABB for occlusion; admission uses the entity ID for stable
+distance ties.
+
+Nearby occluder discovery examines at most the nearest 64 visible grids, still
+limited to 500 live block reads and 32 accepted solid cubes. Each nearby view
+caches candidate positions for 15 active frames, invalidating on camera cell,
+topology revision or frame-counter restart. Every reused position is looked up
+again and checked for intact, undeformed, completed base-game cube armor before
+it can hide anything. Current grid transforms are used each frame. Newly repaired
+cubes can take up to 15 active frames to improve culling; this causes extra drawing,
+not stale occlusion. Empty candidate caches need no inverse matrix or block reads.
+
+An armor candidate is also rejected if its full native cube bounds touch or cross
+the current camera near plane. Testing only the smaller occlusion inset was not
+enough: the native front face could be clipped while the inset still blocked all
+CPU test rays. This conservative rejection serves both cross-grid and same-grid
+culling. Clipped positions remain candidates and are checked again every frame,
+so camera movement within a cached cell can immediately restore eligibility.
+Candidate caches still retain at most 32 positions. Two tiny cases cover the
+clipped-front counterexample and a moved camera with an independent transformed
+corner-depth reference; native close-wall appearance still needs in-game checking.
+
+Cross-grid occlusion stops after 2,048 target/cube tests per frame and keeps the
+remaining targets visible. A target's camera and eight world-AABB corners are
+transformed lazily once per blocker-owner group, instead of repeating the same
+transforms for each solid cube. The original slab tests and corner order are
+unchanged. Three tiny regressions compare moved/rotated cases with the retained
+uncached path, count lazy corner reuse, and check candidate-cache invalidation.
+Same-grid subtree traversal shares at most 4,096 node/cube tests across the entire
+frame; exhausted work retains frustum-visible leaves in their original order.
+Existing public unlimited traversal overloads retain their behavior. A two-cell
+case checks a blocker that covers one leaf but not the parent, exhausting the
+shared budget at the parent without losing either leaf. The cap bounds occlusion
+work, not the remaining tree traversal or drawing.
+No native frame-time or allocation percentage is claimed for this follow-up.
+Disabled telemetry also avoids preparing the fleet publication/frame and sky
+strings and counting uniform face patches; the non-telemetry fleet identity uses
+existing constant strings.
+
+### Bounded grid admission and snapshot retention
+
+Each frame now selects the nearest 128 eligible grids using a fixed-capacity max
+heap, then sorts only those candidates. Current world bounds, frustum visibility
+and camera distances are reread every frame, so moving grids never rely on a
+previous frame's visibility or order. Distance ties use entity ID. Farther eligible
+grids retain unknown-depth context; the HUD explicitly reports their count as
+"grids: shape only" with limited heat detail, separately from previews that are
+still refining. Preview construction stays limited to eight per frame and now
+starts with the nearest candidates rather than live-list order.
+
+The snapshot cache retains at most 192 views after each draw's admission phase,
+with up to eight new previews temporarily coexisting during acquisition. Views
+no longer admitted immediately dispose their unfinished preparation iterator.
+Their completed snapshots remain for two seconds after the last admitted frame
+to smooth camera turns; re-admission checks expiry before updating the timestamp,
+including after a suspended view resumes. Oldest inactive snapshots are removed first when capacity is
+exceeded. Admitted snapshots are never evicted by retention pruning. Closing a
+grid or unloading the world releases its entry, and disabling the view pauses
+all work. Three tiny cases compare nearest order with an independent full sort,
+including ties and moving candidates, and exercise pause, expiry, eviction,
+return, close and clear behavior.
+
+The independent draw no longer aliases a grid's field dictionary through the
+legacy `smoothCorners` static. When the last rendered grid left the viewport,
+that alias could retain its surface fields after the two-second cache expiry,
+until another measured grid rendered or vision stopped. It retained one grid's
+prepared fields, not the native grid entity. Independent faces already receive
+their field explicitly and caps call `DrawCapTriangle` directly, so removing the
+alias preserves legacy BlockLab ownership and the separate `previousSurface`
+transition binding. This is a reference-lifetime correction; no native timing
+claim or artificial wrapper test accompanies it.
+
+A topology change also disposes an admitted view's suspended refresh iterator
+before it can resume a mutated block enumeration. The next job uses the current
+revision, while the existing complete snapshot remains available and is marked
+as refining until replacement. A single dictionary-backed iterator case checks
+cancellation/disposal and successful continuation of the replacement epoch.
+
+The independent view distinguishes missing samples from finite over-range heat.
+The existing measured/autorange input ceiling remains 100,000 K. Finite hotter
+Core values become a bounded 1,000,000 K **display marker** before field sampling,
+above all allowed range highs and excluded from autorange. This prevents accepted
+extreme temperatures from disappearing and keeps cap interpolation sums finite;
+it never changes simulation temperatures. An initial preview with no usable data
+does not invent 293.15 K. A completed empty refresh clears the old thermal regions
+and previous fade data, leaving native unknown context and a "no temperature data"
+HUD count. Recovery rebuilds geometry and starts the fade from the new samples.
+If data first appears between the detail and mean scans, the populated mean
+supplies coarse geometry instead of publishing an empty reusable order. A
+one-block regression checks that transition through detail selection and ordering.
+One block exercises normal, extreme finite, absent/nonfinite and recovered input
+through the shared production policy, region scan, field sample, palette and range.
+This fixes wholly empty sample sets; partially missing regions still use the
+existing spatial interpolation/fallback estimates from remaining valid samples.
+
+**Remaining discovery costs:** the world-grid frustum scan is still O(N); nearest
+admission is O(N log 128) in the worst case and rejects farther overflow in
+constant work. Sorting is bounded to 128 entries. These are count bounds, not a
+hard draw deadline or a byte-accurate memory budget: snapshot size and individual
+preparation iterator steps still depend on grid complexity. No native CPU/GPU
+percentage is claimed for admission or retention.
+
+### Surface refresh scratch reuse
+
+Minimum-patch planning now reuses its two 625-byte memoization arrays across one
+grid refresh job instead of allocating them independently for each qualifying
+cell. Costs are cleared before each new planning face; cut decisions are read
+only through the current cost table. Published fields retain no scratch reference.
+Prior-temperature lattices allocate their six-face holder only if faces are built
+or requested, so sampling-only prior lattices avoid that array. The original
+`BuildFaces` overload remains available and every refresh iterator yield is
+unchanged. One tiny comparison exercises three changing/prior lattices with
+fresh and shared scratch, checking exact patch order, positions, temperatures,
+diagonals and saved-patch counts. No new timing percentage is claimed.
+
+Stable legend inputs now bypass the per-frame enum/number string-key formatting;
+changed inputs still use the original one-decimal key, preserving the existing
+label refresh boundary. Multi-patch faces reuse their first local-frustum result
+instead of repeating the same bounds/plane test before patch traversal.
+
+### Sky climate conversion cache
+
+Each planet wrapper now lazily retains one sky-only climate conversion. Its key
+tracks the definition reference, supplied-field flags, night/day/pole values,
+world-settings presence and the corresponding three world values. These are all
+mutable inputs consumed by `ClimateModel.Target` in the sky pass. A miss still
+uses the existing catalog conversion and clamps; a missing definition remains
+unknown. In-place definition or world-setting edits invalidate the cached result.
+Camera, sun and latitude sampling remain live. The cache ends with its planet
+wrapper and does not alter the simulation's environment caches. One tiny cache
+case covers definition replacement, each scalar change, flags, world override
+presence and unknown definitions. This removes repeated conversion allocations;
+no frame-time percentage is claimed.
+
+Unknown sky discs use the same blue-grey context colour as the legend. Reducing
+sky rings or sectors to fit a share now reports limited heat detail even when the
+complete reduced disc fits; triangle rejection is not required to flag that limit.
+
+### Character highlight reinspection
+
+Installed renderer inspection also rules out simply adding native character
+highlights over the current compositor. `MyRender11.DrawGameScene` calls
+`MyHighlight.Run` before `MyBillboardRenderer.RenderPostPP`; the opaque thermal
+PostPP bands would overwrite that earlier highlight output. Independently,
+`MyHighlightPass.Begin` uses `WriteHighlightStencil`, which disables depth tests
+and writes bit 64. Ordinary terrain/grid depth alone cannot reject a hidden
+highlighted character. `WriteOverlappingHighlightStencil` is depth-equal, but
+applies only to explicitly registered renderable/instance actors and writes bit
+128. The inner blend accepts `(stencil & 192) == 64`: registering the character
+itself would reject its visible pixels (192), while hidden pixels could still
+pass (64). Native character code registers the locally controlled suit and held
+items for overlap suppression, not an automatic scene-wide occlusion mask.
+Thickness zero removes a highlight; there is no zero-thickness fill shortcut.
+Positive thickness adds mesh redraw, depth copy, blur and fullscreen blends.
+
+The inspected MDK 2.1.16 whitelist admits the visual-script provider's exact
+`Sandbox.Game` namespace, but not `MyRenderProxy` or `MyHighlightSystem` in
+`Sandbox.Game.SessionComponents`. Installed `SetHighlightLocal(name, ...)` stays
+local with the default player ID; ordinary `SetHighlight(name, ...)` instead
+raises a reliable server-invoked broadcast event. This resolves API locality,
+not the rendering blockers. No in-game invocation or state change was made; see
+[engine notes](engine-notes.md#character-highlights-do-not-solve-thermal-view-readability).
+
+The inspected `Sandbox.Game.dll` SHA-256 is
+`de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf`;
+the renderer hash is recorded above. There is still no demonstrated cheap native
+character-only, depth-correct mask after PostPP. Four depth bands can merge a
+character with terrain at similar depth; this fidelity limitation remains open.
+
+### Character proxy feasibility review
+
+An oriented box around a character could use the same complete entry/exit volume
+as a grid: twelve face triangles plus a near-plane cap, with a separate categorical
+unknown colour. Native depth would supply the actual visible silhouette where it
+falls within that box. It would also colour any terrain or hull surface within
+the box, because billboard depth has no entity-owner filter. `MyBillboard.ParentID`
+provides attachment transforms, not an owner-specific scene-depth mask.
+
+The installed character implementation sets its local AABB from collision width
+and standing or crouching height. Its render component expands that box by
+(1.5, 2, 1.5) for render culling. Thus the collision box is not a demonstrated
+animation envelope; expanding it increases nearby surface contamination, while
+a single capsule cannot represent every limb, pose or modded character. The
+public character interface exposes neither a ready skinned silhouette nor a
+client exterior temperature in Kelvin. `GetOutsideTemperature` is normalized
+environmental temperature, so it cannot supply the missing thermal measurement.
+
+Ordering creates an additional correctness issue. Drawing character volumes
+after the grid pass resets grid heat behind their projected exit faces. For a
+proxy interval [1, 2] and a hot wall at depth 3, both proxy faces pass native depth
+and the exit leaves the wall unknown. Drawing proxies first preserves that wall
+but lets any overlapping grid volume colour the character as grid heat. A simple
+extra character pass therefore cannot provide correct ownership in all scenes.
+
+A limited experiment could draw a bounded nearest-character set before the grid
+pass and reject proxies intersecting admitted grid volumes. This would improve
+open terrain and space while explicitly excluding characters in or beside ships;
+it is not complete character coverage. Native pruning provides reusable-list
+sphere queries covering NPC entities, but topmost-only queries can omit parented
+characters and the all-entity variant traverses child hierarchies. Neither query
+has a work/result cap; a radius and refresh cadence would limit typical cost,
+not worst-case discovery time. Live transforms, closure, near clipping and
+frustum checks would still be required for cached entries. The sphere overloads
+have not been whitelist-compiled in this review. No character proxy or native
+render-state modification was enabled.
+
 ## Scope and reproduction
 
 ### Nearest-block query traversal
@@ -561,6 +863,7 @@ clocks; simulation totals must not be treated as reliable frame attribution.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Cached exact sky-climate conversion inputs, reused surface planning scratch and stable legend inputs, and documented native character-highlight/proxy limits. Bounded nearest-grid admission and recent snapshot retention. Bounded preview discovery and occlusion, cached/revalidated nearby candidates, reused exact corner transforms and avoided disabled telemetry formatting. Bounded default fleet/sky submissions, added complete-cell coarse fallback and explicit unknown-depth context, and measured the uniform-lattice fast path with a tiny frozen-reference fixture. |
 | 2026-09-19 | Reused nearest-search child distance bounds; exact-output query benchmark measured 18.8% less CPU. |
 | 2026-09-19 | Short-circuited redundant cap samples with exact-output benchmark and removed duplicate region visibility checks. |
 | 2026-09-19 | Inspected installed billboard ordering/UV path and added bounded adaptive thermal sampling to near-camera caps. |

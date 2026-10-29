@@ -81,7 +81,7 @@ namespace Thermodynamics
 
         private static string Aero(ThermalSimulation simulation, ThermalNode node, EnvironmentState state)
         {
-            Vector3 normal = ShapeNormal.Of(simulation.Grid.Occupancy(), node.Block);
+            Vector3 normal = ShapeNormal.OfGrid(simulation.Grid, node.Block);
 
             string text = "friction: " + node.LastFrictionWatts.ToString("n1") + "W"
                 + "  wind(local): " + Compact(state.WindDirectionLocal * state.WindSpeed) + "m/s";

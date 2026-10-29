@@ -1,0 +1,73 @@
+using System;
+using System.Collections.Generic;
+using C = CORE_NAMESPACE;
+using VRageMath;
+
+sealed class CLASS_NAME : IRig
+{
+    private readonly C.ThermalSimulation simulation;
+    private readonly C.EnvironmentState environment;
+    private readonly C.CoolantLoop loop;
+    private readonly bool preparation;
+    public CLASS_NAME(int count, int floor, int maxSubsteps, bool coolant, bool mixed, float flow, float fill, bool prepare)
+    {
+        preparation = prepare;
+        var settings = new C.ThermalSettings { MaxSubstepsPerBlock = floor, MaxSubsteps = maxSubsteps,
+            EnableDamage = false, EnableSolarHeat = false, EnableConduction = !coolant,
+            EnableEnvironment = !coolant, WellMixedCoolant = mixed, MaxElementVisitsPerStep = 0 };
+        settings.Derive();
+        var grid = new C.GridModel(2.5f);
+        simulation = new C.ThermalSimulation(settings, grid);
+        // Isolate coolant exchange from the corrected inactive-block-conduction demand.
+        var thermal = new C.BlockThermalProperties { Conductivity = coolant ? 0f : 83.333f, SpecificHeat = 500f,
+            Emissivity = .8f, HeatSourceWatts = 37f };
+        var model = C.BlockModel.Solid("test", Vector3I.One, 10f, thermal);
+        for (int i = 0; i < count; i++)
+            simulation.AddBlock(new C.BlockInstance(model, new Vector3I(i % 8, (i / 8) % 8, i / 64), C.BlockOrientation.Identity), 300f + i % 17 * 31f);
+        simulation.RebuildAll();
+        if (coolant)
+        {
+            loop = new C.CoolantLoop(C.LoopThermalProperties.Default(), 400f);
+            foreach (var block in grid.Blocks) loop.Pipes.Add(block);
+            simulation.Solver.SetLoops(new List<C.CoolantLoop> { loop });
+            loop.FillFraction = fill;
+            loop.FlowSegmentsPerSecond = flow;
+            loop.Links.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                loop.Links.Add(new C.LoopLink(i, 800f + i % 7, i));
+                loop.Links.Add(new C.LoopLink((i + 1) % count, 17f + i % 3, i));
+            }
+        }
+        environment = C.EnvironmentSolver.Solve(settings, simulation.Planet, C.EnvironmentSample.DarkVacuum());
+        Reset();
+        Run();
+    }
+    public void Reset()
+    {
+        for (int i = 0; i < simulation.Solver.Nodes.Count; i++)
+            simulation.Solver.Nodes[i].Temperature = 300f + i % 17 * 31f;
+        if (loop != null)
+            for (int i = 0; i < loop.PipeCount; i++) loop.SetSegmentTemperature(i, 340f + i % 11 * 37f);
+    }
+    public void Run()
+    {
+        if (preparation) simulation.Solver.RequiredSubsteps(simulation.Settings.StepSeconds, environment);
+        else simulation.Solver.Step(simulation.Settings.StepSeconds, environment);
+    }
+    public float[] Values()
+    {
+        var values = new List<float>();
+        values.Add(simulation.Solver.RequiredSubsteps(simulation.Settings.StepSeconds, environment));
+        values.Add(simulation.Solver.FlooredNodes);
+        values.Add(simulation.Solver.LastSubsteps);
+        foreach (var node in simulation.Solver.Nodes) values.Add(node.Temperature);
+        if (loop != null)
+        {
+            values.Add(loop.LastWattsAbsorbed);
+            values.Add(loop.LastWattsRejected);
+            for (int i = 0; i < loop.PipeCount; i++) values.Add(loop.SegmentTemperature(i));
+        }
+        return values.ToArray();
+    }
+}

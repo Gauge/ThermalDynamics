@@ -361,7 +361,6 @@ namespace Thermodynamics.Core
                 solver.RebuildRoomAir(rooms.Map);
             }
 
-            appliedOnce = true;
             End(SimulationPhase.Exposure);
         }
 
@@ -456,6 +455,8 @@ namespace Thermodynamics.Core
         public void RebuildAll()
         {
             Begin(SimulationPhase.Topology);
+            solver.AbandonStep();
+            RefreshHeatTimeScale();
             surfaces.Rebuild(grid);
             solver.RebuildLinks();
             RebuildLoops();
@@ -480,31 +481,21 @@ namespace Thermodynamics.Core
             topologyDirty = false;
             roomsDirty = false;
             exposureDirty = false;
-            appliedRevision = settings.Revision;
+            RememberAppliedSettings();
         }
 
 
         private void ApplySettingsIfChanged()
         {
             if (appliedRevision == settings.Revision) return;
-            appliedRevision = settings.Revision;
-
-            if (!appliedOnce || appliedHeatTimeScale != settings.HeatTimeScale)
-            {
-                appliedHeatTimeScale = settings.HeatTimeScale;
-
-                IList<ThermalNode> nodes = solver.Nodes;
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    nodes[i].HeatTimeScale = settings.HeatTimeScale;
-                }
-            }
+            // Active ranges share cached coefficients and plans. A revised setting must
+            // take effect at a new step rather than halfway through those ranges.
+            solver.AbandonStep();
+            RefreshHeatTimeScale();
 
             if (!appliedOnce || appliedCoolantLoops != settings.EnableCoolantLoops
                 || appliedWellMixedCoolant != settings.WellMixedCoolant)
             {
-                appliedCoolantLoops = settings.EnableCoolantLoops;
-                appliedWellMixedCoolant = settings.WellMixedCoolant;
                 RebuildLoops();
             }
 
@@ -512,11 +503,38 @@ namespace Thermodynamics.Core
                 || appliedRoomConvection != settings.RoomConvectionCoefficient
                 || appliedRoomDensity != settings.RoomAirDensity)
             {
-                appliedRoomAir = settings.EnableRoomAir;
-                appliedRoomConvection = settings.RoomConvectionCoefficient;
-                appliedRoomDensity = settings.RoomAirDensity;
                 solver.RebuildRoomAir(rooms.Map);
             }
+
+            RememberAppliedSettings();
+        }
+
+
+        private void RefreshHeatTimeScale()
+        {
+            if (appliedOnce && appliedHeatTimeScale == settings.HeatTimeScale) return;
+
+            IList<ThermalNode> nodes = solver.Nodes;
+            for (int i = 0; i < nodes.Count; i++) nodes[i].HeatTimeScale = settings.HeatTimeScale;
+
+            IList<CoolantLoop> loops = solver.Loops;
+            for (int i = 0; i < loops.Count; i++) loops[i].HeatTimeScale = settings.HeatTimeScale;
+
+            IList<RoomAirNode> air = solver.RoomAir;
+            for (int i = 0; i < air.Count; i++) air[i].HeatTimeScale = settings.HeatTimeScale;
+        }
+
+
+        private void RememberAppliedSettings()
+        {
+            appliedHeatTimeScale = settings.HeatTimeScale;
+            appliedCoolantLoops = settings.EnableCoolantLoops;
+            appliedWellMixedCoolant = settings.WellMixedCoolant;
+            appliedRoomAir = settings.EnableRoomAir;
+            appliedRoomConvection = settings.RoomConvectionCoefficient;
+            appliedRoomDensity = settings.RoomAirDensity;
+            appliedOnce = true;
+            appliedRevision = settings.Revision;
         }
 
         private int appliedRevision = -1;
@@ -606,6 +624,16 @@ namespace Thermodynamics.Core
 
         public void Update(float frameSeconds, EnvironmentSample sample)
         {
+            Update(frameSeconds, sample, true);
+        }
+
+
+        /// <summary>
+        /// Advances pending work even when the host skipped sampling this frame. Starting a
+        /// replacement step after cancellation requires a sample from a subsequent update.
+        /// </summary>
+        public void Update(float frameSeconds, EnvironmentSample sample, bool hasEnvironmentSample)
+        {
             ApplySettingsIfChanged();
 
             if (topologyDirty)
@@ -659,12 +687,12 @@ namespace Thermodynamics.Core
             }
 
             Begin(SimulationPhase.Solver);
-            AdvanceSolver(frameSeconds, sample);
+            AdvanceSolver(frameSeconds, sample, hasEnvironmentSample);
             End(SimulationPhase.Solver);
         }
 
 
-        private void AdvanceSolver(float frameSeconds, EnvironmentSample sample)
+        private void AdvanceSolver(float frameSeconds, EnvironmentSample sample, bool hasEnvironmentSample)
         {
             if (frameSeconds <= 0f) return;
 
@@ -678,6 +706,10 @@ namespace Thermodynamics.Core
                     stepDelayFrames--;
                     return;
                 }
+
+                // Preparation may cancel a step after the host decided it could skip
+                // sampling. Never turn that frame's default sample into a new environment.
+                if (!hasEnvironmentSample) return;
 
                 EnvironmentState state = EnvironmentSolver.Solve(settings, planet, sample);
 
@@ -842,8 +874,9 @@ namespace Thermodynamics.Core
 
             List<StoredHeldCoolant> storedHeld = new List<StoredHeldCoolant>();
 
+            bool legacy;
             if (!ThermalStorageCodec.TryDecode(
-                    data, blocks, storedLoops, storedRooms, storedHeld, storedFills))
+                    data, blocks, storedLoops, storedRooms, storedHeld, storedFills, out legacy))
             {
                 return 0;
             }
@@ -851,7 +884,9 @@ namespace Thermodynamics.Core
             int restored = 0;
             for (int i = 0; i < blocks.Count; i++)
             {
-                BlockInstance block = grid.GetAtCell(blocks[i].Position);
+                // Legacy saves used SlimBlock.Position; current saves use the block's minimum cell.
+                BlockInstance block = legacy ? grid.GetAtCell(blocks[i].Position)
+                    : grid.GetByKey(GridMath.Key(blocks[i].Position));
                 if (block == null) continue;
 
                 ThermalNode node = solver.GetNode(block);
@@ -885,7 +920,7 @@ namespace Thermodynamics.Core
 
             for (int i = 0; i < storedHeld.Count; i++)
             {
-                BlockInstance block = grid.GetAtCell(storedHeld[i].Position);
+                BlockInstance block = grid.GetByKey(GridMath.Key(storedHeld[i].Position));
                 if (block == null) continue;
 
                 ThermalNode node = solver.GetNode(block);
@@ -925,10 +960,13 @@ namespace Thermodynamics.Core
             int applied = 0;
             for (int i = 0; i < tail.Count; i++)
             {
+                float received = tail[i].Temperature;
+                // The wire format is finite, but direct Core consumers can also import records.
+                if (float.IsNaN(received) || float.IsInfinity(received)) continue;
                 ThermalNode node = solver.GetNodeAt(tail[i].Position);
                 if (node == null) continue;
 
-                float value = Math.Max(ThermalConstants.MinimumTemperature, tail[i].Temperature);
+                float value = Math.Max(ThermalConstants.MinimumTemperature, received);
 
                 if (Math.Abs(node.Temperature - value) <= HotTailCodec.TemperatureStep) continue;
 

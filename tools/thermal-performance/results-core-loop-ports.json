@@ -1,0 +1,50 @@
+{
+  "runtime": "9.0.20",
+  "samples": 9,
+  "iterations": 96,
+  "results": [
+    {
+      "name": "loop-rebuild",
+      "nodes": 2,
+      "old_ms": [
+        0.040297,
+        0.037682,
+        0.029466,
+        0.025669,
+        0.029967,
+        0.026531,
+        0.029827,
+        0.077899,
+        0.027442
+      ],
+      "new_ms": [
+        0.014969,
+        0.013756,
+        0.011753,
+        0.011783,
+        0.011823,
+        0.011722,
+        0.014438,
+        0.019677,
+        0.011703
+      ],
+      "old_best_ms": 0.025669,
+      "new_best_ms": 0.011703,
+      "old_median_ms": 0.029827,
+      "new_median_ms": 0.011823,
+      "old_allocated_bytes": 68352,
+      "new_allocated_bytes": 0,
+      "exact_state_match": true
+    }
+  ],
+  "baseline_commit": "60677d353dddc0f8b90b7ee7733cdc8789bd3c27",
+  "baseline_core_sha256": "71ab82cb4694a78d34009190545c610b722b46865ada122ccaaf65f60c262442",
+  "current_core_sha256": "b2cb0876a42e3875be99afd9d04d94db09c8533ea9c1b79cb285ab0de1346c75",
+  "fixture_revision": "two-loop-rebuild-v1",
+  "fixture_sha256": "9a883b7629a9d272343d24f557fe917a854e48a5fba4bdf9ce746dc2ba0d0c97",
+  "sdk": "10.0.112",
+  "working_tree_head": "60677d353dddc0f8b90b7ee7733cdc8789bd3c27",
+  "host": "Linux-7.2.11-200.fc44.x86_64-x86_64-with-glibc2.43",
+  "cpu": "AMD Ryzen 9 9950X 16-Core Processor",
+  "scope": "Two one-pipe loop replacements; includes SetLoops lookup/link rebuilding but excludes discovery, renderer, adapter and networking."
+}

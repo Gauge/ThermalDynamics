@@ -121,13 +121,14 @@ namespace Thermodynamics.Core
         {
             BlockInstance pump = ring[index];
 
-            List<GridPort> ports = pump.CoolantLinkPorts();
-            if (ports.Count < 2) return 1;
+            CoolantShape shape = pump.Model.Coolant;
+            CoolantPort[] ports = shape == null ? null : shape.LinkPorts;
+            if (ports == null || ports.Length < 2) return 1;
 
             BlockInstance next = ring[(index + 1) % ring.Count];
             if (next == pump) return 1;
 
-            GridPort outlet = ports[1];
+            GridPort outlet = TransformPort(pump, ports[1]);
             return grid.GetAtCell(outlet.Target) == next ? 1 : -1;
         }
 
@@ -145,8 +146,8 @@ namespace Thermodynamics.Core
             fault = CoolantFault.None;
             if (grid == null || start == null || start.Model.Coolant == null) return null;
 
-            List<GridPort> startPorts = start.CoolantLinkPorts();
-            if (startPorts.Count < 2)
+            CoolantPort[] startPorts = start.Model.Coolant.LinkPorts;
+            if (startPorts == null || startPorts.Length < 2)
             {
                 fault = CoolantFault.OpenEnd;
                 return null;
@@ -161,7 +162,8 @@ namespace Thermodynamics.Core
             visited.Add(start.Key);
 
             BlockInstance current = start;
-            GridPort exit = startPorts[0];
+            GridPort firstPort = TransformPort(start, startPorts[0]);
+            GridPort exit = firstPort;
 
             int guard = grid.BlockCount + 1;
 
@@ -188,7 +190,7 @@ namespace Thermodynamics.Core
 
                 if (next == start)
                 {
-                    if (!SamePort(entry, startPorts[0])) return ring;
+                    if (!SamePort(entry, firstPort)) return ring;
 
                     fault = CoolantFault.DoubledBack;
                     return null;
@@ -221,12 +223,15 @@ namespace Thermodynamics.Core
 
         private static bool TryFindPortFacing(BlockInstance block, Vector3I cell, Vector3I direction, out GridPort port)
         {
-            List<GridPort> ports = block.CoolantLinkPorts();
-            for (int i = 0; i < ports.Count; i++)
+            CoolantShape shape = block.Model.Coolant;
+            CoolantPort[] ports = shape == null ? null : shape.LinkPorts;
+            int count = ports == null ? 0 : ports.Length;
+            for (int i = 0; i < count; i++)
             {
-                if (ports[i].Cell == cell && ports[i].Direction == direction)
+                GridPort candidate = TransformPort(block, ports[i]);
+                if (candidate.Cell == cell && candidate.Direction == direction)
                 {
-                    port = ports[i];
+                    port = candidate;
                     return true;
                 }
             }
@@ -238,11 +243,14 @@ namespace Thermodynamics.Core
 
         private static bool TryFindOtherPort(BlockInstance block, GridPort entry, out GridPort other)
         {
-            List<GridPort> ports = block.CoolantLinkPorts();
-            for (int i = 0; i < ports.Count; i++)
+            CoolantShape shape = block.Model.Coolant;
+            CoolantPort[] ports = shape == null ? null : shape.LinkPorts;
+            int count = ports == null ? 0 : ports.Length;
+            for (int i = 0; i < count; i++)
             {
-                if (SamePort(ports[i], entry)) continue;
-                other = ports[i];
+                GridPort candidate = TransformPort(block, ports[i]);
+                if (SamePort(candidate, entry)) continue;
+                other = candidate;
                 return true;
             }
 
@@ -254,6 +262,15 @@ namespace Thermodynamics.Core
         private static bool SamePort(GridPort a, GridPort b)
         {
             return a.Cell == b.Cell && a.Direction == b.Direction;
+        }
+
+
+        // Discovery needs one value at a time, not the independently owned public port list.
+        // Read the current model and orientation each call; definitions remain mutable.
+        internal static GridPort TransformPort(BlockInstance block, CoolantPort port)
+        {
+            return new GridPort(block.LocalToGrid(port.LocalCell),
+                block.LocalDirectionToGrid(port.LocalDirection));
         }
 
 

@@ -28,6 +28,29 @@ namespace Thermodynamics.Tests
     {
         private const float ThickAir = 1f;
 
+        [Fact]
+        public void GeometryEqualityUsesNormalizedWeightsRatherThanRegistrationState()
+        {
+            DragProfile unset = default(DragProfile);
+            DragProfile normalized = DragProfile.Of(float.NaN, -1f, float.NegativeInfinity,
+                float.PositiveInfinity, 5f, 1f);
+            Assert.False(unset.IsSet);
+            Assert.True(normalized.IsSet);
+            Assert.True(unset.HasSameWeights(normalized));
+            Assert.True(normalized.HasSameWeights(unset));
+
+            var weights = new[] { 1f, 1f, 1f, 1f, 1f, 1f };
+            for (int face = 0; face < Face.Count; face++)
+            {
+                weights[face] = .5f;
+                DragProfile changed = DragProfile.Of(weights[0], weights[1], weights[2],
+                    weights[3], weights[4], weights[5]);
+                Assert.False(unset.HasSameWeights(changed));
+                Assert.True(changed.HasSameWeights(changed));
+                weights[face] = 1f;
+            }
+        }
+
 
         private static HistoricalThermalSettings Settings(bool solar = false)
         {

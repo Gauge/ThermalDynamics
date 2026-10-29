@@ -14,6 +14,8 @@ namespace Thermodynamics
         private sealed class GridView
         {
             public ThermalGrid Grid;
+            public BoundingBoxD WorldBounds;
+            public ThermalVisionOcclusion.CandidateCache Occluders;
             public ThermalVisionRegionOrder Order;
 
             public Dictionary<Region,ThermalVisionSurfaceField> Fields = new Dictionary<Region,ThermalVisionSurfaceField>();
@@ -21,21 +23,32 @@ namespace Thermodynamics
             public Dictionary<Region,ThermalVisionSurfaceField> Previous = new Dictionary<Region,ThermalVisionSurfaceField>();
             public IEnumerator<bool> Work;
             public double Published, Next, Distance;
-            public int Blocks, DetailBudget;
-            public long TopologyRevision;
+            public int Blocks, DetailBudget, DetailCeiling=512;
+            public long TopologyRevision,ObservedRevision,WorkRevision;
             public double Spacing;
             public bool Interior;
             public Vector3D InteriorCentre;
             public float Mean;
-            public bool Detailed;
+            public bool Detailed,HasTemperature;
         }
 
-        private static readonly Dictionary<ThermalGrid,GridView> gridViews = new Dictionary<ThermalGrid,GridView>();
+        private struct FleetCandidate
+        {
+            public ThermalGrid Grid;
+            public BoundingBoxD Bounds;
+        }
+
+        private static readonly ThermalVisionViewCache<ThermalGrid,GridView> gridViews =
+            new ThermalVisionViewCache<ThermalGrid,GridView>(ThermalVisionPreparationBudget.RetainedViews,
+                ThermalVisionPreparationBudget.RetainSeconds,PauseGridView,InvalidGridView);
+
+        private static readonly ThermalVisionFleetSelection<FleetCandidate> fleetCandidates =
+            new ThermalVisionFleetSelection<FleetCandidate>(ThermalVisionPreparationBudget.AdmittedGrids);
 
         private static readonly List<GridView> visibleViews = new List<GridView>();
 
-        private static readonly List<ThermalGrid> deadViews = new List<ThermalGrid>();
         private static int viewWorkCursor;
+        private static readonly ThermalVisionFrameBudget fleetDrawBudget=new ThermalVisionFrameBudget();
 
         private static readonly List<BoundingBoxD> localVisionBlockers=new List<BoundingBoxD>(32);
         private static double preparationPriorityDebt;
@@ -54,19 +67,25 @@ namespace Thermodynamics
         private static void PauseIndependentFleet()
         {
             preparationPriorityDebt=0;
-            foreach(var view in gridViews.Values)
-            {
-                if(view.Work!=null) view.Work.Dispose();
-                view.Work=null; view.Next=0;
-            }
+            gridViews.PauseAll();
             previousSurface=null;
+        }
+
+        private static void PauseGridView(GridView view)
+        {
+            if(view.Work!=null) view.Work.Dispose();
+            view.Work=null; view.Next=0;
+        }
+
+        private static bool InvalidGridView(GridView view)
+        {
+            return view.Grid.Grid==null || view.Grid.Grid.MarkedForClose;
         }
 
         private static void ClearIndependentFleet()
         {
             preparationPriorityDebt=0;
-            foreach(var view in gridViews.Values) if(view.Work!=null) view.Work.Dispose();
-            gridViews.Clear(); visibleViews.Clear(); visionOccluders.Clear(); skyPlanets.Clear(); previousSurface=null;
+            gridViews.Clear(); fleetCandidates.Clear(); visibleViews.Clear(); visionOccluders.Clear(); skyPlanets.Clear(); previousSurface=null;
         }
 
         private static float OldTemperature(GridView view,Vector3D p)
@@ -78,16 +97,18 @@ namespace Thermodynamics
 
         private static GridView FirstView(ThermalGrid grid,double now)
         {
-            double sum=0; int count=0, visited=0;
+            var temperatures=new ThermalVisionTemperatureData(); int visited=0;
             foreach(var block in grid.Blocks)
             {
                 if(visited++>=32) break;
                 if(block==null || block.Node==null) continue;
-                float t=block.Node.Temperature;
-                if(!float.IsNaN(t) && !float.IsInfinity(t) && t>=0 && t<=100000) { sum+=t; count++; }
+                float t; temperatures.Add(block.Node.Temperature,out t);
 
             }
-            var view=new GridView { Grid=grid, Mean=count>0?(float)(sum/count):293.15f, Published=now, Blocks=grid.BlockCount };
+            float mean; bool hasTemperature=temperatures.TryMean(out mean);
+            var view=new GridView { Grid=grid, Mean=mean, HasTemperature=hasTemperature, Published=now, Blocks=grid.BlockCount,
+                TopologyRevision=grid.TopologyRevision,ObservedRevision=grid.TopologyRevision };
+            if(!hasTemperature) return view;
             double size=grid.Grid.GridSize;
 
             var box=new Region(((Vector3D)grid.Grid.Min-new Vector3D(.5))*size,((Vector3D)grid.Grid.Max+new Vector3D(.5))*size,view.Mean);
@@ -105,8 +126,8 @@ namespace Thermodynamics
             foreach(var block in thermal.Blocks)
             {
                 if(block==null || block.Node==null) continue;
-                float t=block.Node.Temperature;
-                if(float.IsNaN(t)||float.IsInfinity(t)||t<0||t>100000) continue;
+                float t;
+                if(!ThermalVisionTemperatureData.TryDisplay(block.Node.Temperature,out t)) continue;
                 Vector3D lo=Vector3D.Max(min,((Vector3D)block.Block.Min-new Vector3D(.5))*size);
                 Vector3D hi=Vector3D.Min(max,((Vector3D)block.Block.Max+new Vector3D(.5))*size);
                 if(lo.X<hi.X && lo.Y<hi.Y && lo.Z<hi.Z) yield return new Region(lo,hi,t);
@@ -119,7 +140,7 @@ namespace Thermodynamics
             var grid=view.Grid.Grid;
             var job=new BlockFleetJob { Grid=view.Grid, Matrix=grid.WorldMatrix, BlockCount=view.Grid.BlockCount, Budget=512 };
             long revision=view.Grid.TopologyRevision;
-            bool reuse=view.Detailed && view.TopologyRevision==revision && view.Blocks==job.BlockCount;
+            bool reuse=view.HasTemperature && view.Detailed && view.TopologyRevision==revision && view.Blocks==job.BlockCount;
             Vector3D eye=MyAPIGateway.Session.Camera.WorldMatrix.Translation;
             Vector3D localEye=Vector3D.Transform(eye,MatrixD.Invert(job.Matrix));
             Vector3D origin=((Vector3D)grid.Min-new Vector3D(.5))*grid.GridSize;
@@ -137,7 +158,7 @@ namespace Thermodynamics
             if(interior!=view.Interior) reuse=false;
             double focal=Math.Max(1,MyAPIGateway.Session.Camera.ViewportSize.Y*.5*Math.Abs(MyAPIGateway.Session.Camera.ProjectionMatrix.M22));
             double diameter=(end-origin).Length()*focal/Math.Max(grid.GridSize,view.Distance);
-            job.Budget=ThermalVisionViewPolicy.DetailBudget(diameter,view.DetailBudget,interior);
+            job.Budget=Math.Min(view.DetailCeiling,ThermalVisionViewPolicy.DetailBudget(diameter,view.DetailBudget,interior));
             if(job.Budget!=view.DetailBudget) reuse=false;
             if(!reuse) job.Detail=new ThermalVisionBlockDetail(job.Budget,localEye);
             double desired=Math.Max(grid.GridSize,view.Distance*4/focal);
@@ -186,6 +207,17 @@ namespace Thermodynamics
                     }
                 }
             }
+            float sampleMean;
+            if(!job.Temperatures.TryMean(out sampleMean))
+            {
+                if(grid.MarkedForClose || view.Grid.BlockCount!=job.BlockCount || view.Grid.TopologyRevision!=revision) yield break;
+                // An empty source set cannot refresh old cell fallback values as
+                // new heat. Keep native unknown context until real data returns.
+                view.HasTemperature=false; view.Detailed=true; view.Mean=float.NaN;
+                view.Order=null; view.Fields.Clear(); view.Previous.Clear();
+                view.Blocks=job.BlockCount; view.TopologyRevision=revision;
+                yield break;
+            }
             cells.Clear(); order.WriteNearToFar(Vector3D.Zero,cells);
             yield return true;
             var paired=reuse?null:ThermalVisionFacePlan.PairedFaces(cells); int cellIndex=0;
@@ -193,6 +225,7 @@ namespace Thermodynamics
             var fields=new Dictionary<Region,ThermalVisionSurfaceField>(cells.Count);
 
             var prior=new Dictionary<Region,ThermalVisionSurfaceField>(cells.Count);
+            var faceScratch=new ThermalVisionSurfaceField.BuildScratch();
             int patchTrianglesSaved=0;
             foreach(var cell in cells)
             {
@@ -206,18 +239,18 @@ namespace Thermodynamics
                 {
                     var p=field.Point(x,y,z); int i=field.Index(x,y,z);
                     field.Values[i]=job.TemperatureField.SampleCached(p,cell.Kelvin);
-                    before.Values[i]=OldTemperature(view,p);
+                    before.Values[i]=view.HasTemperature?OldTemperature(view,p):field.Values[i];
                     yield return true;
                 }
-                field.BuildFaces(20,true,before,job.Budget>=512?20:0); patchTrianglesSaved+=field.SavedPatches*2; field.PrepareTransition(before); fields.Add(cell,field); prior.Add(cell,before);
+                field.BuildFaces(20,true,before,job.Budget>=512?20:0,faceScratch); patchTrianglesSaved+=field.SavedPatches*2; field.PrepareTransition(before); fields.Add(cell,field); prior.Add(cell,before);
                 yield return true;
             }
             if(grid.MarkedForClose || view.Grid.BlockCount!=job.BlockCount || view.Grid.TopologyRevision!=revision) yield break;
             view.Order=order; view.Fields=fields; view.Previous=prior; view.Blocks=job.BlockCount;
             view.Interior=interior; view.InteriorCentre=centre;
             view.TopologyRevision=revision; view.Spacing=job.SurfaceSpacing; view.DetailBudget=job.Budget;
-            view.Detailed=true; view.Published=FleetClock.Elapsed.TotalSeconds;
-            RecordEvent("independent grid published: grid="+grid.EntityId+" blocks="+job.BlockCount+" regions="+cells.Count+" prepared-tri-saved="+patchTrianglesSaved+" detail-budget="+job.Budget+" diameter-px="+diameter.ToString("F1")
+            view.Detailed=true; view.HasTemperature=true; view.Mean=sampleMean; view.Published=FleetClock.Elapsed.TotalSeconds;
+            if(Telemetry.Enabled) RecordEvent("independent grid published: grid="+grid.EntityId+" blocks="+job.BlockCount+" regions="+cells.Count+" prepared-tri-saved="+patchTrianglesSaved+" detail-budget="+job.Budget+" diameter-px="+diameter.ToString("F1")
                 +" refresh-wall-ms="+((FleetClock.Elapsed.TotalSeconds-refreshStarted)*1000).ToString("F1")+" interior-occupancy="+interior+" geometry-reused="+reuse+" refresh-path="+(reuse?"temperature-only":"topology")+" spacing-m="+job.SurfaceSpacing+" nearest-samples="+job.TemperatureField.NearestSamples
                 +" cache-hits="+job.TemperatureField.CacheHits+" cache-entries="+job.TemperatureField.CacheEntries+" thermal-samples="+job.TemperatureField.Count+" field-fallbacks="+job.TemperatureField.Fallbacks+" field-queries="+job.TemperatureField.Queries,false);
         }
@@ -229,7 +262,7 @@ namespace Thermodynamics
             {
                 var view=visibleViews[i];
                 if(view.Work==null && now<view.Next) continue;
-                if(!view.Detailed) return i;
+                if(!view.Detailed || view.TopologyRevision!=view.Grid.TopologyRevision) return i;
                 if(refresh<0) refresh=i;
             }
             return refresh;
@@ -239,24 +272,54 @@ namespace Thermodynamics
         {
             double now=FleetClock.Elapsed.TotalSeconds;
             var camera=MyAPIGateway.Session.Camera; Vector3D eyeWorld=camera.WorldMatrix.Translation;
-            visibleViews.Clear(); deadViews.Clear();
-            foreach(var pair in gridViews) if(pair.Key.Grid==null || pair.Key.Grid.MarkedForClose) deadViews.Add(pair.Key);
-            foreach(var key in deadViews) { if(gridViews[key].Work!=null) gridViews[key].Work.Dispose(); gridViews.Remove(key); }
-            foreach(var thermal in ThermalGrid.LiveGrids)
+            visibleViews.Clear(); fleetCandidates.Clear(); gridViews.BeginFrame();
+            int createdViews=0,deferredViews=0,eligibleGrids=0;
+            var liveGrids=ThermalGrid.LiveGrids;
+            for(int gridIndex=0;gridIndex<liveGrids.Count;gridIndex++)
             {
-                var grid=thermal.Grid;
+                var thermal=liveGrids[gridIndex]; var grid=thermal.Grid;
                 if(grid==null || grid.MarkedForClose || thermal.Simulation==null || thermal.BlockCount==0) continue;
                 var bounds=grid.PositionComp.WorldAABB;
                 if(!camera.IsInFrustum(ref bounds)) continue;
+                eligibleGrids++;
+                double distance=Vector3D.Distance(eyeWorld,Vector3D.Clamp(eyeWorld,bounds.Min,bounds.Max));
+                fleetCandidates.Offer(new FleetCandidate { Grid=thermal,Bounds=bounds },distance,grid.EntityId);
+            }
+            fleetCandidates.OrderNearToFar();
+            int admissionOverflow=eligibleGrids-fleetCandidates.Count;
+            for(int candidateIndex=0;candidateIndex<fleetCandidates.Count;candidateIndex++)
+            {
+                var candidate=fleetCandidates[candidateIndex];
+                var thermal=candidate.Value.Grid;
                 GridView view;
-                if(!gridViews.TryGetValue(thermal,out view)) { view=FirstView(thermal,now); gridViews.Add(thermal,view); }
-                view.Distance=Vector3D.Distance(eyeWorld,Vector3D.Clamp(eyeWorld,bounds.Min,bounds.Max));
+                if(!gridViews.TryAdmit(thermal,now,out view))
+                {
+                    // Preview creation allocates fields and a partition tree. Keep
+                    // acquisition bursts outside the preparation deadline bounded;
+                    // deferred grids retain the native-depth context this frame.
+                    if(createdViews>=ThermalVisionPreparationBudget.PreviewGridsPerFrame) { deferredViews++; continue; }
+                    view=FirstView(thermal,now); gridViews.AddAdmitted(thermal,view,now); createdViews++;
+                }
+                long revision=thermal.TopologyRevision;
+                bool changed=view.ObservedRevision!=revision;
+                view.ObservedRevision=revision;
+                // A suspended block enumerator or partial field belongs to its
+                // starting epoch. Discard it before any MoveNext sees mutations.
+                if(ThermalVisionRefreshLifecycle.CancelChanged(ref view.Work,view.WorkRevision,revision) || changed)
+                    view.Next=0;
+                view.WorldBounds=candidate.Value.Bounds;
+                view.Distance=candidate.Distance;
                 visibleViews.Add(view);
             }
-            visibleViews.Sort((a,b)=> { int d=a.Distance.CompareTo(b.Distance); return d!=0?d:a.Grid.Grid.EntityId.CompareTo(b.Grid.Grid.EntityId); });
+            // Release offscreen or overflow preparation immediately, but keep a
+            // small recent snapshot cache for camera turns and moving grids.
+            gridViews.Trim(now);
+            fleetCandidates.Clear();
             double occlusionStart=ProbeClock.Elapsed.TotalMilliseconds;
             int hiddenGrids=CullHiddenFleet(eyeWorld);
             double occlusionMs=ProbeClock.Elapsed.TotalMilliseconds-occlusionStart;
+            int detailCeiling=ThermalVisionViewPolicy.FleetDetailCeiling(visibleViews.Count);
+            foreach(var view in visibleViews) view.DetailCeiling=detailCeiling;
             double preparationStart=ProbeClock.Elapsed.TotalMilliseconds;
             double priorityMs=0,backgroundMs=0;
             int priority=FindFleetPreparationPriority(now);
@@ -270,7 +333,11 @@ namespace Thermodynamics
                 if(background) { index=viewWorkCursor%visibleViews.Count; viewWorkCursor=(index+1)%visibleViews.Count; }
                 var view=visibleViews[index]; visited++;
                 double stepStart=ProbeClock.Elapsed.TotalMilliseconds;
-                if(view.Work==null && now>=view.Next) view.Work=RefreshGrid(view).GetEnumerator();
+                if(view.Work==null && now>=view.Next)
+                {
+                    view.WorkRevision=view.Grid.TopologyRevision;
+                    view.Work=RefreshGrid(view).GetEnumerator();
+                }
                 if(view.Work!=null)
                 {
                     idle=0;
@@ -290,22 +357,32 @@ namespace Thermodynamics
                 if(view.Work==null && index==priority) priority=FindFleetPreparationPriority(now);
             }
             double preparationEnd=ProbeClock.Elapsed.TotalMilliseconds;
-            if(frames%30==0) RecordEvent("independent preparation: priority-grid="+priorityGrid+" distance-m="+priorityDistance.ToString("F1")
+            if(Telemetry.Enabled && frames%30==0) RecordEvent("independent preparation: priority-grid="+priorityGrid+" distance-m="+priorityDistance.ToString("F1")
                 +" priority-ms="+priorityMs.ToString("F3")+" background-ms="+backgroundMs.ToString("F3")+" steps="+visited,false);
             double near=camera.NearPlaneDistance*1.05;
             regionBillboards=regionCulledFaces=regionCulledPatches=regionUniformPatches=regionDrawnCells=regionCapTriangles=0;
-            countUniformPatches=frames%30==0;
-            RegionBackdrop(near,RegionNeutral);
+            countUniformPatches=Telemetry.Enabled && frames%30==0;
+            double far=ThermalVisionViewPolicy.BackdropDistance(BlockFleetViewDistance());
+            // Shared native depth provides animated characters and voxel/terrain
+            // silhouettes without mesh copies, raycasts, or per-entity work.
+            for(int layer=0;layer<ThermalVisionContext.Layers;layer++)
+                RegionBackdrop(ThermalVisionContext.Distance(layer,near,far),ThermalVisionContext.Colour(layer));
+            fleetDrawBudget.Reset(ThermalVisionFrameBudget.GridTriangles);
+            Vector4 contextNeutral=ThermalVisionContext.Colour(0);
             if(automaticRange && SceneRange.Update(Math.Min(.25,ExposureClock.Elapsed.TotalSeconds))) { lowKelvin=SceneRange.Low; highKelvin=SceneRange.High; }
             ExposureClock.Restart(); if(automaticRange) SceneRange.BeginSamples();
-            int previews=0, sharedExitsSkipped=0, hiddenSubtrees=0;
+            int previews=0, coarseCells=0, hiddenSubtrees=0, missingTemperatures=0;
+            int remainingSubtreeTests=ThermalVisionOcclusion.MaxSubtreeTests;
             MatrixD inverseCamera=MatrixD.Invert(camera.WorldMatrix);
+            int remainingGrids=visibleViews.Count;
             foreach(var view in visibleViews)
             {
+                fleetDrawBudget.BeginSlice(remainingGrids--);
+                if(!view.Detailed || view.TopologyRevision!=view.Grid.TopologyRevision) previews++;
+                if(!view.HasTemperature) { missingTemperatures++; continue; }
                 if(view.Order==null) continue;
-                if(!view.Detailed) previews++;
                 regionRenderMatrix=view.Grid.Grid.WorldMatrix;
-                smoothCorners=view.Fields; previousSurface=view.Previous;
+                previousSurface=view.Previous;
                 surfaceBlend=(float)MathHelper.Clamp((now-view.Published)/.3,0,1);
                 if(surfaceBlend>=1 && view.Previous.Count>0) view.Previous.Clear();
                 MatrixD localCamera=camera.WorldMatrix*MatrixD.Invert(regionRenderMatrix); Vector3D eye=localCamera.Translation;
@@ -316,46 +393,86 @@ namespace Thermodynamics
                     if(visionOccluders[i].Owner==view.Grid)localVisionBlockers.Add(visionOccluders[i].Bounds);
                 int gridHiddenSubtrees;
                 view.Order.WriteVisibleNearToFar(eye,regionDrawOrder,localFrustum,
-                    localVisionBlockers.Count==0?null:localVisionBlockers,out gridHiddenSubtrees);
+                    localVisionBlockers.Count==0?null:localVisionBlockers,ref remainingSubtreeTests,out gridHiddenSubtrees);
                 hiddenSubtrees+=gridHiddenSubtrees;
                 foreach(var cell in regionDrawOrder)
                 {
+                    if(fleetDrawBudget.SliceRemaining<12) { fleetDrawBudget.Take(12); break; }
                     ThermalVisionSurfaceField cellField;
                     if(!view.Fields.TryGetValue(cell,out cellField)) continue;
                     if(automaticRange) { SceneRange.Observe(cellField.Minimum); SceneRange.Observe(cellField.Maximum); }
                     Vector3D middle=(cell.Min+cell.Max)*.5, half=(cell.Max-cell.Min)*.5;
                     double depth=Vector3D.Dot(middle-eye,localCamera.Forward), radius=Vector3D.Dot(half,Vector3D.Abs(localCamera.Forward));
+                    capTriangles.Clear(); nearCapPolygon.Clear();
+                    // Early clipping can return the other scratch buffer. Use
+                    // that exact result for both detailed and coarse cap fans.
+                    var cap=nearCapPolygon;
+                    ThermalVisionSurfaceField previous=null;
+                    if(surfaceBlend<1) view.Previous.TryGetValue(cell,out previous);
                     if(depth-radius<=near && depth+radius>=near)
                     {
-                        var cap=ThermalVisionRegionPartition.NearCap(cell,localCamera,camera.ProjectionMatrix,near,nearCapPolygon,nearCapScratch);
-                        for(int i=1;i+1<cap.Count;i++) SmoothTriangle(cell,cap[0],cap[i],cap[i+1],eye,false);
+                        cap=ThermalVisionRegionPartition.NearCap(cell,localCamera,camera.ProjectionMatrix,near,nearCapPolygon,nearCapScratch);
+                        for(int i=1;i+1<cap.Count;i++)
+                            cellField.AppendCapTriangles(cap[0],cap[i],cap[i+1],previous,surfaceBlend,20,capTriangles);
+                    }
+                    // A thermal volume must be submitted atomically. Dropping its
+                    // exit after drawing its entry would paint unrelated surfaces
+                    // behind it. Reserve a conservative whole-cell envelope first;
+                    // frustum rejection can only reduce the triangles it submits.
+                    bool coarse=!fleetDrawBudget.Take(ThermalVisionFrameBudget.CellTriangles(cellField,eye,capTriangles.Count));
+                    if(coarse)
+                    {
+                        // Preserve complete coverage with sampled corner values
+                        // when the detailed patch set exceeds this grid's share.
+                        if(!fleetDrawBudget.Take(12+Math.Max(0,cap.Count-2))) continue;
+                        coarseCells++; capTriangles.Clear();
+                        for(int i=1;i+1<cap.Count;i++)
+                        {
+                            var a=cap[0]; var b=cap[i]; var c=cap[i+1];
+                            capTriangles.Add(new ThermalVisionSurfaceField.TemperatureTriangle { A=a,B=b,C=c,
+                                Temperatures=new Vector3(cellField.BlendSample(previous,a,surfaceBlend),
+                                    cellField.BlendSample(previous,b,surfaceBlend),cellField.BlendSample(previous,c,surfaceBlend)) });
+                        }
+                    }
+                    for(int i=0;i<capTriangles.Count;i++)
+                    {
+                        var triangle=capTriangles[i];
+                        DrawCapTriangle(triangle.A,triangle.B,triangle.C,triangle.Temperatures,eye,false);
                     }
                     for(int pass=0;pass<2;pass++) for(int axis=0;axis<3;axis++) for(int side=0;side<2;side++)
                     {
                         bool upper=side==1;
                         bool entering=(RegionAxis(eye,axis)-RegionAxis(upper?cell.Max:cell.Min,axis))*(upper?1:-1)>0;
                         if(entering!=(pass==0)) continue;
-                        if(!entering && (cellField.PairedFaceMask & (1<<(axis*2+side)))!=0) { sharedExitsSkipped++; continue; }
-                        RegionFace(cell,axis,upper,RegionNeutral,eye,entering,localFrustum,cellField);
+                        // Retain shared exits: the adjacent cell may have been
+                        // rejected by this frame's budget and cannot close this one.
+                        RegionFace(cell,axis,upper,contextNeutral,eye,entering,localFrustum,cellField,coarse);
                     }
                     regionDrawnCells++;
                 }
             }
             previousSurface=null; surfaceBlend=1;
-            RegionBackdrop(ThermalVisionViewPolicy.BackdropDistance(BlockFleetViewDistance()),new Vector4(0,0,0,1));
+            RegionBackdrop(far,new Vector4(0,0,0,1));
             DrawThermalSky();
-            incomplete=previews>0;
-            rowIdentity="independent moving grids / "+(automaticRange?"AUTO":"LOCK"); rowKey=null;
-            Outcome(previews>0?"independent-preview":"independent-detail");
+            bool detailLimited=fleetDrawBudget.Limited || admissionOverflow>0 || skyDrawBudget.Limited;
+            incomplete=previews>0 || deferredViews>0 || missingTemperatures>0 || detailLimited;
+            rowIdentity=automaticRange?"independent moving grids / AUTO":"independent moving grids / LOCK"; rowKey=null;
+            Outcome(detailLimited?"independent-budget-limited":missingTemperatures>0?"independent-missing-data":previews+deferredViews>0?"independent-preview":"independent-detail");
             if(frames++%30==0)
             {
-                RecordEvent("independent occlusion: own-grid-hidden-subtrees="+hiddenSubtrees,false);
+                if(Telemetry.Enabled) RecordEvent("independent occlusion: own-grid-hidden-subtrees="+hiddenSubtrees
+                    +" own-grid-tests="+(ThermalVisionOcclusion.MaxSubtreeTests-remainingSubtreeTests),false);
 
                 panel.Text=new RichText("THERMAL / "+(State.Current==ThermalVisionState.Mode.WhiteHot?"WHITE HOT":"CIVIDIS")
                     +" / "+(lowKelvin-273.15f).ToString("0")+" to "+(highKelvin-273.15f).ToString("0")+" C"
-                    +(previews>0?" / refining "+previews+" grids":""));
-                RecordEvent("independent draw: grids="+visibleViews.Count+" hidden-grids="+hiddenGrids+" solid-occluders="+visionOccluders.Count+" occlusion-ms="+occlusionMs.ToString("F3")+" previews="+previews+" regions="+regionDrawnCells+" billboards="+regionBillboards+" cap-triangles="+regionCapTriangles+" uniform-patches="+regionUniformPatches+" offscreen-patches="+regionCulledPatches+" shared-exits-skipped="+sharedExitsSkipped+" discovery-ms="+occlusionStart.ToString("F3")+" preparation-ms="+(preparationEnd-preparationStart).ToString("F3")
-                    +" draw-ms="+(ProbeClock.Elapsed.TotalMilliseconds-preparationEnd).ToString("F3")+" submission-cap=none-stress-test",false);
+                    +(previews+deferredViews>0?" / refining "+(previews+deferredViews)+" grids":"")
+                    +(detailLimited?" / heat detail limited":"")
+                    +(missingTemperatures>0?" / "+missingTemperatures+" grids: no temperature data":"")
+                    +(admissionOverflow>0?" / "+admissionOverflow+" grids: shape only":"")+"\nBLUE-GREY: shape only / temperature unknown");
+                if(Telemetry.Enabled) RecordEvent("independent draw: grids="+visibleViews.Count+" hidden-grids="+hiddenGrids+" solid-occluders="+visionOccluders.Count+" occluder-queries="+occluderQueries+" occluder-tests="+occluderTests+" occluder-cache-hits="+occluderCacheHits+" new-views="+createdViews+" deferred-views="+deferredViews+" admission-overflow="+admissionOverflow+" cached-views="+gridViews.Count+" occlusion-ms="+occlusionMs.ToString("F3")+" previews="+previews+" regions="+regionDrawnCells+" billboards="+regionBillboards+" cap-triangles="+regionCapTriangles+" uniform-patches="+regionUniformPatches+" offscreen-patches="+regionCulledPatches+" coarse-cells="+coarseCells+" shared-exits-skipped=0"+" discovery-ms="+occlusionStart.ToString("F3")+" preparation-ms="+(preparationEnd-preparationStart).ToString("F3")
+                    +" draw-ms="+(ProbeClock.Elapsed.TotalMilliseconds-preparationEnd).ToString("F3")
+                    +" grid-triangle-cap="+ThermalVisionFrameBudget.GridTriangles+" grid-budget-limited="+fleetDrawBudget.Limited
+                    +" context-layers="+ThermalVisionContext.Layers+" context=unknown-native-depth",false);
             }
         }
     }

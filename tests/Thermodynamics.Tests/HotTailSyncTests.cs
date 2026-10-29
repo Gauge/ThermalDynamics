@@ -230,6 +230,66 @@ namespace Thermodynamics.Tests
             Assert.Equal(1, HotTailCodec.Packets(5, 0));
         }
 
+        [Fact]
+        public void AnEmptyHullSnapshotAcknowledgesWithoutClearingKnownTemperatures()
+        {
+            var client = new HotTailClientState();
+            Assert.True(client.ShouldAsk(42));
+            byte[] message = HotTailMessage.EncodeTemperatures(HotTailKind.HullSnapshot,
+                42, new List<StoredTemperature>(), 0, 0);
+            Assert.Equal(HotTailMessage.SizeOf(0), message.Length);
+            long gridId;
+            var received = new List<StoredTemperature>();
+            Assert.Equal(HotTailKind.HullSnapshot, HotTailMessage.TryDecode(message, out gridId, received));
+            Assert.Empty(received);
+
+            var builder = GridBuilder.Large();
+            builder.Place(Catalog.LightArmor(), Vector3I.Zero);
+            var simulation = builder.BuildSimulation(new ThermalSettings(), 420f);
+            Assert.Equal(0, simulation.ImportHotTail(received));
+            Assert.Equal(420f, simulation.Solver.Nodes[0].Temperature);
+            client.Answered(gridId);
+            client.Advance(60f);
+            Assert.True(client.HasHull(42));
+            Assert.False(client.ShouldAsk(42));
+        }
+
+        [Fact]
+        public void AnOverflowingRecordCountIsRejectedBeforeReadingAnyRecords()
+        {
+            // A 15-byte, zero-record hull message with the inner count replaced by int.MaxValue.
+            byte[] message = HotTailMessage.EncodeTemperatures(HotTailKind.HullSnapshot,
+                42, new List<StoredTemperature>(), 0, 0);
+            int count = HotTailMessage.HeaderSize + 1;
+            message[count] = message[count + 1] = message[count + 2] = 255;
+            message[count + 3] = 127;
+            var received = new List<StoredTemperature>
+                { new StoredTemperature(Vector3I.Zero, 500f) };
+            long gridId;
+            Assert.Equal(HotTailKind.Unknown, HotTailMessage.TryDecode(message, out gridId, received));
+            Assert.Empty(received);
+        }
+
+        [Fact]
+        public void ClosingOneGridRequestsItsReplacementWithoutForgettingAnotherHull()
+        {
+            var client = new HotTailClientState();
+            Assert.True(client.ShouldAsk(42));
+            Assert.True(client.ShouldAsk(99));
+            client.Answered(42);
+            client.Answered(99);
+
+            client.Forget(42);
+            Assert.Equal(1, client.Tracked);
+            Assert.False(client.HasHull(42));
+            Assert.True(client.ShouldAsk(42));
+            Assert.False(client.ShouldAsk(42));
+            Assert.True(client.HasHull(99));
+            Assert.False(client.ShouldAsk(99));
+            Assert.Equal(2, client.Tracked);
+            Assert.Equal(1, client.Waiting);
+        }
+
 
         [Fact]
 

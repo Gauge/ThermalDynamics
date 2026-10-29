@@ -94,7 +94,7 @@ namespace ThermalPerformance.SurfaceBuildBaseline
                  else
                  { int m=(v0+v1)/2; SplitFace(axis,upper,u0,u1,v0,m,error,list); SplitFace(axis,upper,u0,u1,m,v1,error,list); }
              }
-             else list.Add(new Patch { A=a,B=b=C=c,D=d, Temperatures=new Vector4(ta,tb,tc,td), PreviousTemperatures=new Vector4(ta,tb,tc,td) });
+             else list.Add(new Patch { A=a,B=b,C=c,D=d, Temperatures=new Vector4(ta,tb,tc,td), PreviousTemperatures=new Vector4(ta,tb,tc,td) });
          }
 
          public void PrepareTransition(ThermalVisionSurfaceField previous)

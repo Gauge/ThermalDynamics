@@ -707,18 +707,55 @@ change to the mod's own blocks cannot move a corpus figure**, so a modded featur
 a vanilla walk is running, and a vanilla walk cannot be invalidated by one. The reverse does not
 hold — `A13` was a change to how *vanilla* blocks are read, and it moved the population by 15.76 %.
 
+The small performance-review regressions also cover resumable source accumulation
+(`HeatSourceSliceTests`), coupled contacts and invalidation (`CoupledSliceTests`),
+disabled-mechanism stability (`InactiveConductanceTests`), and sparse topology/shadow/debug
+queries (`SparseGridQueryTests`). Renderer checks cover full-volume budget admission
+(`ThermalVisionFrameBudgetTests`), bounded fleet/cache lifetime (`ThermalVisionAdmissionTests`),
+and shared face-planning scratch (`ThermalVisionSurfaceScratchTests`). Scalar API inputs,
+callback ownership/failure, and batched removed-cue cleanup are covered by
+`ThermalApiInputsTests`, `ThermalThresholdDispatchTests`, and `HeatCueLifetimeTests`.
+`HeatPumpDeviceLookupTests` compares per-pass adapter lookup with the public linear query using
+two same-position block identities, duplicate entries and mutations between passes.
+`ThermalVisionClimateCacheTests` checks sky-climate cache invalidation without a native planet.
+`PersistenceRestoreTests` covers nonfinite stored values and version-aware block anchors
+using one block and one room cell.
+`CoolantApplyTests` compares fused coolant application/mixing with frozen arithmetic on four parcels.
+`NodePreparationFusionTests` compares ordinary preparation with frozen mirror/floor/demand walks on
+four nodes, including direct edits, floor restoration, prewarming and sliced publication.
+`LoopRebuildScratchTests` checks retained loop lookups, self-alias replacement, and frozen spill/reclaim
+arithmetic using two blocks; scratch references must be released after each rebuild.
+Its rotated pipe/target case compares direct sink-port iteration with the public transform oracle.
+`SettingsRevisionTests` checks revision cancellation, consistent block/coolant/room heat-clock scaling,
+and fresh sampling after cancellation with one block, one parcel and one air node.
+`ExposureSkipTests.MaximumBudgetDrainsAPartialSweepWithoutOverflowOrNegativeWork` uses two adjacent
+blocks to check maximum-budget completion, removal between slices and exact work counters.
+`SunShadowReuseTests` checks retained shadow skin across direction, topology and grid-identity changes,
+and releases dormant blocker copies without losing completed sun/wind publication in a two-block case.
+`ThermalOccluderTransformTests` checks mixed-grid shadow motion thresholds and captured blocker
+topology/model identity using three transforms and one block.
+`ThermalVisionRefreshLifecycleTests` disposes a real suspended iterator before changed topology can resume it.
+`ThermalVisionTemperatureDataTests` distinguishes missing samples from bounded over-range heat through
+the one-cell scan, field, palette and exposure path.
+`AppendedNodeEnvironmentTests` keeps cached heat totals and sun/wind publication within the active step's node set.
+`HeatSourceSnapshotTests` checks source-array ownership with two nodes and one source between slices.
+`ExternalTemperatureWriteTests` keeps the publication temperature floor after a one-block radiative
+cooling step receives an external write between slices.
+`ThermalNumericBoundaryTests` uses one zero-emissivity block to check accepted extreme temperatures
+with overshoot clamping off/on and bounded substep counts for extreme demand.
+
 | Subject | Suites |
 | --- | --- |
 | **Block geometry and the grid model** | `FaceTests` `FaceSpanTests` `BoxGeometryTests` `GridMathTests` `CellBitsetTests` `BlockOrientationTests` `BlockOrientationCacheTests` `BlockInstanceTests` `BlockInstanceOneCellTests` `GridModelTests` `GridModelAdjacencyTests` `BlockSurfaceBuilderTests` `Se2LatticeTests` `Se2RefineTests` `ShapeTests` |
-| **Surfaces, rooms and air** | `SurfaceMapTests` `SurfaceMapPackingTests` `RoomMapperTests` `DoorSealingTests` `RoomPortalTests` `IncrementalRoomTests` `RoomMapFreezeTests` `RoomMapSnapshotTests` `RoomMapSolidTests` `RoomSpanFloodTests` `RoomMapCompletionTests` `RoomMapRecyclingTests` `GridOccupancyTests` `RoomCellStorageTests` `RoomAuditTests` `UnmappedRoomTests` `RoomAirTests` `RoomAirCanonicalTests` `RoomAirCouplingTests` `RoomPressureTests` `RoomAirPressureTests` `ExposureAuditTests` `ExposureFastPathTests` `CoarseRoomFloodTests` |
+| **Surfaces, rooms and air** | `SurfaceMapTests` `SurfaceMapPackingTests` `RoomMapperTests` `DoorSealingTests` `RoomPortalTests` `IncrementalRoomTests` `RoomMapFreezeTests` `RoomMapSnapshotTests` `RoomMapSolidTests` `RoomSpanFloodTests` `RoomMapCompletionTests` `RoomMapRecyclingTests` `RoomPagedStorageTests` `GridOccupancyTests` `RoomCellStorageTests` `RoomAuditTests` `UnmappedRoomTests` `RoomAirTests` `RoomAirCanonicalTests` `RoomAirCouplingTests` `RoomPressureTests` `RoomAirPressureTests` `ExposureAuditTests` `ExposureFastPathTests` `CoarseRoomFloodTests` |
 | **Conduction and the integrator** | `ConductionTests` `StabilityTests` `ConductionClampGateTests` `CoupledConductanceCacheTests` `NodeIndexTests` `FacePackingTests` `SubstepDemandTests` `SubstepFloorTests` `SubstepCeilingTests` `SubstepScaleTests` `HeatTimeScaleTests` |
 | **Environment: air, climate, weather** | `EnvironmentSolverTests` `RadiationTests` `ConvectionSolarFrictionTests` `FrictionIsolationTests` `GridFrictionTotalTests` `DragShapeTests` `ShapeNormalGeometryTests` `AerodynamicStripTests` `AeroGeometryTests` `AeroCalibrationTests` `AeroIncidenceTests` `AeroFlightTests` `AeroProfileMassTests` `AeroProfileLabTests` `AeroProfileBuilderTests` `AeroCentreUpdateTests` `AeroRuntimeTests` `AeroProfileApiTests` `AeroPopulationInputTests` `AeroPopulationDragTests` `VoxelCursorTests` `ShapeNormalOneCellTests` `GridCapacityTests` `SurfaceRebuildScratchTests` `RoomAirPoolTests` `WindShieldingCostTests` `WindShieldingTests` `CentreOfPressureTests` `DragProfileTests` `ClimateModelTests` `GroundRoughnessTests` `DayLengthTests` `WeatherAndDepthTests` `UndergroundContactTests` `PlanetThermalTests` `PlanetReferenceTests` `PlanetPropertyMergeTests` `DescentTests` |
-| **Sun, shadow and occlusion** | `SunShadowMapTests` `SolarSelfShadowingTests` `SunLitSliceTests` `SolarOcclusionTests` `SolarOcclusionSamplerTests` `OcclusionLadderTests` `OcclusionMathTests` `SolarSymmetryTests` `GridShadowTests` `TerrainHorizonTests` `SelfShadowScenarioTests` `FaceWeightPairingTests` |
+| **Sun, shadow and occlusion** | `SunShadowMapTests` `SolarSelfShadowingTests` `SunLitSliceTests` `SolarOcclusionTests` `SolarOcclusionSamplerTests` `OcclusionLadderTests` `OcclusionMathTests` `SolarSymmetryTests` `GridShadowTests` `ThermalOccluderTransformTests` `TerrainHorizonTests` `SelfShadowScenarioTests` `FaceWeightPairingTests` |
 | **Wind** | `WindFieldTests` `WindProfileTests` `GradientHeightTests` `WindSlopeTests` `WindTerrainTests` `WindCompassTests` `StormHeatingTests` `WindScenarioTests` `WindSolverContractTests` `WindLabTests` |
 | **Heat sources, damage and thresholds** | `HeatGenerationTests` `OverheatSpillTests` `DamageTests` `CriticalTemperatureTests` `CriticalTemperatureMirrorTests` `OverheatEventTests` `SuitThermalTests` `IncandescenceTests` `HeatWarningTests` `HeatCueScanTests` `ThresholdTests` `HeatSourceTests` `HeatSourceMathTests` `HeatSourceCommandTests` `HeatSourceBlockTests` `CustomHeatSourceTests` `MultiCellAndDamageTests` `ReactorWasteHeatTests` `GridHeatBalanceTests` `HottestNodeTests` `GlowGeometryTests` `HeatGlowStyleTests` `SessionCleanupTests` `ThermalVisionTests` `ThermalVisionTelemetryTests` `ThermalVisionLabTests` `ThermalVisionRegionOrderTests` `ThermalVisionRegionScanTests` `ThermalVisionCelestialTests` `ThermalVisionHudProjectionTests` `ThermalVisionOcclusionTests` |
 | **Coolant loops and heat pumps** | `CoolantFillTests` `CoolantLoopTests` `CoolantDiscoveryTests` `PumpPowerTests` `CoolantFlowTests` `CoolantFaultTests` `HeatLaunderingTests` `PipeFitterTests` `HeatPumpTests` `CoolingScenarioClaimTests` |
-| **What a step costs, and what it must not change** | `LoadTests` `StepBudgetTests` `AllowanceTests` `CapVersusAllowanceTests` `StepWorkUnitTests` `PairedRunTests` `FrankenHullTests` `StepFixedCostTests` `StepPrologueTests` `StepPacingTests` `StepTermsTests` `SpreadStepTests` `StaggerTests` `PaceEquivalenceTests` `SweepSliceTests` `BufferGrowthTests` `IncrementalTopologyTests` `BlockRefreshTests` `CostRollupTests` `SolverReportingTests` `StressFindingsTests` |
-| **Bit-identity: an optimisation against what it replaced** | `PrecomputedEnvironmentTests` `HeatGainHoistTests` `CanonicalLinkOrderTests` `FixedSourceRowTests` `WattsClearFusionTests` `ConductionClampGateTests` `DiagnosticBatchingTests` `ExposureSkipTests` |
+| **What a step costs, and what it must not change** | `LoadTests` `StepBudgetTests` `AllowanceTests` `CapVersusAllowanceTests` `StepWorkUnitTests` `CoupledSliceTests` `PairedRunTests` `FrankenHullTests` `StepFixedCostTests` `StepPrologueTests` `StepPacingTests` `StepTermsTests` `SpreadStepTests` `StaggerTests` `PaceEquivalenceTests` `SweepSliceTests` `BufferGrowthTests` `IncrementalTopologyTests` `BlockRefreshTests` `CostRollupTests` `SolverReportingTests` `StressFindingsTests` |
+| **Bit-identity: an optimisation against what it replaced** | `PrecomputedEnvironmentTests` `HeatGainHoistTests` `CanonicalLinkOrderTests` `FixedSourceRowTests` `WattsClearFusionTests` `ConductionClampGateTests` `DiagnosticBatchingTests` `ExposureSkipTests` `CoreHotPathTests` `NodePreparationFusionTests` |
 | **Settings, storage and definitions** | `DialReachTests` `SettingsDialReachTests` `LoopDialReachTests` `PlanetDialReachTests` `BlockDialReachTests` `LoopBeforeTests` `LoopCoolantMassTests` `CellSizeTests` `DesignedHullTests` `SettingsTests` `SettingsDefaultsTests` `SettingsWiringTests` `ShippedIdentityTests` `ValidationReportingTests` `StorageCodecTests` `SchedulerTests` `DefinitionTests` `DefinitionFileTests` `ShippedDefinitionTests` `AuthoredMaterialTests` `AuthoredWasteTests` `BlockDerivationTests` `SolarAbsorptivityTests` `SelectiveSurfaceTests` `MaterialOverrideTests` `FeatureToggleTests` `DefaultSettingsTests` `ProfileSuiteTests` `ProfileClockTests` `WorldSettingsTests` |
 | **Readouts a player sees** | `TemperatureScaleTests` `UnitsTests` |
 | **Telemetry, reports and overlays** | `RunningStatTests` `HistogramTests` `TimingStatTests` `TelemetryFormatTests` `TelemetryAnomalyTests` `SampleGateTests` `GridHealthTests` `AnomalyRegistryTests` `FrameCostTests` `FramePacingTests` `StepPhaseTests` `ProfilerTests` `RescanGateTests` `OverlayBudgetTests` `PerformanceReportTests` `BenchmarkBaselineTests` `OptimisedBuildTests` `CensusBoltTests` `StageLabTests` `FirstStepLabTests` `RemapLocalityLabTests` `NodeActivityLabTests` `EnvironmentWalkLabTests` `StepWalksLabTests` `HeatSourceWalkLabTests` `SampleStatisticTests` `StepPhaseLabTests` `LinkSpanProbe` `ProjectFileTests` `EnvironmentReadoutTests` |
@@ -756,6 +793,8 @@ counterexample. These are not native GPU or thermal-coverage acceptance tests.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Add a two-identity heat-pump adapter lookup comparison against the public linear query, including duplicate and replaced entries and value-equal subclasses. |
+| 2026-10-28 | Index four-block frozen-reference stability and coolant hot-path tests, including modulo bounds and uninitialized public loops; add tiny sparse-room page/reset/dense-parity tests and a one-unit startup-allocation check; cover coupled contact/scratch slicing, diagnostic reset ordering and supported-method invalidation with four-block fixtures. Add four-pipe legacy discovery parity across mutable port order, duplicates, opening and repair. |
 | 2026-10-13 | Add frozen-baseline coolant discovery parity checks and linear-allocation regressions for open chains and broken rings. |
 | 2026-10-08 | Explicitly distinguish dated lane measurements from current validation totals. |
 | 2026-10-01 | Separate production Core from explicit historical fixtures; preserve the read-only integration lane. |

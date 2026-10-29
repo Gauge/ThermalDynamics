@@ -153,11 +153,22 @@ namespace Thermodynamics.Presentation
             IList<BoundingBoxD> blockers,out int hiddenSubtrees)
         {
             if(result==null || frustum==null)throw new ArgumentException("Output and local frustum required");
-            hiddenSubtrees=0;result.Clear();VisitVisible(root,eye,result,frustum,false,blockers,ref hiddenSubtrees);
+            // Preserve the original unlimited traversal for existing callers.
+            int remainingOcclusionTests=-1;
+            hiddenSubtrees=0;result.Clear();VisitVisible(root,eye,result,frustum,false,blockers,ref remainingOcclusionTests,ref hiddenSubtrees);
+        }
+
+        /// <summary>Shares an occlusion-test budget across trees; exhaustion keeps all frustum-visible geometry.</summary>
+        public void WriteVisibleNearToFar(Vector3D eye,List<Region> result,BoundingFrustumD frustum,
+            IList<BoundingBoxD> blockers,ref int remainingOcclusionTests,out int hiddenSubtrees)
+        {
+            if(result==null || frustum==null)throw new ArgumentException("Output and local frustum required");
+            if(remainingOcclusionTests<0) remainingOcclusionTests=0;
+            hiddenSubtrees=0;result.Clear();VisitVisible(root,eye,result,frustum,false,blockers,ref remainingOcclusionTests,ref hiddenSubtrees);
         }
 
         private static void VisitVisible(Node node,Vector3D eye,List<Region> result,BoundingFrustumD frustum,bool inside,
-            IList<BoundingBoxD> blockers,ref int hiddenSubtrees)
+            IList<BoundingBoxD> blockers,ref int remainingOcclusionTests,ref int hiddenSubtrees)
         {
             if(node==null) return;
             if(!inside)
@@ -166,13 +177,16 @@ namespace Thermodynamics.Presentation
                 if(relation==ContainmentType.Disjoint) return;
                 inside=relation==ContainmentType.Contains;
             }
-            if(blockers!=null)for(int i=0;i<blockers.Count;i++)
+            if(blockers!=null)for(int i=0;i<blockers.Count && remainingOcclusionTests!=0;i++)
+            {
+                if(remainingOcclusionTests>0) remainingOcclusionTests--;
                 if(ThermalVisionOcclusion.HiddenLocal(eye,node.Bounds,blockers[i]))
                 { hiddenSubtrees++; return; }
+            }
             if(node.Low==null && node.High==null) { result.Add(node.Value); return; }
             bool lowFirst=Coordinate(eye,node.Axis)<=node.Plane;
-            VisitVisible(lowFirst?node.Low:node.High,eye,result,frustum,inside,blockers,ref hiddenSubtrees);
-            VisitVisible(lowFirst?node.High:node.Low,eye,result,frustum,inside,blockers,ref hiddenSubtrees);
+            VisitVisible(lowFirst?node.Low:node.High,eye,result,frustum,inside,blockers,ref remainingOcclusionTests,ref hiddenSubtrees);
+            VisitVisible(lowFirst?node.High:node.Low,eye,result,frustum,inside,blockers,ref remainingOcclusionTests,ref hiddenSubtrees);
         }
 
 

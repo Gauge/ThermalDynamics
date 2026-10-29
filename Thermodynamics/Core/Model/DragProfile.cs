@@ -21,6 +21,16 @@ namespace Thermodynamics.Core
             return new DragProfile(Clamp(a), Clamp(b), Clamp(c), Clamp(d), Clamp(e), Clamp(f));
         }
 
+        /// <summary>Compare exported face multipliers, including an unset profile's unit weights.</summary>
+        public bool HasSameWeights(DragProfile other)
+        {
+            for (int face = 0; face < 6; face++)
+            {
+                if (this[face] != other[face]) return false;
+            }
+            return true;
+        }
+
         public float this[int face]
         {
             get

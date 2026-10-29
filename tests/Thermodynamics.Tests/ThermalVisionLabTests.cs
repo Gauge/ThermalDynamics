@@ -115,6 +115,19 @@ namespace Thermodynamics.Tests
         }
 
         [Fact]
+        public void EmptyNearCapMayReturnTheOtherScratchBufferWhileItsVolumeRemainsVisible()
+        {
+            var region=new ThermalVisionRegionPartition.Region(new Vector3D(.2,-1,-2),new Vector3D(1,1,.1),600);
+            var projection=MatrixD.CreatePerspectiveFieldOfView(Math.PI/2,1,.05,100);
+            Assert.NotEqual(ContainmentType.Disjoint,new BoundingFrustumD(projection).Contains(new BoundingBoxD(region.Min,region.Max)));
+            var polygon=new List<Vector3D>(16); var scratch=new List<Vector3D>(16);
+            var cap=ThermalVisionRegionPartition.NearCap(region,MatrixD.Identity,projection,.05,polygon,scratch);
+            // The first clipping plane rejects the whole near viewport. A coarse
+            // fallback must use the returned cap, not polygon's old rectangle.
+            Assert.Same(scratch,cap); Assert.Empty(cap); Assert.Equal(4,polygon.Count);
+        }
+
+        [Fact]
 
         public void NearCapScratchBuffersDoNotLeakPreviousPolygonsOrAllocateAfterWarmup()
         {

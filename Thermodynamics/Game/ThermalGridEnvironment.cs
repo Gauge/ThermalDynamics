@@ -44,6 +44,7 @@ namespace Thermodynamics
         {
             PlanetProperties.Clear();
             OverlapResults.Clear();
+            OccluderScratch.Clear();
             sunDirectionFrame = -1;
 
             Day.Reset();
@@ -67,12 +68,15 @@ namespace Thermodynamics
             SamplePlanet(ref sample, ref position, planet);
             SampleWind(ref sample, ref position, ref worldToLocal, planet);
             bool buried = sample.IsUnderground || sample.Depth > 0f;
+            // A skipped ray pass must not reuse the previous sample's "tested" flag.
+            occlusionTested = false;
             sample.SolarOcclusion = buried ? 1f : SolarOcclusion(ref position, ref sample);
             sample.IsSolarOccluded = sample.SolarOcclusion >= 1f;
 
-            if (occlusionTested) RefreshShadowOccluders(ref position, ref sample);
+            RefreshShadowOccluders(ref position, ref sample);
 
-            sample.HeatSourceCount = ThermalHeatSources.Sample(position, ref worldToLocal, ref heatSourceBuffer);
+            sample.HeatSourceCount = Simulation.Settings.EnableHeatSources
+                ? ThermalHeatSources.Sample(position, ref worldToLocal, ref heatSourceBuffer) : 0;
             sample.HeatSources = heatSourceBuffer;
 
             LastSample = sample;
@@ -372,7 +376,8 @@ namespace Thermodynamics
                 return;
             }
 
-            float ceiling = planet.Entity.GetWindSpeed(position);
+            Settings settings = Settings.Instance;
+            float ceiling = settings.EnableWind ? planet.Entity.GetWindSpeed(position) : 0f;
 
             float weather = sample.WeatherIntensity;
             float weatherWind = WeatherResponse.Soften(sample.Weather, weather).WindMultiplier;
@@ -387,11 +392,9 @@ namespace Thermodynamics
                 windHeating, sunSine, TickSeconds,
                 Simulation.Planet.LagSecondsFor(Day.Known ? Day.Seconds : 0f));
 
-            Settings settings = Settings.Instance;
-
             WindSolver.Inputs inputs = new WindSolver.Inputs();
 
-            inputs.Ceiling = settings.EnableWind ? ceiling : 0f;
+            inputs.Ceiling = ceiling;
             inputs.Up = up;
             inputs.Axis = axis;
             inputs.WeatherIntensity = weather;
@@ -579,65 +582,72 @@ namespace Thermodynamics
             LineD line = new LineD(position, position + ((Vector3D)sample.SunDirection * 15000000d));
 
             OverlapResults.Clear();
-            MyGamePruningStructure.GetTopmostEntitiesOverlappingRay(ref line, OverlapResults);
-
-            bool occluded = false;
-
-            for (int i = 0; i < OverlapResults.Count && !occluded; i++)
+            try
             {
-                MyEntity entity = OverlapResults[i].Element;
+                MyGamePruningStructure.GetTopmostEntitiesOverlappingRay(ref line, OverlapResults);
 
-                MyPlanet planet = entity as MyPlanet;
-                if (planet != null)
+                bool occluded = false;
+
+                for (int i = 0; i < OverlapResults.Count && !occluded; i++)
                 {
-                    if (settings.SolarOcclusionPlanets)
-                    {
-                        occluded = OcclusionMath.IsOccludedBySphere(
-                            position,
-                            planet.PositionComp.WorldMatrixRef.Translation,
-                            planet.AverageRadius,
-                            sample.SunDirection);
+                    MyEntity entity = OverlapResults[i].Element;
 
-                        if (occluded) continue;
+                    MyPlanet planet = entity as MyPlanet;
+                    if (planet != null)
+                    {
+                        if (settings.SolarOcclusionPlanets)
+                        {
+                            occluded = OcclusionMath.IsOccludedBySphere(
+                                position,
+                                planet.PositionComp.WorldMatrixRef.Translation,
+                                planet.AverageRadius,
+                                sample.SunDirection);
+
+                            if (occluded) continue;
+                        }
+
+                        occluded = TerrainOccluded(planet, ref position, ref sample);
+                        continue;
                     }
 
-                    occluded = TerrainOccluded(planet, ref position, ref sample);
-                    continue;
+                    MyVoxelBase voxel = entity as MyVoxelBase;
+                    if (voxel != null)
+                    {
+                        if (!settings.SolarOcclusionVoxels) continue;
+                        if (voxel.RootVoxel is MyPlanet) continue;
+
+                        LineD segment;
+                        voxel.PositionComp.WorldAABB.Intersect(ref line, out segment);
+
+                        IHitInfo hit;
+                        MyAPIGateway.Physics.CastRay(segment.From, segment.To, out hit, 28);
+                        occluded = hit != null;
+                        continue;
+                    }
+
+                    MyCubeGrid other = entity as MyCubeGrid;
+                    if (other != null && other.Physics != null && other.EntityId != Grid.EntityId)
+                    {
+                        if (settings.SolarGridShadows != (int)GridShadowMode.Basic) continue;
+
+                        LineD segment;
+                        other.PositionComp.WorldAABB.Intersect(ref line, out segment);
+                        occluded = other.RayCastBlocks(segment.From, segment.To).HasValue;
+                    }
                 }
 
-                MyVoxelBase voxel = entity as MyVoxelBase;
-                if (voxel != null)
+                if (settings.DebugSolarRaycast && !MyAPIGateway.Utilities.IsDedicated)
                 {
-                    if (!settings.SolarOcclusionVoxels) continue;
-                    if (voxel.RootVoxel is MyPlanet) continue;
-
-                    LineD segment;
-                    voxel.PositionComp.WorldAABB.Intersect(ref line, out segment);
-
-                    IHitInfo hit;
-                    MyAPIGateway.Physics.CastRay(segment.From, segment.To, out hit, 28);
-                    occluded = hit != null;
-                    continue;
+                    Vector4 color = (occluded ? Color.Red : Color.White).ToVector4();
+                    MySimpleObjectDraw.DrawLine(line.From, line.To, MyStringId.GetOrCompute("Square"), ref color, 0.1f);
                 }
 
-                MyCubeGrid other = entity as MyCubeGrid;
-                if (other != null && other.Physics != null && other.EntityId != Grid.EntityId)
-                {
-                    if (settings.SolarGridShadows != (int)GridShadowMode.Basic) continue;
-
-                    LineD segment;
-                    other.PositionComp.WorldAABB.Intersect(ref line, out segment);
-                    occluded = other.RayCastBlocks(segment.From, segment.To).HasValue;
-                }
+                return occluded;
             }
-
-            if (settings.DebugSolarRaycast && !MyAPIGateway.Utilities.IsDedicated)
+            finally
             {
-                Vector4 color = (occluded ? Color.Red : Color.White).ToVector4();
-                MySimpleObjectDraw.DrawLine(line.From, line.To, MyStringId.GetOrCompute("Square"), ref color, 0.1f);
+                OverlapResults.Clear();
             }
-
-            return occluded;
         }
 
         private static readonly List<Vector3D> SamplePoints = new List<Vector3D>();
@@ -654,6 +664,7 @@ namespace Thermodynamics
 
             if (!wanted)
             {
+                shadowOccluderVersions.Clear();
                 if (occluders.Count > 0)
                 {
                     occluders.Clear();
@@ -662,66 +673,79 @@ namespace Thermodynamics
                 return;
             }
 
+            // Clearing disabled caches is independent of the expensive native query cadence.
+            if (!occlusionTested) return;
+
             OccluderScratch.Clear();
 
-            LineD line = new LineD(position, position + ((Vector3D)sample.SunDirection * ShadowOccluderRange));
-
-            OverlapResults.Clear();
-            MyGamePruningStructure.GetTopmostEntitiesOverlappingRay(ref line, OverlapResults);
-
-            double shadedSize = Grid.GridSize;
-            MatrixD cellsToWorld = MatrixD.CreateScale(shadedSize) * Grid.WorldMatrix;
-
-            for (int i = 0; i < OverlapResults.Count; i++)
+            try
             {
-                MyCubeGrid other = OverlapResults[i].Element as MyCubeGrid;
-                if (other == null || other.Closed || other.EntityId == Grid.EntityId) continue;
-                if (other.GameLogic == null) continue;
+                LineD line = new LineD(position, position + ((Vector3D)sample.SunDirection * ShadowOccluderRange));
 
-                ThermalGrid thermals = other.GameLogic.GetAs<ThermalGrid>();
-                if (thermals == null || thermals.Simulation == null) continue;
+                OverlapResults.Clear();
+                MyGamePruningStructure.GetTopmostEntitiesOverlappingRay(ref line, OverlapResults);
 
-                MatrixD toOccluder = cellsToWorld
-                    * other.PositionComp.WorldMatrixNormalizedInv
-                    * MatrixD.CreateScale(1d / other.GridSize);
+                double shadedSize = Grid.GridSize;
+                MatrixD cellsToWorld = MatrixD.CreateScale(shadedSize) * Grid.WorldMatrix;
 
-                OccluderScratch.Add(new SunShadowMap.Occluder
+                for (int i = 0; i < OverlapResults.Count; i++)
                 {
-                    Model = thermals.Simulation.Grid,
-                    ToOccluder = toOccluder,
-                    Id = other.EntityId,
-                });
+                    MyCubeGrid other = OverlapResults[i].Element as MyCubeGrid;
+                    if (other == null || other.Closed || other.EntityId == Grid.EntityId) continue;
+                    if (other.GameLogic == null) continue;
+
+                    ThermalGrid thermals = other.GameLogic.GetAs<ThermalGrid>();
+                    if (thermals == null || thermals.Simulation == null) continue;
+
+                    MatrixD toOccluder = cellsToWorld
+                        * other.PositionComp.WorldMatrixNormalizedInv
+                        * MatrixD.CreateScale(1d / other.GridSize);
+
+                    OccluderScratch.Add(new SunShadowMap.Occluder
+                    {
+                        Model = thermals.Simulation.Grid,
+                        ToOccluder = toOccluder,
+                        Id = other.EntityId,
+                    });
+                }
+
+                if (!OccludersMoved(occluders, OccluderScratch)) return;
+
+                occluders.Clear();
+                shadowOccluderVersions.Clear();
+                for (int i = 0; i < OccluderScratch.Count; i++)
+                {
+                    SunShadowMap.Occluder occluder = OccluderScratch[i];
+                    occluders.Add(occluder);
+                    shadowOccluderVersions.Add(occluder.Model.Version);
+                }
+
+                Simulation.Solver.MarkSunOccludersChanged();
             }
-
-            if (!OccludersMoved(occluders, OccluderScratch)) return;
-
-            occluders.Clear();
-            for (int i = 0; i < OccluderScratch.Count; i++) occluders.Add(OccluderScratch[i]);
-
-            Simulation.Solver.MarkSunOccludersChanged();
+            finally
+            {
+                OverlapResults.Clear();
+                OccluderScratch.Clear();
+            }
         }
 
-        private static bool OccludersMoved(
+        private bool OccludersMoved(
             List<SunShadowMap.Occluder> current, List<SunShadowMap.Occluder> fresh)
         {
-            if (current.Count != fresh.Count) return true;
+            if (current.Count != fresh.Count || current.Count != shadowOccluderVersions.Count) return true;
 
             for (int i = 0; i < current.Count; i++)
             {
-                if (current[i].Id != fresh[i].Id) return true;
-
-                MatrixD was = current[i].ToOccluder;
-                MatrixD now = fresh[i].ToOccluder;
-
-                if (Vector3D.DistanceSquared(was.Translation, now.Translation) > 1d) return true;
-                if (Vector3D.Dot(was.Forward, now.Forward) < 0.9994d) return true;
-                if (Vector3D.Dot(was.Up, now.Up) < 0.9994d) return true;
+                if (ThermalOccluderTransform.Changed(current[i], shadowOccluderVersions[i], fresh[i])) return true;
             }
 
             return false;
         }
 
         private const double ShadowOccluderRange = 5000d;
+
+        // Model is a live reference; its version must be captured when the cache is published.
+        private readonly List<int> shadowOccluderVersions = new List<int>();
 
         private static readonly List<SunShadowMap.Occluder> OccluderScratch =
             new List<SunShadowMap.Occluder>();

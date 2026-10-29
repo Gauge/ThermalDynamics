@@ -120,6 +120,7 @@ temperatures, overheat events and threshold crossings.
 | [Game/ThermalCoolantShapes.cs](../Thermodynamics/Game/ThermalCoolantShapes.cs) | static | Subtype → coolant plumbing. |
 | [Game/ThermalHeatPumpShapes.cs](../Thermodynamics/Game/ThermalHeatPumpShapes.cs) | static | Subtype → heat-pump faces and ratings. |
 | [Game/ThermalHeatPumpBlock.cs](../Thermodynamics/Game/ThermalHeatPumpBlock.cs) | `MyGameLogicComponent` | The electrical half of a heat pump: the resource sink it draws through, and the switch that runs it. |
+| [Game/HeatPumpDeviceLookup.cs](../Thermodynamics/Game/HeatPumpDeviceLookup.cs) | static | Reuses a per-pass identity lookup for electrical input and demand publication, avoiding a device-list scan per native pump. |
 | [Game/ThermalBridges.cs](../Thermodynamics/Game/ThermalBridges.cs) | static | Conduction across a rotor or piston, between two grids. |
 | [Game/ThermalHeatSources.cs](../Thermodynamics/Game/ThermalHeatSources.cs) | static | Registered point heat sources, and their irradiance at a grid. |
 | [Game/ThermalGridScheduler.cs](../Thermodynamics/Game/ThermalGridScheduler.cs) | static | Gives every grid its share of every frame, so a step is spread rather than landed whole. |
@@ -215,6 +216,10 @@ it leaves the room map complete before the first step rather than after it.
 
 Blocks whose definition sets `ExcludeFromSimulation` never become nodes.
 
+Queued overheat damage and threshold callbacks verify the original `BlockInstance` before delivery.
+If another callback replaces a block at the same cell, its replacement does not receive the removed
+block's queued damage or threshold crossing.
+
 A block only tells the simulation something when it changes: power, thrust, door state and
 attachment are all events. Mass is the exception — the game raises nothing a mod can hook for build
 progress or damage — so it is swept every eight steps, alongside room pressure.
@@ -224,6 +229,13 @@ progress or damage — so it is swept every eight steps, alongside room pressure
 [Game/ThermalGridStorage.cs](../Thermodynamics/Game/ThermalGridStorage.cs) writes one
 base64 blob into the grid's `MyModStorageComponent`, under the GUID registered in
 [EntityComponents.sbc](../Thermodynamics/Content/Data/EntityComponents.sbc). `IsSerialized()` triggers the save.
+Saving starts only after `UpdateOnceBeforeFrame` has added existing blocks, rebuilt the simulation
+and loaded their stored temperatures. If native serialization runs earlier, the existing blob is
+left intact instead of being replaced by an uninitialised simulation's empty state.
+The installed engine permits this ordering: `MyEntities.CreateFromObjectBuilder` completes `Init`
+before returning, while the first-frame callback is dispatched separately. An immediate
+`GetObjectBuilder` call, including from an entity-added callback, serializes the component container
+and calls `IsSerialized` before storage is copied into the object builder.
 
 The codec's v2 format carries block, loop and room air temperatures, keyed by 64-bit position, by
 the loop's own signature rather than by its index, and by the room's anchor cell — so a rebuilt loop
@@ -231,12 +243,21 @@ keeps its heat and distant blocks cannot alias. It reads v1, so old saves load, 
 adding a section rather than by changing its marker, so a save written now still loads on a build
 that predates the section.
 
+Current block and held-coolant records match the block's minimum cell exactly, so a removed block's
+record cannot attach to the interior of a larger replacement. Legacy block records keep their
+occupying-cell lookup: the original writer used `SlimBlock.Position`, which can differ from `Min`
+on rotated or multicell blocks. Neither format identifies a replacement at the same saved anchor.
+Nonfinite temperature, fill and held-capacity records are skipped while valid records still load;
+finite values retain their existing clamps. Direct room-temperature restoration applies the same
+finite check. The save layout and public codec overloads are unchanged.
+
 Room air loads onto rooms the map already holds, which is why `UpdateOnceBeforeFrame` runs
 `RebuildAll` before `Load`. The restored air is marked initialised: pressurisation arrives later,
 from the vent sweep, and filling a room for the first time is what would otherwise take its
 temperature from the walls. Air that was never filled is not written at all — its figure is a
-placeholder rather than a measurement — and a room whose shape changed while the world was closed
-has a different anchor, so it starts from its surfaces exactly as it would have done mid-session.
+placeholder rather than a measurement. A room with a different anchor starts from its surfaces.
+The format stores only the anchor, so a changed room that retains its lowest cell can still inherit
+the saved temperature; the anchor is not a full room-shape identity.
 
 ## Definition loading
 
@@ -282,6 +303,10 @@ pumps `ThermalSimulation` — which is exactly what the test harness does.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Resolve heat-pump bindings once per adapter pass with exact reference identity and cleared scratch ownership; keep the public mutable Core query unchanged. |
+| 2026-10-28 | Validate original block identity before applying queued overheat damage, matching threshold callback ownership. |
+| 2026-10-28 | Skip nonfinite persistence records, enforce exact current-format block anchors while retaining legacy reference-cell restores, and document the anchor-only room identity limit. |
+| 2026-10-28 | Preserve stored temperatures when native serialization precedes initial block loading. |
 | 2026-10-01 | Map session, settings, solver, telemetry and thermal-vision responsibilities after the refactor. |
 | 2026-10-01 | State production, test-fixture and external-provider ownership separately. |
 | 2026-09-19 | Grouped SE1 thermal vision under Game, split heat lookup from surface preparation, and removed the performance tool's unused model reference. |

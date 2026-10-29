@@ -62,6 +62,47 @@ bounded by one shared remaining budget; light creation checks the live dictionar
 unload. At saturation, departing lights are retired after traversal, so a new light can wait one
 frame for its slot. These lifecycle statements are code inspection, not executed engine tests.
 
+Grid and block frustum checks include the expanded halo rather than only the physical block bounds.
+Ordinary heat quads and lights are suspended while an eligible full thermal view replaces the scene;
+they resume when that view is off, suppressed by UI or reports a rendering failure. Nearby lights
+remain eligible outside the camera frustum during ordinary vision because they can illuminate
+surfaces inside it. Exposed-face masks and world centres remain live reads so doors, moving grids
+and removed blocks do not retain cached world geometry.
+
+The existing cue interval invalidates cached block bindings, half extents, bounding radii, linear
+colours and the single light region. The surface cache rebuilds only when a visible grid needs it,
+and the region only when a nearby grid needs a light. The existing grid bounding sphere supplies
+a conservative camera-distance lower bound: at 320 m or beyond, even the capped 120 m light
+cannot reach its 200 m viewing range. Those grids skip light-region reduction, and any previous
+light retires immediately, preserving its slot for later grids; their surface cues still use
+the 2,000 m range.
+The region centre is a positive-weight average of block anchors inside the grid bounds, so this
+early rejection cannot discard an otherwise eligible light. Grids outside draw range do not
+prepare these caches. Frame drawing reuses them and transforms the six face bases once per grid.
+The installed MyLight properties already mark changed positions and properties dirty; the draw
+path does not force a render update for unchanged lights.
+
+Removing a hot block invalidates its cue immediately. Multiple removals before the next draw are
+compacted together in one linear pass, preserving surviving cue order. Light-region reduction and
+lazy surface binding both use that pruned snapshot, so a replacement at the same cell cannot
+inherit the removed block's cached visual. A new cue pass may light the replacement normally.
+
+Emissive reconciliation uses reusable position sets. HeatGlow off clears emissives even when
+warning sounds remain enabled. Cooling restores the block's working, disabled or damaged preset
+according to its current state, rather than always selecting working. Grid close clears its cues,
+and session unload clears remaining cues and stops/releases the shared warning sound emitter.
+
+These changes have deterministic work-count evidence, not native timing evidence. With n existing
+glowing positions also present once in the cue list, the old reconciliation made n(n+1)/2 position
+comparisons: eight positions required 36 comparisons. The replacement uses eight set membership
+probes plus eight insertions, with expected linear scaling. For an unchanged list of n hot blocks
+over F nearby draws, region reduction changes from 2nF list visits to 2n; surface colour conversion
+and block lookup similarly move from each visited frame to each demanded cue snapshot. Face bases
+require 18 transforms per drawn grid. The old path transformed each exposed normal and, for a
+visible face, two tangents. These counts exclude engine submission, set collision costs and GPU work.
+For a cue snapshot on a grid rejected by the 320 m light bound, region reduction makes zero hot-cue
+visits instead of 2n. The bound reuses the distance already calculated for surface-range rejection.
+
 ## References and evidence
 
 * [WeaponCore-StarCore](https://github.com/StarCoreSE/WeaponCore-StarCore), inspected at
@@ -85,11 +126,27 @@ curved meshes, holes, deformation or animated subparts. Soft borders and grazing
 box silhouette but do not create mesh emissivity. Adjacent patches can overlap. A shadowless light
 can leak through walls and a single grid light cannot represent disconnected hotspots accurately.
 Submission/light limits can omit geometry or lights; grid iteration order is not a nearest-first
-sort. These caps do not bound CPU scans: nearby lit-block traversal and light-region reduction
-remain linear in the available cue lists. The 1.12 halo scale expands quad area by 25.44% relative
+sort. These caps do not bound every CPU scan: visible lit-block traversal remains linear in the
+available cue lists, and cache rebuilding is linear when demanded after a cue update. Cache storage
+also scales with hot blocks on grids previously drawn. The 1.12 halo scale expands quad area by 25.44% relative
 to the former face fill, so equal submission count does not imply equal GPU cost. There is one
 texture sample per fragment and no added billboard layer, but only a paired game measurement can
 establish the resulting frame-time change.
+
+Generic emissive writes affect the existing Emissive and Display material names, including their
+subparts, as confirmed in the installed MyCubeBlock implementation. They cannot add emissive
+materials to arbitrary armour and can temporarily replace functional indicator colours on hot
+blocks. Preset restoration respects working state but cannot restore arbitrary material changes
+owned by another mod. The depth-tested surface cue supplies the common armour path; no new mesh
+assets or shadow-casting lights are required.
+
+The 2026-10-28 API inspection reads the installed Sandbox.Game.dll types MyCubeBlock, MyLight and
+MyEntity3DSoundEmitter, and the IMyCamera sphere-frustum signatures in VRage.Game.xml. The inspected
+Sandbox.Game.dll SHA-256 is
+`de04e9162bcf87fc07cec377213d99533bcfe1c34c9e1e2231168144c9d67edf`.
+The two small CullSphereIncludesEveryExpandedFaceCorner cases cover a small cube and a multi-cell
+large-grid block. They verify geometric culling coverage only; native emissive restoration,
+sound cleanup, thermal-view transitions and frame cost still require a game session.
 
 ## Live visibility failure and colour-path correction
 
@@ -192,6 +249,8 @@ by this offline result.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Prune removed hot blocks before lazy surface/light preparation, batching removal bursts into one stable pass and releasing cleared cue references. |
+| 2026-10-28 | Cache cue-derived render data on demand; remove quadratic emissive reconciliation and forced light messages; add conservative frustum culling, thermal-view suppression and cue cleanup; record operation-count evidence and native validation limits. |
 | 2026-09-20 | Record the user's failed visibility observation; correct sRGB ramp scaling, add HDR emission and live submission diagnostics. |
 | 2026-09-20 | Document the implemented profile, integration, reproducible checks and live-game verification gap. |
 | 2026-09-20 | Record reference findings, scope, limits and acceptance criteria before implementation. |

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Thermodynamics.Core;
+using Thermodynamics.Presentation;
 using VRage.Game.ModAPI;
 using VRage.Utils;
 using VRageMath;
@@ -22,13 +23,83 @@ namespace Thermodynamics
         private readonly HeatCueState cueState = new HeatCueState();
         private readonly List<HeatCue> cues = new List<HeatCue>();
 
-        private readonly Dictionary<Vector3I, float> glowing = new Dictionary<Vector3I, float>();
+        private readonly HashSet<Vector3I> glowing = new HashSet<Vector3I>(Vector3I.Comparer);
+        private readonly HashSet<Vector3I> cuedGlow = new HashSet<Vector3I>(Vector3I.Comparer);
 
         private readonly List<LitBlock> litBlocks = new List<LitBlock>();
 
+        internal struct GlowSurface
+        {
+            public ThermalBlock Bound;
+            public Vector3 Half;
+            public Vector4 Emission;
+            public double Radius;
+        }
+
+        private readonly List<GlowSurface> glowSurfaces = new List<GlowSurface>();
+        private GlowRegion glowRegion;
+        private bool glowSurfacesDirty, glowRegionDirty, glowPrunePending;
+
+        internal List<GlowSurface> GlowSurfaces
+        {
+            get
+            {
+                PruneRemovedGlow();
+                if (glowSurfacesDirty) PrepareGlowSurfaces();
+                return glowSurfaces;
+            }
+        }
+
+        internal bool TryGetGlowRegion(out GlowRegion region)
+        {
+            PruneRemovedGlow();
+            if (glowRegionDirty)
+            {
+                GlowRegion.Reduce(litBlocks, out glowRegion);
+                glowRegionDirty = false;
+            }
+            region = glowRegion;
+            return region.Glow > 0f;
+        }
+
+        private void PrepareGlowSurfaces()
+        {
+            glowSurfaces.Clear();
+            for (int i = 0; i < litBlocks.Count; i++)
+            {
+                LitBlock lit = litBlocks[i];
+                ThermalBlock bound = Get(lit.Position);
+                if (bound == null || bound.Block == null) continue;
+                Vector3 half = FaceQuad.HalfExtents(bound.Block.Min, bound.Block.Max, Grid.GridSize);
+                glowSurfaces.Add(new GlowSurface
+                {
+                    Bound = bound,
+                    Half = half,
+                    Emission = HeatGlowStyle.LinearEmission(Incandescence.Colour(lit.Kelvin), lit.Glow),
+                    Radius = HeatGlowStyle.CullRadius(half, Grid.GridSize),
+                });
+            }
+            glowSurfacesDirty = false;
+        }
+
         public IList<LitBlock> LitBlocks
         {
-            get { return litBlocks; }
+            get { PruneRemovedGlow(); return litBlocks; }
+        }
+
+        private void ForgetGlow(Vector3I position)
+        {
+            if (glowing.Contains(position)) Fade(position);
+            if (!cuedGlow.Remove(position)) return;
+            glowPrunePending = glowSurfacesDirty = glowRegionDirty = true;
+        }
+
+        private void PruneRemovedGlow()
+        {
+            if (!glowPrunePending) return;
+            HeatCueLifetimes.Prune(litBlocks, cuedGlow);
+            glowSurfaces.Clear();
+            glowPrunePending = false;
         }
 
         private readonly List<Vector3I> faded = new List<Vector3I>();
@@ -37,6 +108,20 @@ namespace Thermodynamics
         private float secondsSinceCues;
 
         private static MyEntity3DSoundEmitter cueEmitter;
+
+        public static void ResetCues()
+        {
+            for (int i = 0; i < Live.Count; i++)
+            {
+                Live[i].ClearGlow();
+                Live[i].cueState.Clear();
+            }
+            if (cueEmitter == null) return;
+            MyEntity3DSoundEmitter emitter = cueEmitter;
+            cueEmitter = null;
+            emitter.StopSound(true, true, true);
+            emitter.Entity = null;
+        }
 
         private void UpdateCues(int steps, float seconds)
         {
@@ -59,7 +144,12 @@ namespace Thermodynamics
                 return;
             }
 
+            if (!glow) ClearGlow();
             litBlocks.Clear();
+            glowSurfaces.Clear();
+            cuedGlow.Clear();
+            glowPrunePending = false;
+            glowSurfacesDirty = glowRegionDirty = glow;
 
             ThermalNode hottest = HottestNode;
             if (hottest == null || hottest.Temperature < Simulation.Solver.CueFloorTemperature())
@@ -81,19 +171,22 @@ namespace Thermodynamics
                 if (audible && cue.Announce) Announce(cue);
             }
 
-            if (glow) FadeBlocksNoLongerCued();
+            if (glow)
+            {
+                FadeBlocksNoLongerCued();
+            }
         }
 
         private void ApplyGlow(HeatCue cue)
         {
             float glow = cue.Glow;
-            float written;
-
             if (glow <= 0f)
             {
-                if (glowing.TryGetValue(cue.Block.Position, out written)) Fade(cue.Block.Position);
+                if (glowing.Contains(cue.Block.Position)) Fade(cue.Block.Position);
                 return;
             }
+
+            cuedGlow.Add(cue.Block.Position);
 
             LitBlock lit = new LitBlock();
             lit.Position = cue.Block.Position;
@@ -108,7 +201,7 @@ namespace Thermodynamics
             Color emissive = new Color(colour * glow);
 
             if (!Emit(cube, glow, emissive)) return;
-            glowing[cue.Block.Position] = glow;
+            glowing.Add(cue.Block.Position);
         }
 
         private void Announce(HeatCue cue)
@@ -143,17 +236,9 @@ namespace Thermodynamics
             if (glowing.Count == 0) return;
 
             faded.Clear();
-            foreach (KeyValuePair<Vector3I, float> entry in glowing)
+            foreach (Vector3I position in glowing)
             {
-                bool held = false;
-                for (int i = 0; i < cues.Count; i++)
-                {
-                    if (cues[i].Block == null || cues[i].Block.Position != entry.Key) continue;
-                    held = cues[i].Glow > 0f;
-                    break;
-                }
-
-                if (!held) faded.Add(entry.Key);
+                if (!cuedGlow.Contains(position)) faded.Add(position);
             }
 
             for (int i = 0; i < faded.Count; i++) Fade(faded[i]);
@@ -162,12 +247,17 @@ namespace Thermodynamics
 
         private void ClearGlow()
         {
+            cues.Clear();
             litBlocks.Clear();
+            glowSurfaces.Clear();
+            cuedGlow.Clear();
+            glowRegion = new GlowRegion();
+            glowPrunePending = glowSurfacesDirty = glowRegionDirty = false;
 
             if (glowing.Count == 0) return;
 
             faded.Clear();
-            foreach (KeyValuePair<Vector3I, float> entry in glowing) faded.Add(entry.Key);
+            foreach (Vector3I position in glowing) faded.Add(position);
             for (int i = 0; i < faded.Count; i++) Fade(faded[i]);
             faded.Clear();
         }
@@ -181,7 +271,10 @@ namespace Thermodynamics
 
             try
             {
-                if (!cube.SetEmissiveStateWorking()) Emit(cube, 0f, Color.Black);
+                bool restored = cube.IsWorking ? cube.SetEmissiveStateWorking()
+                    : cube.IsFunctional ? cube.SetEmissiveStateDisabled()
+                    : cube.SetEmissiveStateDamaged();
+                if (!restored) Emit(cube, 0f, Color.Black);
             }
             catch (Exception e)
             {

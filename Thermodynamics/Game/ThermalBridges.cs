@@ -63,13 +63,14 @@ namespace Thermodynamics
         public static void Update(float deltaSeconds)
         {
             if (Bridges.Count == 0 || deltaSeconds <= 0f) return;
+            if (Settings.Instance == null || !Settings.Instance.EnableConduction) return;
 
             for (int i = Bridges.Count - 1; i >= 0; i--)
             {
                 Bridge bridge = Bridges[i];
 
-                ThermalNode a = bridge.A != null ? bridge.A.Node : null;
-                ThermalNode b = bridge.B != null ? bridge.B.Node : null;
+                ThermalNode a = LiveNode(bridge.A);
+                ThermalNode b = LiveNode(bridge.B);
                 if (a == null || b == null)
                 {
                     Bridges.RemoveAt(i);
@@ -86,6 +87,13 @@ namespace Thermodynamics
                 a.Temperature = Math.Max(ThermalConstants.MinimumTemperature, a.Temperature + (energy / a.ThermalMass));
                 b.Temperature = Math.Max(ThermalConstants.MinimumTemperature, b.Temperature - (energy / b.ThermalMass));
             }
+        }
+
+        private static ThermalNode LiveNode(ThermalBlock bound)
+        {
+            if (bound == null || bound.SweepSlot < 0 || bound.Grid == null
+                || bound.Grid.Grid == null || bound.Grid.Grid.MarkedForClose || bound.Grid.Grid.Closed) return null;
+            return bound.Node;
         }
     }
 }

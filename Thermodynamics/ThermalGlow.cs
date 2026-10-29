@@ -27,9 +27,14 @@ namespace Thermodynamics
 
         private const float LightRangeCap = 120f;
 
+        private const double LightViewRange = 200.0;
+
         private static readonly Dictionary<long, MyLight> Lights = new Dictionary<long, MyLight>();
 
         private static readonly List<long> Extinguished = new List<long>();
+        private static readonly Vector3D[] Normals = new Vector3D[Face.Count];
+        private static readonly Vector3[] Left = new Vector3[Face.Count];
+        private static readonly Vector3[] Up = new Vector3[Face.Count];
 
         public static void Draw()
         {
@@ -52,6 +57,13 @@ namespace Thermodynamics
                 return;
             }
 
+            if (ThermalVisionProbe.ReplacesScene)
+            {
+                Clear();
+                LastState = "thermal vision";
+                return;
+            }
+
             Vector3D eye = MyAPIGateway.Session.Camera.WorldMatrix.Translation;
 
             IList<ThermalGrid> grids = ThermalGrid.LiveGrids;
@@ -71,10 +83,21 @@ namespace Thermodynamics
                 double distance = Math.Max(0.0, Vector3D.Distance(bounds.Center, eye) - bounds.HalfExtents.Length());
                 if (distance >= HeatGlowStyle.DrawRange) continue;
 
+                // The weighted cue centre lies inside the grid bounds. Even the largest
+                // permitted light cannot reach the viewing range beyond this lower bound.
                 Extinguished.Remove(thermals.Grid.EntityId);
-                UpdateLight(thermals, ref eye);
+                if (distance < LightRangeCap + LightViewRange)
+                {
+                    UpdateLight(thermals, ref eye);
+                }
+                else
+                {
+                    Extinguish(thermals.Grid.EntityId);
+                }
 
-                if (quads < HeatGlowStyle.MaxQuads)
+                BoundingSphereD sphere = new BoundingSphereD(bounds.Center,
+                    HeatGlowStyle.CullRadius((Vector3)bounds.HalfExtents, thermals.Grid.GridSize));
+                if (quads < HeatGlowStyle.MaxQuads && MyAPIGateway.Session.Camera.IsInFrustum(ref sphere))
                     quads += DrawGrid(thermals, ref eye, HeatGlowStyle.MaxQuads - quads);
             }
 
@@ -122,7 +145,7 @@ namespace Thermodynamics
 
             float lightRange = Math.Min(LightRangeCap, radius + LightReach);
             float fade = HeatGlowStyle.RangeFade(Math.Max(0.0,
-                Vector3D.Distance(centre, eye) - lightRange), 200.0);
+                Vector3D.Distance(centre, eye) - lightRange), LightViewRange);
             if (fade <= 0f)
             {
                 Extinguish(thermals.Grid.EntityId);
@@ -150,7 +173,6 @@ namespace Thermodynamics
             light.Intensity = region.Glow * LightIntensity * fade;
             light.Range = lightRange;
             light.LightOn = true;
-            light.MarkPositionDirty();
             light.UpdateLight();
         }
 
@@ -160,7 +182,7 @@ namespace Thermodynamics
             centre = Vector3D.Zero;
             radius = 0f;
 
-            if (!GlowRegion.Reduce(thermals.LitBlocks, out region)) return false;
+            if (!thermals.TryGetGlowRegion(out region)) return false;
 
             float gridSize = thermals.Grid.GridSize;
             MatrixD gridMatrix = thermals.Grid.WorldMatrix;
@@ -175,16 +197,23 @@ namespace Thermodynamics
             MatrixD gridMatrix = thermals.Grid.WorldMatrix;
             float gridSize = thermals.Grid.GridSize;
 
-            IList<LitBlock> lit = thermals.LitBlocks;
+            for (int face = 0; face < Face.Count; face++)
+            {
+                Vector3 localLeft, localUp;
+                FaceQuad.Tangents(face, out localLeft, out localUp);
+                Normals[face] = Vector3D.TransformNormal(Face.Normals[face], gridMatrix);
+                Left[face] = (Vector3)Vector3D.TransformNormal(localLeft, gridMatrix);
+                Up[face] = (Vector3)Vector3D.TransformNormal(localUp, gridMatrix);
+            }
+
+            List<ThermalGrid.GlowSurface> surfaces = thermals.GlowSurfaces;
             int quads = 0;
 
-            for (int i = 0; i < lit.Count && quads < budget; i++)
+            for (int i = 0; i < surfaces.Count && quads < budget; i++)
             {
-                LitBlock block = lit[i];
-                if (block.Glow <= 0f) continue;
-
-                ThermalBlock bound = thermals.Get(block.Position);
-                if (bound == null || bound.Block == null || bound.Node == null) continue;
+                ThermalGrid.GlowSurface surface = surfaces[i];
+                ThermalBlock bound = surface.Bound;
+                if (bound == null || bound.SweepSlot < 0 || bound.Block == null || bound.Node == null) continue;
 
                 ThermalNode node = bound.Node;
                 if (node.TotalExposedFaces == 0) continue;
@@ -195,14 +224,16 @@ namespace Thermodynamics
                 float fade = HeatGlowStyle.RangeFade(distance, HeatGlowStyle.DrawRange);
                 if (fade <= 0f) continue;
 
-                Vector3 half = FaceQuad.HalfExtents(bound.Block.Min, bound.Block.Max, gridSize);
+                Vector3 half = surface.Half;
+                BoundingSphereD sphere = new BoundingSphereD(centre, surface.Radius);
+                if (!MyAPIGateway.Session.Camera.IsInFrustum(ref sphere)) continue;
                 LastSurfaceBlocks++;
-                Vector4 colour = Colour(block) * fade;
+                Vector4 colour = surface.Emission * fade;
 
                 for (int face = 0; face < Face.Count && quads < budget; face++)
                 {
                     if (node.GetExposedFaces(face) == 0) continue;
-                    if (DrawFace(face, ref centre, ref half, ref gridMatrix, ref eye, ref colour, gridSize))
+                    if (DrawFace(face, ref centre, ref half, ref eye, ref colour, gridSize))
                     {
                         quads++;
                     }
@@ -213,10 +244,10 @@ namespace Thermodynamics
         }
 
         private static bool DrawFace(int face, ref Vector3D centre, ref Vector3 half,
-            ref MatrixD gridMatrix, ref Vector3D eye, ref Vector4 colour, float gridSize)
+            ref Vector3D eye, ref Vector4 colour, float gridSize)
         {
             Vector3 localNormal = Face.Normals[face];
-            Vector3D normal = Vector3D.TransformNormal(localNormal, gridMatrix);
+            Vector3D normal = Normals[face];
 
             float reach = FaceQuad.Extent(ref half, ref localNormal);
             Vector3D position = centre + (normal * (reach + HeatGlowStyle.StandOff(gridSize)));
@@ -229,15 +260,12 @@ namespace Thermodynamics
             Vector3 localLeft, localUp;
             FaceQuad.Tangents(face, out localLeft, out localUp);
 
-            Vector3 left = (Vector3)Vector3D.TransformNormal(localLeft, gridMatrix);
-            Vector3 up = (Vector3)Vector3D.TransformNormal(localUp, gridMatrix);
-
             MyTransparentGeometry.AddBillboardOriented(
                 GlowMaterial,
                 HeatGlowStyle.BillboardColour(colour, facing),
                 position,
-                left,
-                up,
+                Left[face],
+                Up[face],
                 FaceQuad.Extent(ref half, ref localLeft) * HeatGlowStyle.HaloScale,
                 FaceQuad.Extent(ref half, ref localUp) * HeatGlowStyle.HaloScale,
                 Vector2.Zero,
@@ -246,11 +274,6 @@ namespace Thermodynamics
             return true;
         }
 
-        private static Vector4 Colour(LitBlock block)
-        {
-            Vector3 locus = Incandescence.Colour(block.Kelvin);
-            return HeatGlowStyle.LinearEmission(locus, block.Glow);
-        }
     }
 
 }

@@ -31,6 +31,12 @@ namespace Thermodynamics.Presentation
         }
 
 
+        public static double CullRadius(Vector3 halfExtents, float gridSize)
+        {
+            return halfExtents.Length() * HaloScale + StandOff(gridSize);
+        }
+
+
         public static float RangeFade(double distance, double range)
         {
             if (!(distance >= 0.0) || !(range > 0.0) || distance >= range) return 0f;

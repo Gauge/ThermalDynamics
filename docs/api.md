@@ -81,6 +81,10 @@ Unregister the handler in `UnloadData`.
 A block that is not simulated — excluded by `ExcludeFromSimulation`, on a grid without physics, or not yet
 registered — reads as zero rather than throwing.
 
+Repeated drag-profile writes that normalize to the same six multipliers keep the geometry revision
+unchanged, including clearing an already unit-weight profile. Consumers can retain their detached
+geometry snapshot until its revision changes.
+
 ```csharp
 var aeroForces = api["GetGridAeroForces"] as Func<IMyCubeGrid, MyTuple<Vector3, Vector3>>;
 var forces = aeroForces(grid);
@@ -144,6 +148,21 @@ forces and releasing the final consumer clears the prepared geometry on the next
 
 Each returns false when the target does not exist. Prefer `AddBlockHeat` for anything physical: it
 is the only one of the three that conserves energy.
+Block lookups verify the supplied native block instance, so a retained reference to a removed block
+cannot read or modify its replacement at the same cell.
+
+Temperature, joule and room-pressure inputs must be finite. Invalid inputs or a heating result that overflows
+return false without changing the block. Finite negative temperatures and cooling below the
+minimum retain the existing temperature floor; signed joules remain supported.
+When a write arrives between solver slices, publication adds the pending simulated temperature
+change to the external write and enforces the same minimum afterward. Pending cooling cannot take
+an accepted floor-temperature write below the minimum.
+
+The solver uses float thermal arithmetic. A finite input alone does not guarantee finite fluxes at
+extreme temperatures: active radiation can still overflow its fourth-power calculation, affecting
+diagnostics and, with overshoot clamping disabled, temperatures. Zero-emissivity blocks skip that
+calculation entirely. Excessive substep demand is capped before conversion to an integer; this
+protects the iteration count without extending the active equations' numeric range.
 
 ## Heat sources
 
@@ -161,6 +180,12 @@ A source bound to an entity disappears when the entity does, so a source on a pr
 burning wreck needs no cleanup. Beyond `range` a source is not sampled at all — keep it to the
 distance the effect should actually be felt at, because every source costs one pass over the
 exposed blocks of every grid within it.
+
+Registration requires finite positive watts and range, and finite world coordinates. Updates
+reject NaN/infinite power without changing the source; finite negative updates retain the existing
+zero-output clamp. Invalid or overflowing sample coordinates contribute no heat. Disabling
+`EnableHeatSources` also skips the adapter's source scan; registered sources remain available
+when it is re-enabled. Public delegate signatures and identifiers are unchanged.
 
 ```csharp
 var addSource = api["AddHeatSource"] as Func<IMyEntity, float, float, int>;
@@ -199,7 +224,15 @@ addThreshold(450f, 0, (block, id, threshold, temperature, rising) =>
 Thresholds are registered against the mod, not a grid, so they apply to grids created later too.
 Crossings are raised once per step, after the step completes, on the server and on clients alike.
 A callback that throws is dropped and logged rather than allowed to stop the simulation — do not
-rely on being called again after throwing.
+rely on being called again after throwing. Its threshold is also removed from existing grids and
+future registrations so it no longer adds work per block. Nonfinite threshold temperatures return
+id zero without registering a callback. If an earlier callback removes and replaces another crossed
+block, the old block's event is not delivered to its replacement.
+
+The production dispatch boundary is tested without native stubs using two block instances and two
+threshold collections. It covers replacement identity, failure cleanup before error reporting,
+and a callback that unregisters itself before throwing. Native engine event ordering remains a
+game-session acceptance check.
 
 ## Settings
 
@@ -273,6 +306,10 @@ than *not within a major*.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Skip zero-coefficient radiation before its fourth-power calculation and cap extreme substep demand before integer conversion; document the remaining float-domain limits for active thermal equations. |
+| 2026-10-28 | Reject stale native block handles in the central API binder and retain the minimum temperature when publication merges a write made between solver slices. |
+| 2026-10-28 | Reject nonfinite point-source inputs and skip source sampling while the mechanism is disabled. |
+| 2026-10-28 | Reject nonfinite direct heat/pressure mutations and heating overflow before changing blocks; retain signed cooling and minimum-temperature behavior. Remove failed callbacks' thresholds from all grids, skip crossed blocks replaced during callbacks, and preserve geometry revisions for unchanged drag multipliers to avoid repeated snapshot copies. Disabled wind skips native weather/wind sampling in remote environment queries. |
 | 2026-10-13 | Defer heating-provider faults to the game thread, disable failed gates, and preserve replacement registrations. |
 | 2026-10-08 | Correct provider forwarding, snapshot costs, thread-safety limits and exception behavior. |
 | 2026-09-27 | Added authored lift overrides, actual submitted lift reporting and optional lifting/residual geometry in profile snapshots. |

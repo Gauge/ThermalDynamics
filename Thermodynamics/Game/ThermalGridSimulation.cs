@@ -82,7 +82,7 @@ namespace Thermodynamics
             try
             {
                 if (timeSimulation) Stats.SimulationTime.Begin();
-                Simulation.Update(frameSeconds, pendingSample);
+                Simulation.Update(frameSeconds, pendingSample, startingStep);
                 if (timeSimulation) Stats.SimulationTime.End();
 
                 steppedThisFrame = Simulation.Scheduler.StepsRun - stepsBefore;
@@ -297,7 +297,7 @@ namespace Thermodynamics
                 OverheatEvent overheat = overheats[i];
 
                 ThermalBlock bound = Get(overheat.Block.Position);
-                if (bound == null) continue;
+                if (bound == null || !ReferenceEquals(bound.Instance, overheat.Block)) continue;
 
                 if (Telemetry.Enabled) Telemetry.OnCriticalDamage(bound, overheat.Damage);
 
@@ -326,24 +326,41 @@ namespace Thermodynamics
 
             if (heatPumps.Count == 0) return;
 
-            for (int i = 0; i < heatPumps.Count; i++)
+            try
             {
-                ThermalBlock bound = heatPumps[i];
-                HeatPumpDevice device = Simulation.GetHeatPump(bound.Instance);
-                if (device == null) continue;
-
-                ThermalHeatPumpBlock electrical = bound.HeatPump;
-                if (electrical == null)
+                PrepareHeatPumpLookup();
+                for (int i = 0; i < heatPumps.Count; i++)
                 {
-                    device.Enabled = false;
-                    device.PowerAvailable = 0f;
-                    continue;
-                }
+                    ThermalBlock bound = heatPumps[i];
+                    HeatPumpDevice device;
+                    if (bound.Instance == null || !heatPumpLookup.TryGetValue(bound.Instance, out device)) continue;
 
-                device.Enabled = electrical.IsRunning;
-                device.PowerAvailable = electrical.PowerAvailable;
-                device.PowerSetting = electrical.PowerSetting;
+                    ThermalHeatPumpBlock electrical = bound.HeatPump;
+                    if (electrical == null)
+                    {
+                        device.Enabled = false;
+                        device.PowerAvailable = 0f;
+                        continue;
+                    }
+
+                    device.Enabled = electrical.IsRunning;
+                    device.PowerAvailable = electrical.PowerAvailable;
+                    device.PowerSetting = electrical.PowerSetting;
+                }
             }
+            finally
+            {
+                if (heatPumpLookup != null) heatPumpLookup.Clear();
+            }
+        }
+
+        private Dictionary<BlockInstance, HeatPumpDevice> heatPumpLookup;
+
+        private void PrepareHeatPumpLookup()
+        {
+            if (heatPumpLookup == null)
+                heatPumpLookup = new Dictionary<BlockInstance, HeatPumpDevice>(HeatPumpDeviceLookup.Comparer);
+            HeatPumpDeviceLookup.Fill(Simulation.HeatPumps, heatPumpLookup);
         }
 
         private void PushCoolantPumpState()
@@ -415,19 +432,31 @@ namespace Thermodynamics
         {
             if (heatPumps.Count == 0) return;
 
-            for (int i = 0; i < heatPumps.Count; i++)
+            try
             {
-                ThermalBlock bound = heatPumps[i];
-                if (bound.HeatPump == null) continue;
+                PrepareHeatPumpLookup();
+                for (int i = 0; i < heatPumps.Count; i++)
+                {
+                    ThermalBlock bound = heatPumps[i];
+                    if (bound.HeatPump == null) continue;
 
-                HeatPumpDevice device = Simulation.GetHeatPump(bound.Instance);
-                bound.HeatPump.SetDemandWatts(device == null ? 0f : device.LastDemandWatts);
+                    HeatPumpDevice device = null;
+                    if (bound.Instance != null) heatPumpLookup.TryGetValue(bound.Instance, out device);
+                    bound.HeatPump.SetDemandWatts(device == null ? 0f : device.LastDemandWatts);
+                }
+            }
+            finally
+            {
+                if (heatPumpLookup != null) heatPumpLookup.Clear();
             }
         }
 
         private void SweepRoomPressure()
         {
             if (!Settings.Instance.EnableRoomAir) return;
+            // A newly published room map can precede its air table while exposure is
+            // sliced. Do not resolve old anchors against the new room numbering.
+            if (Simulation.Solver.ExposureRefreshPending) return;
 
             IList<RoomAirNode> air = Simulation.RoomAir;
             if (air.Count == 0) return;
@@ -449,7 +478,7 @@ namespace Thermodynamics
                 {
                     for (int i = 0; i < air.Count; i++)
                     {
-                        Simulation.SetRoomPressure(air[i].Anchor, 0f);
+                        if (air[i].Pressure != 0f) Simulation.SetRoomPressure(air[i].Anchor, 0f);
                     }
                     return;
                 }
@@ -498,7 +527,7 @@ namespace Thermodynamics
 
                     float level = RoomPressure.Level(true, SealedByGame[i], reported);
 
-                    Simulation.SetRoomPressure(room.Anchor, level);
+                    if (room.Pressure != level) Simulation.SetRoomPressure(room.Anchor, level);
                 }
             }
             finally
@@ -568,9 +597,7 @@ namespace Thermodynamics
             {
                 ThresholdCrossing crossing = crossings[i];
                 ThermalBlock bound = Get(crossing.Block.Position);
-                if (bound == null) continue;
-
-                ThermalApi.RaiseThreshold(crossing, bound.Block);
+                ThermalApi.RaiseThreshold(crossing, bound);
             }
         }
     }

@@ -191,7 +191,7 @@ namespace Thermodynamics.Presentation
             Vector3D a = (sample.Min - origin) / cellSize, b = (sample.Max - origin) / cellSize;
             double sum = a.X + a.Y + a.Z + b.X + b.Y + b.Z;
             if (double.IsNaN(sum) || double.IsInfinity(sum) || float.IsNaN(sample.Kelvin)
-                || float.IsInfinity(sample.Kelvin) || sample.Kelvin < 0 || sample.Kelvin > 100000
+                || float.IsInfinity(sample.Kelvin) || sample.Kelvin < 0 || sample.Kelvin > ThermalVisionTemperatureData.OverRangeKelvin
                 || a.X >= b.X || a.Y >= b.Y || a.Z >= b.Z) return false;
             const double bound = 1000000000;
             if (a.X < -bound || a.Y < -bound || a.Z < -bound || b.X > bound || b.Y > bound || b.Z > bound) return false;

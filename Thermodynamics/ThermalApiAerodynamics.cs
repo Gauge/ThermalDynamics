@@ -48,12 +48,13 @@ namespace Thermodynamics
             if (thermal == null || !thermal.LastSample.HasPlanet) return new MyTuple<bool,Vector3,float,float,float,Vector3>();
             var sample = thermal.LastSample;
             var at = new MyTuple<bool,Vector3,float,float,float,Vector3>();
-            var planet = PlanetManager.GetClosestPlanet(grid.GetPosition());
+            Vector3D position = grid.GetPosition();
+            var planet = PlanetManager.GetClosestPlanet(position);
             if (planet == null || planet.Entity == null) return at;
             at.Item1 = true;
-            at.Item3 = planet.Entity.GetAirDensity(grid.GetPosition()) * 1.225f;
+            at.Item3 = planet.Entity.GetAirDensity(position) * 1.225f;
             at.Item4 = Settings.Instance.PlanetDayTemperature;
-            var up = (Vector3)(grid.GetPosition() - planet.Entity.PositionComp.GetPosition());
+            var up = (Vector3)(position - planet.Entity.PositionComp.GetPosition());
             if (up.LengthSquared() > 0f) up.Normalize();
             at.Item6 = up;
             at.Item2 = Settings.Instance.EnableWind ? sample.WindDirection * sample.WindSpeed : Vector3.Zero;
@@ -87,6 +88,9 @@ namespace Thermodynamics
                 return result;
             }
             var settings = Settings.Instance;
+            // Fallback is only used away from thermal grids; avoid uninitialised 2.7 K history.
+            result.Item4 = settings.PlanetDayTemperature;
+            if (!settings.EnableWind) return result;
             string weather = Sandbox.Game.MyVisualScriptLogicProvider.GetWeather(position);
             float intensity = Sandbox.Game.MyVisualScriptLogicProvider.GetWeatherIntensity(position);
             var input = new WindSolver.Inputs {
@@ -97,9 +101,7 @@ namespace Thermodynamics
                 DiurnalAmplitude = settings.WindDiurnalAmplitude, DiurnalCrossover = settings.WindDiurnalCrossover
             };
             WindSolver.Result wind = WindSolver.Solve(ref input);
-            result.Item2 = settings.EnableWind ? wind.Direction * wind.Speed : Vector3.Zero;
-            // Fallback is only used away from thermal grids; avoid uninitialised 2.7 K history.
-            result.Item4 = settings.PlanetDayTemperature;
+            result.Item2 = wind.Direction * wind.Speed;
             return result;
         }
     }

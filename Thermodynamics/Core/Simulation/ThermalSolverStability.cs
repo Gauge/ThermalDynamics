@@ -8,27 +8,38 @@ namespace Thermodynamics.Core
     {
         public float RequiredSubsteps(float deltaSeconds)
         {
-            PrepareStepState();
+            // Queries during a spread step must observe its scratch, not overwrite it from
+            // public temperatures that have not been published yet.
+            if (StepInFlight) return RequiredSubstepsFromState(deltaSeconds);
+            float worstNodeRate = PrepareStepState(true);
 
-            return RequiredSubstepsFromState(deltaSeconds);
+            return RequiredSubstepsFromState(deltaSeconds, worstNodeRate);
         }
 
 
         public float RequiredSubsteps(float deltaSeconds, EnvironmentState environment)
         {
+            if (StepInFlight) return RequiredSubstepsFromState(deltaSeconds, -1f, ref environment);
             Environment = environment;
 
             return RequiredSubsteps(deltaSeconds);
         }
 
 
-        private void PrepareStepState()
+        private float PrepareStepState(bool estimateStability)
         {
             RebuildLinksIfNeeded();
             EnsureBuffers();
+            if (estimateStability)
+            {
+                // Contact totals do not read mirrored node properties. Make them current before
+                // copying each node so its immediately following stability visit can be fused.
+                RecomputeConductanceTotalsIfNeeded();
+                return SyncNodeStateAndEstimate();
+            }
             SyncNodeState();
             RecomputeConductanceTotalsIfNeeded();
-            ApplyThermalMassFloor();
+            return ApplyThermalMassFloor();
         }
 
         private struct StabilityTerms
@@ -80,18 +91,31 @@ namespace Thermodynamics.Core
 
         private float RequiredSubstepsFromState(float deltaSeconds)
         {
+            return RequiredSubstepsFromState(deltaSeconds, -1f);
+        }
+
+        private float RequiredSubstepsFromState(float deltaSeconds, float worstNodeRate)
+        {
+            EnvironmentState environment = Environment;
+            return RequiredSubstepsFromState(deltaSeconds, worstNodeRate, ref environment);
+        }
+
+        private float RequiredSubstepsFromState(float deltaSeconds, float worstNodeRate,
+            ref EnvironmentState environment)
+        {
             Work.StabilityEstimates++;
 
-            float worst = 0f;
-
-
-            StabilityTerms terms = StabilityEnvironment();
-
-            for (int i = 0; i < nodes.Count; i++)
+            float worst = worstNodeRate;
+            if (worst < 0f)
             {
-
-                float perNode = NodeStabilityRate(i, ref terms) / nodeThermalMass[i];
-                if (perNode > worst) worst = perNode;
+                worst = 0f;
+                StabilityTerms terms = StabilityEnvironment(ref environment);
+                int count = StepInFlight ? stepNodeCount : nodes.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    float perNode = NodeStabilityRate(i, ref terms) / nodeThermalMass[i];
+                    if (perNode > worst) worst = perNode;
+                }
             }
 
             for (int l = 0; l < loops.Count; l++)
@@ -152,7 +176,7 @@ namespace Thermodynamics.Core
         public void PrepareForSteps()
         {
             if (StepInFlight) return;
-            PrepareStepState();
+            PrepareStepState(false);
 
             RefreshLinkMassFactors();
         }
@@ -273,19 +297,25 @@ namespace Thermodynamics.Core
 
         private int ClampSubsteps(float required)
         {
-            if (required <= 1f) return 1;
+            if (!(required > 1f)) return 1;
+            if (required >= MaxSubsteps) return MaxSubsteps;
 
-            int substeps = (int)Math.Ceiling(required);
-            if (substeps > MaxSubsteps) substeps = MaxSubsteps;
-            return substeps;
+            // Bound finite and infinite demand before the runtime-dependent out-of-range cast.
+            return (int)Math.Ceiling(required);
         }
 
         private bool conductanceTotalsDirty = true;
+        // Incremental topology edits must update the mechanisms represented by the cached sum,
+        // even when settings changed before the next stability preparation.
+        private bool conductanceIncludesBlocks, conductanceIncludesLoops, conductanceIncludesRooms;
 
 
         private void RecomputeConductanceTotalsIfNeeded()
         {
-            if (!conductanceTotalsDirty) return;
+            if (!conductanceTotalsDirty
+                && conductanceIncludesBlocks == settings.EnableConduction
+                && conductanceIncludesLoops == settings.EnableCoolantLoops
+                && conductanceIncludesRooms == settings.EnableRoomAir) return;
             RecomputeConductanceTotals();
         }
 
@@ -306,18 +336,27 @@ namespace Thermodynamics.Core
         }
 
 
-        private void ApplyThermalMassFloor()
+        private float ApplyThermalMassFloor()
         {
+            int previousFloored = FlooredNodes;
             FlooredNodes = 0;
 
             int cap = EffectiveSubstepFloor;
-            if (cap <= 0) return;
-
             float step = settings.StepSeconds;
-            if (step <= 0f) return;
+            if (cap <= 0 || step <= 0f)
+            {
+                // Clean nodes do not pass through SyncNodeState's capacity refresh on a toggle.
+                if (previousFloored > 0)
+                {
+                    for (int i = 0; i < nodes.Count; i++) nodeThermalMass[i] = nodes[i].ThermalMass;
+                    linkMassFactorFrom = 0;
+                }
+                return -1f;
+            }
 
             float perRate = step / (StabilitySafetyFactor * cap);
             bool moved = false;
+            float worst = 0f;
 
 
             StabilityTerms terms = StabilityEnvironment();
@@ -327,7 +366,8 @@ namespace Thermodynamics.Core
             {
                 float real = nodes[i].ThermalMass;
 
-                float floor = NodeStabilityRate(i, ref terms) * perRate;
+                float rate = NodeStabilityRate(i, ref terms);
+                float floor = rate * perRate;
                 float wanted = real < floor ? floor : real;
 
                 if (nodeThermalMass[i] != wanted)
@@ -337,10 +377,69 @@ namespace Thermodynamics.Core
                 }
 
                 if (wanted > real) FlooredNodes++;
+
+                // Reuse this exact rate instead of scanning every node again for stability.
+                float demand = rate / nodeThermalMass[i];
+                if (demand > worst) worst = demand;
             }
 
             if (moved) linkMassFactorFrom = 0;
 
+            ApplyCoupledMassFloors(perRate);
+            return worst;
+        }
+
+
+        private float SyncNodeStateAndEstimate()
+        {
+            bool all = BeginNodeStateSync();
+            int previousFloored = FlooredNodes;
+            FlooredNodes = 0;
+
+            int cap = EffectiveSubstepFloor;
+            float step = settings.StepSeconds;
+            bool flooring = !(cap <= 0 || step <= 0f);
+            bool restore = !flooring && previousFloored > 0;
+            float perRate = flooring ? step / (StabilitySafetyFactor * cap) : 0f;
+            bool moved = restore;
+            float worst = 0f;
+            StabilityTerms terms = StabilityEnvironment();
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                ThermalNode node = nodes[i];
+                float temperature = node.Temperature;
+                nodeTemperatures[i] = temperature;
+                nodeStepStart[i] = temperature;
+                if (all || node.StateDirty) SyncNodeProperties(i, node);
+
+                float rate = NodeStabilityRate(i, ref terms);
+                if (flooring)
+                {
+                    float real = node.ThermalMass;
+                    float floor = rate * perRate;
+                    float wanted = real < floor ? floor : real;
+                    if (nodeThermalMass[i] != wanted)
+                    {
+                        nodeThermalMass[i] = wanted;
+                        moved = true;
+                    }
+                    if (wanted > real) FlooredNodes++;
+                }
+                else if (restore) nodeThermalMass[i] = node.ThermalMass;
+
+                float demand = rate / nodeThermalMass[i];
+                if (demand > worst) worst = demand;
+            }
+
+            if (moved) linkMassFactorFrom = 0;
+            if (flooring) ApplyCoupledMassFloors(perRate);
+            return worst;
+        }
+
+
+        private void ApplyCoupledMassFloors(float perRate)
+        {
             for (int l = 0; l < loops.Count; l++)
             {
                 CoolantLoop loop = loops[l];
@@ -364,17 +463,21 @@ namespace Thermodynamics.Core
 
         private float LoopConductance(int index)
         {
+            if (!settings.EnableCoolantLoops) return 0f;
             return index >= 0 && index < loopConductanceTotal.Length ? loopConductanceTotal[index] : 0f;
         }
 
 
         private float SegmentConductance(int index)
         {
+            if (!settings.EnableCoolantLoops) return 0f;
             if (index < 0 || index >= loops.Count) return 0f;
 
             CoolantLoop loop = loops[index];
             int count = loop.ParcelCount;
-            if (count <= 0) return 0f;
+            if (count <= 0 || loop.Links.Count == 0) return 0f;
+            float fill = loop.FillFraction;
+            float stagnant = loop.StagnantFactor;
 
             if (segmentConductanceScratch.Length < count)
             {
@@ -390,7 +493,7 @@ namespace Thermodynamics.Core
                 int parcel = loop.ParcelOf(link.SegmentIndex);
                 if (parcel < 0 || parcel >= count) continue;
 
-                segmentConductanceScratch[parcel] += loop.LinkConductance(i);
+                segmentConductanceScratch[parcel] += (link.Conductance * fill) * stagnant;
             }
 
             float worst = 0f;
@@ -406,6 +509,7 @@ namespace Thermodynamics.Core
 
         private float RoomConductance(int index)
         {
+            if (!settings.EnableRoomAir) return 0f;
             return index >= 0 && index < roomConductanceTotal.Length ? roomConductanceTotal[index] : 0f;
         }
 
@@ -424,16 +528,29 @@ namespace Thermodynamics.Core
 
             for (int l = 0; l < loops.Count; l++)
             {
+                if (!settings.EnableCoolantLoops)
+                {
+                    loopConductanceTotal[l] = 0f;
+                    continue;
+                }
                 CoolantLoop loop = loops[l];
+                if (loop.Links.Count == 0)
+                {
+                    loopConductanceTotal[l] = 0f;
+                    continue;
+                }
+                float fill = loop.FillFraction;
+                float stagnant = loop.StagnantFactor;
                 float total = 0f;
-                for (int i = 0; i < loop.Links.Count; i++) total += loop.LinkConductance(i);
+                for (int i = 0; i < loop.Links.Count; i++)
+                    total += (loop.Links[i].Conductance * fill) * stagnant;
                 loopConductanceTotal[l] = total;
             }
 
             for (int r = 0; r < roomAir.Count; r++)
             {
                 RoomAirNode air = roomAir[r];
-                if (!air.HasAir)
+                if (!settings.EnableRoomAir || !air.HasAir)
                 {
                     roomConductanceTotal[r] = 0f;
                     continue;
@@ -476,6 +593,9 @@ namespace Thermodynamics.Core
         {
             Work.ConductanceRecomputes++;
             conductanceTotalsDirty = false;
+            conductanceIncludesBlocks = settings.EnableConduction;
+            conductanceIncludesLoops = settings.EnableCoolantLoops;
+            conductanceIncludesRooms = settings.EnableRoomAir;
             EnsureBuffers();
             RecomputeCoupledConductance();
             for (int i = 0; i < nodes.Count; i++)
@@ -483,14 +603,16 @@ namespace Thermodynamics.Core
                 nodeConductanceTotal[i] = 0f;
             }
 
-            for (int i = 0; i < links.Count; i++)
+            int blockLinks = conductanceIncludesBlocks ? links.Count : 0;
+            for (int i = 0; i < blockLinks; i++)
             {
                 ThermalLink link = links[i];
                 nodeConductanceTotal[link.NodeA] += link.Conductance;
                 nodeConductanceTotal[link.NodeB] += link.Conductance;
             }
 
-            for (int l = 0; l < loops.Count; l++)
+            int loopCount = conductanceIncludesLoops ? loops.Count : 0;
+            for (int l = 0; l < loopCount; l++)
             {
                 CoolantLoop loop = loops[l];
                 for (int i = 0; i < loop.Links.Count; i++)
@@ -503,7 +625,8 @@ namespace Thermodynamics.Core
                 }
             }
 
-            for (int r = 0; r < roomAir.Count; r++)
+            int roomCount = conductanceIncludesRooms ? roomAir.Count : 0;
+            for (int r = 0; r < roomCount; r++)
             {
                 RoomAirNode air = roomAir[r];
                 if (!air.HasAir) continue;

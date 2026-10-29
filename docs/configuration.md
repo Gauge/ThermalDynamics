@@ -17,10 +17,15 @@ a world loads and regenerated when `Version` does not match.
 | Driving settings from another mod | [api.md](api.md#settings) |
 
 Every setting can also be changed while the world is running. A change is written into the settings
-object every grid already holds and picked up on the next step: heat capacities are rescaled,
-coolant loops and room air are rebuilt, and each mechanism reads its own switch. Applying local
+object every grid already holds and picked up on a new step: heat capacities are rescaled
+together, loop/room structures are rebuilt when their relevant settings change, and each mechanism
+reads its own switch. A revision cancels pending work before applying the new settings;
+if the host skipped sampling, the replacement waits for a fresh environment sample. Applying local
 settings marks a deferred save; the server flushes accepted changes to world storage.
 `/thermal save` remains available to save explicitly.
+Runtime suit updates and grid initialization read the shared applied Core settings without
+reapplying them. Those reads no longer publish settings, schedule saves or advance the revision;
+explicit settings changes still use the existing apply path.
 
 ## Runtime control
 
@@ -676,6 +681,15 @@ in as many messages as the hull needs. After that the server states only the blo
 warning band — the same last 100 K the glow already draws — every `TemperatureSyncInterval`
 seconds, and says nothing at all about a hull with nothing near failing.
 
+A hull with no eligible temperature records still answers the initial request with a 15-byte empty
+snapshot, so the client stops retrying. This acknowledges receipt without clearing any temperature
+already known by that client; block removal remains the engine's topology work. Empty band updates
+remain silent. The decoder rejects a record count larger than the complete records in the payload
+before reading them, including counts whose byte-size multiplication would overflow.
+Closing a local grid immediately forgets its snapshot status, so a replacement with the same entity
+ID asks again even if it streams back before the next half-second synchronization pass. Other grids'
+completed snapshots remain known.
+
 Both halves are load-bearing, and that is measured rather than assumed. Correcting the band alone
 leaves a client misreading for 145 s of a 560 s run *whatever the interval*, because a corrected
 block conducts to neighbours that are still stale; the hull once and then the band takes it to
@@ -1272,7 +1286,7 @@ a session starts on — the keybind is how each client drives it.
 | Setting | Default | Effect |
 | --- | --- | --- |
 | `EnableTelemetry` | `false` | Session-long data collection. See [telemetry.md](telemetry.md). |
-| `TelemetryPlanetProbes` | 0 | Solver steps between planet-wide probe sweeps, or 0 for none. A sweep reads the **wind and the climate** at 72 fixed points — every latitude from −80° to +80° including the equator, eight longitudes each — at five heights, whether or not anything is standing there. Writes `Thermodynamics_PlanetProbes_*.csv`. 360 is a sweep a minute at the shipped clock. |
+| `TelemetryPlanetProbes` | 0 | Diagnostic ticks between planet-wide probe sweeps, or 0 for none. These ticks run six times per simulated second, independently of solver frequency. A sweep reads the **wind and the climate** at 72 fixed points — every latitude from −80° to +80° including the equator, eight longitudes each — at five heights, whether or not anything is standing there. Writes `Thermodynamics_PlanetProbes_*.csv`. 360 is a sweep a simulated minute. |
 | `TelemetrySampleStride` | 4 | Fraction of each grid's blocks sampled per step for the per-definition statistics — `1/n`. Every block is still seen once per `n` steps. |
 
 
@@ -1384,6 +1398,10 @@ one with a migration risk — is late rather than first.
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Read applied Core settings during suit ticks and grid initialization, avoiding repeated publication, deferred saves, revisions and definition-fingerprint work. Explicit configuration changes retain their apply path. |
+| 2026-10-28 | Forget a closing grid's client snapshot state immediately, preserving other grids' completion when the same entity ID returns between sync passes. |
+| 2026-10-28 | Acknowledge an empty hull with one empty snapshot and reject oversized packet counts without overflow; preserve existing client temperatures and the silent empty-band policy. |
+| 2026-10-28 | Clarify the six-Hz diagnostic clock for planet probe intervals; preserve the documented 360-tick minute after correcting the session call cadence. |
 | 2026-10-08 | Remove the retired aerodynamics settings folder and correct top-speed display ownership. |
 | 2026-10-01 | Correct the persistence description to match deferred saving in Settings.Apply and FlushPending. |
 | 2026-09-27 | Added lift, ground effect, character drag and recovery heating defaults, plus optional gameplay re-entry heating. New protocol slots 167–173 preserve retired identifiers. |

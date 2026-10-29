@@ -40,6 +40,17 @@ namespace Thermodynamics.Presentation
         }
 
 
+        // Bound the fleet's target partition count instead of preparing 512
+        // regions for every visible grid. Each grid keeps at least 16 regions;
+        // the independent submission cap still bounds exceptionally large fleets.
+        public static int FleetDetailCeiling(int visibleGrids)
+        {
+            if(visibleGrids<1) return 512;
+            int ceiling=512;
+            while(ceiling>16 && ceiling/2>=512/visibleGrids) ceiling/=2;
+            return ceiling;
+        }
+
         private static bool Valid(double value, double near)
         { return !double.IsNaN(value) && !double.IsInfinity(value) && value > near + 1; }
     }

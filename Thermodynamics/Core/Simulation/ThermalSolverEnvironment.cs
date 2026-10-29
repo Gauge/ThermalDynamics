@@ -99,6 +99,7 @@ namespace Thermodynamics.Core
             float h, int from, int to)
         {
             bool diagnostics = plan.Diagnostics;
+            int count = EnvironmentNodeCount;
 
             if (plan.GenerationOnly)
             {
@@ -135,8 +136,8 @@ namespace Thermodynamics.Core
                     for (int i = from; i < to; i++) ClearEnvironmentDiagnostics(i);
                 }
 
-                if (to >= nodes.Count && plan.Generating) SettleHeatGainRowTotal(summing);
-                if (PrecomputeEnvironment && to >= nodes.Count) environmentRowsValid = true;
+                if (to >= count && plan.Generating) SettleHeatGainRowTotal(summing);
+                if (PrecomputeEnvironment && to >= count) environmentRowsValid = true;
                 return;
             }
 
@@ -152,7 +153,7 @@ namespace Thermodynamics.Core
             float radiationShare = plan.RadiationShare;
 
             bool shielded = settings.EnableWindwardShielding
-                && nodeWindLit.Length >= nodes.Count * Face.Count;
+                && nodeWindLit.Length >= count * Face.Count;
 
             bool fill = !environmentRowsValid || !PrecomputeEnvironment;
 
@@ -289,7 +290,7 @@ namespace Thermodynamics.Core
                 if (environmentEnabled)
                 {
                     float radiation = 0f;
-                    if (radiating)
+                    if (radiating && radiationRow[i] != 0f)
                     {
                         float squared = temperature * temperature;
                         radiation = -radiationRow[i] * ((squared * squared) - ambientPow4);
@@ -337,6 +338,7 @@ namespace Thermodynamics.Core
                 if (!diagnostics) continue;
 
                 ThermalNode node = nodes[i];
+                node.LastConductionWatts = 0f;
                 node.LastRadiationWatts = radiationWatts;
                 node.LastConvectionWatts = convectionWatts;
                 node.LastSolarWatts = solarRow[i];
@@ -348,35 +350,35 @@ namespace Thermodynamics.Core
             heatGainAccumulator = heatGainSum;
             frictionAccumulator = frictionSum;
 
-            if (to >= nodes.Count) SettleHeatGainRowTotal(summingRows);
-            if (fill && to >= nodes.Count) Work.EnvironmentRowFills++;
-            if (PrecomputeEnvironment && to >= nodes.Count) environmentRowsValid = true;
+            if (to >= count) SettleHeatGainRowTotal(summingRows);
+            if (fill && to >= count) Work.EnvironmentRowFills++;
+            if (PrecomputeEnvironment && to >= count) environmentRowsValid = true;
         }
 
 
-        private void AccumulateHeatSources(ref EnvironmentState env, bool diagnostics)
+        private void AccumulateHeatSourceRange(HeatSourceState source, bool diagnostics,
+            int from, int to)
         {
-            for (int s = 0; s < env.HeatSourceCount; s++)
-            {
-                HeatSourceState source = env.HeatSources[s];
-                if (source.Irradiance <= 0f) continue;
+            if (source.Irradiance <= 0f) return;
 
+            if (from == 0)
+            {
                 Vector3 direction = source.DirectionLocal;
                 ResolveDirection(ref direction, sourceWeights);
+            }
 
-                for (int i = 0; i < nodes.Count; i++)
-                {
-                    if (nodeExposedFaces[i] <= 0) continue;
+            for (int i = from; i < to; i++)
+            {
+                if (nodeExposedFaces[i] <= 0) continue;
 
-                    float watts = source.Irradiance * nodeAbsorptivity[i]
+                float watts = source.Irradiance * nodeAbsorptivity[i]
 
-                        * Weighted(i, sourceWeights) * nodeExposedArea[i];
-                    if (watts == 0f) continue;
+                    * Weighted(i, sourceWeights) * nodeExposedArea[i];
+                if (watts == 0f) continue;
 
-                    nodeWatts[i] += watts;
-                    heatGainAccumulator += watts;
-                    if (diagnostics) nodes[i].LastHeatSourceWatts += watts;
-                }
+                nodeWatts[i] += watts;
+                heatGainAccumulator += watts;
+                if (diagnostics) nodes[i].LastHeatSourceWatts += watts;
             }
         }
 
@@ -440,10 +442,17 @@ namespace Thermodynamics.Core
         }
 
 
+        private int EnvironmentNodeCount
+        {
+            get { return StepInFlight ? stepNodeCount : nodes.Count; }
+        }
+
+
         private void BeginWindLit(float fill)
         {
             windLitFill = fill;
             windLitCursor = 0;
+            windLitCount = EnvironmentNodeCount;
             windLitPending = true;
         }
 
@@ -452,15 +461,17 @@ namespace Thermodynamics.Core
         {
             if (!windLitPending) return false;
 
-            if (windLitCursor >= nodes.Count)
+            int count = Math.Min(windLitCount,
+                Math.Min(EnvironmentNodeCount, nodeWindLit.Length / Face.Count));
+            if (windLitCursor >= count)
             {
                 windLitPending = false;
                 return false;
             }
 
-            if (nodeWindLit.Length < nodes.Count * Face.Count) return false;
+            if (nodeBudget <= 0) return false;
 
-            int end = Math.Min(nodes.Count, windLitCursor + nodeBudget);
+            int end = windLitCursor + Math.Min(count - windLitCursor, nodeBudget);
 
             if (windLitFill >= 0f)
             {
@@ -483,7 +494,7 @@ namespace Thermodynamics.Core
             }
 
             windLitCursor = end;
-            if (windLitCursor >= nodes.Count) windLitPending = false;
+            if (windLitCursor >= count) windLitPending = false;
             return true;
         }
 
@@ -492,6 +503,7 @@ namespace Thermodynamics.Core
         {
             sunLitFill = fill;
             sunLitCursor = 0;
+            sunLitCount = EnvironmentNodeCount;
             sunLitPending = true;
         }
 
@@ -500,14 +512,16 @@ namespace Thermodynamics.Core
         {
             if (!sunLitPending) return false;
 
-            if (sunLitCursor >= nodes.Count)
+            int count = Math.Min(sunLitCount,
+                Math.Min(EnvironmentNodeCount, nodeSunLit.Length / Face.Count));
+            if (sunLitCursor >= count)
             {
                 sunLitPending = false;
                 return false;
             }
 
-            int end = sunLitCursor + nodeBudget;
-            if (end > nodes.Count) end = nodes.Count;
+            if (nodeBudget <= 0) return false;
+            int end = sunLitCursor + Math.Min(count - sunLitCursor, nodeBudget);
 
             if (sunLitFill >= 0f)
             {
@@ -530,7 +544,7 @@ namespace Thermodynamics.Core
             }
 
             sunLitCursor = end;
-            if (sunLitCursor >= nodes.Count) sunLitPending = false;
+            if (sunLitCursor >= count) sunLitPending = false;
             return true;
         }
 

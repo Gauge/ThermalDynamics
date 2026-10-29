@@ -71,7 +71,7 @@ namespace Thermodynamics
             MyTransparentGeometry.AddTriangleBillboard(triangle.A, triangle.B, triangle.C,
                 normal, normal, normal, GradientUv(triangle.A), GradientUv(triangle.B), GradientUv(triangle.C),
                 State.Current == ThermalVisionState.Mode.Cividis ? GradientColour : GradientGrey,
-                0, (triangle.A + triangle.B + triangle.C) / 3, Vector4.One, MyBillboard.BlendTypeEnum.PostPP);
+                uint.MaxValue, (triangle.A + triangle.B + triangle.C) / 3, Vector4.One, MyBillboard.BlendTypeEnum.PostPP);
         }
     }
 }

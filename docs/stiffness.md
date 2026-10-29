@@ -50,6 +50,12 @@ largest `ΣG / C` on the grid. A substep costs one pass over the nodes and links
 work per real second  ∝  (simulated seconds per real second) × r_max
 ```
 
+Only enabled exchange mechanisms contribute to `ΣG`: block conduction, coolant and room air
+are gated independently. Turning block conduction off therefore removes its substep demand and
+mass floor while preserving enabled coolant or room coupling. Independent heat sources retain
+their real heat capacity when no active exchange requires a floor. Settings changes invalidate the
+cached conductance totals; disabling the floor also restores capacities already raised by it.
+
 Both settings that look like they control cost cancel out of that:
 
 * **`Frequency`** halves the step and doubles the number of steps, so it cancels out of the
@@ -205,7 +211,7 @@ is **73.4**, so the shipped configuration asks for more than it is granted on ab
 real population. [balance.md](balance.md#air-is-where-the-substep-budget-goes-and-the-shipped-pair-does-not-fit-it)
 records that as a `G6` failure; what nobody had measured is what the refusal actually does.
 
-**What happens is not the floor below.** `ApplyThermalMassFloor` returns immediately when
+**What happens is not the floor below.** `ApplyThermalMassFloor` returns without raising capacity when
 `MaxSubstepsPerBlock` is zero, which is what ships, so no capacity is raised and no block is
 approximated on purpose. The step is simply integrated at the ceiling, with the two overshoot
 clamps — `ClampConductionOvershoot` and `ClampEnvironmentOvershoot`, both on by default — bounding
@@ -1068,6 +1074,7 @@ conductivity 50 is conduction-stiff, and a material definition would fix them ou
 
 | Date | Change |
 | --- | --- |
+| 2026-10-28 | Exclude disabled block, coolant and room exchange from stability demand, clamps and mass flooring, including after incremental topology edits. Turning the floor off restores real block capacities. Tiny two- and three-block regressions cover toggles, placement/removal and independent source heating against disconnected blocks. |
 | 2026-08-25 | Put the population beside the one-hull sweeps ([backlog.md](backlog.md) `C3`). The census hull's 0.028 K worst block is near the population's median rather than its worst — the p99 over 32,576 paired runs is 0.2820 K and the max 48.22 K — and the reach runs the opposite way to what these tables suggest, because stiffness is a block's property and not a hull's. |
 | 2026-08-24 | **Decided `C14`: the census hull is typical in stiffness and extreme in heat, on purpose.** The section above framed that as an open question — a worst case or a typical ship — and the two are properties rather than answers. A cost figure has to describe what a server pays, which is why `C26` put the hull in the population's trough; a temperature figure has to be a ceiling, which is why it stays at the 96th percentile for heat. The rule that follows is about quoting: a temperature taken on this hull is an upper bound, and every approximation accepted on such a figure — `C19`'s 0.028 K, `MaxSubstepsPerBlock 6`'s 0.607 K — is safer under that reading rather than shakier. |
 | 2026-08-24 | **Re-ran both per-block cap sweeps at the pair and hull that now ship, and what the cap is worth inverted.** In vacuum the hull demands 7.35 substeps rather than 22.97, so no cap above six binds and a cap of 6 buys nothing; in thick air at 200 m/s it demands 24.97 rather than 34.44 and a cap of 6 buys 3.1× for **0.028 K** on the worst-placed block against the 0.607 K that made it a switch. That is the same size as the ceiling breach `C19` accepted, so the number separating the two mechanisms is gone — [backlog.md](backlog.md) `C3`. |

@@ -149,7 +149,8 @@ namespace Thermodynamics.Core
             int at = start + 1;
 
             int count = ReadInt32(data, ref at);
-            if (count < 0 || data.Length - start < SizeOf(count)) return false;
+            // Compare against available complete records before multiplying an untrusted count.
+            if (count < 0 || count > (data.Length - start - HeaderSize) / RecordSize) return false;
 
             for (int i = 0; i < count; i++)
             {

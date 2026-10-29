@@ -18,14 +18,7 @@ namespace Thermodynamics.Core
 
         internal void SyncNodeState()
         {
-            Work.NodeStateSyncs++;
-
-            bool all = resyncAll;
-            resyncAll = false;
-            if (all) Work.FullNodeResyncs++;
-
-            if (all) lowestCritical = float.PositiveInfinity;
-
+            bool all = BeginNodeStateSync();
             for (int i = 0; i < nodes.Count; i++)
             {
                 ThermalNode node = nodes[i];
@@ -34,37 +27,51 @@ namespace Thermodynamics.Core
                 nodeTemperatures[i] = temperature;
                 nodeStepStart[i] = temperature;
 
-                if (!all && !node.StateDirty) continue;
-                node.StateDirty = false;
+                if (all || node.StateDirty) SyncNodeProperties(i, node);
+            }
+        }
 
-                if (nodeThermalMass[i] != node.ThermalMass) linkMassFactorFrom = 0;
 
-                nodeThermalMass[i] = node.ThermalMass;
-                nodeRadiation[i] = node.RadiationCoefficient;
-                nodeGeneration[i] = node.HeatGenerationWatts;
-                nodeExposedArea[i] = node.ExposedArea;
-                nodeAbsorptivity[i] = node.Thermal.EffectiveSolarAbsorptivity;
-                nodeCritical[i] = node.Thermal.CriticalTemperature;
-                if (nodeCritical[i] > 0f && nodeCritical[i] < lowestCritical)
-                {
-                    lowestCritical = nodeCritical[i];
-                }
+        private bool BeginNodeStateSync()
+        {
+            Work.NodeStateSyncs++;
+            bool all = resyncAll;
+            resyncAll = false;
+            if (all) Work.FullNodeResyncs++;
+            if (all) lowestCritical = float.PositiveInfinity;
+            return all;
+        }
 
-                int total = node.TotalExposedFaces;
-                nodeExposedFaces[i] = total;
 
-                int b = i * Face.Count;
-                if (total <= 0)
-                {
-                    for (int f = 0; f < Face.Count; f++) nodeFaceWeights[b + f] = 0f;
-                    continue;
-                }
+        private void SyncNodeProperties(int i, ThermalNode node)
+        {
+            node.StateDirty = false;
+            if (nodeThermalMass[i] != node.ThermalMass) linkMassFactorFrom = 0;
 
-                float inverse = 1f / total;
-                for (int f = 0; f < Face.Count; f++)
-                {
-                    nodeFaceWeights[b + f] = node.GetExposedFaces(f) * inverse;
-                }
+            nodeThermalMass[i] = node.ThermalMass;
+            nodeRadiation[i] = node.RadiationCoefficient;
+            nodeGeneration[i] = node.HeatGenerationWatts;
+            nodeExposedArea[i] = node.ExposedArea;
+            nodeAbsorptivity[i] = node.Thermal.EffectiveSolarAbsorptivity;
+            nodeCritical[i] = node.Thermal.CriticalTemperature;
+            if (nodeCritical[i] > 0f && nodeCritical[i] < lowestCritical)
+            {
+                lowestCritical = nodeCritical[i];
+            }
+
+            int total = node.TotalExposedFaces;
+            nodeExposedFaces[i] = total;
+            int b = i * Face.Count;
+            if (total <= 0)
+            {
+                for (int f = 0; f < Face.Count; f++) nodeFaceWeights[b + f] = 0f;
+                return;
+            }
+
+            float inverse = 1f / total;
+            for (int f = 0; f < Face.Count; f++)
+            {
+                nodeFaceWeights[b + f] = node.GetExposedFaces(f) * inverse;
             }
         }
 
@@ -84,7 +91,7 @@ namespace Thermodynamics.Core
                 if (h * nodeConductanceTotal[i] >= ClampBindingMargin * nodeThermalMass[i]) return true;
             }
 
-            int linkCount = links.Count;
+            int linkCount = settings.EnableConduction ? links.Count : 0;
             if (linkCount > linkConductance.Length) linkCount = linkConductance.Length;
             if (linkCount > linkMassFactor.Length) linkCount = linkMassFactor.Length;
 
@@ -93,12 +100,14 @@ namespace Thermodynamics.Core
                 if (h * linkConductance[i] >= ClampBindingMargin * linkMassFactor[i]) return true;
             }
 
-            for (int l = 0; l < loops.Count; l++)
+            int loopCount = settings.EnableCoolantLoops ? loops.Count : 0;
+            for (int l = 0; l < loopCount; l++)
             {
                 if (h * SegmentConductance(l) >= ClampBindingMargin * EffectiveLoopMass(l)) return true;
             }
 
-            for (int r = 0; r < roomAir.Count; r++)
+            int roomCount = settings.EnableRoomAir ? roomAir.Count : 0;
+            for (int r = 0; r < roomCount; r++)
             {
                 if (!roomAir[r].HasAir) continue;
                 if (h * RoomConductance(r) >= ClampBindingMargin * EffectiveRoomMass(r)) return true;
@@ -152,34 +161,15 @@ namespace Thermodynamics.Core
         }
 
 
-        private void ClearEnvironmentDiagnostics()
-        {
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                ClearEnvironmentDiagnostics(i);
-            }
-        }
-
-
         private void ClearEnvironmentDiagnostics(int i)
         {
             ThermalNode node = nodes[i];
+            node.LastConductionWatts = 0f;
             node.LastRadiationWatts = 0f;
             node.LastConvectionWatts = 0f;
             node.LastSolarWatts = 0f;
             node.LastFrictionWatts = 0f;
             node.LastHeatSourceWatts = 0f;
-        }
-
-
-        private void ClearConductionDiagnostics()
-        {
-            if (!diagnosticsSubstep) return;
-
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                nodes[i].LastConductionWatts = 0f;
-            }
         }
 
 
@@ -257,15 +247,7 @@ namespace Thermodynamics.Core
             {
                 CoolantLoop loop = loops[l];
 
-                float mass = EffectiveLoopMass(l);
-                float[] watts = loop.SegmentWatts;
-
-                for (int i = 0; i < watts.Length; i++)
-                {
-                    loop.ApplyParcelWatts(i, watts[i], h, mass);
-                }
-
-                loop.Advect(h);
+                loop.ApplyWattsAndAdvect(h, EffectiveLoopMass(l));
             }
 
             for (int r = 0; r < roomAir.Count; r++)
@@ -381,6 +363,8 @@ namespace Thermodynamics.Core
 
         public void SetAllTemperatures(float kelvin)
         {
+            if (nodes.Count == 0 && loops.Count == 0) return;
+            AbandonStep();
             for (int i = 0; i < nodes.Count; i++)
             {
                 nodes[i].Temperature = kelvin;

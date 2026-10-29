@@ -11,7 +11,7 @@ namespace Thermodynamics.Core
         private Vector3I searchMin;
         private Vector3I searchMaxExclusive;
 
-        private readonly CellBitset solid = new CellBitset();
+        private readonly PagedCellBitset solid = new PagedCellBitset();
         private Vector3I[] roomCellStore = EmptyCells;
         private int[] roomStarts = EmptyRanges;
         private int[] roomLengths = EmptyRanges;
@@ -22,7 +22,7 @@ namespace Thermodynamics.Core
         private int roomCellCount;
 
 
-        private readonly CellBitset roomCells = new CellBitset();
+        private readonly PagedCellBitset roomCells = new PagedCellBitset();
 
 
         private int[] roomByRank = EmptyRanges;
@@ -286,10 +286,15 @@ namespace Thermodynamics.Core
 
         internal void SetSearchBounds(Vector3I min, Vector3I maxExclusive)
         {
+            SetSearchBounds(min, maxExclusive, false);
+        }
+
+        internal void SetSearchBounds(Vector3I min, Vector3I maxExclusive, bool paged)
+        {
             searchMin = min;
             searchMaxExclusive = maxExclusive;
-            solid.Reset(min, maxExclusive);
-            roomCells.Reset(min, maxExclusive);
+            solid.Reset(min, maxExclusive, paged);
+            roomCells.Reset(min, maxExclusive, paged);
         }
 
 

@@ -112,6 +112,11 @@ namespace Thermodynamics
             }
 
             watts = value * scale;
+            if (float.IsNaN(watts) || float.IsInfinity(watts))
+            {
+                watts = 0f;
+                return false;
+            }
             return true;
         }
 

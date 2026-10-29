@@ -28,6 +28,7 @@ namespace Thermodynamics
         public static void Reset()
         {
             Interiors.Clear();
+            Players.Clear();
             Overwhelmed = 0;
             HottestInterior = 0f;
         }
@@ -43,14 +44,19 @@ namespace Thermodynamics
             if (MyAPIGateway.Players == null || seconds <= 0f) return;
 
             Players.Clear();
-            MyAPIGateway.Players.GetPlayers(Players);
-
-            for (int i = 0; i < Players.Count; i++)
+            try
             {
-                Step(settings.ToCore(), Players[i], seconds);
+                MyAPIGateway.Players.GetPlayers(Players);
+                ThermalSettings core = settings.AppliedCore;
+                for (int i = 0; i < Players.Count; i++)
+                {
+                    Step(core, Players[i], seconds);
+                }
             }
-
-            Players.Clear();
+            finally
+            {
+                Players.Clear();
+            }
         }
 
         private static void Step(ThermalSettings core, IMyPlayer player, float seconds)

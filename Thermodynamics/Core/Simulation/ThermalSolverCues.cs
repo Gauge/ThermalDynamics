@@ -125,8 +125,11 @@ namespace Thermodynamics.Core
 
             for (int i = 0; i < count; i++)
             {
-                float kelvin = nodeTemperatures[i];
-                float critical = nodeCritical[i];
+                // Cues describe published node state. Scratch may be unprepared for a new
+                // node, or already ahead of publication during a spread step.
+                ThermalNode node = nodes[i];
+                float kelvin = node.Temperature;
+                float critical = node.Thermal.CriticalTemperature;
 
                 if (critical <= 0f || (kelvin < critical * HeatCueState.WatchFraction
                     && kelvin < Incandescence.GlowStartKelvin(critical)))
@@ -134,7 +137,6 @@ namespace Thermodynamics.Core
                     continue;
                 }
 
-                ThermalNode node = nodes[i];
                 BlockInstance block = node.Block;
                 if (block == null) continue;
 

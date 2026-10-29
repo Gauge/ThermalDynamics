@@ -20,6 +20,7 @@ namespace Thermodynamics
             public ThermalVisionBlockDetail Detail;
             public List<Region> SmoothSamples;
             public ThermalVisionBlockField TemperatureField;
+            public ThermalVisionTemperatureData Temperatures;
             public double SurfaceSpacing;
             public int Refined;
             public bool AllExact;
@@ -53,8 +54,11 @@ namespace Thermodynamics
             foreach (ThermalBlock block in job.Grid.Blocks)
             {
                 if (block == null || block.Node == null) continue;
-                float t = block.Node.Temperature;
-                if (float.IsNaN(t) || float.IsInfinity(t) || t < 0 || t > 100000) continue;
+                float t;
+                bool usable=collectDetail
+                    ? ThermalVisionTemperatureData.TryDisplay(block.Node.Temperature,out t)
+                    : job.Temperatures.Add(block.Node.Temperature,out t);
+                if(!usable) continue;
 
                 var sample = new Region(((Vector3D)block.Block.Min - new Vector3D(.5)) * size,
                     ((Vector3D)block.Block.Max + new Vector3D(.5)) * size, t);
